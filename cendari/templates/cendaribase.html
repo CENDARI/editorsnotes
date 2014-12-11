@@ -29,28 +29,24 @@
 {% compress css %}{% block css %}{% endblock %}{% endcompress %}
 {% block css_nocompress %}{% endblock %}
 		
+<script type="text/javascript">
+        	var EditorsNotes = {};
+        	{% if request.user.is_authenticated and request.user.email %}
+          		EditorsNotes.loggedInUser = '{{ request.user.email }}';
+        	{% endif %}
+</script>
+
+<script type="text/javascript">
+			cendari_js_project_slug = '{{ project.slug }}'||'{{project_slug}}';
+		    cendari_root_url = "{%url 'index_view' %}";
+</script>
+
 {% if not project %}
 	{% set project_slug = user.get_authorized_projects |first %}
-    <!-- <p>Doesn't have project</p>		 -->
-{% else %}	
+       		
+{% else %}
   	{% set project_slug = project.slug %}
-  	<!-- <p>Has project</p> -->
 {% endif %}
-
-<script type="text/javascript">
-	cendari_js_project_slug = '{{ project.slug }}'||'{{project_slug}}';
-    cendari_root_url = "{%url 'index_view' %}";
-</script>
-
-<script type="text/javascript">
-    var EditorsNotes = {};
-    {% if request.user.is_authenticated and request.user.email %}
-  		EditorsNotes.loggedInUser = '{{ request.user.email }}';
-	{% endif %}
-</script>
-
-
-
 
 <!-- editor base js -->
 	<script type="text/javascript" src="{% static "function/jquery/jquery-1.8.2.min.js" %}"></script>
@@ -96,6 +92,7 @@
 	
 </body>
 </html>
+
 
 
 
