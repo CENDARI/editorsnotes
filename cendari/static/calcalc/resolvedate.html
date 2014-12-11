@@ -1,0 +1,808 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <title>Resolve Date</title>
+    <style type="text/css">
+      body.main {
+	  background-color: #FFFFFF;
+	  color: #000000;
+      }
+      
+      dt {
+	  margin-top: 1ex;
+      }
+      
+      input.ctr {
+	  text-align: center
+      }
+      
+      tableNO.a {
+	  float: right;
+	  margin-left: 12px;
+	  width: 170px;
+      }
+      
+      table.l {
+	  border: 1px outset black;
+	  margin-right: 8px;
+	  background-color: #D0D0D0;
+	  color: #000000;
+	  width: 45%;
+      }
+      
+      table.l td, th {
+	  border: 1px inset;
+	  padding: 5px;
+      }
+      
+      table.r {
+	  border: 1px outset black;
+	  margin-left: 8px;
+	  background-color: #D0D0D0;
+	  color: #000000;
+      }
+      
+      table.r td, th {
+	  border: 1px inset;
+      }
+    </style>
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <meta name="keywords" content="calendar, converter, Julian, Gregorian, Islamic, Hebrew, Persian, Mayan, Bahai, French, Indian" />
+    <meta name="description" content="Calendar Converter" />
+    <meta name="author" content="John Walker" />
+    <meta name="robots" content="index" />
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+    <script type="text/javascript" language="JavaScript" src="astro.js"></script>
+    
+    <script type="text/javascript" language="JavaScript" src="calendar.js"></script>
+  </head>
+  
+  <body class="main">
+    
+    <h1>Calendar Converter</h1>
+    
+    <div id="tabs">
+      <ul>
+	<li><a href="#gregorian"><span>Gregorian</span></a></li>
+	<li><a href="#julian"><span>Julian</span></a></li>
+	<li><a href="#julianday"><span>Julian Day</span></a></li>
+	<li><a href="#hebrew"><span>Hebrew</span></a></li>
+	<li><a href="#islamic"><span>Islamic</span></a></li>
+	<li><a href="#mayan"><span>Mayan</span></a></li>
+	<li><a href="#persiana"><span>Persian</span></a></li>
+	<li><a href="#persian"><span>Persian Algorithmic</span></a></li>
+	<li><a href="#bahai"><span>Bahá'í</span></a></li>
+	<li><a href="#indian"><span>Indian Civil</span></a></li>
+	<li><a href="#french"><span>French Republican</span></a></li>
+	<li><a href="#iso"><span>ISO-8601</span></a></li>
+	<li><a href="#unix"><span>Unix <tt>time()</tt></span></a></li>
+	<li><a href="#excel"><span>Excel Serial Day</span></a></li>
+      </ul>
+      <div id="gregorian">
+	<p>
+	  <form name="gregorian" action="javascript:return false;">
+	    <table class="l">
+	      <tr><th>Date:</th>
+		<td align="center">
+		  <input type="text" name="year" value="1998" size="5" />
+		  <select name="month" size="1">
+		    <option value="1">January</option>
+		    <option value="2">February</option>
+		    <option value="3">March</option>
+		    <option value="4">April</option>
+		    <option value="5">May</option>
+		    <option value="6">June</option>
+		    <option value="7">July</option>
+		    <option value="8">August</option>
+		    <option value="9">September</option>
+		    <option value="10">October</option>
+		    <option value="11">November</option>
+		    <option value="12">December</option>
+		  </select>
+		  <input type="text" name="day" value="1" size="3" />
+		  <br />
+		  <input type="text" name="leap" value="" size="12" class="ctr" readonly="readonly" />
+		</td>
+	      </tr>
+	      
+	      <tr>
+		<th>
+		  Time:
+		</th>
+		<td align="center">
+		  <input type="text" name="hour" value="00" size="2" />:<input
+    									   type="text" name="min" value="00" size="2" />:<input
+															    type="text" name="sec" value="00" size="2" />
+		</td>
+	      </tr>
+	      
+	      <tr>
+		<th>
+		  Weekday:
+		</th>
+		<td align="center">
+		  <input type="text" name="wday" value="" size="9" class="ctr" readonly="readonly" />
+		</td>
+	      </tr>
+	      
+	      <tr>
+		<td colspan="2" align="center">
+		  <input type="button" value="Calculate" onclick="calcGregorian();" />
+		  &nbsp; &nbsp;
+		  <input type="button" value="Today" onclick="setDateToToday(); calcGregorian();" />
+		</td>
+	      </tr>
+	    </table>
+	  </form>
+	  <script type="text/javascript" language="JavaScript">
+	    <!--
+	    //  Preset the fields in the request form to today's date.
+    	    setDateToToday();
+	    // -->
+	  </script>
+	</p>
+      </div>
+      <div id="julianday">
+	<p>
+	  <form name="julianday" action="javascript:return false;">
+	    <table class="l">
+	      
+	      <tr>
+		<td align="center">
+		  <b>Julian day:</b>
+		  
+		  <input type="text" name="day" value="" size="16" />
+		</td>
+	      </tr>
+	      <tr>
+		<td colspan="2" align="center">
+		  <input type="button" value="Calculate" onclick="calcJulian();" />
+		</td>
+	      </tr>
+	    </table>
+	  </form>
+	</p>
+	<p>
+	  <form name="modifiedjulianday" action="javascript:return false;">
+	    <table class="l">
+	      
+	      <tr>
+		<td align="center">
+		  <b>Modified Julian day:</b>
+		  <input type="text" name="day" value="" size="16" />
+		</td>
+	      </tr>
+	      <tr>
+		<td colspan="2" align="center">
+		  <input type="button" value="Calculate" onclick="calcModifiedJulian();" />
+		</td>
+	      </tr>
+	    </table>
+	  </form>
+	</p>
+      </div>
+      <div id="julian">
+	<form name="juliancalendar" action="javascript:return false;">
+	  <table class="l">
+	    
+	    <tr>
+	      <th>
+		Date:
+	      </th>
+	      <td align="center">
+		
+		<input type="text" name="year" value="" size="5" />
+		<select name="month" size="1">
+		  <option value="1">January</option>
+		  <option value="2">February</option>
+		  <option value="3">March</option>
+		  <option value="4">April</option>
+		  <option value="5">May</option>
+		  <option value="6">June</option>
+		  <option value="7">July</option>
+		  <option value="8">August</option>
+		  <option value="9">September</option>
+		  <option value="10">October</option>
+		  <option value="11">November</option>
+		  <option value="12">December</option>
+		</select>
+		<input type="text" name="day" value="" size="3" />
+		
+		<br />
+		
+		<input type="text" name="leap" value="" size="12" class="ctr" readonly="readonly" />
+		
+		<br />
+		<input type="text" name="wday" value="" size="9" class="ctr" readonly="readonly" />
+	      </td>
+	    </tr>
+	    
+	    <tr>
+	      <td colspan="2" align="center">
+		<input type="button" value="Calculate" onclick="calcJulianCalendar();" />
+	      </td>
+	    </tr>
+	  </table>
+	</form>
+      </div>
+      <div id="hebrew">
+	<form name="hebrew" action="javascript:return false;">
+	  
+	  <table class="l">
+	    
+	    <tr>
+	      <th>
+		Date:
+	      </th>
+	      <td align="center">
+		
+		<input type="text" name="year" value="" size="5" />
+		<select name="month" size="1">
+		  <option value="1">Nisan</option>
+		  <option value="2">Iyyar</option>
+		  <option value="3">Sivan</option>
+		  <option value="4">Tammuz</option>
+		  <option value="5">Av</option>
+		  <option value="6">Elul</option>
+		  <option value="7">Tishri</option>
+		  <option value="8">Heshvan</option>
+		  <option value="9">Kislev</option>
+		  <option value="10">Teveth</option>
+		  <option value="11">Shevat</option>
+		  <option value="12">Adar</option>
+		  <option value="13">Veadar</option>
+		</select>
+		<input type="text" name="day" value="" size="3" />
+		
+		<br />
+		
+		<input type="text" name="leap" value="" size="36" class="ctr" readonly="readonly" />
+		
+	      </td>
+	    </tr>
+	    <tr>
+	      <th>
+		Hebrew month:
+	      </th>
+	      <td align="center">
+		<img src="figures/hebrew_month_0.gif" name="hebmonth" width="186" height="51" alt="" />
+		
+	      </td>
+	    </tr>
+	    <tr>
+	      <td colspan="2" align="center">
+		<input type="button" value="Calculate" onclick="calcHebrew();" />
+	      </td>
+	    </tr>
+	  </table>
+	</form>
+      </div>
+      <div id="islamic">
+	<form name="islamic" action="javascript:return false;">
+	  <table class="l">
+	    
+	    <tr>
+	      <th>
+		Date:
+	      </th>
+	      <td align="center">
+		
+		<input type="text" name="year" value="" size="5" />
+		<select name="month" size="1">
+		  <option value="1">Muharram</option>
+		  <option value="2">Safar</option>
+		  <option value="3">Rabi`al-Awwal</option>
+		  <option value="4">Rabi`ath-Thani</option>
+		  <option value="5">Jumada l-Ula</option>
+		  <option value="6">Jumada t-Tania</option>
+		  <option value="7">Rajab</option>
+		  <option value="8">Sha`ban</option>
+		  <option value="9">Ramadan</option>
+		  <option value="10">Shawwal</option>
+		  <option value="11">Dhu l-Qa`da</option>
+		  <option value="12">Dhu l-Hijja</option>
+		</select>
+		<input type="text" name="day" value="" size="3" />
+		
+		<br />
+		
+		<input type="text" name="leap" value="" size="12" class="ctr" readonly="readonly" />
+	      </td>
+	    </tr>
+	    
+	    <tr>
+	      <th>
+		Weekday:
+	      </th>
+	      <td align="center">
+		<input type="text" name="wday" value="" size="18" class="ctr" readonly="readonly" />
+	      </td>
+	    </tr>
+	    
+	    <tr>
+	      <td colspan="2" align="center">
+		<input type="button" value="Calculate" onclick="calcIslamic();" />
+	      </td>
+	    </tr>
+	  </table>
+	</form>
+      </div>
+      <div id="mayan">
+	<form name="mayancount" action="javascript:return false;">
+	  <table class="l">
+	    
+	    <tr>
+	      <td align="center">
+		<b>Mayan Long Count</b>
+		<br />
+		
+		<input type="text" name="baktun" value="" size="4" />
+		<b>.</b>
+		<input type="text" name="katun" value="" size="3" />
+		<b>.</b>
+		<input type="text" name="tun" value="" size="3" />
+		<b>.</b>
+		<input type="text" name="uinal" value="" size="3" />
+		<b>.</b>
+		<input type="text" name="kin" value="" size="3" />
+		
+		<p />
+		
+		<b>Haab:</b>&nbsp;&nbsp;<input type="text" name="haab" value="" size="9" class="ctr" readonly="readonly" />
+		<br />
+		<b>Tzolkin:</b>&nbsp;&nbsp;<input type="text" name="tzolkin" value="" size="10" class="ctr" readonly="readonly" />
+	      </td>
+	    </tr>
+	    
+	    <tr>
+	      <td colspan="2" align="center">
+		<input type="button" value="Calculate" onclick="calcMayanCount();" />
+	      </td>
+	    </tr>
+	  </table>
+	</form>
+      </div>
+      <div id="persiana">
+	<form name="persiana" action="javascript:return false;">
+	  <table class="l">
+	    
+	    <tr>
+	      <th>
+		Date:
+	      </th>
+	      <td align="center">
+		
+		<input type="text" name="year" value="" size="5" />
+		<select name="month" size="1">
+		  <option value="1">Farvardin</option>
+		  <option value="2">Ordibehesht</option>
+		  <option value="3">Khordad</option>
+		  <option value="4">Tir</option>
+		  <option value="5">Mordad</option>
+		  <option value="6">Shahrivar</option>
+		  <option value="7">Mehr</option>
+		  <option value="8">Aban</option>
+		  <option value="9">Azar</option>
+		  <option value="10">Dey</option>
+		  <option value="11">Bahman</option>
+		  <option value="12">Esfand</option>
+		</select>
+		<input type="text" name="day" value="" size="3" />
+		
+		<br />
+		
+		<input type="text" name="leap" value="" size="12" class="ctr" readonly="readonly" />
+	      </td>
+	    </tr>
+	    
+	    <tr>
+	      <th>
+		Weekday:
+	      </th>
+	      <td align="center">
+		<input type="text" name="wday" value="" size="13" class="ctr" readonly="readonly" />
+	      </td>
+	    </tr>
+	    
+	    <tr>
+	      <td colspan="2" align="center">
+		<input type="button" value="Calculate" onclick="calcPersiana();" />
+		<!--
+		    <input type="button" value="+" onclick="document.persiana.year.value++; calcPersiana();" />
+		    -->
+	      </td>
+	      
+	    </tr>
+	  </table>
+	</form>
+      </div>
+      <div id="persian">
+	<form name="persian" action="javascript:return false;">
+	  <table class="r">
+	    
+	    <tr>
+	      <th>
+		Date:
+	      </th>
+	      <td align="center">
+		
+		<input type="text" name="year" value="" size="5" />
+		<select name="month" size="1">
+		  <option value="1">Farvardin</option>
+		  <option value="2">Ordibehesht</option>
+		  <option value="3">Khordad</option>
+		  <option value="4">Tir</option>
+		  <option value="5">Mordad</option>
+		  <option value="6">Shahrivar</option>
+		  <option value="7">Mehr</option>
+		  <option value="8">Aban</option>
+		  <option value="9">Azar</option>
+		  <option value="10">Dey</option>
+		  <option value="11">Bahman</option>
+		  <option value="12">Esfand</option>
+		</select>
+		<input type="text" name="day" value="" size="3" />
+		
+		<br />
+		
+		<input type="text" name="leap" value="" size="12" class="ctr" readonly="readonly" />
+	      </td>
+	    </tr>
+	    
+	    <tr>
+	      <th>
+		Weekday:
+	      </th>
+	      <td align="center">
+		<input type="text" name="wday" value="" size="13" class="ctr" readonly="readonly" />
+	      </td>
+	    </tr>
+	    
+	    <tr>
+	      <td colspan="2" align="center">
+		<input type="button" value="Calculate" onclick="calcPersian();" />
+	      </td>
+	    </tr>
+	  </table>
+	</form>
+      </div>
+      <div id="bahai">
+	<form name="bahai" action="javascript:return false;">
+	  <table class="l">
+	    
+	    <tr>
+	      <th>
+		Date:
+	      </th>
+	      <td align="center">
+		Kull-i-Shay:&nbsp;<input type="text" name="kull_i_shay" value="" size="3" />
+		
+		&nbsp; &nbsp;
+		
+		Váhid:&nbsp;<input type="text" name="vahid" value="" size="3" />
+		
+		<br />
+		Year:&nbsp;<select name="year" size="1">
+		  <option value="1">Alif</option>
+		  <option value="2">Bá'</option>
+		  <option value="3">Ab</option>
+		  <option value="4">Dál</option>
+		  <option value="5">Báb</option>
+		  <option value="6">Váv</option>
+		  <option value="7">Abad</option>
+		  <option value="8">Jád</option>
+		  <option value="9">Bahá</option>
+		  <option value="10">Hubb</option>
+		  <option value="11">Bahháj</option>
+		  <option value="12">Javáb</option>
+		  <option value="13">Ahad</option>
+		  <option value="14">Vahháb</option>
+		  <option value="15">Vidád</option>
+		  <option value="16">Badí'</option>
+		  <option value="17">Bahí</option>
+		  <option value="18">Abhá</option>
+		  <option value="19">Vahíd</option>
+		</select>
+		
+		<br />
+		Month:&nbsp;<select name="month" size="1">
+		  <option value="1">Bahá</option>
+		  <option value="2">Jalál</option>
+		  <option value="3">Jamál</option>
+		  <option value="4">`Azamat</option>
+		  <option value="5">Núr</option>
+		  <option value="6">Rahmat</option>
+		  <option value="7">Kalimát</option>
+		  <option value="8">Kamál</option>
+		  <option value="9">Asmá'</option>
+		  <option value="10">`Izzat</option>
+		  <option value="11">Mashíyyat</option>
+		  <option value="12">`Ilm</option>
+		  <option value="13">Qudrat</option>
+		  <option value="14">Qawl</option>
+		  <option value="15">Masáil</option>
+		  <option value="16">Sharaf</option>
+		  <option value="17">Sultán</option>
+		  <option value="18">Mulk</option>
+		  <option value="19">Ayyám-i-Há</option>
+		  <option value="20">`Alá'</option>
+		</select>
+		
+		
+		<br />
+		Day:&nbsp;<select name="day" size="1">
+		  <option value="1">Bahá</option>
+		  <option value="2">Jalál</option>
+		  <option value="3">Jamál</option>
+		  <option value="4">`Azamat</option>
+		  <option value="5">Núr</option>
+		  <option value="6">Rahmat</option>
+		  <option value="7">Kalimát</option>
+		  <option value="8">Kamál</option>
+		  <option value="9">Asmá'</option>
+		  <option value="10">`Izzat</option>
+		  <option value="11">Mashíyyat</option>
+		  <option value="12">`Ilm</option>
+		  <option value="13">Qudrat</option>
+		  <option value="14">Qawl</option>
+		  <option value="15">Masáil</option>
+		  <option value="16">Sharaf</option>
+		  <option value="17">Sultán</option>
+		  <option value="18">Mulk</option>
+		  <option value="19">`Alá'</option>
+		</select>
+		
+		<br />
+		Weekday:&nbsp;&nbsp;<input type="text" name="weekday" value="" size="9" class="ctr" readonly="readonly" />
+		
+		<br />
+		
+		<input type="text" name="leap" value="" size="12" class="ctr" readonly="readonly" />
+	      </td>
+	    </tr>
+	    
+	    <tr>
+	      <td colspan="2" align="center">
+		<input type="button" value="Calculate" onclick="calcBahai();" />
+	      </td>
+	    </tr>
+	  </table>
+	</form>
+      </div>
+      <div id="indian">
+	<form name="indiancivilcalendar" action="javascript:return false;">
+	  <table class="l">
+	    
+	    <tr>
+	      <th>
+		Date:
+	      </th>
+	      <td align="center">
+		
+		<input type="text" name="year" value="" size="5" />
+		<select name="month" size="1">
+		  <option value="1">Caitra</option>
+		  <option value="2">Vaisakha</option>
+		  <option value="3">Jyaistha</option>
+		  <option value="4">Asadha</option>
+		  <option value="5">Sravana</option>
+		  <option value="6">Bhadra</option>
+		  <option value="7">Asvina</option>
+		  <option value="8">Kartika</option>
+		  <option value="9">Agrahayana</option>
+		  <option value="10">Pausa</option>
+		  <option value="11">Magha</option>
+		  <option value="12">Phalguna</option>
+		</select>
+		<input type="text" name="day" value="" size="3" />
+		
+		<br />
+		
+		Weekday: 
+		<input type="text" name="weekday" value="" size="15" class="ctr" readonly="readonly" />
+		
+		<br />
+		
+		<input type="text" name="leap" value="" size="12" class="ctr" readonly="readonly" />
+	      </td>
+	    </tr>
+	    
+	    <tr>
+	      <td colspan="2" align="center">
+		<input type="button" value="Calculate" onclick="calcIndianCivilCalendar();" />
+	      </td>
+	    </tr>
+	  </table>
+	</form>
+      </div>
+      <div id="french">
+	<form name="french" action="javascript:return false;">
+	  <table class="l">
+	    
+	    <tr>
+	      <th>
+		Date:
+	      </th>
+	      <td align="center">
+		
+		Année
+		
+		<input type="text" name="an" value="" size="5" />
+		
+		de la République
+		
+		<br />
+		
+		Mois de
+		
+		<select name="mois" size="1">
+		  <option value="1">Vendémiaire</option>
+		  <option value="2">Brumaire</option>
+		  <option value="3">Frimaire</option>
+		  <option value="4">Nivôse</option>
+		  <option value="5">Pluviôse</option>
+		  <option value="6">Ventôse</option>
+		  <option value="7">Germinal</option>
+		  <option value="8">Floréal</option>
+		  <option value="9">Prairial</option>
+		  <option value="10">Messidor</option>
+		  <option value="11">Thermidor</option>
+		  <option value="12">Fructidor</option>
+		  <option value="13">(Sans-culottides)</option>
+		</select>
+		
+		<br />
+		
+		Décade
+		<select name="decade" size="1">
+		  <option value="1">I</option>
+		  <option value="2">II</option>
+		  <option value="3">III</option>
+		</select>
+		
+		Jour
+		<select name="jour" size="1">
+		  <option value="1">du Primidi (1)</option>
+		  <option value="2">du Duodi (2)</option>
+		  <option value="3">du Tridi (3)</option>
+		  <option value="4">du Quartidi (4)</option>
+		  <option value="5">du Quintidi (5)</option>
+		  <option value="6">du Sextidi (6)</option>
+		  <option value="7">du Septidi (7)</option>
+		  <option value="8">du Octid (8)i</option>
+		  <option value="9">du Nonidi (9)</option>
+		  <option value="10">du Décadi (10)</option>
+		  <option value="11">------------</option>
+		  <option value="12">de la Vertu (1)</option>
+		  <option value="13">du Génie (2)</option>
+		  <option value="14">du Travail (3)</option>
+		  <option value="15">de l'Opinion (4)</option>
+		  <option value="16">des Récompenses (5)</option>
+		  <option value="17">de la Révolution (6)</option>
+		</select>
+	      </td>
+	    </tr>
+	    
+	    <tr>
+	      <td colspan="2" align="center">
+		<input type="button" value="Calculate" onclick="calcFrench();" />
+	      </td>
+	    </tr>
+	  </table>
+	</form>
+      </div>
+      <div id="iso">
+	<form name="isoweek" action="javascript:return false;">
+	  <table class="l">
+	    
+	    <tr>
+	      <td align="center">
+		
+		Day <input type="text" name="day" value="" size="3" /> of
+		week <input type="text" name="week" value="" size="3" /> of
+		year <input type="text" name="year" value="" size="5" />
+	      </td>
+	    </tr>
+	    
+	    <tr>
+	      <td align="center">
+		<input type="button" value="Calculate" onclick="calcIsoWeek();" />
+	      </td>
+	    </tr>
+	  </table>
+	</form>
+	
+	<form name="isoday" action="javascript:return false;">
+	  <table class="l">
+	    
+	    <tr>
+	      <td align="center">
+		
+		Day <input type="text" name="day" value="" size="3" /> of
+		year <input type="text" name="year" value="" size="5" />
+	      </td>
+	    </tr>
+	    
+	    <tr>
+	      <td align="center">
+		<input type="button" value="Calculate" onclick="calcIsoDay();" />
+	      </td>
+	    </tr>
+	  </table>
+	</form>
+      </div>
+      <div id="unix">
+	<form name="unixtime" action="javascript:return false;">
+	  <table class="l">
+	    
+	    <tr>
+	      <td align="center">
+		<b>Unix time() value:</b>
+		
+		<input type="text" name="time" value="" size="14" />
+	      </td>
+	    </tr>
+	    <tr>
+	      <td colspan="2" align="center">
+		<input type="button" value="Calculate" onclick="calcUnixTime();" />
+	      </td>
+	    </tr>
+	  </table>
+	</form>
+      </div>
+      <div id="excel">
+	<form name="excelserial1900" action="javascript:return false;">
+	  <table class="l">
+	    
+	    <tr>
+	      <td align="center">
+		<b><font size="+1">1900 Date System (PC)</font></b>
+		<br />
+		<b>Excel serial day:</b>
+		
+		<input type="text" name="day" value="" size="16" />
+	      </td>
+	    </tr>
+	    <tr>
+	      <td colspan="2" align="center">
+		<input type="button" value="Calculate" onclick="calcExcelSerial1900();" />
+	      </td>
+	    </tr>
+	  </table>
+	</form>
+	
+	<form name="excelserial1904" action="javascript:return false;">
+	  <table class="l">
+	    
+	    <tr>
+	      <td align="center">
+		<b><font size="+1">1904 Date System (Macintosh)</font></b>
+		<br />
+		<b>Excel serial day:</b>
+		
+		<input type="text" name="day" value="" size="16" />
+	      </td>
+	    </tr>
+	    <tr>
+	      <td colspan="2" align="center">
+		<input type="button" value="Calculate" onclick="calcExcelSerial1904();" />
+	      </td>
+	    </tr>
+	  </table>
+	</form>
+      </div>
+    </div>
+    <script>
+      $("#tabs").tabs();
+      if (location.search != "") {
+      presetDataToRequest(location.search.substring(1));
+      } else {
+      calcGregorian();                  // Calculate today's values in other calendars
+      }
+    </script>
+    
+  </body>
+</html>

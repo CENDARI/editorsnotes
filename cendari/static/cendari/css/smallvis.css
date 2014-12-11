@@ -1,0 +1,206 @@
+
+/* Page Styles */
+#loader{
+  width: 100%;
+  height: 100%;
+  vertical-align: bottom;
+  text-align: center;
+  font: 30pt sans-serif;
+  color: #F5F5F5;
+}
+
+div#output {
+  position: absolute;
+  text-align: center;
+  left: 3px;
+  right: 3px;
+}
+
+
+/* Media Styles for variable page sizes */
+@media (min-width: 800px) {
+  .panel .map {
+    height: 800px;
+  }
+}
+
+
+/* Highlight Styles */
+.histogram .highlight1 rect:nth-child(2),
+.timeline rect.highlight1,
+.map .highlight1{
+  opacity: 0.6 !important;
+}
+
+.histogram .highlight2 rect:nth-child(2),
+.timeline rect.highlight2,
+.map .highlight2{
+  opacity: 1 !important;
+}
+
+.histogram .highlight3 rect:nth-child(2),
+.timeline rect.highlight3,
+.map .highlight3{
+  fill: red !important;
+}
+
+.histogram .highlight4 rect:nth-child(2),
+.timeline rect.highlight4,
+.map .highlight4{
+  fill: rgb(51, 204, 51) !important;
+}
+
+.histogram .mark.deselected rect:nth-child(2),
+.timeline .mark.deselected,
+.map .mark.deselected{
+  fill: rgb(197, 197, 197) !important;
+}
+
+
+/* Entity Colors - Darkened versions of the ones from schema_colors.css */
+.panel.event{  border-top: 1px solid rgb(176, 182, 224); }
+.panel.event .title{ background-color: rgb(176, 182, 224); }
+.panel.event .mark rect:nth-child(2),
+.panel.event .timeline .mark,
+.panel.event .map .mark{ fill: rgb(176, 182, 224); }
+
+.panel.person{  border-top: 1px solid rgb(231, 133, 148); }
+.panel.person .title{ background-color: rgb(231, 133, 148); }
+.panel.person .mark rect:nth-child(2),
+.panel.person .timeline .mark,
+.panel.person .map .mark{ fill: rgb(231, 133, 148); }
+
+.panel.place{  border-top: 1px solid rgb(88, 153, 224); }
+.panel.place .title{ background-color: rgb(88, 153, 224); }
+.panel.place .mark rect:nth-child(2),
+.panel.place .timeline .mark,
+.panel.place .map .mark{ fill: rgb(88, 153, 224); }
+
+
+/* Visualization Styles */
+.panel {
+  font-size: 10pt;
+  line-height: 15pt;
+  padding: 5px 0px;
+  margin: 5px 10px;
+  border-top: 1px solid steelblue;
+  display: inline-block;
+  position: relative;
+  text-align: left;
+  font-family: corbel,verdana,sans-serif;
+  min-width: 300px;
+  min-height: 50px;
+  width: 100%;
+}
+
+.panel .panelText {
+  display: inline-block;
+  width: 300px;
+  vertical-align: top;
+  padding-bottom: 5px;
+}
+
+.panel .panelVis{
+  display: inline-block;
+}
+
+.panel .panelTip {
+  position: absolute;
+  top: 20px;
+  width: 300px;
+  text-align: right;
+}
+
+.panel .title {
+  background-color: steelblue;
+  color: white;
+  display: inline-block;
+  max-width: 400px;
+  padding: 0px 10px;
+  border-radius: 15px;
+  vertical-align: top;
+  border: solid white 1px;
+  cursor: pointer;
+}
+
+.panel .title:hover {
+  background-color: lightgrey;
+}
+
+.panel .value {
+  font-size: smaller;
+  color: grey;
+}
+
+.histogram {
+  height:80px;
+}
+
+.histogram .mark rect {
+  fill: white;
+}
+
+.histogram text {
+  fill: steelblue;
+}
+
+.histogram .mark.selected rect {
+  fill: whitesmoke;
+}
+
+.histogram .mark rect:nth-child(2) {
+  fill: steelblue;
+  stroke: white;
+  pointer-events: none;
+}
+
+
+
+.histogramTip {
+  min-height: 22px;
+}
+
+.histogramTip .value, .histogramTip .title{
+  margin-right: 10px;
+}
+
+.timeline{
+  height: 80px;
+}
+
+.timeline .mark{
+  fill: steelblue;
+  opacity: 0.3;
+}
+
+.timeline .axis text{
+  font-size: 7pt;
+  fill: grey;
+}
+
+.timeline .axis line,
+.timeline .axis path {
+  fill: none;
+  stroke: grey;
+  stroke-width: 0.5px;
+  shape-rendering: crispEdges;
+}
+
+.map{
+  height:200px;
+}
+
+.map .mark{
+  fill: steelblue;
+  stroke: white;
+  stroke-weight: 0.4;
+  opacity:1.0;
+}
+
+
+
+.leaflet-container {
+    background: #fff;
+}
+
+

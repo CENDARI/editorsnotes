@@ -1,0 +1,31 @@
+{% extends "form.html" %}
+{% load typogrify display %}
+{% load staticfiles compress %}
+
+{% block noform %}
+
+<meta name="note_id" id="note_id" content="{{ note.id }}" />
+<input id="editorEditBut" type="button" value="Edit"/>
+
+
+<div>
+ 	  <iframe id="editorsDom" src="{{  iframe_url  }}" allowfullscreen="true" width="100%" height="1200px">
+    <p>Sorry, your browser does not support iframes. </p>
+  </iframe>
+</div>
+
+{% endblock %}
+
+{% block form_functions %}
+
+<script>
+    cendari.addInit(function() { 
+    	cendari.addTab('{{ title }}');
+    	cendari.addWidgetToActiveTab("form","editorsDom" ,"border");
+
+    });
+
+</script>
+
+
+	{% endblock form_functions %}

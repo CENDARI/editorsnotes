@@ -1,0 +1,15 @@
+{% extends "cendaribase.html" %}
+{% load typogrify display %}
+{% load staticfiles compress %}
+
+
+{% block layout %}
+	{% compress js %}
+		<script type="text/javascript" src="{% static "cendari/js/nolayout.js" %}"></script>
+	{% endcompress %}
+		
+
+	{% block nolayout_content %}
+	{% endblock nolayout_content %}
+
+{% endblock layout %}

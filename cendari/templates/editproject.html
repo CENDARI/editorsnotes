@@ -1,0 +1,29 @@
+{% extends "form.html" %}
+{% load typogrify display %}
+{% load staticfiles compress %}
+
+
+{% block form_init %}
+<meta name="project_id" id="project_id" content="{{ project.id }}" />
+
+
+{% endblock form_init %}
+{% block form_content %}
+
+	  {{ form.as_p }}
+  <input class="btn" type="submit" value="Save">
+
+{% endblock form_content %}
+
+
+
+{% block form_functions %}
+
+<script>
+
+	cendari.addInit(function() {
+		cendari.addTab("Project");
+		cendari.addWidgetToActiveTab("form", "noteform", "border");
+	}); 
+</script>
+{% endblock form_functions %}

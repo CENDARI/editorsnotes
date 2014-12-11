@@ -1,0 +1,187 @@
+{% extends "centerCendari.html" %}
+{% load set_var %}
+{% load staticfiles typogrify display  compress %}
+
+{% block css %}
+	<link rel="stylesheet" type="text/css" media="all" href="{% static "iipmooviewer/css/iip.css" %}" />
+{% endblock %}
+
+{% block init %}
+	<meta name="document_id" id="document_id" content="{{ document.id }}" />
+	<meta name="document_name" id="document_name" content="{{ document.import_id }}" />
+	<script type="text/javascript" src="{% static "cendari/js/document.js" %}"></script>
+{% endblock init %}
+
+{% block model_fields %}
+	<div class="form-menu-document" >
+		<ul class="tabs document">
+			<li> <!-- ENTITIES TAB --> 
+				<input type="radio" checked name="tabs" id="tab1">
+				<label for="tab1">
+					<script > document.write("Entities (" + "{{ document.get_all_related_topics|length }}" + ")"); </script>
+				</label>
+				<div id="tab-content1" class="tab-content  document animated fadeIn">
+					<div class="form-entities">					
+						{% if document %}						
+							{% for topic in document.get_all_related_topics %}
+								<a href= {{ topic.get_absolute_url }}
+								{% if 		topic.topic_node.type == "PER" %} class ="form-entities r_person"
+								{% elif 	topic.topic_node.type == "ORG" %} class ="form-entities r_organization"
+								{% elif 	topic.topic_node.type == "EVT" %} class ="form-entities r_event"
+								{% elif 	topic.topic_node.type == "PLA" %} class ="form-entities r_place"
+								{% elif 	topic.topic_node.type == "TAG" %} class ="form-entities r_thing"
+								{% else 						%} class = "form-entities"
+								{% endif %}
+								> {{ topic }} </a>
+							{% endfor %}
+							{% if not document.get_all_related_topics|length > 0 %}
+								<div> No Entities. </div> 
+								<div> select the Entity & right-click to add it</div>
+							{% endif %}
+
+						{% endif %}
+						
+						{% if not document.id > 0 %}
+							<div> No Entities. </div> 
+							<div> Save this document to add your Entities</div>
+						{% endif %}
+
+					</div>
+				</div>
+			</li> <!-- end of ENTITIES TAB --> 
+			
+			<li> <!-- TRANSCRIPT TAB -->
+				<input type="radio" name="tabs" id="tab2">
+				<label for="tab2">Transcript {% if document.transcript %} (1) {% else %} (0) {% endif %}</label>
+				<div id="tab-content2" class="tab-content document animated fadeIn">
+					{% if document.id %}
+						<iframe   scrolling="no" id="transciptIframe" class="transcript-form" width="100%" src="{% url 'transcript_edit_view' project.slug document.id %}"></iframe>
+					{% else %}
+						Save document before adding a transcript.
+					{% endif %}				
+				</div>
+			</li> <!-- end of TRANSCRIPT TAB -->
+			
+			<li> <!-- ZOTERO TAB -->
+				<input type="radio" name="tabs" id="tab3">
+				<label for="tab3">Zotero data ({% if not document.zotero_link %}0{% else %}1{% endif%})</label>
+				<div id="tab-content3" class="tab-content document animated fadeIn">
+					{% if zotero_data %}
+						{% include "zotero_item.html" %}
+					{% else %}
+						<p>This document has no connected Zotero data.</p>
+					{% endif %}
+				</div>
+			</li> <!-- end of ZOTERO TAB -->
+
+			<li> <!-- LINKS TAB -->
+				<input type="radio" name="tabs" id="tab4">
+				<label for="tab4">Links ({% if not document.has_links %}0{% else %}{{ document.links.count }} {% endif%})</label>
+				<div id="tab-content4" class="tab-content document animated fadeIn">
+					{% if document.has_links %}
+						<h4>External link{% if document.links.count > 1 %}s{% endif %}</h4>
+						<ul class="unstyled">
+						{% for link in document.links.all %}
+							<li>
+								<a style="text-decoration: underline;" href="{{ link }}">{{ link }}</a>
+								<div>
+									{{ link.description }}
+								</div>
+							</li>
+						{% endfor %}
+						</ul>
+					{% endif %}				
+				</div>
+			</li> <!-- end of LINKS TAB -->
+
+			<li> <!-- SCANS TAB -->
+				<input type="radio" name="tabs" id="tab5">
+				<label for="tab5">Scans ({% if not scans %}0{% else %}{{ document.get_scan_count }} {% endif%})</label>
+				<div id="tab-content5" class="tab-content document animated fadeIn">
+					{% if scans %}
+						<section id="scans-tab" class="tab-pane">
+							<div id="scanlist-container">
+								<ul id="scan-list">
+									{% for scan in scans %}
+										<li>
+										<a class="scan btn" href="http://{{ domain }}{{ scan.image.url }}">
+										{{ forloop.counter }}
+											</a>
+											</li>
+									{% endfor %}
+								</ul>
+							</div>
+
+							<br/>
+
+							<!--<div id="scan-viewer" style="height: 500px;"></div> -->
+							<iframe width="100%" allowfullscreen="true" id="scan-viewer" ></iframe>
+
+							<div id="progress-notify">
+								<span id="progress-message">Loading scanned document...</span>
+								<div id="progressbar"></div>
+							</div>
+						</section>
+					{% endif %}
+
+				</div>
+			</li>
+
+		</ul>
+
+
+	<div class="stop-float"></div>
+	<div style="height:5px"> &nbsp;</div>
+	
+	{% if document.id %}
+		<form class="formCendari" id="documentCendari" action="{% url "api:api-documents-detail" project_slug=project.slug  pk=document.id %}" method="POST">  
+		{% csrf_token %}
+	{% else %}
+		<form class="formCendari" id="documentCendari" action="{% url "api:api-documents-list" project_slug=project.slug %}" method="POST" >
+		{% csrf_token %}
+	{% endif %}
+			<div class="form-main edit-section" >
+				<input  class="editorlabel" id="documentDescEditBut" type="button" value= {% if document.id > 0 %} " [ Read Only ]                --- click here for Edit mode" {% else %} " [ Editable ]                    --- click here for Read-Only mode" {% endif %} />
+				<p>Document's description</p>
+				<div data-error-target="description"></div>
+				<textarea id="document-description" class="mceEditor" type="text" name="description" > 
+					{% if document %} {{document.description|as_html}} {% endif %}
+				</textarea>
+				{% if document.id %}
+					<button id="saveButton" class="save-item" name="_method" value="PUT" >Save</button>
+				{% else %}
+					<button id="saveButton" class="save-item" method="post">Save</button>
+				{% endif %}
+			</div>
+
+		</div>
+
+	</form>
+{% endblock model_fields %}
+
+{% block functions %}
+
+	<script>
+		switchtabs(5, "document");
+		var isReadOnly = false, title = "New Document";
+
+		if (( id = document.getElementById("document_id").getAttribute("content")) > 0) {
+			var name = document.getElementById("document_name").getAttribute("content");
+			title = "Document " + id + ": " + name;
+			isReadOnly = true;
+		}
+
+
+		var descriptionLabel = "Document Description ";
+		var temp = document.getElementById("documentDescEditBut").getAttribute("value");
+
+		document.getElementById("documentDescEditBut").value = descriptionLabel + temp;
+
+		cendari.addInit(function() {
+			cendari.createEditor(500, "document-description", false, "documentDescEditBut", descriptionLabel);
+			cendari.addTab(title);
+			cendari.addWidgetToActiveTab("form", "noteform", "border");
+			cendari.addImageViewer("panel", "scan-viewer");
+		});
+	</script>
+{% endblock functions %}

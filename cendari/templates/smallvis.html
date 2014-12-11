@@ -1,0 +1,119 @@
+<html>
+  <head>
+    {% load staticfiles compress %}
+    <script src='//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'></script>
+    <script src='{% static 'function/d3/d3.v3.min.js' %}'></script>
+    
+    <link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css' />
+    <script src='//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js'></script>
+
+    <script src='{% static 'cendari/js/smallvis-generators.js' %}'></script>
+    <script src='{% static 'tracing/trace_test_130529.js' %}'></script>
+    <link href='{% static 'cendari/css/smallvis.css' %}' rel='stylesheet' type='text/css'/>
+  </head>
+
+  <body>
+    <div id='loader'>visualizing...</div>
+    <div id='output'></div>
+    
+
+   <script type='text/javascript'>
+    var cendari_root_url = '{%url 'index_view' %}';
+    var project_slug = '{{ project_slug }}';
+
+    //Define the vis panels to display
+    var panelDefinitions = [
+      /*{ //FIXME: Add a simpler mechanism for doing the kind of binning necessary for queries like this
+        'visualization' : 'countshistogram',
+        'maxLabel' : 'Most Common Entity Type  ',
+        'minLabel' : 'Least Common Entity Type',
+        'value' : function(item) {
+          return item.type;
+        },
+        'format' : function(value) {
+          return numberWithCommas(value) + (value == 1 ? ' entity' : ' entities');
+        }
+      },*/{
+        'visualization' : 'histogram',
+        'entityTypeClass': 'person',
+        'label': function(d){return d.preferred_name},
+        'maxLabel' : 'Most Common Person ',
+        'value' : function(item) {
+          return item.count;
+        },
+        'format' : function(value) {
+          return numberWithCommas(value) + (value == 1 ? ' doc' : ' docs');
+        },
+        'inputFilter' : function(value) {
+          return value.type == 'PER';
+        }
+      },{
+        'visualization' : 'histogram',
+        'entityTypeClass': 'place',
+        'label': function(d){return d.preferred_name},
+        'maxLabel' : 'Most Common Place ',
+        'value' : function(item) {
+          return item.count;
+        },
+        'format' : function(value) {
+          return numberWithCommas(value) + (value == 1 ? ' doc' : ' docs');
+        },
+        'inputFilter' : function(value) {
+          return value.type == 'PLA';
+        }
+      },{
+        'visualization':'timeline',
+        'entityTypeClass': 'event',
+        'inputFilter' : function(item) {
+          return item.type == 'EVT';
+        },
+        'value' : function(item) {
+          return item.date;
+        },
+        'resultFilter' : function(value) {
+          return (typeof value == 'number');
+        },
+        'label': function(d){
+          return d.preferred_name},
+        'maxLabel' : 'Most Recent',
+        'minLabel' : 'Oldest',
+        'format' : function(value) {
+          var date = new Date(Number(value));
+          return date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate()
+        }
+      },{
+        'visualization': 'map',
+        'entityTypeClass': 'place',
+        'inputFilter' : function(item) {
+          return item.type == 'PLA';
+        },
+        'value' : function(item) {
+          return item.count;
+        },
+        'location' : function(item) {
+          if(item.latlong) return item.latlong;
+          else return false;
+        },
+        'label': function(d){return d.preferred_name},
+        'maxLabel' : 'Most Common Place ',
+        'format' : function(value) {
+          return numberWithCommas(value) + (value == 1 ? ' doc' : ' docs');
+        }
+      }
+    ];
+    
+    //load data and render the visualizations
+    d3.json('{%  url "smallvisdata_view" project_slug=project_slug %}', function(error, json) {
+      if (error) return console.warn(error);
+      buildVisualizations(json, panelDefinitions, '#output');
+      setupHighlightMessageReciever();
+      d3.select('#loader').remove();
+    });
+    
+    
+
+
+
+   </script>
+  </body>
+</html>

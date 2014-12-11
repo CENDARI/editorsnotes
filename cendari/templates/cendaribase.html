@@ -1,0 +1,101 @@
+{% load set_var %}
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	  <meta name="static_url" id="static_url" content="{{ STATIC_URL }}" />
+	  <meta name="root_url" id="root_url" content="{%url 'index_view' %}" />
+
+{% load staticfiles compress %}
+				<title> Cendari 
+				{% if project %}: {{ project.name }}
+				{% else %}
+				{% endif %}
+				{% block title %}
+				{% endblock %} 
+				</title>
+{% compress css %}	
+	<!-- editors base css-->
+	<link rel="stylesheet" href="{% static "style/main.less" %}" type="text/less"/>
+	<link rel="stylesheet" href="{% static "style/font-awesome/font-awesome.css" %}" type="text/css"/>
+	<link rel="stylesheet" href="{% static "style/openwebicons/css/openwebicons-bootstrap.css" %}" type="text/css"/>
+    <link rel="stylesheet" href="{% static "style/bootstrap-custom.css" %}" type="text/css"/>	
+	<!-- editors OLD base css-->
+	<link rel="stylesheet" href="{% static "style/jquery-ui/jquery-ui-1.8.10.custom.css" %}" type="text/css"/>	
+	<!-- extjs css-->
+	<link rel="stylesheet" type="text/css" href="{% static "extjs/resources/css/ext-custom.css" %}" />
+{% endcompress %}
+	
+{% compress css %}{% block css %}{% endblock %}{% endcompress %}
+{% block css_nocompress %}{% endblock %}
+		
+{% if not project %}
+	{% set project_slug = user.get_authorized_projects |first %}
+    <!-- <p>Doesn't have project</p>		 -->
+{% else %}	
+  	{% set project_slug = project.slug %}
+  	<!-- <p>Has project</p> -->
+{% endif %}
+
+<script type="text/javascript">
+	cendari_js_project_slug = '{{ project.slug }}'||'{{project_slug}}';
+    cendari_root_url = "{%url 'index_view' %}";
+</script>
+
+<script type="text/javascript">
+    var EditorsNotes = {};
+    {% if request.user.is_authenticated and request.user.email %}
+  		EditorsNotes.loggedInUser = '{{ request.user.email }}';
+	{% endif %}
+</script>
+
+
+
+
+<!-- editor base js -->
+	<script type="text/javascript" src="{% static "function/jquery/jquery-1.8.2.min.js" %}"></script>
+    <script type="text/javascript" src="https://login.persona.org/include.js"></script>
+	<script type="text/javascript" src="{% static "function/lib/browserid.js" %}"></script>				
+
+<!-- editors OLD js: MAYBE SHOULD BE REMOVED?--> 	
+	<script type="text/javascript" src="{% static "function/jquery/jquery-ui-1.8.24.custom.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "function/underscore-min.js" %}"></script>
+	<script type="text/javascript" src="{% static "function/jquery/jquery.timeago.js" %}"></script>
+	<script type="text/javascript" src="{% static "function/jquery/jquery.ba-bbq.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "function/base.js" %}"></script>
+	<script type="text/javascript" src="{% static "function/bootstrap.min.js" %}"></script>
+
+<!-- extsjs js?-->
+	<script type="text/javascript" src="{% static "extjs/bootstrap.js" %}"></script>
+	<!-- <script type="text/javascript" src="{% static "extjs/ext-all-debug.js" %}"> </script>   -->
+				
+<!-- tinymce face -->
+	<script type="text/javascript" src="{% static "RDFaCE0.6schema/tinymce/jscripts/tiny_mce/plugins/rdface/js/util/config.js" %}"></script>
+	<script type="text/javascript" src="{% static "RDFaCE0.6schema/tinymce/jscripts/tiny_mce/plugins/rdface/js/util/jquery.cookie.js" %}"></script>
+	<script type="text/javascript" src="{% static "RDFaCE0.6schema/tinymce/jscripts/tiny_mce/plugins/rdface/js/util/drag.js" %}"></script>
+	<script type="text/javascript" src="{% static "RDFaCE0.6schema/tinymce/jscripts/tiny_mce/plugins/rdface/js/util/functions.js" %}"></script>
+	<script type="text/javascript" src="{% static "RDFaCE0.6schema/tinymce/jscripts/tiny_mce/tiny_mce.js" %}"></script>
+	<script type="text/javascript" src="{% static "RDFaCE0.6schema/tinymce/jscripts/tiny_mce/tiny_mce_gzip.js" %}"></script>
+
+<!-- tracing library -->
+	<script type="text/javascript" src="{% static "tracing/trace_test_130529.js" %}"></script>			
+{% compress js %}{% block js %}{% endblock %}{% endcompress %}
+		
+{% block js_nocompress %}
+	<script type="text/javascript" src="https://www.gstatic.com/freebase/suggest/4_2/suggest.min.js"></script>
+{% endblock %}
+
+</head>
+
+{% load typogrify display %}
+
+<body>
+
+{% block layout %}
+{% endblock layout %}
+	
+</body>
+</html>
+
+
+

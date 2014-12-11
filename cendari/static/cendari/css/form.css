@@ -1,0 +1,256 @@
+div .form-entities {
+
+}
+
+#scan-viewer {
+
+height: 100%;
+width: 100%;
+}
+
+div .form-main {
+	margin: 0px 0px 0px 0px;
+	padding: 0;
+	height: 25px;
+}
+
+
+.rdf-textarea {
+	height: 25px;
+}
+.horizontal-style {
+
+	display: table;
+	width: 100%;
+}
+
+.horizontal-style li {
+	display: table-cell;
+}
+
+.horizontal-style ul {
+	width: 100%;
+}
+.horizontal-style a {
+
+	display: block;
+	text-align: center;
+	margin: 0px 0px 0px 0px;
+}
+
+.stop-float {
+	clear: both;
+}
+input[type="button"] {
+	width: 100%;
+	height: 25px;
+	background: #D7D7D7;
+}
+
+.editorlabel {
+	background: #F0F0EE;
+	outline: 1px solid #CCCCCC;
+	width: 100%;
+	height: 20px;
+	text-align: left;
+	text-indent: 7px;
+}
+
+.inline-block {
+
+	text-indent: 0px;
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-left: 0px;
+	margin-bottom: 0px;
+	width: 100%;
+}
+
+.form input[type="text"] {
+	width: 100%;
+	border: 2px solid #898989;
+	float: left;
+	height: 25px;
+}
+
+input, textarea, select {
+	width: 100%;
+	border: 2px solid #898989;
+	float: left;
+	resize: none;
+	/*height: 25px;*/
+}
+
+.editor-form {
+	border: none;
+	outline: none;
+	height: 100%;
+	width: 100%;
+}
+
+#emptyeditor {
+	height: 100%;
+}
+
+.form {
+	height: 1200px;
+}
+
+
+/* hide radio buttons */
+.tabs input[type=radio] {
+	position: absolute;
+	top: -9999px;
+	left: -9999px;
+}
+
+.tabs {
+	width: 100%;
+	float: none;
+	list-style: none;
+	/*position: relative;*/
+	padding: 0;
+	margin: 0px auto;
+}
+
+
+.tabs li {
+	float: left;
+}
+
+.tabs label {
+	display: block;
+	padding: 3px 10px;
+	border-radius: 2px 2px 0 0;
+	background: #F0F0EE;
+	cursor: pointer;
+	top: 3px;
+	-webkit-transition: all 0.2s ease-in-out;
+	-moz-transition: all 0.2s ease-in-out;
+	-o-transition: all 0.2s ease-in-out;
+	transition: all 0.2s ease-in-out;
+}
+
+.tabs label:hover {
+	background: rgba(255,255,255,0.5);
+	top: 0;
+}
+
+[id^=tab]:checked + label {
+	background: #D7D7D7;
+	top: 0;
+}
+
+
+
+
+[id^=tab]:checked + .form-menu-document{
+	height: 200px;
+}
+
+ label[for*="id_documentlink"]{
+ 	background: none;
+ 	
+ }
+
+/*
+[id^=id_documentlink-0-DELETE] {
+	visibility: hidden; 
+}
+
+
+ label[for*="id_documentlink"][for*='-DELETE'] { display:none; }
+ 
+ input[type="checkbox"] {
+	visibility: hidden; 
+}
+
+
+ */
+/*
+[id^=tab-content] {
+	display: block;
+}*/
+input[type="file"]
+{
+	height: 36px;
+	span: 6px;
+		border: 6px;
+}
+
+input[name="assigned_users"] {    
+visibility: hidden;
+}    
+.tab-content {
+	z-index: 2;
+	display: none;
+	outline: 1px solid #CCCCCC;
+	text-align: left;
+	width: 100%;
+	padding-top: 10px;
+	padding: 5px;
+	position: absolute;
+	top: 25px;
+	left: 0;
+	box-sizing: border-box;
+	-webkit-animation-duration: 0.5s;
+	-o-animation-duration: 0.5s;
+	-moz-animation-duration: 0.5s;
+	animation-duration: 0.5s;
+}
+
+.transcript-form
+{
+	height: 160px;
+}
+.tabs.note {
+	height: 130px;
+}
+
+.tab-content.note {
+	height: 90px;
+}
+
+.tabs.document {
+	height: 240px;
+}
+
+.tab-content.document {
+	height: 200px;
+}
+.zotero-information-edit .control-group {
+	margin-bottom: 0px !important;
+}
+
+.topicassignment {
+
+	display: inline;
+	height: 0px;
+}
+
+.related-topics {
+	display: none;
+	height: 0px;
+}
+.related-topics .topicassignment {
+	display: none;
+	height: 0px;
+}
+
+.related-topics input {
+	visibility: hidden;
+}
+
+.form-entities {
+	padding: 0px;
+	margin-top: 0px;
+	margin-right: 10px;
+	margin-bottom: 10px;
+	margin-left: 0px;
+}
+
+.assigned-users-field ul {
+	list-style-type: none;
+	margin-left: 0;
+}
+

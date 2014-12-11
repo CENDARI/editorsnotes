@@ -1,0 +1,23 @@
+{% extends "form.html" %}
+{% load typogrify display %}
+{% load staticfiles compress %}
+
+{% block noform %}
+
+<form id="jigsawform" enctype="multipart/form-data" action="." method="post" style="height:1200px;" class="form-horizontal editor-form">{% csrf_token %}
+{{ form.as_p }}
+<input type="submit" value="Submit" />
+</form>
+
+<script>
+    cendari.addInit(function() { 
+		cendari.addTab("Jigsaw");
+    	cendari.addWidgetToActiveTab("form","jigsawform" ,"border");
+    });
+</script>
+
+
+{% endblock %}
+
+
+)

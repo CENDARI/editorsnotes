@@ -1,0 +1,179 @@
+{% extends "form.html" %}
+{% load typogrify display %}
+{% load staticfiles compress %}
+
+{% block form_init %}
+<meta name="note_id" id="note_id" content="{{ note.id }}" />
+<meta name="note_name" id="note_name" content="{{ note.title }}" />
+
+{% endblock form_init %}
+
+{% block form_content %}
+<div class="form">
+	
+
+	<ul class="tabs note">
+		<li>
+			<input type="radio" checked name="tabs" id="tab1">
+			<label for="tab1">
+				<script >
+					document.write("Entities (" + "{{ note.get_all_related_topics|length }}" + ")");
+				</script></label>
+			<div id="tab-content1" class="tab-content  note animated fadeIn">
+				<div class="form-entities">
+					{% with formset=formsets.topicassignment %}
+					<fieldset class="collapsable related-topics">
+						{% include "includes/bootstrap_formset.html" %}
+					</fieldset>
+					{% endwith %}
+
+					{% if note %}
+
+						
+							{% for topic in note.get_all_related_topics %}
+							<a href= {{ topic.get_absolute_url }}
+							{% if 		topic.topic_node.type == "PER" %} class ="form-entities r_person"
+							{% elif 	topic.topic_node.type == "ORG" %} class ="form-entities r_organization"
+							{% elif 	topic.topic_node.type == "EVT" %} class ="form-entities r_event"
+							{% elif 	topic.topic_node.type == "PLA" %} class ="form-entities r_place"
+							{% elif 	topic.topic_node.type == "TAG" %} class ="form-entities r_thing"
+							{% else 						%} class = "form-entities"
+							{% endif %}
+							> {{ topic }} </a>
+							{% endfor %}
+				
+						{% if not note.get_all_related_topics|length > 0 %}
+							<div> No Entities. </div> 
+							<div> select the Entity & right-click to add it</div>
+						{% endif %}
+					
+					{% endif %}
+					
+					{% if not note.id > 0 %}
+							<div> No Entities. </div> 
+							<div> Save this note to add your Entities</div>
+					{% endif %}
+					
+				
+
+				</div>
+			</div>
+		</li>
+		<li>
+			<input type="radio" name="tabs" id="tab2">
+			<label for="tab2">Status {% if note.status == "0" %} (Closed) {% elif note.status == "2" %} (Hibernating)  {% else %} (Open) {% endif %}</label>
+			<div id="tab-content2" class="tab-content note animated fadeIn">
+				<div class="form-status">
+					<fieldset class="status-field collapsable">
+						{% include "includes/bootstrap_errors.html" with errors=form.status.errors %}
+						<div class="fieldset-content">
+							{{ form.status }}
+						</div>
+					</fieldset>
+				</div>
+			</div>
+		</li>
+		<li>
+			<input type="radio" name="tabs" id="tab3">
+			<label for="tab3">Assigned Users</label>
+			<div id="tab-content3" class="tab-content note animated fadeIn">
+				<div class="form-assigned-users">
+				
+
+					{% if note.assigned_users %}
+						<fieldset class="assigned-users-field collapsable">
+							{% include "includes/bootstrap_errors.html" with errors=form.assigned_users.errors %}
+							<div class="fieldset-content">
+								{{ form.assigned_users }}
+							</div>
+						</fieldset>
+						<div>
+							<ul class="unstyled">
+								{% for u in note.assigned_users.all %}
+								<li>
+									{{ u|as_link }}
+								</li>
+								{% endfor %}
+								
+								
+							</ul>
+						</div>
+					{% else %}
+					
+							<div> No Assigned Users</div>
+							
+					{% endif %}
+				</div>
+			</div>
+		</li>
+	</ul>
+	<div class="stop-float"></div>
+	<div style="height:5px"> &nbsp;</div>
+
+	<div class="form-main" >
+		<fieldset >
+			<div class="inline-block">
+				      {% include "includes/bootstrap_errors.html" with errors=form.title.errors %}
+						{{ form.title }}
+					
+			</div>
+		</fieldset>
+
+		<fieldset class="description-field collapsable">
+			{% include "includes/bootstrap_errors.html" with errors=form.content.errors %}
+			<div class="fieldset-content" >
+				{% include "includes/wysihtml5_full_toolbar.html" with toolbar_id="content-toolbar" %}
+				<input  class="editorlabel" id="noteDescEditBut" type="button" value= {% if note.id > 0 %} " [ Read Only ]                --- click here for Edit mode" {% else %} " [ Editable ]                    --- click here for Read-Only mode" {% endif %} />
+				{{ form.content }}
+			</div>
+		</fieldset>
+
+	</div>
+</div>
+{% endblock form_content %}
+
+{% block form_functions %}
+<textarea name="example" style="width:100%">
+	    &lt;p&gt;Text with a &lt;span class="mceNonEditable"&gt;[non editable]&lt;/span&gt; inline element.&lt;/p&gt;
+	    &lt;p class="mceNonEditable"&gt;Noneditable text block with &lt;span class="mceEditable"&gt;[editable]&lt;/span&gt; items within.&lt;/p&gt;
+	    &lt;p&gt;Text with tokens that isn't [[editable]] since they match the noneditabe_regexp.&lt;/p&gt;
+	  </textarea>
+
+
+<script>
+
+	switchtabs(3,"note");
+	$("#id_title").attr("placeholder", "Insert Note Title  . . . ");
+	
+	var  isReadOnly = false, title ="New Note", id = document.getElementById("note_id").getAttribute("content");
+	if ( id >0){
+		var name = document.getElementById("note_name").getAttribute("content");
+		title = "Note " + id +": "+name;
+		isReadOnly=true;
+	}
+		
+	var descriptionLabel = "Note Description ";
+	var temp = document.getElementById("noteDescEditBut").getAttribute("value");
+
+
+	document.getElementById("noteDescEditBut").value = descriptionLabel + temp;
+
+	cendari.addInit(function() {
+		cendari.createEditor($('#noteform').height(), "id_content", isReadOnly, "noteDescEditBut", descriptionLabel);
+		cendari.addTab(title);
+		cendari.addWidgetToActiveTab("form", "noteform", "border");
+	}); 
+
+
+	{% if note %}
+	// highlight associated entities in the paired vis panel
+	var currentNoteEntities = {{ note.get_all_related_topics_ids }};
+	window.postMessage({'messageType':'cendari_highlight',
+                      'targetWindowIds':'east',
+                      'entityIds':currentNoteEntities,
+                      'highlightMode':1},
+                       document.location.origin);
+ 	{% endif %}
+
+</script>
+{% endblock form_functions %}

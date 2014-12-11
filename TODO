@@ -1,0 +1,10 @@
+[Done:JDF+CP] Install Shibboleth authentication on apache on the pro2.cendari.dariah.eu machine
+Workflow:
+	[CP] A user1 of editorsnotes invite a user2 on a project by email
+	[CP] the user2 receives the mail, connects through shibboleth and get recognized by editorsnotes
+	[CP] If a person not invited with a Shibboleth account accesses editorsnotes and only get access to a message asking to create an account
+
+[Done:JDF] Install iipimage server
+[JDF] Override singleton editorsnotes.search.en_index on Cendari
+[JDF] Connect to Virtuoso and use #link in requirements.txt
+[Later:JDF] Install/start django_rq in rc.local

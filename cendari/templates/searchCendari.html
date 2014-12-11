@@ -1,0 +1,80 @@
+{% extends "centerCendari.html" %}
+{% load typogrify display %}
+{% load staticfiles compress %}
+{% load render_search_results display typogrify %}
+
+{% block model_fields %}
+
+<div id="editorsDom">
+ 	
+{% block title %}: Results for '{{ query }}'{% endblock %}
+
+{% block css_nocompress %}
+<link rel="stylesheet" href="{{ STATIC_URL }}style/facets.css" type="text/css" />
+<style type="text/css">
+  .highlighted {
+    background: #faa732;
+    padding: 2px;
+  }
+  .searchresult > a * {
+    display: inline;
+  }
+  .searchresult {
+    margin-bottom: .75em;
+  }
+  .searchresult .fragment {
+    margin-bottom: 4px;
+  }
+  .searchresult .fragment * {
+    display: inline;
+  }
+</style>
+{% endblock css_nocompress %}
+
+{% block js_nocompress %}
+<script type="text/javascript" src="{{ STATIC_URL }}function/facets.js"></script>
+<script type="text/javascript">
+  $(document).ready(function() {
+      var facets = $('#results').facet({
+        'fields': [
+          {'key': 'model', 'label': 'Result type'}
+        ],
+        'itemSelector': '.searchresult'
+      });
+      var sq = "{{ query }}";
+      value = "{project:" + cendari_js_project_slug + ", search_query: " + sq + "}";
+      //trace.event("_user","search", "north_panel", value);
+  });
+</script>
+{% endblock js_nocompress %}
+
+<div id="searchresults" class="span-24 last">
+{% if query %}
+  {% if results %}
+  <p id="message">Search results for <em>{{ query }}</em>:</p>
+  <ol id="results" class="span-18 last">
+    {% for result in results %}
+      {{ result|render_search_result|safe }}
+    {% endfor %}
+  </ol>
+  {% else %}
+  <p id="message">No results for <em>{{ query }}</em>.</p> 
+  {% endif %}
+</div>
+{% endif %}
+
+
+
+</div>
+
+<script>
+    cendari.addInit(function() { 
+    	cendari.addTab("Search");
+    	cendari.addWidgetToActiveTab("panel","editorsDom" ,"border");
+
+    });
+
+</script>
+
+{% endblock %}
+

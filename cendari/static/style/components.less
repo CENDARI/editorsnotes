@@ -1,0 +1,105 @@
+.object-reference {
+  .makeRow();
+
+  padding: .75em;
+  margin-left: 0;
+
+  > div[class*='-side'] {
+    .makeColumn();
+    width: 16px;
+    margin-left: 0;
+    line-height: 19px;
+    i { font-size: 24px; color: #333; }
+  }
+
+  > div[class*='-main'] {
+
+    .makeColumn(11);
+    width: 880px;
+    margin-left: 6px;
+    padding-left: 6px;
+    border-left: 1px solid #999;
+
+    > :first-child {
+      display: inline-block;
+      text-indent: -2.5em;
+      margin-left: 2.5em;
+      a { color: @textColor; }
+      * { display: inline; }
+    }
+
+    > [class*='-text-content'], > .btn-toolbar {
+      margin-top: 4px;
+      padding-top: 4px;
+      border-top: 1px dotted #ccc;
+    }
+
+    > .btn-toolbar { padding-top: 7px; margin-bottom: 7px; }
+
+    > [class*='-text-content']:empty {
+      margin: 0;
+      padding: 0;
+      border: none;
+    }
+
+  }
+}
+
+.ui-helper-hidden-accessible { display: none; }
+.ui-autocomplete {
+  border: 1px solid #aaa;
+  background: #fff;
+  max-width: 750px;
+  max-height: 300px;
+  border-radius: 2px;
+  left: 0;
+
+  .ui-autocomplete-header { border-bottom: 1px solid black; }
+  .ui-autocomplete-header a {
+    padding: 8px;
+    display: block;
+    color: #000;
+    font-weight: bold;
+    text-decoration: none;
+  }
+
+  .ui-menu-item:not(:last-of-type) { border-bottom: 1px solid #f0f0f0; }
+  .ui-menu-item a {
+    padding: 8px;
+    display: block;
+    color: #333;
+    text-decoration: none;
+    cursor: pointer;
+    &:hover, &.ui-state-focus { background: #f0f0f0; }
+    * { margin: 0; display: inline; }
+  }
+
+}
+
+/* editing */
+
+#note-status select { margin-bottom: 0; width: 150px; }
+body.editing .note-title-input {
+  width: 90%;
+  font-size: 20px;
+  height: 30px;
+}
+
+@relatedTopicVerticalPadding: 4px;
+.related-topics-widget {
+  .related-topic {
+    font-size: 14px;
+    padding: @relatedTopicVerticalPadding 0;
+    &:hover {
+      background: #e2e2e2;
+    }
+  }
+  .related-topic a.destroy {
+    color: black;
+    padding: 6px 2*@relatedTopicVerticalPadding;
+    &:hover {
+      text-decoration: none;
+      color: @btnDangerBackground;
+    }
+  }
+}

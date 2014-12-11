@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>jeoQuery UI</title>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/themes/redmond/jquery-ui.css"/>
+    <link rel="stylesheet" href="jeoquery.css"/>
+  </head>
+  <body>
+    <div class="row well forms-horizontal" id="cityAutocomplete">
+      <label for="city">City autocomplete (nicked from jquery ui demo):
+        <input class="input-large" id="city" type="text"/>
+      </label>
+    </div>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
+    <script src="jeoquery.js"></script>
+    <script>
+      $(function () {
+	  jeoquery.defaultData.userName = 'fekete';
+                
+	  $("#city").jeoCityAutoComplete({callback: function(city) {
+	      if (console) {
+		  console.log(city);
+		  console.log("RDF at: http://sws.geonames.org/"+city.geonameId+"/about.rdf");
+	      }
+	  }});
+      });
+    </script>
+  </body>
+</html>

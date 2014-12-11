@@ -1,0 +1,52 @@
+{% extends "cendarilayout.html" %}
+{% load typogrify display %}
+{% load staticfiles compress %}
+{% load display staticfiles %}
+{% load widget_tweaks %}
+
+
+{% block editor_content %}
+	<!-- <script src="{% static "function/wysihtml5/wysihtml5-0.3.0.js" %}"></script>
+	<script src="{% static "function/wysihtml5/parser_rules.js" %}"></script> -->
+	<script src="{% static "function/citeproc-js/xmldom.js" %}"></script>
+	<script src="{% static "function/citeproc-js/citeproc.js" %}"></script>
+<!--	<script src="{% static "function/zotero.jquery.js" %}"></script> -->
+	<script src="{% static "function/admin-bootstrap-base.js" %}"></script>
+<!--	<script src="{% static "function/admin-bootstrap-note.js" %}"></script> -->
+<!--	<script src="{% static "function/admin-bootstrap-document.js" %}"></script> -->
+<!--	<script src="{% static "function/admin-bootstrap-topic.js" %}"></script> -->
+	<!--
+	<script src="{% static "function/lib/wysihtml5/wysihtml5-0.3.0.js" %}"></script>
+	<script src="{% static "function/lib/wysihtml5/parser_rules.js" %}"></script> -->
+
+	<!--
+	<script src="{% static "function/admin-bootstrap-note-sections.js" %}"></script>
+	<script src="{% static "function/admin-bootstrap-topic.js" %}"></script>
+	<script src="{% static "function/admin-bootstrap-transcript.js" %}"></script> -->
+	
+	<!--<link rel="stylesheet" type="text/css" href="{% static "style/bootstrap-admin.css" %}" type="text/css" /> -->
+	<link rel="stylesheet" type="text/css" href="{% static "cendari/css/form.css" %}" />
+	<link rel="stylesheet" type="text/css" href="{% static "RDFaCE0.6schema/tinymce/jscripts/tiny_mce/plugins/rdface/schema_creator/schema_colors.css" %}" />
+	<link type="text/css" rel="stylesheet" href="https://www.gstatic.com/freebase/suggest/4_2/suggest.min.css" />
+	{% if form.media %}{{ form.media.js }}{% endif %}
+
+	<button type="button" id="editButton"></button>
+
+	{% block form_init %}
+	{% endblock form_init%}
+
+	{% block noform %}
+
+		<form class="form" id="noteform" enctype="multipart/form-data" method="post" class="form-horizontal editor-form" >{% csrf_token %} 
+		 	{% include "includes/bootstrap_errors.html" with errors=form.non_field_errors %}
+			{% block form_content %}
+				<h2>{% if form.instance.id %}Change{% else %}Add{% endif %} {{ form.Meta.model|object_name|lower }}</h2>
+			{% endblock form_content %}
+		</form>
+
+	{% endblock noform %}
+
+	{% block form_functions %}
+	{% endblock form_functions %}
+
+{% endblock editor_content %}

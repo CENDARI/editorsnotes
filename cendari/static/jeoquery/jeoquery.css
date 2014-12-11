@@ -1,0 +1,129 @@
+.center {
+	text-align: center;
+}
+
+.map {
+	background: url('img/bg.png') no-repeat;
+}
+
+a {
+	color: #237729;
+}
+a:hover {
+	color: #3aab42;
+}
+
+.container { padding-top: 30px; }
+	
+.hero-unit {
+	padding: 20px;
+	/* Fallback for web browsers that don't support RGBa */
+	background-color: #969696;
+	/* RGBa with 0.6 opacity */
+	background-color: rgba(150, 150, 150, 0.2);
+	/* For IE 5.5 - 7*/
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#33969696, endColorstr=#33969696);
+	/* For IE 8*/
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#33969696, endColorstr=#33969696)"; 
+}
+
+.hero-unit h1 {
+	font-size: 5em;
+	color: #78ff9b;
+	text-shadow: 3px 3px 0 black;
+	margin-bottom: 20px;
+}
+
+div.btn-container div.span4 {
+	text-align: center;
+	padding: 20px;
+	border: 3px solid lightgray;
+	border-radius: 10px;
+	background-color: #a6ddff;
+	box-shadow: 10px 10px 5px #888;
+	margin-bottom: 20px;
+}
+div.btn-container div.span4 a {
+	font-size: 26px;
+	font-style: bold;
+}
+div.btn-container div.span4:hover {
+/*	background-color: #a8cfab; */
+}
+
+div#directCalls a {
+	margin-top: 5px;
+}
+
+#debug li[rel='leaf'] > a > ins { 
+	background-image: url('http://cdn.dustball.com/paste_plain.png');
+	background-position: 0px 0px;
+}
+#debug li[rel='application_view_list'] > a > ins { 
+	background-image: url('http://cdn.dustball.com/application_view_list.png');
+	background-position: 0px 0px;
+}
+#debug li[rel='world'] > a > ins { 
+	background-image: url('http://cdn.dustball.com/world.png');
+	background-position: 0px 0px;
+}
+
+div.frontpage p {
+	font-size: 1.5em;
+	line-height: 1.2em;
+	padding-bottom: 1em;
+}
+
+
+/* Pretty printing styles. Used with prettify.js. */
+/* Vim sunburst theme by David Leibovic */
+
+pre .str, code .str { color: #65B042; } /* string  - green */
+pre .kwd, code .kwd { color: #E28964; } /* keyword - dark pink */
+pre .com, code .com { color: #AEAEAE; font-style: italic; } /* comment - gray */
+pre .typ, code .typ { color: #89bdff; } /* type - light blue */
+pre .lit, code .lit { color: #3387CC; } /* literal - blue */
+pre .pun, code .pun { color: #fff; } /* punctuation - white */
+pre .pln, code .pln { color: #fff; } /* plaintext - white */
+pre .tag, code .tag { color: #89bdff; } /* html/xml tag    - light blue */
+pre .atn, code .atn { color: #bdb76b; } /* html/xml attribute name  - khaki */
+pre .atv, code .atv { color: #65B042; } /* html/xml attribute value - green */
+pre .dec, code .dec { color: #3387CC; } /* decimal - blue */
+
+pre.prettyprint, code.prettyprint {
+        background-color: #000;
+        -moz-border-radius: 8px;
+        -webkit-border-radius: 8px;
+        -o-border-radius: 8px;
+        -ms-border-radius: 8px;
+        -khtml-border-radius: 8px;
+        border-radius: 8px;
+}
+
+pre.prettyprint {
+        margin: 1em auto;
+        padding: 1em;
+        white-space: pre-wrap;
+}
+
+
+/* Specify class=linenums on a pre to get line numbering */
+ol.linenums { margin-top: 0; margin-bottom: 0; color: #AEAEAE; } /* IE indents via margin-left */
+li.L0,li.L1,li.L2,li.L3,li.L5,li.L6,li.L7,li.L8 { list-style-type: none }
+/* Alternate shading for lines */
+li.L1,li.L3,li.L5,li.L7,li.L9 { }
+
+@media print {
+  pre .str, code .str { color: #060; }
+  pre .kwd, code .kwd { color: #006; font-weight: bold; }
+  pre .com, code .com { color: #600; font-style: italic; }
+  pre .typ, code .typ { color: #404; font-weight: bold; }
+  pre .lit, code .lit { color: #044; }
+  pre .pun, code .pun { color: #440; }
+  pre .pln, code .pln { color: #000; }
+  pre .tag, code .tag { color: #006; font-weight: bold; }
+  pre .atn, code .atn { color: #404; }
+  pre .atv, code .atv { color: #060; }
+}
+@import url(http://fonts.googleapis.com/css?family=Inconsolata);
+code, pre { font: 17px/1.4 "Inconsolata", "andale mono", "lucida console", monospace; }

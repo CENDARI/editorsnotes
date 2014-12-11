@@ -1,0 +1,307 @@
+
+	body {
+	  width: 100%;
+	
+	}
+	nav {
+	  width: 100%;
+	  margin: 0px 0px 0px 0px; 
+	}
+	nav ul {
+	  list-style: none;
+	  overflow: hidden; 
+	  width: 100%;
+	}
+	nav ul li {
+	  float: left;
+	  min-width:20%;
+	}
+	nav ul li a {
+	  text-align: center;
+	  padding: 5px 0;
+	  display: block;
+	  width: 100%;
+	  background: #FFFFFF;																								/* background: #cdeb8e; *//* Old browsers */
+	  background: -moz-linear-gradient(top,  #FFFFFF 0%, #D6D6D6 100%); 											 	/* -moz-linear-gradient(top, #cdeb8e 0%, #b0ca34 100%);*/ /* FF3.6+ */
+	  background: -webkit-gradient(linear, left top, left bottom,color-stop(0%,#FFFFFF), color-stop(100%,#D6D6D6));		/* color-stop(0%,#cdeb8e), color-stop(100%,#b0ca34));*/ /* Chrome,Safari4+ */
+	  background: -webkit-linear-gradient(top,  #FFFFFF 0%,#D6D6D6 100%);												/* #cdeb8e 0%,#b0ca34 100%);*/ /* Chrome10+,Safari5.1+ */
+	  background: -o-linear-gradient(top,  #FFFFFF 0%,#D6D6D6 100%);													/* #cdeb8e 0%,#b0ca34 100%);*/ /* Opera 11.10+ */
+	  background: linear-gradient(to bottom,  #FFFFFF 0%,#D6D6D6 100%); 												/* #cdeb8e 0%,#b0ca34 100%);*/ /* W3C, IE10+ */
+	  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#FFFFFF', endColorstr='#D6D6D6',GradientType=0 ); /* startColorstr='#cdeb8e',  endColorstr='#b0ca34',GradientType=0 );*/ /* IE6-9 */
+	  }
+	nav ul li a,
+	nav ul li a:focus,
+	nav ul li a:visited,
+	nav ul li a:hover,
+	nav ul li a:active {
+	  color: #000;
+	  text-decoration: none; 
+	}
+	nav ul li a:active {
+		background: #DAD9D9; /* Old browsers */ 	  /*background: #b0ca34; */
+		background: -moz-linear-gradient(top,   #DAD9D9 0%, #555555 100%);/*background: -moz-linear-gradient(top,   #b0ca34 0%, #96c40d 100%);*/ /* FF3.6+ */
+		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#DAD9D9), color-stop(100%,#555555));/*background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#b0ca34), color-stop(100%,#96c40d));*/ /* Chrome,Safari4+ */
+		background: -webkit-linear-gradient(top,  #DAD9D9 0%,#555555 100%);/*background: -webkit-linear-gradient(top,  #b0ca34 0%,#96c40d 100%);*/ /* Chrome10+,Safari5.1+ */
+		background: -o-linear-gradient(top,  #DAD9D9 0%,#555555 100%); /*background: -o-linear-gradient(top,  #b0ca34 0%,#96c40d 100%);*//* Opera 11.10+ */
+		background: linear-gradient(to bottom,  #DAD9D9 0%,#555555 100%);/* background: linear-gradient(to bottom,  #b0ca34 0%,#96c40d 100%);*//* W3C, IE10+ */
+		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#DAD9D9', endColorstr='#555555',GradientType=0 ); 
+		/*filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#b0ca34', endColorstr='#96c40d',GradientType=0 );*/ /* IE6-9 */
+	}
+	nav ul li:first-child a {
+	  border-top-left-radius: 8px;
+	  border-bottom-left-radius: 8px; 
+	}
+	nav ul li:last-child a {
+	  border-top-right-radius: 8px;
+	  border-bottom-right-radius: 8px; 
+	  }
+
+  
+
+
+form#noteform {/*background:#A2C2C9; */width:100%; padding:10px; border:1px margin:0 auto;}
+form#transcriptform {/*background:#A2C2C9; */width:100%; padding:10px; border:1px margin:0 auto;}
+form#noteform fieldset 
+{
+	/*min-height:50px;*/
+	display:block; 
+	border:0px solid #107887; padding:5px; 
+	font-family:verdana, sans-serif; 
+	margin-bottom:0.5em; /*line-height:1.5em*/;
+}
+
+form#transcriptform fieldset 
+{
+	/*min-height:50px;*/
+	display:block; 
+	border:0px solid #107887; padding:0px; 
+	font-family:verdana, sans-serif; 
+	margin-bottom:0.5em; /*line-height:1.5em*/;
+}
+form#noteform fieldset#personal {
+	background:transparent url(cssplay/crutch.gif) no-repeat 400px 10px;}
+form#noteform fieldset#medical {
+	background:transparent url(cssplay/sling.gif) no-repeat 400px 10px;}
+form#noteform fieldset#current {
+	background:transparent url(cssplay/cold.gif) no-repeat 390px 10px;}
+* html form#noteform fieldset#personal, * html form#noteform fieldset#medical {
+	background-position:400px 20px;}
+* html form#noteform fieldset#current {background-position:390px 20px;}
+form#noteform fieldset#opt {/*background:#87A1A8;*/}
+form#noteform legend 
+{
+	font-family:georgia, sans-serif; font-size:1.1em; 
+	font-weight:bold; border:3px margin-bottom:5px; 
+	padding:3px; width:254px; url(cssplay/form.gif) repeat-x center left;
+}
+/* form#noteform label 
+{
+	clear:left; display:block; float:left; 
+	text-align:left; padding-right:10px; 
+	color:#333333; margin-bottom:0.5em;
+}*/
+form#noteform input 
+{
+	border:1px;
+	width:100%; 
+	padding-left:0.5em;
+	margin-bottom:0.6em; 
+}
+
+form#transcriptform input 
+{
+	border:1px;
+	width:100%; 
+	padding-left:0.5em;
+	margin-bottom:0.6em; 
+}
+.related-topics input
+{
+	visibility:hidden;
+}
+form#noteform select 
+{
+}
+form#noteform textarea 
+{
+
+}
+
+form#transcriptform textarea 
+{
+	/*width:410px; height:15em; min-height:30px; */border:1px solid #fff; 
+	padding:0.5em; overflow:auto;
+}
+form#noteform option 
+{
+	background:#788; color:#fff;
+}
+form#noteform optgroup 
+{
+	background:#abb; color:#000; 
+	font-family:georgia, serif;
+}
+form#noteform optgroup option 
+{
+	background:#9aa; color:#fff;
+}
+form#noteform #button1, form#noteform #button2 
+{
+	color:#c00; padding-right:0.5em; 
+	cursor:pointer; width:205px; margin-left:8px;
+}
+form#noteform #button1:hover, form#noteform #button2:hover {background-position:center left; color:#000;}
+form#noteform ul {
+	list-style-type:none;
+	margin:0;
+	padding:0;
+	/*overflow:hidden;*/
+}
+form#noteform li{
+	float:left;
+}
+
+
+fieldset[name="transcript_content"] textarea {
+
+		    padding:0px;
+		    margin:0px;
+		    height:100%;
+		    width:100%;
+		    margin-start: 0px;
+
+}
+/* note.html */
+  .zotero-information-edit .control-group {
+    margin-bottom: 0px !important;
+  }
+
+  form#noteform.note-status {
+    font-weight: bold;
+    padding-bottom: 1em;
+    margin-bottom: 1em;
+  }
+ form#noteform .note-status-hibernating {
+    color: black;
+  }
+ form#noteform .note-status-open {
+    color: green;
+  }
+ form#noteform .note-status-closed {
+    color: red;
+  }
+form#noteform .zotero-container {
+    height: 355px;
+    overflow-y: scroll;
+  }
+  
+/* note.html */
+
+.transcript-form{
+	width:100%;
+	border:0;
+	padding: 0px;
+	background-color:red;
+}
+.topicassignment 
+{
+	/*margin-bottom: 3px;
+	margin-left: 8px; */
+	display: inline;
+	height:0px;
+}
+
+.generic-form
+{
+	background-color:red;
+}
+.related-topics
+{
+	display:none;
+	height:0px;
+}
+.related-topics .topicassignment
+{	
+	/*visibility:hidden;*/
+	/*background-color: yellow;*/
+	display:none;
+	height:0px;
+}
+
+.form-entities
+{
+	padding: 0px;
+  	margin-top:0px;
+  	margin-right:10px;
+  	margin-bottom:10px;
+  	margin-left:0px;
+}
+
+.editor-form{
+		  /*  background-color: #87A1A8;*/
+		    border: none;
+		    outline:none;
+		    /*padding: 10px;
+		    marging:0px;*/
+		    height:100%;
+		    width:100%;
+}
+
+  #emptyeditor {
+    height: 100%;
+  }
+/* note_admin.html  css*/
+
+  .assigned-users-field ul {
+    list-style-type: none;
+    margin-left: 0;
+  }
+  
+  .title-field {
+  		display: inline-block;
+  		display: inline; 
+  }
+  .title-field input[type="text"] {
+    /*width: 500px; */
+    border: 1px solid black;
+    outline: 1px solid #CCCCCC;
+
+    display: inline; 
+    /*height:25px;*/
+
+  }
+  
+    .title-field label{
+    	display: inline; 
+    }
+
+.editorlabel {
+	background: #F0F0EE;
+	outline: 1px solid #CCCCCC;
+	margin-top:0px;
+  	margin-right:0px;
+  	margin-bottom:0px;
+  	margin-left:0px;
+	padding: 0px;
+	text-align: left;
+	font-weight:500;
+	position: relative;
+    bottom: -6px;
+
+   /* width:100%;*/
+	
+}
+
+
+
+  .description-field textarea {
+    width: 700px;
+   /* height: 300px;*/
+    border-radius: 0;
+    box-shadow: none;
+    border: 1px solid black;
+    padding: 8px;
+    background: #f0f0f0;
+  }
+
+/* end of  note_admin.html css */

@@ -1,0 +1,177 @@
+{% extends "form.html" %}
+{% load typogrify display %}
+{% load staticfiles compress %}
+
+{% block form_init %}
+
+<meta name="topic_id" id="topic_id" content="{{ topic.id }}" />
+<meta name="topic_prefname" id="prefname_id" content="{{ topic.preferred_name }}" />
+
+{% endblock form_init %}
+
+
+{% block form_content %}
+<div class="form">
+	<ul class="tabs document">
+		<li>
+			<input type="radio" checked name="tabs" id="tab1">
+			<label for="tab1">Related Notes <script > document.write("("+ "{{ topic.get_related_notes|length }}" +")"); </script></label>
+			<div id="tab-content1" class="tab-content  document animated fadeIn">
+				<section id="notes-panel" class="panel-pane">
+				  {% if topic.get_related_notes %}
+				  {% for note in topic.get_related_notes %}
+				  <div id="note-{{ note.id }}" class="note">
+				    <div class="note-link">
+				      <a href="{{ note.get_absolute_url }}">{{ note.title }}</a>
+				    </div>
+				    <div class="note-last-modified">
+				      <span class="quiet">Last modified: </span><span>{{ note.last_updated|date:"F j, Y" }}</span>
+				    </div>
+				  </div>
+				  {% endfor %}<br></br>
+				  {% else %}
+                                     There are no notes or queries related to <em>{{ topic.preferred_name }}</em>.<br></br>
+				  {% endif %}
+				</section>
+			</div>
+		</li>
+		
+		<li>
+			<input type="radio" name="tabs" id="tab2">
+			<label for="tab2">Related Documents<script >  document.write("("+ "{{ topic.get_related_documents|length }}" +")"); </script></label>
+			<div id="tab-content2" class="tab-content document animated fadeIn">
+				  <section id="documents-panel" class="panel-pane">
+				  {% if topic.get_related_documents %}
+				  {% for document in topic.get_related_documents %}
+				  <div id="note-{{ document.id }}" class="related-document">
+				    <div class="document-link">
+				      <a href="{{ document.get_absolute_url }}">{{ document.import_id}}</a>
+				    </div>
+				    <div class="document-last-modified">
+				      <span class="quiet">Last modified: </span><span>{{ document.last_updated|date:"F j, Y" }}</span>
+				    </div>
+				  </div>
+				  {% endfor %}<br></br>
+				  {% else %}
+                                     There are no documents related to <em>{{ topic.preferred_name }}</em>.<br></br>
+				  {% endif %}
+			  </section>
+			</div>
+		</li>
+		<li>
+			
+
+    
+			<input type="radio" name="tabs" id="tab3">
+			<label for="tab3">Related Topics <script > document.write("("+ "{{ topic.get_related_topics|length }}" +")");</script></label>
+			<div id="tab-content3" class="tab-content document animated fadeIn">
+	  			<section id="topics-panel" class="panel-pane">
+				    {% with formset=formsets.topicassignment %}
+				    <fieldset name="related_topics_fields" class="related-topics">
+				      {% include "includes/bootstrap_formset.html" %}
+				      {% if topic.get_related_topics %}
+				      {% for top in topic.get_related_topics %}
+				      <div id="topic-{{ top.id }}" class="related-topic">
+					<div class="topic-link">
+					  <a href="{{ top.get_absolute_url }}">{{ top.preferred_name }}</a>
+					</div>
+					<div class="topic-last-modified">
+					  <span class="quiet">Last modified: </span><span>{{ top.last_updated|date:"F j, Y" }}</span>
+					</div>
+				      </div>
+				      {% endfor %}<br></br>
+				      {% else %}
+	                              There are no topics related to <em>{{ topic.preferred_name }}</em>.<br></br>
+				      {% endif %}
+				    </fieldset>
+				    {% endwith %}
+			  </section>
+			</div>
+		</li>
+	
+	
+		<li>
+			<input type="radio" name="tabs" id="tab4">
+			<label for="tab4"> Alternate forms </label>
+			<div id="tab-content4" class="tab-content document animated fadeIn">
+	  				    {% with formset=formsets.alternatename %}
+					    <fieldset name="alternate_forms_fields">
+					      {% include "includes/bootstrap_formset.html" %}
+					    </fieldset>
+    					{% endwith %}
+			</div>
+		</li>
+				
+			<li>
+			<input type="radio" name="tabs" id="tab4">
+			<label for="tab4">Article</label>
+			<div id="tab-content4" class="tab-content note animated fadeIn">
+					 <fieldset name="article_fields">
+				      {% include "includes/bootstrap_errors.html" with errors=form.summary.errors %}
+				      <div class="fieldset-content article">
+				        {% include "includes/wysihtml5_full_toolbar.html" with toolbar_id="summary-toolbar" %}
+				        {{ form.summary }}
+				      </div>
+				
+				      <div class="article-citations" style="margin: 1em .5em;">
+				        <legend>Citations</legend>
+				        {% include "includes/citation_formset.html" with citations_formset=formsets.citation %}
+				        <button type="button" class="btn btn-primary" id="add-citation">Add citation</a>
+				      </div>
+
+  				</fieldset>
+			</div>
+		</li>
+		
+		
+	</ul>
+	<div class="stop-float"></div>
+	<div style="height:5px"> &nbsp;</div>
+
+	<div class="form-main" >
+		<label class="editorlabel bold">  Name: </label> 
+		<fieldset name="preferred_name_fields">
+			{% include "includes/bootstrap_errors.html" with errors=form.preferred_name.errors %}
+			<div class="fieldset-content">
+				{{ form.preferred_name }} 
+			</div>
+		</fieldset>
+		<hr />
+		
+		<label class="editorlabel bold"> Resolve: </label> (e.g. to resolve the entity place 'Berlin' use the URL: http://dbpedia.org/resource/Berlin )
+		<fieldset name="rdf_field" >
+      				{% include "includes/bootstrap_errors.html" with errors=form.rdf.errors %}
+      				<div class="fieldset-content rdf">
+        				{{ form.rdf }}
+      				</div>
+  		</fieldset>	
+		<hr />
+	</div>
+</div>
+
+
+{% endblock form_content %}
+
+{% block form_functions %}
+
+<script>
+
+	switchtabs(5,"document");
+	$("#rdfinput").attr("placeholder", "Start typing to get suggestions  . . . ");
+	
+	var title = document.getElementById("prefname_id").getAttribute("content");
+	//if(!title )	title="New Entity";
+		
+	//var descriptionLabel = "Resource URL ";
+	//var temp = document.getElementById("topicResolveBut").getAttribute("value");
+	//document.getElementById("topicResolveButtn).value = descriptionLabel + temp;	
+	
+    cendari.addInit(function() { 
+    	//cendari.createEditor($('#noteform').height(), "id_rdf", true, "topicResolveBut", descriptionLabel);
+    	cendari.addTab(title);
+    	cendari.addWidgetToActiveTab("form","noteform" ,"border");
+    });
+
+</script>
+
+{% endblock form_functions %}

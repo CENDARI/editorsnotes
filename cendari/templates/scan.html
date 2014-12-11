@@ -1,0 +1,61 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head>
+    {% load staticfiles compress %}
+    <title>Cendari Editors' Notes{% if project %}: {{ project }}{% else %}{% endif %}{% block title %}{% endblock %}</title>
+    <link rel="shortcut icon" href="{% static 'style/icons/favicon.ico' %}"/>
+  <link rel="stylesheet" type="text/css" media="all" href="{% static "iipmooviewer/css/iip.min.css" %}" />
+
+  <script src="//ajax.googleapis.com/ajax/libs/mootools/1.4.5/mootools-yui-compressed.js"></script>
+<!--
+  <script type="text/javascript" src="{% static "iipmooviewer/js/iipmooviewer-2.0-min.js" %}"></script>
+-->
+  <script type="text/javascript" src="{% static "iipmooviewer/src/mootools-more-1.4.0.1.js" %}"></script>
+  <script type="text/javascript" src="{% static "iipmooviewer/src/iipmooviewer-2.0.js" %}"></script>
+  <script type="text/javascript" src="{% static "iipmooviewer/src/navigation.js" %}"></script>
+  <script type="text/javascript" src="{% static "iipmooviewer/src/scale.js" %}"></script>
+  <script type="text/javascript" src="{% static "iipmooviewer/src/touch.js" %}"></script>
+  <script type="text/javascript" src="{% static "iipmooviewer/src/protocols/iip.js" %}"></script>
+  <script type="text/javascript" src="{% static "iipmooviewer/src/annotations.js" %}"></script>
+  <script type="text/javascript" src="{% static "iipmooviewer/src/blending.js" %}"></script>
+  <script type="text/javascript" src="{% static "iipmooviewer/src/lang/help.en.js" %}"></script>
+  <style type="text/css">
+    body{
+      height: 100%;
+      padding: 0;
+      margin: 0;
+    }
+    div#viewer{
+      height: 100%;
+      min-height: 100%;
+      width: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      margin: 0;
+      padding: 0;
+    }	
+  </style>
+
+  <link rel="shortcut icon" href="{% static "iipmooviewer/images/iip-favicon.png" %}" />
+  <link rel="apple-touch-icon" href="{% static "images/iip.png" %}"/>
+
+  <script type="text/javascript">
+{% autoescape off %}
+    new IIPMooViewer( "viewer", {
+	server: '{{ scan.server }}',
+	image: '{{ scan.image }}',
+	credit: '{{ scan.credit }}',
+	load: {{ scan.options }},
+        prefix: '{% static "iipmooviewer/images/" %}',
+        showNavWindow: false,
+        showNavButtons: false,
+        enableFullscreen: true
+    });
+{% endautoescape %}
+  </script>
+
+ </head>
+
+ <body>
+   <div id="viewer"></div>
+ </body>
