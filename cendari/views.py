@@ -611,7 +611,7 @@ def search(request,project_slug=None):
 @login_required
 def iframe_view(request,type):
     if type =='issuereport' :
-        url = "https://github.com/CENDARI/CENDARI-VRE/issues/new"
+        url = "https://dev.dariah.eu/jira/secure/CreateIssue.jspa?pid=10900&issuetype=1"
         title = "Issue Report"
     elif type == 'survey':
         url = "https://docs.google.com/forms/d/1d4l8P9eVKGOHIW6MQ-hYSKzZOyOJmnh6QRtJr4lOJJE/viewform?usp=send_form"
