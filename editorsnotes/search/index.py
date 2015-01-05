@@ -28,12 +28,24 @@ class ElasticSearchIndex(object):
         if not hasattr(self, 'get_name'):
             raise NotImplementedError('Must implement get_name method')
         self.name = self.get_name()
+        self.opened = False
+
+    def _open(self):
+        pass
+
+    def open(self):
+        if self.opened:
+            return self.es
+        print('opening ElasticSearch')
         self.es = OrderedResponseElasticSearch(settings.ELASTICSEARCH_URLS)
+        self.opened = True
         if not self.exists():
             self.create()
             self.created = True
         else:
             self.created = False
+        self._open()
+        return self.es
 
     def get_settings(self):
         return {}
@@ -43,25 +55,32 @@ class ElasticSearchIndex(object):
         pass
 
     def exists(self):
-        server_url, _ = self.es.servers.get()
+        server_url, _ = self.open().servers.get()
         resp = self.es.session.head(server_url + '/' + self.name)
         return resp.status_code == 200
 
     def create(self):
-        created = self.es.create_index(self.name, self.get_settings())
+        created = self.open().create_index(self.name, self.get_settings())
         self.put_mapping()
         return created
 
     def delete(self):
-        return self.es.delete_index(self.name)
+        self.open()
+        return self.open().delete_index(self.name)
 
 
 class ENIndex(ElasticSearchIndex):
-    def __init__(self):
+    def __init__(self, onOpen=None):
         self.document_types = {}
+        self.onOpen = onOpen
         super(ENIndex, self).__init__()
 
+    def _open(self):
+        if self.onOpen:
+            apply(self.onOpen, [self])
+
     def put_mapping(self):
+        self.open()
         self.put_type_mappings()
 
     def get_name(self):
@@ -92,7 +111,7 @@ class ENIndex(ElasticSearchIndex):
         }
 
     def put_type_mappings(self):
-        existing_types = self.es.get_mapping()\
+        existing_types = self.open().get_mapping()\
                 .get(self.name, {})\
                 .get('mappings', {})\
                 .keys()
@@ -106,17 +125,17 @@ class ENIndex(ElasticSearchIndex):
 
     def register(self, model, adapter=None, highlight_fields=None,
                  display_field=None):
-
         if adapter is None:
-            doc_type = DocumentTypeAdapter(self.es, self.name, model,
+            doc_type = DocumentTypeAdapter(self, self.name, model,
                                            highlight_fields, display_field)
         else:
-            doc_type = adapter(self.es, self.name, model)
+            doc_type = adapter(self, self.name, model)
         self.document_types[model] = doc_type
 
         self.put_type_mappings()
 
     def data_for_object(self, obj):
+        self.open()
         doc_type = self.document_types.get(obj.__class__, None)
         if doc_type is None:
             return None
@@ -126,11 +145,13 @@ class ENIndex(ElasticSearchIndex):
                            id=obj.id)
 
     def search_model(self, model, query, **kwargs):
+        self.open()
         doc_type = self.document_types.get(model)
         return self.es.search(query, index=self.name,
                               doc_type=doc_type.type_label, **kwargs)
 
     def search(self, query, highlight=False, **kwargs):
+        self.open()
 
         if isinstance(query, basestring):
             prepared_query = {
@@ -154,7 +175,7 @@ class ENIndex(ElasticSearchIndex):
             for field_name in highlight_fields:
                 prepared_query['highlight']['fields'][field_name] = {}
 
-        return self.es.search(prepared_query, index=self.name, **kwargs)
+        return self.open().search(prepared_query, index=self.name, **kwargs)
 
 VERSION_ACTIONS = {
     VERSION_ADD: 'added',
@@ -177,7 +198,7 @@ class ActivityIndex(ElasticSearchIndex):
         else:
             raise ValueError('Must pass either project or user')
         query.update(kwargs)
-        search = self.es.search(query, index=self.name, size=size)
+        search = self.open().search(query, index=self.name, size=size)
         return [ hit['_source']['data'] for hit in search['hits']['hits'] ]
 
     def data_from_reversion_version(self, version):
@@ -197,5 +218,5 @@ class ActivityIndex(ElasticSearchIndex):
         }
 
     def handle_edit(self, instance, version):
-        self.es.index(self.name, 'activity',
+        self.open().index(self.name, 'activity',
                       self.data_from_reversion_version(version))

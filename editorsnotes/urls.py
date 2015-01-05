@@ -30,6 +30,7 @@ urlpatterns += patterns('editorsnotes.main.views.navigation',
     url(r'^about/$', 'about', name='about_view'),
     url(r'^about/test/$', 'about_test'),
     url(r'^search/$', 'search', name='search_view'),
+    url(r'^version/$', 'get_version', name='get_version'),
 )
 
 # Admin patterns

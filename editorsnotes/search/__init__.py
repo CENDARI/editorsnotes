@@ -26,18 +26,19 @@ class DocumentAdapter(DocumentTypeAdapter):
         })
         return mapping
 
-en_index = ENIndex()
-en_index.register(main_models.Note,
-                  display_field='serialized.title',
-                  highlight_fields=('serialized.title',
-                                    'serialized.content',
-                                    'serialized.sections'))
-en_index.register(main_models.Topic,
-                  display_field='serialized.preferred_name',
-                  highlight_fields=('serialized.preferred_name',
-                                    'serialized.summary'))
-
-en_index.register(main_models.Document, adapter=DocumentAdapter)
+def register_models(en_index):
+    print('registering models')
+    en_index.register(main_models.Note,
+                      display_field='serialized.title',
+                      highlight_fields=('serialized.title',
+                                        'serialized.content',
+                                        'serialized.sections'))
+    en_index.register(main_models.Topic,
+                      display_field='serialized.preferred_name',
+                      highlight_fields=('serialized.preferred_name',
+                                        'serialized.summary'))
+    en_index.register(main_models.Document, adapter=DocumentAdapter)
+en_index = ENIndex(onOpen=register_models)
 
 activity_index = ActivityIndex()
 
@@ -51,6 +52,8 @@ def update_activity_index(instances, revision, versions, **kwargs):
 
 @receiver(post_save)
 def update_elastic_search_handler(sender, instance, created, **kwargs):
+    if not activity_index.opened:
+        return
     klass = instance.__class__
     if klass in en_index.document_types:
         document_type = en_index.document_types[klass]
@@ -63,6 +66,8 @@ def update_elastic_search_handler(sender, instance, created, **kwargs):
 
 @receiver(post_delete)
 def delete_es_document_handler(sender, instance, **kwargs):
+    if not activity_index.opened:
+        return
     klass = instance.__class__
     if klass in en_index.document_types:
         document_type = en_index.document_types[klass]

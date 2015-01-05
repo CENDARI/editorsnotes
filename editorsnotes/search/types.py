@@ -9,7 +9,7 @@ from rest_framework.renderers import JSONRenderer
 from editorsnotes.api import serializers
 
 class DocumentTypeAdapter(object):
-    def __init__(self, es, index_name, model=None, highlight_fields=None,
+    def __init__(self, esidx, index_name, model=None, highlight_fields=None,
                  display_field=None):
         self.model = model or self.get_model()
         self.type_label = getattr(self, 'type_label', self.model._meta.module_name)
@@ -22,13 +22,16 @@ class DocumentTypeAdapter(object):
 
         self.highlight_fields = getattr(self, 'highlight_fields', highlight_fields)
         
-        self.es = es
+        self.esidx = esidx
         self.index_name = index_name
 
         self.dummy_request = self.make_dummy_request()
 
     def __unicode__(self):
         return self.model._meta.module_name
+
+    def get_es(self):
+        return self.esidx.open()
 
     def get_model(self):
         try:
@@ -79,13 +82,13 @@ class DocumentTypeAdapter(object):
 
     def clear(self):
         try:
-            self.es.delete_all(self.index_name, self.type_label)
+            self.get_es().delete_all(self.index_name, self.type_label)
         except ElasticHttpNotFoundError:
             pass
 
     def put_mapping(self):
         mapping = self.get_mapping()
-        self.es.put_mapping(self.index_name, self.type_label, mapping)
+        self.get_es().put_mapping(self.index_name, self.type_label, mapping)
 
     def data_from_object(self, obj, request=None):
         if not hasattr(obj, '_rest_serialized'):
@@ -130,16 +133,16 @@ class DocumentTypeAdapter(object):
     def index(self, instance=None, pk=None, request=None):
         obj = self.get_object(instance, pk)
         doc = self.data_from_object(obj, request)
-        self.es.index(self.index_name, self.type_label, doc, obj.pk, refresh=True)
+        self.get_es().index(self.index_name, self.type_label, doc, obj.pk, refresh=True)
 
     def update(self, instance=None, pk=None, request=None):
         obj = self.get_object(instance, pk)
         doc = self.data_from_object(obj, request)
-        self.es.update(self.index_name, self.type_label, obj.pk, doc=doc, refresh=True)
+        self.get_es().update(self.index_name, self.type_label, obj.pk, doc=doc, refresh=True)
 
     def remove(self, instance=None, pk=None):
         obj = self.get_object(instance, pk)
-        self.es.delete(self.index_name, self.type_label, obj.pk)
+        self.get_es().delete(self.index_name, self.type_label, obj.pk)
 
     def update_all(self, qs=None, chunk_size=300):
         i = 0
@@ -153,5 +156,5 @@ class DocumentTypeAdapter(object):
             if not chunk:
                 break
             data = [ self.data_from_object(obj) for obj in chunk ]
-            self.es.bulk_index(self.index_name, self.type_label, data)
+            self.get_es().bulk_index(self.index_name, self.type_label, data)
             i += chunk_size

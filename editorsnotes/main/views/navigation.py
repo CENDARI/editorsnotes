@@ -13,6 +13,7 @@ from django.template import RequestContext
 from PIL import Image, ImageDraw, ImageFont
 
 from editorsnotes.search import en_index
+import editorsnotes
 
 from ..forms import FeedbackForm
 from ..models import Document, Note, Project, TopicNode
@@ -113,3 +114,5 @@ def about(request):
     return render_to_response(
         'about.html', o, context_instance=RequestContext(request))
 
+def get_version(request):
+    return HttpResponse(editorsnotes.__version__, content_type="application/json")
