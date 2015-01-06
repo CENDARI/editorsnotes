@@ -26,6 +26,7 @@ class DocumentAdapter(DocumentTypeAdapter):
         })
         return mapping
 
+#[jdf] Deferred registration of models to avoid connecting to ES
 def register_models(en_index):
     print('registering models')
     en_index.register(main_models.Note,
@@ -38,6 +39,7 @@ def register_models(en_index):
                       highlight_fields=('serialized.preferred_name',
                                         'serialized.summary'))
     en_index.register(main_models.Document, adapter=DocumentAdapter)
+
 en_index = ENIndex(onOpen=register_models)
 
 activity_index = ActivityIndex()
