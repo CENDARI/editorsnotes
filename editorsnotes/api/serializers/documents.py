@@ -3,11 +3,17 @@ import json
 
 from lxml import etree
 from rest_framework import serializers
+from rest_framework.reverse import reverse
 
-from editorsnotes.main.models import Document, Citation, Scan
+from editorsnotes.main.models import Document, Citation, Scan, Transcript
 
 from .base import (RelatedTopicSerializerMixin, ProjectSpecificItemMixin,
-                   URLField, ProjectSlugField, HyperlinkedProjectItemField)
+                   URLField, ProjectSlugField, HyperlinkedProjectItemField,
+                   TopicAssignmentField)
+
+# Cendari code E.G. aviz
+from cendari.semantic import semantic_process_document,semantic_process_transcript
+
 
 class ZoteroField(serializers.WritableField):
     def to_native(self, zotero_data):
@@ -38,6 +44,11 @@ class ScanSerializer(serializers.ModelSerializer):
 class DocumentSerializer(RelatedTopicSerializerMixin, ProjectSpecificItemMixin,
                          serializers.ModelSerializer):
     project = ProjectSlugField()
+
+    # Cendari code E.G. aviz
+    # added from the editors note repository
+    transcript = serializers.SerializerMethodField('get_transcript_url')
+
     zotero_data = ZoteroField(required=False)
     url = URLField()
     scans = ScanSerializer(many=True, required=False, read_only=True)
@@ -49,10 +60,43 @@ class DocumentSerializer(RelatedTopicSerializerMixin, ProjectSpecificItemMixin,
         exclusions = super(DocumentSerializer, self).get_validation_exclusions()
         exclusions.remove('zotero_data')
         return exclusions
+    
     class Meta:
         model = Document
         fields = ('id', 'description', 'url', 'project', 'last_updated',
-                  'scans', 'related_topics', 'zotero_data',)
+                  'scans', 'transcript', 'related_topics', 'zotero_data',)
+    # Cendari code E.G. aviz
+    def save_object(self, obj, **kwargs):
+        super(DocumentSerializer, self).save_object(obj, **kwargs)
+        print "creating semantics for document"
+        print obj
+        semantic_process_document(obj)
+
+    # Cendari code E.G. aviz
+    # added from the editors note repository
+    def get_transcript_url(self, obj):
+        if not obj.has_transcript():
+            return None
+        return reverse('api:api-transcripts-detail',
+                       args=(obj.project.slug, obj.id),
+                       request=self.context.get('request', None))
+
+# Cendari code E.G. aviz
+# added from the editors note repository
+class TranscriptSerializer(serializers.ModelSerializer):
+    url = URLField(lookup_arg_attrs=('document.project.slug', 'document.id'))
+    document = HyperlinkedProjectItemField(
+        required=True, view_name='api:api-documents-detail')
+
+    # Cendari code E.G. aviz
+    def save_object(self, obj, **kwargs):
+        super(TranscriptSerializer, self).save_object(obj, **kwargs)
+        print "creating semantics for transcript"
+        print obj
+        semantic_process_transcript(obj)
+
+    class Meta:
+        model = Transcript
 
 class CitationSerializer(serializers.ModelSerializer):
     url = URLField('api:api-topic-citations-detail',

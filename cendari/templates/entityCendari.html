@@ -3,152 +3,192 @@
 {% load typogrify display note_sections staticfiles compress %}
 
 {% block js %}
-<script type="text/javascript" src="{{ STATIC_URL }}function/topic.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}function/facets.js"></script>
+	<script type="text/javascript" src="{{ STATIC_URL }}function/topic.js"></script>
+	<script type="text/javascript" src="{{ STATIC_URL }}function/facets.js"></script>
 {% endblock %}
 
 {% block css %}
-<link rel="stylesheet" href="{{ STATIC_URL }}style/topic.css" type="text/css"/>
-<link rel="stylesheet" href="{{ STATIC_URL }}style/facets.css" type="text/css" />
+	<link rel="stylesheet" href="{{ STATIC_URL }}style/topic.css" type="text/css"/>
+	<link rel="stylesheet" href="{{ STATIC_URL }}style/facets.css" type="text/css" />
 {% endblock %}
 
 {% block init %}
-<meta name="topic_id" id="topic_id" content="{{ topic.id }}" />
-<meta name="topic_prefname" id="prefname_id" content="{{ topic.preferred_name }}" />
+	<meta name="topic_id" id="topic_id" content="{{ topic.id }}" />
+	<meta name="topic_prefname" id="prefname_id" content="{{ topic.preferred_name }}" />
 
 {% endblock init %}
 
 {% block model_fields %}
-<div class="form" >
-	<ul class="tabs note">
-		<li> <!-- RELATED NOTES TAB --> 
-			<input type="radio" checked name="tabs" id="tab1">
-			<label for="tab1">Related Notes <script > document.write("("+ "{{ notes |length }}" +")"); </script></label>
-			<div id="tab-content1" class="tab-content  note animated fadeIn">
-				{% if notes %}
-			          {% for note, note_topics in notes %}
-			          <div id="note-{{ note.id }}" class="related-note">
-			            <div class="note-link"> {{ note|as_link }} </div>
-			            <div class="note-last-modified"><span class="quiet">Last modified: </span><span>{{ note.last_updated }}</span></div>			            
-			          </div>
-			          {% endfor %}
-			        {% else %}
-			          There are no notes related to <em>{{ topic.preferred_name }}</em>.
-        		{% endif %}
-      			</section>
+	<div class="form" >
+		<ul class="tabs note">
+			<li> <!-- RELATED NOTES TAB --> 
+				<input type="radio" checked name="tabs" id="tab1">
+				<label for="tab1">Related Notes <script > document.write("("+ "{{ notes |length }}" +")"); </script></label>
+				<div id="tab-content1" class="tab-content  note animated fadeIn">
+					{% if notes %}
+						{% for note, note_topics in notes %}
+							<div id="note-{{ note.id }}" class="related-note">
+								<div class="note-link"> {{ note|as_link }} </div>
+								<div class="note-last-modified"><span class="quiet">Last modified: </span><span>{{ note.last_updated }}</span></div>			            
+							</div>
+						{% endfor %}
+					{% else %}
+						There are no notes related to <em>{{ topic.preferred_name }}</em>.
+					{% endif %}
+					<!-- </section> -->
+				</div>
+			</li> <!-- end of RELATED NOTES TAB --> 
+
+			<li> <!-- RELATED DOCUMENTS TAB -->
+				<input type="radio" name="tabs" id="tab2">
+				<label for="tab2">Related Documents<script >  document.write("("+ "{{ documents|length }}" +")"); </script></label>
+				<div id="tab-content2" class="tab-content note animated fadeIn">
+					{% if documents %}
+						<ul id="document-list" class="model-list unstyled">
+							{% for document in documents %}
+								<li class="document-list-item">
+								{{ document|as_link|typogrify }}
+								</li>
+							{% endfor %}
+						</ul>
+					{% else %}
+					There are no documents related to <em>{{ topic.preferred_name }}</em>.
+						{% comment %}
+							<div id="import-documents">
+								<a class="button" href="/document/upload/?reltopic={{ topic.id }}&return_to={{ topic.get_absolute_url }}">Import documents</a>
+							</div>
+						{% endcomment %}
+					{% endif %}
+				</div>
+			</li> <!-- end of RELATED DOCUMENTS TAB -->
+
+			<li> <!-- RELATED ENTITIES TAB -->
+				<input type="radio" name="tabs" id="tab3">
+				<label for="tab3">Related Entities <script > document.write("("+ "{{ topic.related_topics.all|length }}" +")");</script></label>
+				<div id="tab-content3" class="tab-content document animated fadeIn">
+					{% if topic.related_topics.all %}
+						<ul class="topic-list">
+							{% for related_topic in topic.related_topics.all %}
+								<li>{{ related_topic.topic|as_link }}{% if not forloop.last %} | {% endif %}</li>
+							{% endfor %}
+						</ul>
+					{% else %}
+						There are no entities related to <em>{{ topic.preferred_name }}</em>.
+					{% endif %}
+				</div>
+			</li> <!-- end of RELATED ENTITIES TAB -->
+
+			<li> <!-- ARTICLE TAB -->
+				<input type="radio" name="tabs" id="tab4">
+				<label for="tab4">Article</label>
+				<div id="tab-content4" class="tab-content note animated fadeIn">
+					<section id="article-tab" class="tab-pane active">
+						<article id="{{ topic.slug }}-summary" class="note">
+							{% if topic.has_summary %}
+								<div class="note-content">
+									{{ topic.summary|as_html }}
+								</div>
+							{% else %}
+								<div>
+									There is no article about <em>{{ topic.preferred_name }}</em> yet.
+								</div>
+							{% endif %}
+							{% if topic.summary_cites.all %}
+								<h4>Sources</h4>
+								<div class="citation-list">
+									{% for cite in topic.summary_cites.all %}
+										{% include "citation.include" %}
+									{% endfor %}
+								</div>
+							{% endif %}
+						</article>
+					</section>
+
+				</div>
+			</li> <!-- end of ARTICLE TAB -->
+		</ul>
+
+
+		<div class="stop-float"></div>
+		<div style="height:5px"> &nbsp;</div>
+
+		<!-- <div class="form-main" >
+			<label class="editorlabel bold">  Name: </label> 
+
+			<input type="text" name="prefname_id" value="{{ topic.preferred_name }}">				
+
+			<div class="span6 edit-button">
+				{% if request.user.is_authenticated %}
+					<a class="btn" href="{{ topic.get_admin_url }}?return_to={{ topic.get_absolute_url }}">Edit</a>
+				{% endif %}
 			</div>
-	</li> <!-- end of RELATED NOTES TAB --> 
-		<li> <!-- RELATED DOCUMENTS TAB -->
-			<input type="radio" name="tabs" id="tab2">
-			<label for="tab2">Related Documents<script >  document.write("("+ "{{ documents|length }}" +")"); </script></label>
-			<div id="tab-content2" class="tab-content note animated fadeIn">
-					        {% if documents %}
-						        <ul id="document-list" class="model-list unstyled">
-						          {% for document in documents %}
-						          <li class="document-list-item">
-						            {{ document|as_link|typogrify }}
-						          </li>
-						          {% endfor %}
-						        </ul>
-					        {% else %}
-						          There are no documents related to <em>{{ topic.preferred_name }}</em>.
-						          {% comment %}
-						            <div id="import-documents">
-						              <a class="button" href="/document/upload/?reltopic={{ topic.id }}&return_to={{ topic.get_absolute_url }}">Import documents</a>
-						            </div>
-						          {% endcomment %}
-					        {% endif %}
+			<div class="span6 edit-history">
+				{{ topic|display_edit_history }}
 			</div>
-		</li> <!-- end of RELATED DOCUMENTS TAB -->
-		<li> <!-- RELATED ENTITIES TAB -->
-			<input type="radio" name="tabs" id="tab3">
-			<label for="tab3">Related Entities <script > document.write("("+ "{{ topic.related_topics.all|length }}" +")");</script></label>
-			<div id="tab-content3" class="tab-content document animated fadeIn">
-			        {% if topic.related_topics.all %}
-				        <ul class="topic-list">
-				          {% for related_topic in topic.related_topics.all %}
-				          <li>{{ related_topic.topic|as_link }}{% if not forloop.last %} | {% endif %}</li>
-				          {% endfor %}
-				        </ul>
-			        {% else %}
+		</div> -->
 
-			          There are no entities related to <em>{{ topic.preferred_name }}</em>.
-			        {% endif %}
-			</div>
-		</li> <!-- end of RELATED ENTITIES TAB -->
-		<li> <!-- ARTICLE TAB -->
-			<input type="radio" name="tabs" id="tab4">
-			<label for="tab4">Article</label>
-			<div id="tab-content4" class="tab-content note animated fadeIn">
-				<section id="article-tab" class="tab-pane active">
-				        <article id="{{ topic.slug }}-summary" class="note">
-				          {% if topic.has_summary %}
-				          <div class="note-content">
-				            {{ topic.summary|as_html }}
-				          </div>
-				          {% else %}
-				          <div>
-				            There is no article about <em>{{ topic.preferred_name }}</em> yet.
-				          </div>
-				          {% endif %}
-				          {% if topic.summary_cites.all %}
-				          <h4>Sources</h4>
-				          <div class="citation-list">
-				            {% for cite in topic.summary_cites.all %}
-				              {% include "citation.include" %}
-				            {% endfor %}
-				          </div>
-				          {% endif %}
-				         
-				        </article>
-      			</section>
+		{% if topic.id %}
+			<form class="formCendari" id="topicCendari" action="{% url "api:api-topics-detail" project_slug=project.slug  topic_node_id=topic.topic_node_id %}" method="POST">    
+			{% csrf_token %}
+
+		{% else %}
+			<form class="formCendari" id="topicCendari" action="/api/projects/{{project.slug}}/topics/" method="POST" >
+			{% csrf_token %}
+		{% endif %}
+			<div class="form-main edit-section" >
+				<label class="editorlabel bold">  Name: </label> 
+				
+				<div id = "preferred_name_id" class="fieldset-content">
+					{{ topic.preferred_name }} 
+				</div>
+
+				<label class="editorlabel bold"> Resolve: </label> (e.g. to resolve the entity place 'Berlin' use the URL: http://dbpedia.org/resource/Berlin )
+				<section data-error-target="content">
+					<input  type="text" id="rdf_id" name="rdf" value="{%if topic.rdf%}{{ topic.rdf }}{%endif%}"/>
+				</section>
+				{% if topic.id %}
+					<input type="hidden" id = "model_id" name="id" value="{{topic.id}}" >
+				{%endif%}
+
+				<!-- <fieldset name="rdf_field" >
+					{% include "includes/bootstrap_errors.html" with errors=form.rdf.errors %}
+					<div class="fieldset-content rdf">
+						<label>Note's title</label>
+				<input  type="text" id="note-title" name="title" value="{{ note.title }}"/>
+					</div>
+				</fieldset>	
+				<hr /> -->
+				{% if topic.id %}
+					<button id="saveButton" class="save-item" name="_method" value="PUT" >Save</button>
+				{% else %}
+					<button id="saveButton" class="save-item"  method="POST" name="_method" value="POST">Save</button>
+				{% endif %}
+
 
 			</div>
-		</li> <!-- end of ARTICLE TAB -->
-	</ul>
-	
+		</form>
 
-	<div class="stop-float"></div>
-	<div style="height:5px"> &nbsp;</div>
-
-	<div class="form-main" >
-		<label class="editorlabel bold">  Name: </label> 
-
-		<input type="text" name="prefname_id" value="{{ topic.preferred_name }}">				
-
-		  <div class="span6 edit-button">
-		  	{% if request.user.is_authenticated %}
-              	<a class="btn" href="{{ topic.get_admin_url }}?return_to={{ topic.get_absolute_url }}">Edit</a>
-          	{% endif %}
-           </div>
-           <div class="span6 edit-history">
-              {{ topic|display_edit_history }}
-            </div>
 	</div>
-
-	
 {% endblock model_fields %}
-
-</div>
 
 {% block functions %}
 
-<script>
+	<script>
 	switchtabs(4,"note");
-	
-	
+
+
 	var title = document.getElementById("prefname_id").getAttribute("content");
 	//if(!title )	title="New Entity";
-		
+
 	//var descriptionLabel = "Resource URL ";
 	//var temp = document.getElementById("topicResolveBut").getAttribute("value");
 	//document.getElementById("topicResolveButtn).value = descriptionLabel + temp;	
-	
-    cendari.addInit(function() { 
-    	//cendari.createEditor($('#noteform').height(), "id_rdf", true, "topicResolveBut", descriptionLabel);
-    	cendari.addTab(title);
-    	cendari.addWidgetToActiveTab("form","noteform" ,"border");
-    });
 
-</script>
+	cendari.addInit(function() { 
+		//cendari.createEditor($('#noteform').height(), "id_rdf", true, "topicResolveBut", descriptionLabel);
+		cendari.addTab(title);
+		cendari.addWidgetToActiveTab("form","noteform" ,"border");
+	});
+
+	</script>
 {% endblock functions %}

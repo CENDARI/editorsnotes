@@ -129,9 +129,10 @@
 				</li>
 			</ul>
 		</section>
+		
 		<div class="stop-float"></div>
 		<div style="height:5px">
-			&nbsp;
+			<!-- &nbsp; -->
 		</div>
 
 		{% if note.id %}
@@ -142,7 +143,7 @@
 			<form class="formCendari" id="noteCendari" action="{% url "api:api-notes-list" project_slug=project.slug %}" method="POST" >
 			{% csrf_token %}
 		{% endif %}
-			<div class="form-main" >
+			<div class="form-main edit-section" >
 				<div data-error-target="title"></div>
 				{% if not note.id %}
 					<input type="hidden" name="related_topics" value="" >
@@ -152,12 +153,12 @@
 					<input type="hidden" name="related_topics" value="" >
 					<input type="hidden" name="status" value="open" >
 					<input type="hidden" name="is_private" value="{{note.is_private}}" >
-					<input type="hidden" name="id" value="{{note.id}}" >
+					<input type="hidden" id = "model_id" name="id" value="{{note.id}}" >
 				{% endif %}
 				<input  class="editorlabel" id="noteDescEditBut" type="button" value= {% if note.id > 0 %} "[ Read Only ]                --- click here for Edit mode" {% else %} "[ Editable ]                    --- click here for Read-Only mode" {% endif %} />
 
 				<label>Note's title</label>
-				<input  type="text" name="title" value="{{ note.title }}"/>
+				<input  type="text" id="note-title" name="title" value="{{ note.title }}"/>
 				
 				<label>Note's content</label>
 				<section data-error-target="content">

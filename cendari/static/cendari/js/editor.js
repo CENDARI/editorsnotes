@@ -60,6 +60,50 @@ function csrfSafeMethod(method) {
     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 }
 
+function uniqueElements(el_array){
+    var uniqueNames = [];
+    $.each(el_array, function(i, el){
+        if($.inArray(el, uniqueNames) === -1) uniqueNames.push(el);
+    })
+    return uniqueNames
+}
+
+function submitTranscript(document_id){
+    console.log("sumbitting transcript");
+    fc = $('#transcriptCendari');
+    formData = "";
+    formData = formData+"csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&";
+
+     if($('#transcript-description').length){
+        formData =formData +'document='+encodeURIComponent($('#transcript-document').val())+'&creator='+$('#transcript-creator').val()+'&last_updater='+$('#transcript-uploader').val()+'&';
+        if(tinyMCE.activeEditor!=null){
+            formData = formData+"&content="+encodeURIComponent(tinyMCE.getInstanceById('transcript-description').getContent())+"&";
+        }
+    }   
+    formData = formData+$("#saveButtonTrascript").attr('name')+"="+$("#saveButtonTrascript").val();
+
+
+    console.log("form object is:");
+    console.log(fc);
+    console.log(fc.attr('action'));
+    console.log(fc.attr('method'));
+    console.log("formData are : \n: "+formData);    
+
+
+    $.ajax({
+        // beforeSend: function (xhr) {xhr.setRequestHeader('X-CSRFToken', $('input[name="csrfmiddlewaretoken"]').val());},
+            url:fc.attr('action'),
+            type: fc.attr('method'),
+            data: formData,
+            // content_type:'application/json',
+            success: function(data){
+                var currentUrl = window.location.toString();
+                var newUrl = currentUrl.replace("add", document_id);
+                window.location.replace(newUrl);  
+            }
+        });
+}
+
 $(document).ready(function(){
     var csrftoken = getCookie('csrftoken');
 
@@ -74,26 +118,70 @@ $(document).ready(function(){
     $('.formCendari').submit(function(e){
         e.preventDefault();
         
-        if(tinyMCE.activeEditor!=null){
-            tinyMCE.activeEditor.save();
+        // if(tinyMCE.activeEditor!=null){
+        //     tinyMCE.activeEditor.save();
+        // }
+
+        for (var edId in tinyMCE.editors){
+            if(tinyMCE.editors[edId]!=null){
+                tinyMCE.editors[edId].save();
+            }
         }
 
         var fc = $(this);
-        var formData = fc.serialize()+"&"+$("#saveButton").attr('name')+"="+$("#saveButton").val();
-        console.log("formData are : \n: "+formData);    
+        // console.log("form object is:");
+        // console.log(fc);
+
+        formData = "";
+        formData = formData+"csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&";
+        if($('#model_id').length){
+            formData=formData+"id="+$('#model_id').val()+"&";
+        }
+        if($('#note-title').length){
+            formData =formData +'title='+$('#note-title').val()+"&related_topics=&status=open&is_private=false&";
+            if(tinyMCE.activeEditor!=null){
+                formData = formData+"content="+encodeURIComponent(tinyMCE.getInstanceById('note-description').getContent())+"&";
+            }        
+        }
+        if($('#document-description').length){
+            if(tinyMCE.activeEditor!=null){
+                formData = formData+"&description="+encodeURIComponent(tinyMCE.getInstanceById('document-description').getContent())+"&";
+            }        
+        }
+        // if($('#transcript-description').length){
+        //     formData =formData +'document='+encodeURIComponent($('#transcript-document').val())+'&creator='+$('#transcript-creator').val()+'&last_uploader='+$('#transcript-uploader').val()+'&';
+        //     if(tinyMCE.activeEditor!=null){
+        //         formData = formData+"&content="+encodeURIComponent(tinyMCE.activeEditor.getContent())+"&";
+        // }        
+        
+        
+         if($('#rdf_id').length){
+            formData = formData + "rdf="+$('#rdf_id').val()+"&";
+            formData = formData + "preferred_name="+$('#preferred_name_id').text().trim()+"&";
+         }
+
+        formData = formData+$("#saveButton").attr('name')+"="+$("#saveButton").val();
+
+
+        // var formData = fc.serialize()+"&"+$("#saveButton").attr('name')+"="+$("#saveButton").val();
+        // var formData = $("#saveButton").attr('name')+"="+$("#saveButton").val()+"&csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&_content_type=application/json&_content="+encodeURIComponent(content)
+        // console.log("formData are : \n: "+formData);    
         $.ajax({
         // beforeSend: function (xhr) {xhr.setRequestHeader('X-CSRFToken', $('input[name="csrfmiddlewaretoken"]').val());},
             url:fc.attr('action'),
             type: fc.attr('method'),
             data: formData,
-            content_type:'application/json',
+            // content_type:'application/json',
             success: function(data){
                 // console.log(data);
-                var currentUrl = window.location.toString();
-                var newUrl = currentUrl.replace("add", data.id);
-                window.location.replace(newUrl);
-                //window.location.assign(newUrl);
-                //window.location.assign(cendari_root_url + "cendari/"+cendari_js_project_slug+"/notes/"+data.id);  
+                if($('#document-description').length){
+                    submitTranscript(data.id);
+                }
+                else{
+                    var currentUrl = window.location.toString();
+                    var newUrl = currentUrl.replace("add", data.id);
+                    window.location.replace(newUrl);
+                }
             }
         });
 

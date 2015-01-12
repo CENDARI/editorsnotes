@@ -1,69 +1,78 @@
-{% extends "emptylayout.html" %}
+<!-- {% extends "emptylayout.html" %}
 {% load typogrify display %}
 {% load staticfiles compress %}
+ -->
 
+{% extends "centerCendari.html" %}
+{% load set_var %}
+{% load staticfiles typogrify display  compress %}
 
-	{% block nolayout_content %}
-<meta name="transcript_id" id="transcript_id" content="{{ transcript.id }}" />
+{% block css %}
+	<link rel="stylesheet" type="text/css" media="all" href="{% static "iipmooviewer/css/iip.css" %}" />
+{% endblock %}
 
-<form id="transcriptform" method="post" class="editor-form"  >
-	{% csrf_token %}
-	{% include "includes/bootstrap_errors.html" with errors=form.non_field_errors %}
+{% block init %}
+	<meta name="document_id" id="document_id" content="{{ document.id }}" />
+	<meta name="document_name" id="document_name" content="{{ document.import_id }}" />
+	<script type="text/javascript" src="{% static "cendari/js/document.js" %}"></script>
+{% endblock init %}
 
-	<fieldset >
-		{% include "includes/bootstrap_errors.html" with errors=form.content.errors %}
-				
-	<input  class="editorlabel" style="width: 100%;" id="transcriptDescEditBut" type="button" value={% if transcript.id > 0 %} " [ Read Only ]                --- click here for Edit mode" {% else %} " [ Editable ]                    --- click here for Read-Only mode" {% endif %} />
+{% block nolayout_content %}
+	<meta name="transcript_id" id="transcript_id" content="{{ transcript.id }}" />
 
-		{{ form.content }}
-	</fieldset>
+	<form id="transcriptform" method="post" class="editor-form"  >
+		{% csrf_token %}
+		{% include "includes/bootstrap_errors.html" with errors=form.non_field_errors %}
 
-	{% with formset=formsets.footnote %}
-	<fieldset id="footnote-formset" style="visibility: hidden;">
-		<h3>Footnotes</h3>
-		{{ formset.management_form }}
-		<div id="footnote-items">
-			{% for footnote in formset %}
-			{% with footnote.instance as fn %}
+		<fieldset >
+			{% include "includes/bootstrap_errors.html" with errors=form.content.errors %}
 
-			<div {% if fn.id %}id="footnote-{{ fn.id }}"{% endif %}
-			class="footnote-edit {% if forloop.last %}hide{% endif %}">
-				<div class="footnote-anchor">
-					{{ fn.as_text }}
+			<input  class="editorlabel" style="width: 100%;" id="transcriptDescEditBut" type="button" value={% if transcript.id > 0 %} " [ Read Only ]                --- click here for Edit mode" {% else %} " [ Editable ]                    --- click here for Read-Only mode" {% endif %} />
+
+			{{ form.content }}
+		</fieldset>
+
+		{% with formset=formsets.footnote %}
+			<fieldset id="footnote-formset" style="visibility: hidden;">
+				<h3>Footnotes</h3>
+				{{ formset.management_form }}
+					<div id="footnote-items">
+				{% for footnote in formset %}
+					{% with footnote.instance as fn %}
+						<div {% if fn.id %}id="footnote-{{ fn.id }}"{% endif %} class="footnote-edit {% if forloop.last %}hide{% endif %}">
+							<div class="footnote-anchor">
+								{{ fn.as_text }}
+							</div>
+							<div class="footnote-content">
+								{{ fn.content|as_html }}
+							</div>
+							<div class="footnote-fields">
+								{% for field in footnote %} {{ field }} {% endfor %}
+							</div>
+						</div>
+					{% endwith %}
+				{% endfor %}
 				</div>
-				<div class="footnote-content">
-					{{ fn.content|as_html }}
-				</div>
-				<div class="footnote-fields">
-					{% for field in footnote %} {{ field }} {% endfor %}
-				</div>
-			</div>
+				{% include "includes/wysihtml5_full_toolbar.html" with toolbar_id="footnote-toolbar" %}
+			</fieldset>
+		{% endwith %}
 
-			{% endwith %}
-			{% endfor %}
-		</div>
-		{% include "includes/wysihtml5_full_toolbar.html" with toolbar_id="footnote-toolbar" %}
-	</fieldset>
-	{% endwith %}
-	
-<button type="submit" height="0.5" style="visibility: hidden;">
-		Save
-</button>
+		<button type="submit" height="0.5" style="visibility: hidden;">Save</button>
 
-</form>
+	</form>
 
 
 
-<script>
+	<script>
 	var descriptionLabel = "Transcript ";
 	var temp = document.getElementById("transcriptDescEditBut").getAttribute("value");
-	
+
 	document.getElementById("transcriptDescEditBut").value = descriptionLabel + temp;
 	var isReadOnly=true, id = document.getElementById("transcript_id").getAttribute("content");	
 	if (id==0) isReadOnly=false;	
-    cendari.addInit(function() { 
-    	cendari.createEditor($("tab-content.document").height(), "id_content", false,"transcriptDescEditBut",descriptionLabel);   	   
-    });
+		cendari.addInit(function() { 
+		cendari.createEditor($("tab-content.document").height(), "id_content", false,"transcriptDescEditBut",descriptionLabel);   	   
+	});
 </script>
 
-	{% endblock nolayout_content %}
+{% endblock nolayout_content %}

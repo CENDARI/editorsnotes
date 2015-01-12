@@ -8,7 +8,8 @@ from editorsnotes.main.models.notes import NOTE_STATUS_CHOICES
 from .base import (ProjectSpecificItemMixin, RelatedTopicSerializerMixin,
                    URLField, ProjectSlugField, UpdatersField,
                    HyperlinkedProjectItemField)
-
+ # Cendari code E.G. aviz
+from cendari.semantic import semantic_process_note
 
 class TextNSSerializer(serializers.ModelSerializer):
     section_id = serializers.Field(source='note_section_id')
@@ -89,6 +90,12 @@ class NoteSerializer(RelatedTopicSerializerMixin, ProjectSpecificItemMixin,
         model = Note
         fields = ('id', 'title', 'url', 'project', 'is_private', 'last_updated',
                   'updaters', 'related_topics', 'content', 'status', 'sections',)
+    # Cendari code  E.G. aviz
+    def save_object(self, obj, **kwargs):
+        super(NoteSerializer, self).save_object(obj, **kwargs)
+        print "creating semantics for note"
+        print obj
+        semantic_process_note(obj)
 
 class MinimalNoteSerializer(RelatedTopicSerializerMixin, ProjectSpecificItemMixin,
                             serializers.ModelSerializer):

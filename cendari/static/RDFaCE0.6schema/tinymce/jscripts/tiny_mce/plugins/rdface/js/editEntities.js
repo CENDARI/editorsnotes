@@ -87,7 +87,7 @@ var EditEntities = {
 		});		
 	},
 	update : function() {
-	    value = '{project:' + cendari_js_project_slug + '}';
+	    value = '{project:' + window.parent.cendari_js_project_slug + '}';
 	    //trace.event("_user","edit_entity.update", "centre.rdface", value);
 		var entity_type=tinyMCEPopup.getWindowArg('entity_type');
 		var pointer=tinyMCEPopup.getWindowArg('pointer');
@@ -131,7 +131,8 @@ var EditEntities = {
 		tinyMCEPopup.close();
 	},
 	delete : function() {
-	    value = '{project:' + cendari_js_project_slug + '}';
+		console.log("deleting entity");
+	    value = '{project:' + window.parent.cendari_js_project_slug + '}';
 	    //trace.event("_user","delete_entity.update", "centre.rdface", value);
 		var pointer=tinyMCEPopup.getWindowArg('pointer');
 		//var selected_txt=tinyMCEPopup.getWindowArg('selected_txt');
@@ -144,7 +145,7 @@ var EditEntities = {
 		tinyMCEPopup.close();
 	},
 	changeType : function(type) {
-	    value = '{project:' + cendari_js_project_slug + '}';
+	    value = '{project:' + window.parent.cendari_js_project_slug + '}';
 	    //trace.event("_user","change_type_entity.update", "centre.rdface", value);
 		var pointer=tinyMCEPopup.getWindowArg('pointer');
 		var annotationF=tinyMCEPopup.getWindowArg('annotationF');
@@ -179,5 +180,7 @@ var EditEntities = {
 		}
 	}
 };
+
+// console.log(window.parent.cendari_js_project_slug);
 
 tinyMCEPopup.onInit.add(EditEntities.init, EditEntities);

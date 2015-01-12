@@ -724,10 +724,13 @@ def editEntityCendari(request, project_slug, topic_node_id):
     o['documents'] = main_models.Document.objects.filter(id__in=[d['id'] for d in documents])
     o['related_topics'] = main_models.Topic.objects.filter(id__in=[t['id'] for t in topics])
     note_objects = main_models.Note.objects.in_bulk([n['id'] for n in notes])
+    print len(note_objects)
+    print note_objects
     for note in notes:
-        related_topics = list((topic for topic in note['related_topics']
-                               if topic['url'] != request.path))
-        note_objects[note['id']] = (note_objects[note['id']], related_topics,)
+        if ('id' in note.keys()) and (note['id'] in note_objects.keys()):
+            related_topics = list((topic for topic in note['related_topics']
+                                   if topic['url'] != request.path))
+            note_objects[note['id']] = (note_objects[note['id']], related_topics,)
     o['notes'] = note_objects.values()
 
     return render_to_response(

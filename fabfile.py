@@ -222,8 +222,8 @@ def symlink_packages():
 
 def collect_static():
     with lcd(PROJ_ROOT):
-        local('{python} manage.py collectstatic --noinput -v0'.format(**env))
-        local('{python} manage.py compile_browserify'.format(**env))
+        local('{python} manage.py collectstatic --noinput -v0 --traceback'.format(**env))
+        local('{python} manage.py compile_browserify --traceback'.format(**env))
 
 def generate_secret_key():
     SECRET_CHARS = 'abcdefghijklmnopqrstuvwxyz1234567890-=!@#$$%^&&*()_+'

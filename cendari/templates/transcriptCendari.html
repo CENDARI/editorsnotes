@@ -1,0 +1,73 @@
+<!-- {% extends "centerCendari.html" %} -->
+{% load set_var %}
+<!-- {% load staticfiles typogrify display  compress %} -->
+
+{% block css %}
+	<link rel="stylesheet" type="text/css" media="all" href="{% static "iipmooviewer/css/iip.css" %}" />
+{% endblock %}
+
+{% block init %}
+	<meta name="document_id" id="document_id" content="{{ document.id }}" />
+	<meta name="document_name" id="document_name" content="{{ document.import_id }}" />
+	<script type="text/javascript" src="{% static "cendari/js/document.js" %}"></script>
+{% endblock init %}
+
+{% block model_fields %}
+	<div class="form-menu-document" >
+		
+
+		<div class="stop-float"></div>
+		<div style="height:5px"> &nbsp;</div>
+
+		{% if document.id %}
+			<form class="formCendari" id="documentCendari" action="{% url "api:api-documents-detail" project_slug=project.slug  pk=document.id %}" method="POST">  
+			{% csrf_token %}
+		{% else %}
+			<form class="formCendari" id="documentCendari" action="{% url "api:api-documents-list" project_slug=project.slug %}" method="POST" >
+			{% csrf_token %}
+		{% endif %}
+			<div class="form-main edit-section" >
+				<p>Document's description</p>
+				<div data-error-target="description"></div>
+				<textarea id="document-description" class="mceEditor" type="text" name="description" > 
+					{% if document %} {{document.description|as_html}} {% endif %}
+				</textarea>
+				{% if document.id %}
+					<button id="saveButton" class="save-item" name="_method" value="PUT" >Save</button>
+				{% else %}
+					<button id="saveButton" class="save-item" method="post">Save</button>
+				{% endif %}
+			</div>
+		</form>
+	
+	</div>
+
+	
+{% endblock model_fields %}
+
+{% block functions %}
+
+	<script>
+		switchtabs(5, "document");
+		var isReadOnly = false, title = "New Document";
+
+		if (( id = document.getElementById("document_id").getAttribute("content")) > 0) {
+			var name = document.getElementById("document_name").getAttribute("content");
+			title = "Document " + id + ": " + name;
+			isReadOnly = true;
+		}
+
+
+		var descriptionLabel = "Document Description ";
+		var temp = document.getElementById("documentDescEditBut").getAttribute("value");
+
+		document.getElementById("documentDescEditBut").value = descriptionLabel + temp;
+
+		cendari.addInit(function() {
+			cendari.createEditor(500, "document-description", false, "documentDescEditBut", descriptionLabel);
+			cendari.addTab(title);
+			cendari.addWidgetToActiveTab("form", "noteform", "border");
+			cendari.addImageViewer("panel", "scan-viewer");
+		});
+	</script>
+{% endblock functions %}

@@ -247,7 +247,7 @@ function buildMap(mapData, element, useCounts){
   //Using Leaflet (instead of D3) for basemap
   var leafletMap = L.map('leafletmap',{attributionControl:false, minZoom:minZoom, maxZoom:maxZoom})
                     .setView([(latExtent[0]+latExtent[1])/2,(lonExtent[0]+lonExtent[1])/2], defaultZoom);
-  L.tileLayer(document.location.protocol + '//{s}.tiles.mapbox.com/v3/wjwillett.EuropeTerrain/{z}/{x}/{y}.jpg').addTo(leafletMap);
+  L.tileLayer(document.location.protocol + '//{s}.tiles.mapbox.com/v4/wjwillett.i9o7e0g1/{z}/{x}/{y}.png?access_token=pk.eyJ1Ijoid2p3aWxsZXR0IiwiYSI6IlJtUlFYVkEifQ.Qk10zoCrd2pTN6t2rcyifQ').addTo(leafletMap);
   for(var i=0; i < mapData.length; i++){
     var d = mapData[i];
     var mark = L.circleMarker([d._lat,d._lon],{'className':'mark', opacity:1.0, weight:0.4, fillOpacity: 1.0})

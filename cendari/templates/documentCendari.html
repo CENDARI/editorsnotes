@@ -18,20 +18,20 @@
 			<li> <!-- ENTITIES TAB --> 
 				<input type="radio" checked name="tabs" id="tab1">
 				<label for="tab1">
-					<script > document.write("Entities (" + "{{ document.get_all_related_topics|length }}" + ")"); </script>
+				<script > document.write("Entities (" + "{{ document.get_all_related_topics|length }}" + ")"); </script>
 				</label>
 				<div id="tab-content1" class="tab-content  document animated fadeIn">
 					<div class="form-entities">					
 						{% if document %}						
 							{% for topic in document.get_all_related_topics %}
 								<a href= {{ topic.get_absolute_url }}
-								{% if 		topic.topic_node.type == "PER" %} class ="form-entities r_person"
-								{% elif 	topic.topic_node.type == "ORG" %} class ="form-entities r_organization"
-								{% elif 	topic.topic_node.type == "EVT" %} class ="form-entities r_event"
-								{% elif 	topic.topic_node.type == "PLA" %} class ="form-entities r_place"
-								{% elif 	topic.topic_node.type == "TAG" %} class ="form-entities r_thing"
-								{% else 						%} class = "form-entities"
-								{% endif %}
+									{% if 		topic.topic_node.type == "PER" %} class ="form-entities r_person"
+									{% elif 	topic.topic_node.type == "ORG" %} class ="form-entities r_organization"
+									{% elif 	topic.topic_node.type == "EVT" %} class ="form-entities r_event"
+									{% elif 	topic.topic_node.type == "PLA" %} class ="form-entities r_place"
+									{% elif 	topic.topic_node.type == "TAG" %} class ="form-entities r_thing"
+									{% else 						%} class = "form-entities"
+									{% endif %}
 								> {{ topic }} </a>
 							{% endfor %}
 							{% if not document.get_all_related_topics|length > 0 %}
@@ -40,28 +40,51 @@
 							{% endif %}
 
 						{% endif %}
-						
+
 						{% if not document.id > 0 %}
 							<div> No Entities. </div> 
 							<div> Save this document to add your Entities</div>
 						{% endif %}
 
-					</div>
+					</div>`
 				</div>
 			</li> <!-- end of ENTITIES TAB --> 
-			
+
 			<li> <!-- TRANSCRIPT TAB -->
 				<input type="radio" name="tabs" id="tab2">
 				<label for="tab2">Transcript {% if document.transcript %} (1) {% else %} (0) {% endif %}</label>
 				<div id="tab-content2" class="tab-content document animated fadeIn">
-					{% if document.id %}
-						<iframe   scrolling="no" id="transciptIframe" class="transcript-form" width="100%" src="{% url 'transcript_edit_view' project.slug document.id %}"></iframe>
+					<!-- {% if document.id %}
+						<iframe   scrolling="no" id="transciptIframe" class="transcript-form" width="100%" src="{% url 'transcript_view' project.slug document.id %}"></iframe>
 					{% else %}
 						Save document before adding a transcript.
-					{% endif %}				
+					{% endif %}	 -->
+					{% if document.id %}
+						<form id="transcriptCendari" class="formCendari" width="100%" action="{% url "api:api-transcripts-detail" project_slug=project.slug  document_id=document.id %}" method="POST" >  
+						{% csrf_token %}
+
+							<div class="form-main edit-section" >
+							<!-- <input  class="editorlabel" id="documentDescEditBut" type="button" value= {% if document.id > 0 %} " [ Read Only ]                --- click here for Edit mode" {% else %} " [ Editable ]                    --- click here for Read-Only mode" {% endif %} /> -->
+								<div data-error-target="description"></div>
+								<input type="hidden" id="transcript-document" name="document" value="{% url "api:api-documents-detail" project_slug=project.slug  pk=document.id %}" >	
+								{% if document.transcript.creator %}
+									<input type="hidden" id="transcript-creator" name="creator" value="{{ document.transcript.creator.id }}" >	
+								{% else %}
+									<input type="hidden" id="transcript-creator" name="creator" value="{{ user.id }}" >
+								{% endif%}
+								<input type="hidden" id="transcript-uploader" name="last_updater" value="{{ user.id }}" >
+								<textarea id="transcript-description" class="mceEditor" type="text" name="content" rows="4"> 
+									{% if document.transcript %} {{document.transcript.content|as_html}} {% endif %}
+								</textarea>
+								<button id="saveButtonTrascript" class="save-item" name="_method" value="PUT"  style="visibility: hidden;">Save</button>
+							</div>
+						</form>	
+					{% else %}
+						Save document before adding a transcript.
+					{% endif %}	
 				</div>
 			</li> <!-- end of TRANSCRIPT TAB -->
-			
+
 			<li> <!-- ZOTERO TAB -->
 				<input type="radio" name="tabs" id="tab3">
 				<label for="tab3">Zotero data ({% if not document.zotero_link %}0{% else %}1{% endif%})</label>
@@ -81,14 +104,14 @@
 					{% if document.has_links %}
 						<h4>External link{% if document.links.count > 1 %}s{% endif %}</h4>
 						<ul class="unstyled">
-						{% for link in document.links.all %}
+							{% for link in document.links.all %}
 							<li>
 								<a style="text-decoration: underline;" href="{{ link }}">{{ link }}</a>
 								<div>
 									{{ link.description }}
 								</div>
 							</li>
-						{% endfor %}
+							{% endfor %}
 						</ul>
 					{% endif %}				
 				</div>
@@ -103,12 +126,12 @@
 							<div id="scanlist-container">
 								<ul id="scan-list">
 									{% for scan in scans %}
-										<li>
+									<li>
 										<a class="scan btn" href="http://{{ domain }}{{ scan.image.url }}">
 										{{ forloop.counter }}
 											</a>
 											</li>
-									{% endfor %}
+										{% endfor %}
 								</ul>
 							</div>
 
@@ -130,16 +153,16 @@
 		</ul>
 
 
-	<div class="stop-float"></div>
-	<div style="height:5px"> &nbsp;</div>
-	
-	{% if document.id %}
-		<form class="formCendari" id="documentCendari" action="{% url "api:api-documents-detail" project_slug=project.slug  pk=document.id %}" method="POST">  
-		{% csrf_token %}
-	{% else %}
-		<form class="formCendari" id="documentCendari" action="{% url "api:api-documents-list" project_slug=project.slug %}" method="POST" >
-		{% csrf_token %}
-	{% endif %}
+		<div class="stop-float"></div>
+		<div style="height:5px"> &nbsp;</div>
+
+		{% if document.id %}
+			<form class="formCendari" id="documentCendari" action="{% url "api:api-documents-detail" project_slug=project.slug  pk=document.id %}" method="POST">  
+			{% csrf_token %}
+		{% else %}
+			<form class="formCendari" id="documentCendari" action="{% url "api:api-documents-list" project_slug=project.slug %}" method="POST" >
+			{% csrf_token %}
+		{% endif %}
 			<div class="form-main edit-section" >
 				<input  class="editorlabel" id="documentDescEditBut" type="button" value= {% if document.id > 0 %} " [ Read Only ]                --- click here for Edit mode" {% else %} " [ Editable ]                    --- click here for Read-Only mode" {% endif %} />
 				<p>Document's description</p>
@@ -153,10 +176,11 @@
 					<button id="saveButton" class="save-item" method="post">Save</button>
 				{% endif %}
 			</div>
+		</form>
+	
+	</div>
 
-		</div>
-
-	</form>
+	
 {% endblock model_fields %}
 
 {% block functions %}
@@ -183,5 +207,6 @@
 			cendari.addWidgetToActiveTab("form", "noteform", "border");
 			cendari.addImageViewer("panel", "scan-viewer");
 		});
+		
 	</script>
 {% endblock functions %}
