@@ -16,7 +16,7 @@ from threading import local
 import urllib
 import urllib2
 import json
-import sys
+import sys, traceback
 import pdb
 
 CENDARI = Namespace("http://pro2.cendari.dariah.eu/enotes/")
@@ -399,11 +399,41 @@ def semantic_resolve_topic(topic):
         return
     uri = URIRef(rdf_url)
     loaded = Graph(identifier=uri)
+
+    print "parsing url"
     try:
-        loaded.parse(location=rdf_url)
+        # loaded.parse(location=rdf_url)
+        loaded.parse(location=uri)
     except:
+        print "Exception in parsing code:"
+        print rdf_url
+        print '-'*60
+        traceback.print_exc(file=sys.stdout)
+        print '-'*60 
         pass
+
     type = URIRef(topic_to_schema(topic.topic_node.type))
+
+    print "rdf_url is :"
+    print rdf_url 
+    print "--------------------------------------"
+    print "uri is :"
+    print uri 
+    print "--------------------------------------"
+    print "loaded functions are:"
+    print dir(loaded)
+    print "--------------------------------------"
+    print "loaded is: "
+    print len(loaded)
+    print "--------------------------------------"
+    print "RDF type is:"
+    print RDF.type
+    print "--------------------------------------"
+    print "type is:"
+    print type
+    print "--------------------------------------"
+
+
     if (uri, RDF.type, type) in loaded:
         print "Ontology in %s contains %s as expected"  % (rdf_url, type)
     else:

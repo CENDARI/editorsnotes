@@ -68,6 +68,9 @@ function uniqueElements(el_array){
     return uniqueNames
 }
 
+
+
+
 function submitTranscript(document_id){
     console.log("sumbitting transcript");
     fc = $('#transcriptCendari');
@@ -83,13 +86,6 @@ function submitTranscript(document_id){
     formData = formData+$("#saveButtonTrascript").attr('name')+"="+$("#saveButtonTrascript").val();
 
 
-    console.log("form object is:");
-    console.log(fc);
-    console.log(fc.attr('action'));
-    console.log(fc.attr('method'));
-    console.log("formData are : \n: "+formData);    
-
-
     $.ajax({
         // beforeSend: function (xhr) {xhr.setRequestHeader('X-CSRFToken', $('input[name="csrfmiddlewaretoken"]').val());},
             url:fc.attr('action'),
@@ -97,24 +93,47 @@ function submitTranscript(document_id){
             data: formData,
             // content_type:'application/json',
             success: function(data){
-                var currentUrl = window.location.toString();
-                var newUrl = currentUrl.replace("add", document_id);
-                window.location.replace(newUrl);  
+                // var currentUrl = window.location.toString();
+                // var newUrl = currentUrl.replace("add", document_id);
+                // window.location.replace(newUrl);  
+                submitScan(document_id);
             }
         });
 }
 
+function submitScan(document_id){
+    console.log('sumbitting scan');
+    $('#scanCendari').submit(function(e){
+        e.preventDefault();
+        var options = { 
+            success: function(){
+                var currentUrl = window.location.toString();
+                var newUrl = currentUrl.replace("add", document_id);
+                // window.location.replace(newUrl);  
+            }
+
+        // other available options: 
+        //url:       url         // override for form's 'action' attribute 
+        //type:      type        // 'get' or 'post', override for form's 'method' attribute 
+        //dataType:  null        // 'xml', 'script', or 'json' (expected server response type) 
+        //clearForm: true        // clear all form fields after successful submit 
+        //resetForm: true        // reset the form after successful submit 
+
+        // $.ajax options can be used here too, for example: 
+        //timeout:   3000 
+        }; 
+        $('#scanCendari').ajaxSubmit(options);
+        return false;
+    });
+    
+    $('#scanCendari').submit();
+
+}
+
+
 $(document).ready(function(){
     var csrftoken = getCookie('csrftoken');
 
-    // $.ajaxSetup({
-    //     beforeSend: function(xhr, settings) {
-    //         if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-    //             xhr.setRequestHeader("X-CSRFToken", csrftoken);
-    //         }
-    //     }
-    // });
-    
     $('.formCendari').submit(function(e){
         e.preventDefault();
         
@@ -156,7 +175,7 @@ $(document).ready(function(){
         
         
          if($('#rdf_id').length){
-            formData = formData + "rdf="+$('#rdf_id').val()+"&";
+            formData = formData + "rdf="+$('#rdf_id').val().trim()+"&";
             formData = formData + "preferred_name="+$('#preferred_name_id').text().trim()+"&";
          }
 
@@ -178,6 +197,7 @@ $(document).ready(function(){
                     submitTranscript(data.id);
                 }
                 else{
+                    console.log('submitting non document');
                     var currentUrl = window.location.toString();
                     var newUrl = currentUrl.replace("add", data.id);
                     window.location.replace(newUrl);

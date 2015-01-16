@@ -6,6 +6,7 @@
 	<link rel="stylesheet" type="text/css" media="all" href="{% static "iipmooviewer/css/iip.css" %}" />
 {% endblock %}
 
+
 {% block init %}
 	<meta name="document_id" id="document_id" content="{{ document.id }}" />
 	<meta name="document_name" id="document_name" content="{{ document.import_id }}" />
@@ -60,7 +61,7 @@
 						Save document before adding a transcript.
 					{% endif %}	 -->
 					{% if document.id %}
-						<form id="transcriptCendari" class="formCendari" width="100%" action="{% url "api:api-transcripts-detail" project_slug=project.slug  document_id=document.id %}" method="POST" >  
+						<form id="transcriptCendari" width="100%" action="{% url "api:api-transcripts-detail" project_slug=project.slug  document_id=document.id %}" method="POST" >  
 						{% csrf_token %}
 
 							<div class="form-main edit-section" >
@@ -122,22 +123,22 @@
 				<label for="tab5">Scans ({% if not scans %}0{% else %}{{ document.get_scan_count }} {% endif%})</label>
 				<div id="tab-content5" class="tab-content document animated fadeIn">
 					{% if scans %}
-						<section id="scans-tab" class="tab-pane">
+						<section id="scans-tab" >
 							<div id="scanlist-container">
 								<ul id="scan-list">
 									{% for scan in scans %}
-									<li>
-										<a class="scan btn" href="http://{{ domain }}{{ scan.image.url }}">
-										{{ forloop.counter }}
+										<li>
+											<a class="scan btn" id="{{scan.id}}" href="http://{{ domain }}{{ scan.image.url }}">
+												<!-- http://{{ domain }}{{ scan.image.url }} -->
+												{{ forloop.counter }}
 											</a>
-											</li>
-										{% endfor %}
+										</li>
+									{% endfor %}
 								</ul>
 							</div>
 
 							<br/>
 
-							<!--<div id="scan-viewer" style="height: 500px;"></div> -->
 							<iframe width="100%" allowfullscreen="true" id="scan-viewer" ></iframe>
 
 							<div id="progress-notify">
@@ -146,6 +147,35 @@
 							</div>
 						</section>
 					{% endif %}
+					<!-- <form class="" id="scanCendari" action="{% url "api:api-scans-list" project_slug=project.slug  document_id=document.id %}" method="POST">
+						{% csrf_token %}
+						<input name="image" type="file">
+						<input name="ordering" value="0" type="hidden">
+						<input type="submit">
+					</form> -->
+
+					<form  action="{% url "api:api-scans-list" project_slug=project.slug  document_id=document.id %}" method="POST" enctype="multipart/form-data" id="scanCendari">
+						<fieldset>
+							{% csrf_token %}
+							<!-- <div class="control-group "> -->
+							<!-- <label for="image" >Image:</label> -->
+							<!-- <div class="controls"> -->
+							<input name="image" type="file" />
+							<!-- </div> -->
+							<!-- </div> -->
+							<div class="control-group ">
+								<label for="ordering"  style="visibility: hidden;" class="control-label">ordering:</label>
+								<div class="controls">
+									<input name="ordering" type="hidden" value="0" />
+								</div>
+							</div>
+							<div style="visibility: hidden;" class="form-actions">
+								<button   class="btn btn-primary" title="Make a POST request on the Scan List resource">POST</button>
+							</div>
+						</fieldset>
+					</form>
+
+
 
 				</div>
 			</li>
@@ -208,5 +238,17 @@
 			cendari.addImageViewer("panel", "scan-viewer");
 		});
 		
+		// $(document).ready(function(){
+		// 	// $('#scanCendari').ajaxForm();
+
+  //           $('#scanCendari').submit(function(e) { 
+		// 	    e.preventDefault();
+		// 	    $(this).ajaxSubmit(); 
+		// 	    // return false to prevent normal browser submit and page navigation 
+		// 	    // return false;  
+		// 	})
+		// });
+
+
 	</script>
 {% endblock functions %}

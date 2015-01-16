@@ -162,7 +162,8 @@ class EditDocumentAdminView(DocumentAdminView):
 def scan(request, scan_id, project_slug):
     print "scan view"
     o = {}
-    o['scan'] = _check_privs(request.user, get_object_or_404(main_models.Scan, id=scan_id))
+    # o['scan'] = _check_privs(request.user, get_object_or_404(main_models.Scan, id=scan_id))
+    o['scan'] = get_object_or_404(main_models.Scan, id=scan_id)
     info = scan_to_dict(o['scan'])
 #    print info
     o['server'] = settings.IIPSRV
@@ -686,7 +687,9 @@ def editDocumentCendari(request, project_slug, document_id):
         [ c.content_object for c in o['document'].citations.filter(content_type=ContentType.objects.get_for_model(main_models.Topic)) ])
     o['scans'] = o['document'].scans.all()
     o['domain'] = Site.objects.get_current().domain
-
+    print "--------------------"
+    print o['domain']
+    print "--------------------"
     notes = [ns.note for ns in main_models.CitationNS.objects\
             .select_related('note')\
             .filter(document=o['document'])]

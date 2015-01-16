@@ -81,7 +81,7 @@ class TrancriptPatch(object):
     target_class = Transcript
     project = Transcript.get_affiliation
     def get_absolute_url(self):
-        return reverse('transcript_edit_view', None, [self.document.id])
+        return reverse('transcript_edit_view', None, [self.document.project.slug,self.document.id])
     def save(self, *args, **kwargs):
         super(Transcript, self).save(*args, **kwargs)
 
@@ -100,9 +100,10 @@ editorsnotes.main.models.topics.TYPE_CHOICES = (
 
 class TopicPatch(object):
     target_class = Topic
-    date = models.DateTimeField(editable=True, db_index=True, null=True,blank=True)
-    rdf = RDFField(null=True,blank=True)
-    
+    date         = models.DateTimeField(editable=True, db_index=True, null=True,blank=True)
+    rdf          = RDFField(null=True,blank=True)
+    # public_name  = models.CharField(max_length=200)
+
     def related_objects(self, model=None):
         qs = TopicAssignment.objects.filter(topic__topic_node_id=self.id)
         if model is not None:
