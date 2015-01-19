@@ -22,7 +22,7 @@
 				<script > document.write("Entities (" + "{{ document.get_all_related_topics|length }}" + ")"); </script>
 				</label>
 				<div id="tab-content1" class="tab-content  document animated fadeIn">
-					<div class="form-entities">					
+					<div class="form-entities" id="document-related-topics">					
 						{% if document %}						
 							{% for topic in document.get_all_related_topics %}
 								<a href= {{ topic.get_absolute_url }}
@@ -47,7 +47,7 @@
 							<div> Save this document to add your Entities</div>
 						{% endif %}
 
-					</div>`
+					</div>
 				</div>
 			</li> <!-- end of ENTITIES TAB --> 
 
@@ -147,13 +147,9 @@
 							</div>
 						</section>
 					{% endif %}
-					<!-- <form class="" id="scanCendari" action="{% url "api:api-scans-list" project_slug=project.slug  document_id=document.id %}" method="POST">
-						{% csrf_token %}
-						<input name="image" type="file">
-						<input name="ordering" value="0" type="hidden">
-						<input type="submit">
-					</form> -->
-
+					
+					{}
+					{% if document.id %}
 					<form  action="{% url "api:api-scans-list" project_slug=project.slug  document_id=document.id %}" method="POST" enctype="multipart/form-data" id="scanCendari">
 						<fieldset>
 							{% csrf_token %}
@@ -174,7 +170,7 @@
 							</div>
 						</fieldset>
 					</form>
-
+					{%endif%}
 
 
 				</div>
