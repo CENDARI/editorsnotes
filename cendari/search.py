@@ -10,6 +10,7 @@ from django.conf import settings
 from pyelasticsearch import ElasticSearch
 from pyelasticsearch.exceptions import InvalidJsonResponseError
 
+from editorsnotes.main.utils import xhtml_to_text
 __all__ = ['cendari_index']
 
 # Copy from editorsnotes.search.index
@@ -201,6 +202,56 @@ class CendariIndex(object):
         }
         return mapping
 
+    def collect_topics(self,node):
+        topics = {
+            'EVT': [],
+            'ORG': [],
+            'PER': [],
+            'PUB': [],
+            'ART': [],
+            'PLA': [],
+            'TAG': []
+        }
+        for ta in node.related_topics.all():
+            topic = ta.topic
+            if topic.topic_node.type:
+                topics[topic.topic_node.type].append(topic.preferred_name)
+        return topics
+
+    def document_to_cendari(self,doc):
+        return None
+
+    def note_to_cendari(self,note):
+        id=note.get_absolute_url()
+        contributors = note.get_all_updaters()
+        contributors.append(note.creator)
+        topics=collect_topics(note)
+        text=xhtml_to_text(note.content)
+        document = {
+            'uri': id,
+            'application': 'nte_note',
+            'contributor': [
+                {"name": c.username, "email": c.email} for c in contributors
+            ],
+            'creator': {
+                "name": note.creator.username,
+                "email": note.creator.email
+            },
+            'date': topics['EVT'],
+            'format': 'application/xhtml+xml', # nothing better eg. xhtml+rdfa
+            'org': topics['ORG'],
+            'person': topics['PER'],
+            'place': topics['PLA'],
+#            'publisher': publishers,
+            'ref': topics['PUB'],
+            'tag': topics['TAG'],
+            'text': text,
+            'groups_allowed': note.project.slug,
+            'users_allowed': []
+        }
+        return document
+
+
 cendari_index = CendariIndex()
 
 #@receiver(post_save) not yet
@@ -209,6 +260,15 @@ def update_elastic_cendari_handler(sender, instance, created, **kwargs):
         cendari_index.open()
     klass = instance.__class__
     print "Ready to save on cendari index"
+
+    doc = None
+    if isinstance(instance, Note):
+        doc = index_note_to_cendari(instance)
+    elif isinstance(instance, Document):
+        doc = index_document_to_cendari(instance)
+    if doc is not None:
+        self.es.index(self.name, 'document', document, id,refresh=True)
+
     # if klass in en_index.document_types:
     #     document_type = en_index.document_types[klass]
     #     if created:
@@ -230,42 +290,3 @@ def delete_elastic_cendari_handler(sender, instance, **kwargs):
 
 
 
-def index_note_to_cendari(note):
-    id=note.get_absolute_url()
-    contributors = note.get_all_updaters()
-    contributors.append(note.creator)
-    dates=[]
-    events=[]
-    languages=[]
-    orgs=[]
-    persons=[]
-    places=[]
-    publishers=[]
-    refs=[]
-    tags=[]
-    
-    document = {
-        'uri': id,
-        'application': 'nte',
-        'contributor': [
-            {"name": c.username, "email": c.email} for c in contributors
-        ],
-        'creator': {
-            "name": note.creator.username,
-            "email": note.creator.email
-        },
-        'date': dates,
-        'event': events,
-        'format': 'application/xhtml+xml', # nothing better eg. xhtml+rdfa
-        'language': languages,
-        'org': orgs,
-        'person': persons,
-        'place': places,
-        'publisher': publishers,
-        'ref': refs,
-        'tag': tags,
-        'text': text,
-        'groups_allowed': note.project.slug,
-        'users_allowed': []
-    }
-    self.es.index(self.name, 'document', document, id,refresh=True)
