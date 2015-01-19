@@ -14,6 +14,8 @@ from editorsnotes.main.models import Project, User
 from .types import DocumentTypeAdapter
 from .utils import clean_query_string
 
+__all__ = ['ElasticSearchIndex', 'ENIndex' ]
+
 class OrderedResponseElasticSearch(ElasticSearch):
     def _decode_response(self, response):
         try:
@@ -28,17 +30,17 @@ class ElasticSearchIndex(object):
         if not hasattr(self, 'get_name'):
             raise NotImplementedError('Must implement get_name method')
         self.name = self.get_name()
-        self.opened = False
+        self.is_open = False
 
     def _open(self):
         pass
 
     def open(self):
-        if self.opened:
+        if self.is_open:
             return self.es
         print('opening ElasticSearch')
         self.es = OrderedResponseElasticSearch(settings.ELASTICSEARCH_URLS)
-        self.opened = True
+        self.is_open = True
         if not self.exists():
             self.create()
             self.created = True

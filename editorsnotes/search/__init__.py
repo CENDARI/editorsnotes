@@ -8,7 +8,7 @@ from editorsnotes.main import models as main_models
 from .index import ENIndex, ActivityIndex
 from .types import DocumentTypeAdapter
 
-__all__ = ['en_index', 'activity_index']
+__all__ = ['en_index', 'activity_index', 'ElasticSearchIndex']
 
 class DocumentAdapter(DocumentTypeAdapter):
     display_field = 'serialized.description'
@@ -45,7 +45,7 @@ activity_index = ActivityIndex()
 
 @receiver(post_revision_commit)
 def update_activity_index(instances, revision, versions, **kwargs):
-    if not activity_index.opened:
+    if not activity_index.is_open:
         activity_index.open()
     handled = [(instance, version) for (instance, version)
                in zip(instances, versions)
@@ -55,7 +55,7 @@ def update_activity_index(instances, revision, versions, **kwargs):
 
 @receiver(post_save)
 def update_elastic_search_handler(sender, instance, created, **kwargs):
-    if not en_index.opened:
+    if not en_index.is_open:
         en_index.open()
     klass = instance.__class__
     if klass in en_index.document_types:
@@ -69,7 +69,7 @@ def update_elastic_search_handler(sender, instance, created, **kwargs):
 
 @receiver(post_delete)
 def delete_es_document_handler(sender, instance, **kwargs):
-    if not en_index.opened:
+    if not en_index.is_open:
         en_index.open()
     klass = instance.__class__
     if klass in en_index.document_types:
