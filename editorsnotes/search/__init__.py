@@ -28,7 +28,6 @@ class DocumentAdapter(DocumentTypeAdapter):
 
 #[jdf] Deferred registration of models to avoid connecting to ES
 def register_models(en_index):
-    print('registering models')
     en_index.register(main_models.Note,
                       display_field='serialized.title',
                       highlight_fields=('serialized.title',
@@ -46,6 +45,8 @@ activity_index = ActivityIndex()
 
 @receiver(post_revision_commit)
 def update_activity_index(instances, revision, versions, **kwargs):
+    if not activity_index.opened:
+        activity_index.open()
     handled = [(instance, version) for (instance, version)
                in zip(instances, versions)
                if issubclass(instance.__class__, main_models.base.Administered)]
@@ -54,8 +55,8 @@ def update_activity_index(instances, revision, versions, **kwargs):
 
 @receiver(post_save)
 def update_elastic_search_handler(sender, instance, created, **kwargs):
-    if not activity_index.opened:
-        return
+    if not en_index.opened:
+        en_index.open()
     klass = instance.__class__
     if klass in en_index.document_types:
         document_type = en_index.document_types[klass]
@@ -68,8 +69,8 @@ def update_elastic_search_handler(sender, instance, created, **kwargs):
 
 @receiver(post_delete)
 def delete_es_document_handler(sender, instance, **kwargs):
-    if not activity_index.opened:
-        return
+    if not en_index.opened:
+        en_index.open()
     klass = instance.__class__
     if klass in en_index.document_types:
         document_type = en_index.document_types[klass]

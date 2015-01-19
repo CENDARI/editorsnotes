@@ -60,6 +60,7 @@ class ElasticSearchIndex(object):
         return resp.status_code == 200
 
     def create(self):
+        print 'Creating index '+self.name
         created = self.open().create_index(self.name, self.get_settings())
         self.put_mapping()
         return created
