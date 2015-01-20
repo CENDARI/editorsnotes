@@ -26,9 +26,9 @@
 				<label for="tab1">Related Notes <script > document.write("("+ "{{ notes |length }}" +")"); </script></label>
 				<div id="tab-content1" class="tab-content  note animated fadeIn">
 					{% if notes %}
-						{% for note, note_topics in notes %}
+						{% for note in notes %}
 							<div id="note-{{ note.id }}" class="related-note">
-								<div class="note-link"> {{ note|as_link }} </div>
+								<div class="note-link"> {{ note|as_link|typogrify }} </div>
 								<div class="note-last-modified"><span class="quiet">Last modified: </span><span>{{ note.last_updated }}</span></div>			            
 							</div>
 						{% endfor %}

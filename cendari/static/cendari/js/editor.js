@@ -80,9 +80,20 @@ function submitTranscript(document_id){
      if($('#transcript-description').length){
         formData =formData +'document='+encodeURIComponent($('#transcript-document').val())+'&creator='+$('#transcript-creator').val()+'&last_updater='+$('#transcript-uploader').val()+'&';
         if(tinyMCE.activeEditor!=null){
-            formData = formData+"&content="+encodeURIComponent(tinyMCE.getInstanceById('transcript-description').getContent())+"&";
+            if(tinyMCE.getInstanceById('transcript-description').getContent().length){
+                formData = formData+"&content="+encodeURIComponent(tinyMCE.getInstanceById('transcript-description').getContent())+"&";
+            }
+            else{
+                submitScan(document_id);
+                return;
+            }
         }
-    }   
+    }
+    else{
+        submitScan(document_id);
+        return;
+    }
+
     formData = formData+$("#saveButtonTrascript").attr('name')+"="+$("#saveButtonTrascript").val();
 
 
@@ -103,30 +114,42 @@ function submitTranscript(document_id){
 
 function submitScan(document_id){
     console.log('sumbitting scan');
-    $('#scanCendari').submit(function(e){
-        e.preventDefault();
-        var options = { 
-            success: function(){
-                var currentUrl = window.location.toString();
-                var newUrl = currentUrl.replace("add", document_id);
-                // window.location.replace(newUrl);  
-            }
 
-        // other available options: 
-        //url:       url         // override for form's 'action' attribute 
-        //type:      type        // 'get' or 'post', override for form's 'method' attribute 
-        //dataType:  null        // 'xml', 'script', or 'json' (expected server response type) 
-        //clearForm: true        // clear all form fields after successful submit 
-        //resetForm: true        // reset the form after successful submit 
+    if($('#id_image').val().length){
+        $('#scanCendari').submit(function(e){
+            e.preventDefault();
+            var options = { 
+                success: function(){
+                    var currentUrl = window.location.toString();
+                    var newUrl = currentUrl.replace("add", document_id);
+                    window.location.replace(newUrl);  
+                }
 
-        // $.ajax options can be used here too, for example: 
-        //timeout:   3000 
-        }; 
-        $('#scanCendari').ajaxSubmit(options);
-        return false;
-    });
+            // other available options: 
+            //url:       url         // override for form's 'action' attribute 
+            //type:      type        // 'get' or 'post', override for form's 'method' attribute 
+            //dataType:  null        // 'xml', 'script', or 'json' (expected server response type) 
+            //clearForm: true        // clear all form fields after successful submit 
+            //resetForm: true        // reset the form after successful submit 
+
+            // $.ajax options can be used here too, for example: 
+            //timeout:   3000 
+            }; 
+            $('#scanCendari').ajaxSubmit(options);
+            return false;
+        });
+        
+        $('#scanCendari').submit();
+    }
+    else{
+        var currentUrl = window.location.toString();
+        var newUrl = currentUrl.replace("add", document_id);
+        window.location.replace(newUrl);  
+
+    }
+
+
     
-    $('#scanCendari').submit();
 
 }
 
@@ -156,8 +179,8 @@ $(document).ready(function(){
         if($('#model_id').length){
             formData=formData+"id="+$('#model_id').val()+"&";
         }
-        if($('#note-title').length){
-            formData =formData +'title='+$('#note-title').val()+"&related_topics=&status=open&is_private=false&";
+        if($('#note_title').length){
+            formData =formData +'title='+$('#note_title').val()+"&related_topics=&status=open&is_private=false&";
             if(tinyMCE.activeEditor!=null){
                 formData = formData+"content="+encodeURIComponent(tinyMCE.getInstanceById('note-description').getContent())+"&";
             }        

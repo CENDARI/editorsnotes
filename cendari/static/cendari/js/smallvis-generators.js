@@ -218,7 +218,7 @@ function buildMap(mapData, element, useCounts){
   var height = parseInt(element.style('height'));
   var width = parseInt(element.style('width'));
   
-  var maxZoom = 10, minZoom = 3, defaultZoom = 4;
+  var maxZoom = 10, minZoom = 3, defaultZoom = 3;
   var minPointSize = 6, maxPointSize = 15;
 
   if(mapData.length < 1) return;

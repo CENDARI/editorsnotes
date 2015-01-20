@@ -563,6 +563,8 @@ def proxyRDFaCE(request):
     return HttpResponse(response, mimetype='application/json') 
 
 def resources(request, project_slug):
+    print "=====> project slug is :"+str(project_slug)
+
     return render_to_response('resources.html',dict(project_slug=project_slug))
 
 def project_index(request, project_slug):
@@ -649,7 +651,7 @@ def editNoteCendari(request, note_id, project_slug):
          can_view = (request.user.is_authenticated() and request.user.has_project_perm(note.project, 'main.view_private_note'))
          if not can_view:
              raise PermissionDenied()
- 
+    o['project'] = note.project
     o['breadcrumb'] = (
         (note.project.name, note.project.get_absolute_url()),
         ("Notes", reverse('all_notes_view', kwargs={'project_slug': note.project.slug})),
@@ -682,6 +684,7 @@ def editDocumentCendari(request, project_slug, document_id):
         ('Documents', reverse('all_documents_view',kwargs={'project_slug': o['document'].project.slug})),
         (o['document'].as_text(), None)
     )
+    o['project'] = o['document'].project
     o['topics'] = (
         [ ta.topic for ta in o['document'].related_topics.all() ] +
         [ c.content_object for c in o['document'].citations.filter(content_type=ContentType.objects.get_for_model(main_models.Topic)) ])
@@ -707,7 +710,9 @@ def editDocumentCendari(request, project_slug, document_id):
 
 def editEntityCendari(request, project_slug, topic_node_id):
     o = {}
+    print "getting topic_qs"
     topic_qs = main_models.Topic.objects.select_related('topic_node', 'creator', 'last_updater', 'project').prefetch_related('related_topics__topic')
+    print "getting topic object"
     o['topic'] = topic = get_object_or_404(topic_qs,topic_node_id=topic_node_id,project__slug=project_slug)
     o['project'] = topic.project
     o['project_slug'] = project_slug
@@ -717,14 +722,14 @@ def editEntityCendari(request, project_slug, topic_node_id):
     )
     topic_query = {'query': {'term': {'serialized.related_topics.id': topic.id }}}
     topic_query['size'] = 1000
-
+    print "searching for models"
     model_searches = ( en_index.search_model(model, topic_query) for model in
                        (main_models.Document, main_models.Note, main_models.Topic) )
     documents, notes, topics = (
         [ result['_source']['serialized'] for result in search['hits']['hits'] ]
         for search in model_searches)
-
-    o['documents'] = main_models.Document.objects.filter(id__in=[d['id'] for d in documents])
+    print "filtering documents"
+    # o['documents'] = main_models.Document.objects.filter(id__in=[d['id'] for d in documents])
     o['related_topics'] = main_models.Topic.objects.filter(id__in=[t['id'] for t in topics])
     note_objects = main_models.Note.objects.in_bulk([n['id'] for n in notes])
     print len(note_objects)
@@ -734,8 +739,9 @@ def editEntityCendari(request, project_slug, topic_node_id):
             related_topics = list((topic for topic in note['related_topics']
                                    if topic['url'] != request.path))
             note_objects[note['id']] = (note_objects[note['id']], related_topics,)
-    o['notes'] = note_objects.values()
-
+    # o['notes'] = note_objects.values()
+    o['documents'] = topic.get_related_documents()
+    o['notes'] = topic.get_related_notes()
     return render_to_response(
         'entityCendari.html', o, context_instance=RequestContext(request))
 

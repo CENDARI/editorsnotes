@@ -26,6 +26,26 @@
 
   {% endcompress %}
   
+  <script type="text/javascript">
+  $(document).ready(function(){
+    cendari_js_project_slug = '{{ project_slug }}';
+    console.log("reloading tree with project slug: "+cendari_js_project_slug);
+    console.log('tree is :');
+    console.log($('#tree'));
+    console.log($('#tree').dynatree("getTree"));
+    console.log($('#tree').dynatree("getTree").reload);
+    $("#tree").dynatree("option", "initAjax", {
+      data: {key:''},
+      url: cendari_root_url+'cendari/'+cendari_js_project_slug+'/getResourcesData/',
+      dataType: "jsonp",
+    });
+
+    $("#tree").dynatree("getTree").reload();
+    $('#tree').dynatree("getTree").reload();
+  });
+  </script>
+
+
   </head>
   
   <body class="example">

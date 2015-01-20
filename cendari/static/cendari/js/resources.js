@@ -46,22 +46,26 @@ $(function() {
 			    } 
 			});
 	    }else{
+	    	console.log()
 			if (node.data.url ) {
+				console.log("node.data.url is  "+node.data.url)
 			    page_url = parent.location;
 			    pathname = page_url.pathname;
 			    if(page_url.href.indexOf('pro2.cendari.dariah.eu')!=-1){
-				pathname = pathname.replace('enotes/','');
+					pathname = pathname.replace('enotes/','');
 			    }
 			    //if node is not already selected
 			    if(node.data.url != pathname){
-				window.open(node.data.url, "_parent");
+					window.open(node.data.url, "_parent");
 			    }
 			}else{
 			    //unselect other nodes (strange as selectMode:1)
+			    console.log('I do not have a node.data.url');
 			    $("#tree").dynatree("getRoot").visit(function(n){
-				if (node.data.key!=n.data.key){
-				    n.select(false);
-				}			 
+					console.log(node.data.key+"!="+n.data.key)
+					if (node.data.key!=n.data.key){
+					    n.select(false);
+					}			 
 			    });
 			}
 	    }
@@ -155,6 +159,7 @@ $(function() {
 	    burl = '';
 	    title = node.data.title;
             burl = cendari_root_url+'cendari/'+cendari_js_project_slug+'/getLazyProjectData/'; 
+            console.log('==========>>>>>>>>>> burl is : '+burl);
 	    node.appendAjax({
                 url: burl,
 		dataType: "jsonp",
