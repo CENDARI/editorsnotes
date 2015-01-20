@@ -25,5 +25,34 @@
 		cendari.addTab("Project");
 		cendari.addWidgetToActiveTab("form", "noteform", "border");
 	}); 
+	// $(document).ready(function(){
+	// 	$('#id_name').keypress(function(event){
+	// 		$('#id_slug').val($('#id_name').val().replace(/[^a-zA-Z0-9-_]/g, '_'));
+	// 	});
+	// 	$('#id_slug').keypress(function(event){
+	// 		$('#id_slug').val($('#id_slug').val()..replace(/[^a-zA-Z0-9-_]/g, '_'));
+	// 	});
+	// })
+	$( document ).ready(function() {    
+		console.log( "ready!" );
+		if($('#id_slug').length){
+			$('#id_name').keyup(function() {
+	        	var dInput = $(this).val();
+				$('#id_slug').val(dInput.replace(/[^a-zA-Z0-9-_]/g, '_'));
+	
+	
+				if (event.which !== 0) {
+	     		   console.log("Charcter was typed. It was: " + String.fromCharCode(e.which));
+	    		}
+	
+			});
+	
+			$('#id_slug').keyup(function() {
+	        	var dInput = $(this).val();
+				$('#id_slug').val(dInput.replace(/[^a-zA-Z0-9-_]/g, '_'));
+			});
+		}
+
+	});
 </script>
 {% endblock form_functions %}
