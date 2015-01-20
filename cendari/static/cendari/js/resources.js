@@ -18,7 +18,7 @@ $(function() {
 	    
 	    level = node.getLevel();
 	    if(level==3){
-			alert('clicked on project ' + cendari_root_url+'cendari/'+cendari_js_project_slug+'/getProjectID/new_slug/'+node.data.key)
+			//alert('clicked on project ' + cendari_root_url+'cendari/'+cendari_js_project_slug+'/getProjectID/new_slug/'+node.data.key)
 
 			//if this project is not already open, then open it
 			if(selected_node!=cendari_js_project_slug){
