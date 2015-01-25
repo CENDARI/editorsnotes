@@ -27,14 +27,7 @@ django-webtest==1.7.6
 
 # CENDARI EXTRA REQUIREMENTS
 pycurl==7.19.3.1
-#django-haystack==2.1.0
-#django-haystack==1.2.7
-#xapian-haystack==1.1.5beta
 guess-language==0.2
-## PIL==1.1.7
-## vv - wjw - I had to specify this alternative URL for PIL - vv
-## http://effbot.org/media/downloads/Imaging-1.1.7.tar.gz 
-#tiffany==0.6.4
 rq==0.3.13
 django-rq==0.6.1
 rdflib==4.1.0
@@ -43,6 +36,5 @@ parse==1.6.4
 django-admin2==0.6.1
 # Symlinks to system packages
 # Symlink djadmin2
-## symlink: xapian
 ## symlink: bsddb3
 
