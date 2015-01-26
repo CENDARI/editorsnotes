@@ -88,20 +88,36 @@ class CendariDataAPI(object):
             id = ''
         return self.read_url(self.url+'dataspaces/'+id)
 
-    def get_resources(self,url):
+    def get_resources(self,url,filter):
         if not self.key:
             raise CendariDataAPIException('Not Logged-in to Cendari Data API')
-        return self.read_url(url)
+        if not filter:
+            filter = ''
+        else:
+            filter='?'+filter
+        return self.read_url(url+filter)
 
-    def users(self,id=None):
+    def get_users(self,id=None):
         if not self.key:
             raise CendariDataAPIException('Not Logged-in to Cendari Data API')
-        return []
+        if not id:
+            id = ''
+        return self.read_url(self.url+'users/'+id)
 
-    def privileges(self,id=None):
+    def get_privileges(self,userId=None,dataspaceId=None,role=None):
         if not self.key:
             raise CendariDataAPIException('Not Logged-in to Cendari Data API')
-        return []
+        if userId:
+            return self.read_url(self.url+'privileges/'+userId)
+        elif dataspaceId:
+            return self.read_url(self.url+'privileges/'+dataspaceId)
+        elif role:
+            if role in ["member", "editor", "admin"]:
+                return self.read_url(self.url+'privileges/'+role)
+            else:
+                raise CendariDataAPIException('Invalid role: %s, should be "member", "editor", or "admin"' % role)
+        else:
+            return self.read_url(self.url+'privileges/')
 
 
 import pprint
@@ -114,13 +130,17 @@ def test():
     #print key
     ds = api.get_dataspace()
     print "Available dataspaces: %d" % len(ds)
+    u = api.get_users()
+    print "Available users(%d): %s" % (len(u), ",".join(u))
+    p = api.get_privileges()
+    print "Available privileges(%d): %s" % (len(p), ",".join(p))
 
-    for d in ds:
-        print "Dataspace: %s" % d['name']
-        res = api.get_resources(d['resources'])
-        print "  Available resources: %d" % len(res)
-        for r in res:
-            print '  %s' % r['name']
+    # for d in ds:
+    #     print "Dataspace: %s" % d['name']
+    #     res = api.get_resources(d['resources'])
+    #     print "  Available resources: %d" % len(res)
+    #     for r in res:
+    #         print '  %s' % r['name']
 
 if __name__ == '__main__':
     test()
