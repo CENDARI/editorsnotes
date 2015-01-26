@@ -88,6 +88,55 @@ class CendariDataAPI(object):
             id = ''
         return self.read_url(self.url+'dataspaces/'+id)
 
+    def delete_dataspace(self,id):
+        if not self.key:
+            raise CendariDataAPIException('Not Logged-in to Cendari Data API')
+        buffer = BytesIO()
+        c = pycurl.Curl()
+        c.setopt(c.URL, self.url+'dataspaces/'+id)
+        c.setopt(pycurl.HTTPHEADER, ["Authorization:"+self.key, "Content-type: application/json"])
+        c.setopt(pycurl.CUSTOMREQUEST, "DELETE")
+        c.setopt(pycurl.WRITEDATA, buffer)
+        c.perform()
+        status = c.getinfo(c.RESPONSE_CODE)
+        #print('Status: %d' % status)
+        c.close()
+        body = buffer.getvalue()
+        #print(body)
+        if status!=200:
+            raise CendariDataAPIException(body)
+        results=body
+        return results
+
+    def create_dataspace(self,name,title=None,desc=None):
+        if not self.key:
+            raise CendariDataAPIException('Not Logged-in to Cendari Data API')
+        # maybe test for name conformance
+        fields = {'name': name}
+        if title is not None:
+            fields['title']= title
+        if desc is not None:
+            fields['description'] = desc
+        postfields = json.dumps(fields)
+        buffer = BytesIO()
+        c = pycurl.Curl()
+        c.setopt(c.URL, self.url+'dataspaces')
+        c.setopt(pycurl.HTTPHEADER, ["Authorization:"+self.key, "Content-type: application/json"])
+        c.setopt(pycurl.POST, True)
+        c.setopt(pycurl.POSTFIELDS, postfields)
+        c.setopt(pycurl.WRITEDATA, buffer)
+        c.perform()
+        status = c.getinfo(c.RESPONSE_CODE)
+        #print('Status: %d' % status)
+        c.close()
+        body = buffer.getvalue()
+        #print(body)
+        if status!=200:
+            raise CendariDataAPIException(body)
+        results=json.loads(body)
+        return results
+        
+
     def get_resources(self,url,filter):
         if not self.key:
             raise CendariDataAPIException('Not Logged-in to Cendari Data API')
@@ -134,6 +183,20 @@ def test():
     print "Available users(%d): %s" % (len(u), ",".join(u))
     p = api.get_privileges()
     print "Available privileges(%d): %s" % (len(p), ",".join(p))
+    c = None
+    for d in ds:
+        if d['name'] == 'nte_test':
+            c = d
+            break
+    if c:
+        pprint.pprint(c)
+#        api.delete_dataspace(c['id'])
+    c = api.create_dataspace(name='nte_test', title='Note Taking Environment test', desc='Test dataspace for the note-taking environment')
+    print c
+    ds = api.get_dataspace()
+    print "Available dataspaces:"
+    for d in ds:
+        print "  "+d['name']
 
     # for d in ds:
     #     print "Dataspace: %s" % d['name']
