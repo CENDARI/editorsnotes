@@ -17,6 +17,8 @@ VIRTUOSO = {
     'HOST': '***virtuoso_host***'
 }
 
+CENDARI_DATA_API_SERVER = "http://localhost:42042/v1"
+
 LDAP_GROUP_MAPS = { 
     'admin_groups': '***semicolon-separated list of group names***',
     'editor_groups': '***semicolon-separated list of group names***',

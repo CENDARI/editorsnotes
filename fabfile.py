@@ -83,7 +83,7 @@ def runserver():
         if 'eppn' not in env:
             env['eppn'] = 'cendari@dariah.eu'
         if 'mail' not in env:
-            env['mail'] = 'cendari@daria.eu'
+            env['mail'] = 'cendari@dariah.eu'
         if 'cn' not in env:
             env['cn'] = 'Cendari Test User'
         local('{python} manage.py runserver'.format(**env))
