@@ -70,7 +70,7 @@ urlpatterns += patterns('editorsnotes.main.views.navigation',
 
 # Admin patterns
 urlpatterns += patterns('',
-    url(r'^projects/(?P<project_slug>\w+)/', include('editorsnotes.admin.urls', namespace='admin', app_name='admin')),
+    url(r'^projects/(?P<project_slug>[-\w]+)/', include('editorsnotes.admin.urls', namespace='admin', app_name='admin')),
     url(r'^projects/add/', 'editorsnotes.admin.views.projects.add_project', name='add_project_view'),
 )
 
@@ -112,61 +112,61 @@ cendaripatterns = patterns('cendari.views',
     url(r'^cendari/external/(?P<type>\w+)/$',                                               'iframe_view',                        name='iframe_view'),
     
 
-    url(r'^cendari/(?P<project_slug>\w+)/index$',                                           'index',                              name='index_project'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/index$',                                           'index',                              name='index_project'),
     
 
     # Cendari Projects
     url(r'^cendari/projects/add/',                                                          'cendari_project_add',                name='add_project_view'),
     url(r'^cendari/projects/(?P<project_id>\d+)/$',                                          'cendari_project_change',            name='project_view'),
-    url(r'^projects/(?P<project_slug>\w+)/',                                                 include('editorsnotes.admin.urls',   namespace='admin', app_name='admin')),
+    url(r'^projects/(?P<project_slug>[-\w]+)/',                                                 include('editorsnotes.admin.urls',   namespace='admin', app_name='admin')),
     #url(r'^cendari/projects/add/$',                                                         cendari.views.change_project,        name='addproject_view'),
     #url(r'^cendari/projects/(?P<slug>[-_a-z0-9]+)/$',                                       EditProjectAdminView.as_view(),      name='project_view'),
 
 	# Cendari Notes
-    #url(r'^cendari/(?P<project_slug>\w+)/notes/(?P<note_id>\d+)/$',                          EditNoteAdminView.as_view(),         name='note_view'),
-   # url(r'^cendari/(?P<project_slug>\w+)/notes/add/$',                                       EditNoteAdminView.as_view(),         name='addnote_view'),
-    #url(r'^cendari/(?P<project_slug>\w+)/notes/(?P<note_id>\d+)/$',                          NoteCendari.as_view(),                    name='note_view'),
-    url(r'^cendari/(?P<project_slug>\w+)/notes/add/$',                                       NoteCendari.as_view(),                name='addnote_view'),
-    url(r'^cendari/(?P<project_slug>\w+)/notes/(?P<note_id>\d+)/$',                          'editNoteCendari',                name='note_view'),
+    #url(r'^cendari/(?P<project_slug>[-\w]+)/notes/(?P<note_id>\d+)/$',                          EditNoteAdminView.as_view(),         name='note_view'),
+   # url(r'^cendari/(?P<project_slug>[-\w]+)/notes/add/$',                                       EditNoteAdminView.as_view(),         name='addnote_view'),
+    #url(r'^cendari/(?P<project_slug>[-\w]+)/notes/(?P<note_id>\d+)/$',                          NoteCendari.as_view(),                    name='note_view'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/notes/add/$',                                       NoteCendari.as_view(),                name='addnote_view'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/notes/(?P<note_id>\d+)/$',                          'editNoteCendari',                name='note_view'),
 
 
     # Cendari Documents
-    url(r'^cendari/(?P<project_slug>\w+)/documents/(?P<document_id>\d+)/transcript/$',       EditTranscriptAdminView.as_view(),   name='transcript_edit_view'),
-   # url(r'^cendari/(?P<project_slug>\w+)/documents/(?P<document_id>\d+)/$',                  EditDocumentAdminView.as_view(),     name='document_view'),
-    url(r'^cendari/(?P<project_slug>\w+)/documents/(?P<document_id>\d+)/$',                 'editDocumentCendari',                name='document_view'),
-   # url(r'^cendari/(?P<project_slug>\w+)/documents/add/$',                                   EditDocumentAdminView.as_view(),     name='adddocument_view'),
-    url(r'^cendari/(?P<project_slug>\w+)/documents/add/$',                                   DocumentCendari.as_view(),     name='adddocument_view'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/documents/(?P<document_id>\d+)/transcript/$',       EditTranscriptAdminView.as_view(),   name='transcript_edit_view'),
+   # url(r'^cendari/(?P<project_slug>[-\w]+)/documents/(?P<document_id>\d+)/$',                  EditDocumentAdminView.as_view(),     name='document_view'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/documents/(?P<document_id>\d+)/$',                 'editDocumentCendari',                name='document_view'),
+   # url(r'^cendari/(?P<project_slug>[-\w]+)/documents/add/$',                                   EditDocumentAdminView.as_view(),     name='adddocument_view'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/documents/add/$',                                   DocumentCendari.as_view(),     name='adddocument_view'),
 
     # Cendari Topics
-    #url(r'^cendari/(?P<project_slug>\w+)/topics/add/$',                                      EditTopicAdminView.as_view(),        name='addtopic_view'),
-    #url(r'^cendari/(?P<project_slug>\w+)/topics/(?P<topic_node_id>\d+)/$',                   EditTopicAdminView.as_view(),        name='topic_view'),
-    url(r'^cendari/(?P<project_slug>\w+)/topics/(?P<topic_node_id>\d+)/$',                   'editEntityCendari',                  name='topic_view'),
+    #url(r'^cendari/(?P<project_slug>[-\w]+)/topics/add/$',                                      EditTopicAdminView.as_view(),        name='addtopic_view'),
+    #url(r'^cendari/(?P<project_slug>[-\w]+)/topics/(?P<topic_node_id>\d+)/$',                   EditTopicAdminView.as_view(),        name='topic_view'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/topics/(?P<topic_node_id>\d+)/$',                   'editEntityCendari',                  name='topic_view'),
 	url(r'^cendari/topic/(?P<topic_node_id>[\w\-,]+)/$',                                        'edit_topic_node',                 name='topic_node_view'),
 
     
     # Cendari Resources Tree
-    url(r'^cendari/(?P<project_slug>\w+)/resources/$',                                       'resources',                         name='resources_view'),
-    url(r'^cendari/(?P<project_slug>\w+)/getResourcesData/$',                                'getResourcesData',                  name='getResourcesData_view'),
-    url(r'^cendari/(?P<project_slug>\w+)/getLazyProjectData/$',                              'getLazyProjectData',                name='getLazyProjectData_view'),
-    url(r'^cendari/(?P<project_slug>\w+)/getTopicType/topic_id/(?P<topic_id>\d+)/$',         'getTopicType',                      name='getTopicType_view'),
-    url(r'^cendari/(?P<project_slug>\w+)/getProjectID/new_slug/(?P<new_slug>\w+)/$',         'getProjectID',                      name='getProjectID_view'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/resources/$',                                       'resources',                         name='resources_view'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/getResourcesData/$',                                'getResourcesData',                  name='getResourcesData_view'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/getLazyProjectData/$',                              'getLazyProjectData',                name='getLazyProjectData_view'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/getTopicType/topic_id/(?P<topic_id>\d+)/$',         'getTopicType',                      name='getTopicType_view'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/getProjectID/new_slug/(?P<new_slug>[-\w]+)/$',         'getProjectID',                      name='getProjectID_view'),
 
 	# Cendari Scans
-    url(r'^cendari/(?P<project_slug>\w+)/scan/(?P<scan_id>\d+)/$',                           'scan',                              name='scan_view'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/scan/(?P<scan_id>\d+)/$',                           'scan',                              name='scan_view'),
     
 	# Cendari Jigsaw
-    url(r'^cendari/(?P<project_slug>\w+)/importfromjigsaw/$',                                'import_from_jigsaw',                name='importfromjigsaw_view'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/importfromjigsaw/$',                                'import_from_jigsaw',                name='importfromjigsaw_view'),
 
 	# Cendari Visualizations
-	url(r'^cendari/(?P<project_slug>\w+)/smallvis/$',                                        'small_vis',                         name='smallvis_view'),
-    url(r'^cendari/(?P<project_slug>\w+)/smallvisdata/$',                                    'small_vis_data_lazy',               name='smallvisdata_view'),
+	url(r'^cendari/(?P<project_slug>[-\w]+)/smallvis/$',                                        'small_vis',                         name='smallvis_view'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/smallvisdata/$',                                    'small_vis_data_lazy',               name='smallvisdata_view'),
     
     url(r'^querySPARQL/(?P<q>[^/]*)/',                                                       'querySPARQL',                       name='querySPARQL'),
 
     url(r'^proxyRDFaCE/$',                                                                   'proxyRDFaCE',                       name='proxyRDFaCE'),
 
     # Cendari search
-    url(r'^cendari/(?P<project_slug>\w+)/search/$',                                          'search',                            name='cendari_search_view'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/search/$',                                          'search',                            name='cendari_search_view'),
 )
 
 urlpatterns += cendaripatterns

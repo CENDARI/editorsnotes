@@ -33,11 +33,6 @@ class CendariUserBackend(RemoteUserBackend):
             user.user_permissions.add(_permission_del)
         if not user.has_perm('main.view_project'):
             user.user_permissions.add(_permission_view)
-        project, created=Project.objects.get_or_create(slug=user.username,
-                                              defaults={'name': user.username})
-        role = project.roles.get(role='Editor')
-        role.users.add(user)
-        project.save()
         return user
 
     def authenticate(self, remote_user):
@@ -48,6 +43,18 @@ class CendariUserBackend(RemoteUserBackend):
 
 def login_user_synchronize(sender, user, request, **kwargs):
     print "Synchronized called on login for %s" % user
+
+    pname = cendari_clean_name(user.username)
+    print "Creating project %s" % pname
+    project = Project.objects.filter(slug=pname)
+    if len(project) != 0:
+        project=project[0]
+    else:
+        project=Project.objects.create(slug=pname, name=user.username)
+        project.save()
+    role = project.roles.get(role='Editor')
+    role.users.add(user)
+
     if 'eppn' not in request.META: 
         print 'No eppn in META'
         return
