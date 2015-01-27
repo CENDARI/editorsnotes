@@ -146,7 +146,7 @@ class CendariDataAPI(object):
         return results
         
 
-    def get_resources(self,url,filter):
+    def get_resources(self,url,filter=None):
         if not self.key:
             raise CendariDataAPIException('Not Logged-in to Cendari Data API')
         if not filter:
@@ -159,6 +159,8 @@ class CendariDataAPI(object):
         if not self.key:
             raise CendariDataAPIException('Not Logged-in to Cendari Data API')
         # maybe test for name conformance
+        url = self.url+'dataspaces/%s/resources' % dataspaceId
+        print "Url is %s" % url
         fields = []
         if name is not None:
             fields.append( ('name', name) )
@@ -175,8 +177,9 @@ class CendariDataAPI(object):
             fields.append( ('file', ( c.FORM_FILE, fileName ) ) )
         elif fileContents is not None:
             fields.append( ('file', fileContents ) )
+        pprint.pprint(fields)
         buffer = BytesIO()
-        c.setopt(c.URL, self.url+'dataspaces/%s/resources')
+        c.setopt(c.URL, url)
         c.setopt(pycurl.HTTPHEADER, ["Authorization:"+self.key])
         c.setopt(pycurl.HTTPPOST, fields)
         c.setopt(pycurl.WRITEDATA, buffer)
@@ -186,7 +189,44 @@ class CendariDataAPI(object):
         c.close()
         body = buffer.getvalue()
         print(body)
-        if status!=200:
+        if status < 200 or status >= 300:
+            raise CendariDataAPIException(body)
+        results=json.loads(body)
+        return results
+
+    def update_resource(self,dataspaceId,resId,fileName=None,fileContents=None,name=None,format=None,title=None,desc=None):
+        if not self.key:
+            raise CendariDataAPIException('Not Logged-in to Cendari Data API')
+        # maybe test for name conformance
+        url = self.url+'dataspaces/%s/resources/%s' % (dataspaceId, resId)
+        print "Url is %s" % url
+        fields = []
+        if name is not None:
+            fields.append( ('name', name) )
+        if format is not None:
+            fields.append( ('format', format) )
+        if title is not None:
+            fields.append( ('title', title) )
+        if desc is not None:
+            fields.append( ('description', desc) )
+        c = pycurl.Curl()
+        if fileName is not None:
+            fields.append( ('file', ( c.FORM_FILE, fileName ) ) )
+        elif fileContents is not None:
+            fields.append( ('file', fileContents ) )
+        pprint.pprint(fields)
+        buffer = BytesIO()
+        c.setopt(c.URL, url)
+        c.setopt(pycurl.HTTPHEADER, ["Authorization:"+self.key])
+        c.setopt(pycurl.HTTPPOST, fields)
+        c.setopt(pycurl.WRITEDATA, buffer)
+        c.perform()
+        status = c.getinfo(c.RESPONSE_CODE)
+        print('Status: %d' % status)
+        c.close()
+        body = buffer.getvalue()
+        print(body)
+        if status < 200 or status >= 300:
             raise CendariDataAPIException(body)
         results=json.loads(body)
         return results
@@ -241,12 +281,23 @@ def test():
         print c
     except CendariDataAPIException as e:
         print "Exception creating dataspace nte_test: "+e.msg
+    res = api.get_resources(c['resources'])
+    rid=None
+    print "  Available resources: %d" % len(res)
+    for r in res:
+        print '  %s' % r['name']
+        if r['name']=='test':
+            rid=r['id']
     ds = api.get_dataspace()
     print "Available dataspaces:"
     for d in ds:
         print "  "+d['name']
 
-    r=api.create_resource(c['id'],fileContents='hello world',name='test',format='text/plain',title='Test file')
+    r=None
+    if rid:
+        r=api.update_resource(c['id'],rid,fileName='cendari_api.py',name='test',format='text/plain',title='Test file')
+    else:
+        r=api.create_resource(c['id'],fileName='cendari_api.py',name='test',format='text/plain',title='Test file')
     pprint.pprint(r)
     # for d in ds:
     #     print "Dataspace: %s" % d['name']
