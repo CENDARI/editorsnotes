@@ -78,6 +78,14 @@ def sync_database():
 def runserver():
     "Run the development server"
     with lcd(PROJ_ROOT):
+        if 'REMOTE_USER' not in env:
+            env['REMOTE_USER'] = 'cendari'
+        if 'eppn' not in env:
+            env['eppn'] = 'cendari@dariah.eu'
+        if 'mail' not in env:
+            env['mail'] = 'cendari@daria.eu'
+        if 'cn' not in env:
+            env['cn'] = 'Cendari Test User'
         local('{python} manage.py runserver'.format(**env))
 
 @task

@@ -90,7 +90,7 @@ def browse_cendari(request):
     if request.user.is_superuser:
 	    o['projects'] = Project.objects.all().order_by('name')
     else:
-	    o['projects'] = Project.objects.filter(pk__in=[p.id for p in Project.objects.all() if p.is_owned_by(request.user)]).order_by('name')
+	    o['projects'] = request.user.get_authorized_projects().order_by('name')
     return render_to_response(
         'browsecendari.html', o, context_instance=RequestContext(request))
     
@@ -423,7 +423,7 @@ def getResourcesData(request, project_slug):
 	    my_tree['children'].append(other_projects)	
     else:
 	    #copied from cendari.admin2
-	    owned_projects = Project.objects.filter(pk__in=[p.id for p in projects if p.is_owned_by(request.user)])
+	    owned_projects = projects
 	    for p in owned_projects:
 		    my_project = { 'title':str(p.name), 'key':str(p.slug), 'isFolder':'true', 'addClass':'',  'url':'', 'isLazy':'true', 'children' : [] }
 		    my_projects['children'].append(my_project)

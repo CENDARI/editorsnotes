@@ -52,8 +52,9 @@ IIPSRV = 'http://cendari.saclay.inria.fr/fcgi-bin/iipsrv.fcgi'
 
 AUTH_USER_MODEL = 'main.User'
 AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-    'django_browserid.auth.BrowserIDBackend',
+#    'django.contrib.auth.backends.ModelBackend',
+    'cendari.cendari_backend.CendariUserBackend',
+#    'django_browserid.auth.BrowserIDBackend',
 )
 
 # CENDARI ADD
@@ -134,6 +135,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.RemoteUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
 )
@@ -179,8 +181,8 @@ COMPRESS_YUGLIFY_BINARY = os.path.join(EN_PROJECT_PATH, 'node_modules', '.bin', 
 REST_FRAMEWORK = {
     #'FILTER_BACKEND': 'editorsnotes.api.filters.HaystackFilterBackend',
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.TokenAuthentication'
+#        'rest_framework.authentication.SessionAuthentication',
+#        'rest_framework.authentication.TokenAuthentication'
     )
 }
 
