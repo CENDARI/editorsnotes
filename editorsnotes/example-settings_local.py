@@ -11,6 +11,18 @@ POSTGRES_DB = {
     'PORT': ''
 }
 
+VIRTUOSO = {
+    'dba_password': '***',
+    'dav_password': '***',
+    'HOST': '***virtuoso_host***'
+}
+
+LDAP_GROUP_MAPS = { 
+    'admin_groups': '***semicolon-separated list of group names***',
+    'editor_groups': '***semicolon-separated list of group names***',
+    'contributor_groups': '***semicolon-separated list of group names***',
+    'user_groups': '***semicolon-separated list of group names***'
+}
 
 ELASTICSEARCH_ENABLED = True
 
@@ -90,7 +102,9 @@ LOCAL_APPS = (
 
 ROOT_URLCONF = 'cendari.urls'
 
+## CENDARI ADD
 
+IIPSRV = 'http://localhost/fcgi-bin/iipsrv.fcgi'
 
 RQ_QUEUES = {
     'high': {
@@ -99,10 +113,6 @@ RQ_QUEUES = {
     'low': {
         'USE_REDIS_CACHE': 'redis-cache',
     },
-
-
-
-
 
 
 ## CENDARI ADD
@@ -114,6 +124,4 @@ RQ_QUEUES = {
 #        'PORT': 6379,
 #        'DB': 0,
 #    }
-    
-
 }
