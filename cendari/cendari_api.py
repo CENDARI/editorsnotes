@@ -1,6 +1,7 @@
 import pycurl
 import urllib
 import json
+import re
 
 try:
     from io import BytesIO
@@ -14,9 +15,17 @@ except ImportError:
     # python 2
     from urllib import urlencode
 
-__all__ = [ 'DATA_API_URL', 'CendariDataAPIException', 'CendariDataAPI' ]
+__all__ = [ 'DATA_API_URL', 'cendari_clean_name', 'CendariDataAPIException', 'CendariDataAPI' ]
 
 DATA_API_URL = 'http://localhost:42042/v1/'
+
+def cendari_clean_name(name):
+    if len(name) < 2:
+        raise CendariDataAPIException('name too short')
+    name = re.sub(r'[^a-z0-9_-]', '_', name.lower())
+    if len(name) > 100:
+        name = name[:100]
+    return name
 
 class CendariDataAPIException(Exception):
     def __init__(self, msg):
@@ -146,6 +155,42 @@ class CendariDataAPI(object):
             filter='?'+filter
         return self.read_url(url+filter)
 
+    def create_resource(self,dataspaceId,fileName=None,fileContents=None,name=None,format=None,title=None,desc=None,setId=None):
+        if not self.key:
+            raise CendariDataAPIException('Not Logged-in to Cendari Data API')
+        # maybe test for name conformance
+        fields = []
+        if name is not None:
+            fields.append( ('name', name) )
+        if format is not None:
+            fields.append( ('format', format) )
+        if title is not None:
+            fields.append( ('title', title) )
+        if desc is not None:
+            fields.append( ('description', desc) )
+        if setId is not None:
+            fields.append( ('setId', setId) )
+        c = pycurl.Curl()
+        if fileName is not None:
+            fields.append( ('file', ( c.FORM_FILE, fileName ) ) )
+        elif fileContents is not None:
+            fields.append( ('file', fileContents ) )
+        buffer = BytesIO()
+        c.setopt(c.URL, self.url+'dataspaces/%s/resources')
+        c.setopt(pycurl.HTTPHEADER, ["Authorization:"+self.key])
+        c.setopt(pycurl.HTTPPOST, fields)
+        c.setopt(pycurl.WRITEDATA, buffer)
+        c.perform()
+        status = c.getinfo(c.RESPONSE_CODE)
+        print('Status: %d' % status)
+        c.close()
+        body = buffer.getvalue()
+        print(body)
+        if status!=200:
+            raise CendariDataAPIException(body)
+        results=json.loads(body)
+        return results
+
     def get_users(self,id=None):
         if not self.key:
             raise CendariDataAPIException('Not Logged-in to Cendari Data API')
@@ -191,13 +236,18 @@ def test():
     if c:
         pprint.pprint(c)
 #        api.delete_dataspace(c['id'])
-    c = api.create_dataspace(name='nte_test', title='Note Taking Environment test', desc='Test dataspace for the note-taking environment')
-    print c
+    try:
+        c = api.create_dataspace(name='nte_test', title='Note Taking Environment test', desc='Test dataspace for the note-taking environment')
+        print c
+    except CendariDataAPIException as e:
+        print "Exception creating dataspace nte_test: "+e.msg
     ds = api.get_dataspace()
     print "Available dataspaces:"
     for d in ds:
         print "  "+d['name']
 
+    r=api.create_resource(c['id'],fileContents='hello world',name='test',format='text/plain',title='Test file')
+    pprint.pprint(r)
     # for d in ds:
     #     print "Dataspace: %s" % d['name']
     #     res = api.get_resources(d['resources'])
