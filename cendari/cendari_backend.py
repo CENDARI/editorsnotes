@@ -47,8 +47,10 @@ def login_user_synchronize(sender, user, request, **kwargs):
         for group in groups:
             if group in group_maps['admin_groups']:
                 is_admin = True
+                print "User is admin"
                 break
             elif group in group_maps['editor_groups']:
+                print "User is editor"
                 is_editor = True
                 break
 
