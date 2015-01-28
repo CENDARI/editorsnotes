@@ -136,11 +136,11 @@ class CendariDataAPI(object):
         c.setopt(pycurl.WRITEDATA, buffer)
         c.perform()
         status = c.getinfo(c.RESPONSE_CODE)
-        #print('Status: %d' % status)
+        print('Status: %d' % status)
         c.close()
         body = buffer.getvalue()
         #print(body)
-        if status!=200:
+        if status<200 or status>=300:
             raise CendariDataAPIException(body)
         results=json.loads(body)
         return results
@@ -255,13 +255,14 @@ class CendariDataAPI(object):
 
 
 import pprint
-import sys
+import sys, os
 
 def test():
-    api = CendariDataAPI(sys.argv[1], sys.argv[2])
-    #api = CendariDataAPI(sys.argv[1])
-    #key = api.session(eppn='me', mail='myself@home',cn='I')
-    #print key
+    #api = CendariDataAPI(sys.argv[1], sys.argv[2])
+    api = CendariDataAPI(sys.argv[1])
+    env = os.environ
+    key = api.session(eppn=env['eppn'], mail=env['mail'],cn=env['cn'])
+    print key
     ds = api.get_dataspace()
     print "Available dataspaces: %d" % len(ds)
     u = api.get_users()

@@ -35,14 +35,37 @@ class CendariUserBackend(RemoteUserBackend):
             user.user_permissions.add(_permission_view)
         return user
 
-    def authenticate(self, remote_user):
-        print("Received an authenticate with remote_user=%s" % (remote_user ))
-        user=super(CendariUserBackend, self).authenticate(remote_user)
-        print "Returning user: ", user
-        return user
-
 def login_user_synchronize(sender, user, request, **kwargs):
     print "Synchronized called on login for %s" % user
+
+    try:
+        memberof = request.META['isMemberOf']
+        print 'On a Cendari server'
+        groups=memberof.split(';')
+        is_admin = False
+        is_editor = False
+        for group in groups:
+            if group in group_maps['admin_groups']:
+                is_admin = True
+                break
+            elif group in group_maps['editor_groups']:
+                is_editor = True
+                break
+
+        if is_admin:
+            user.is_superuser = True
+            user.is_active = True
+            user.is_staff = True
+        elif is_editor:
+            user.is_superuser = False
+            user.is_active = True
+            user.is_staff = True
+        else:
+            user.is_superuser = False
+            user.is_active = True
+            user.is_staff = False
+    except KeyError:
+        pass
 
     pname = cendari_clean_name(user.username)
     print "Creating project %s" % pname
@@ -51,7 +74,7 @@ def login_user_synchronize(sender, user, request, **kwargs):
         project=project[0]
     else:
         project=Project.objects.create(slug=pname, name=user.username)
-        project.save()
+        project.save() # default roles are created at save time
     role = project.roles.get(role='Editor')
     role.users.add(user)
 
@@ -75,26 +98,28 @@ def login_user_synchronize(sender, user, request, **kwargs):
         raise ImproperlyConfigured("CENDARI_DATA_API_SERVER must be configured in the settings file'")
     try:
         api = CendariDataAPI(data_api_server)
-        if not api.session(eppn, mail, cn):
+        if not api.session(eppn=eppn, mail=mail, cn=cn):
             print "Cendari Data API refuses the connection"
             return
     except:
-        print 'Cannot contact Cendari Data API'
+        print 'Cannot contact the Cendari Data API at %s' % data_api_server
         return
-    dataspaces = api.get_dataspaces()
+    dataspaces = api.get_dataspace()
     dprojects = {}
     for d in dataspaces:
-        if d['name'].startsWith('nte_'):
+        if d['name'].startswith('nte_'):
             name=d['name'][4:]
             dprojects[name] = d
             project, created=Project.objects.get_or_create(slug=pname, 
                                                            defaults={'name': pname })
             if created or user.superuser_or_belongs_to(project):
+                print 'creating local project: %s' % pname
                 role = project.roles.get(role='Editor') # TODO get privileges from API
                 role.users.add(user)
     for p in user.get_authorized_projects():
-        pname = cendari_clean_name(p.name)
+        pname = "nte_"+cendari_clean_name(p.name)
         if pname not in dprojects:
+            print 'creating remote project: %s' % pname
             api.create_dataspace(pname,title=p.name)
     
 user_logged_in.connect(login_user_synchronize)

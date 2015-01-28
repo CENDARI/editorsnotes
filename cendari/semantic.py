@@ -19,7 +19,8 @@ import json
 import sys, traceback
 import pdb
 
-CENDARI = Namespace("http://pro2.cendari.dariah.eu/enotes/")
+CENDARI = Namespace("http://resources.cendari.dariah.eu/notes/")
+#CENDARI = Namespace("http://pro2.cendari.dariah.eu/enotes/")
 SCHEMA  = Namespace("http://schema.org/")
 DBPROP  = Namespace("http://dbpedia.org/property/")
 GRS     = Namespace("http://www.georss.org/georss/")
