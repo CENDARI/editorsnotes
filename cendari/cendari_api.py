@@ -21,7 +21,7 @@ DATA_API_URL = 'http://localhost:42042/v1/'
 
 def cendari_clean_name(name):
     if len(name) < 2:
-        raise CendariDataAPIException('name too short')
+        raise CendariDataAPIException('name too short (should be > 2)')
     name = re.sub(r'[^a-z0-9_-]', '_', name.lower())
     if len(name) > 100:
         name = name[:100]
@@ -112,8 +112,8 @@ class CendariDataAPI(object):
         c.close()
         body = buffer.getvalue()
         #print(body)
-        if status!=200:
-            raise CendariDataAPIException(body)
+        if status < 200 or status >= 300:
+            raise CendariDataAPIException("Error %d: %s" % (status, body))
         results=body
         return results
 
