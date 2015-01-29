@@ -1,5 +1,5 @@
-from cendari.patches import run
+# from cendari.patches import run
 import cendari.search
 
-run()
+# run()
 

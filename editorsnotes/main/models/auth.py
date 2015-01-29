@@ -93,6 +93,26 @@ class User(AbstractUser, URLAccessible):
     def get_activity_for(user, max_count=50):
         return activity_for(user, max_count=50)
 
+    # Cendari code E.G. aviz
+    def get_authorized_projects(self):
+        if self.is_superuser:
+            return Project.objects.all()
+        return self.get_affiliated_projects()
+    def get_an_authorized_project(self):
+        if self.is_superuser:
+            return Project.objects.all()[0]
+        else: 
+            return self.get_affiliated_projects()[0]
+    def superuser_or_belongs_to(self, project):
+        if self.is_superuser:
+            return True
+        return self.belongs_to(project)
+        # fix a bug present in editorsnotes to be removed when editorsnotes is fixed
+    def _get_project_role(self, project):
+        role_attr = '_{}_role_cache'.format(project.slug)
+        if not hasattr(self, role_attr):
+            setattr(self, role_attr, project.get_role_for(self))
+        return getattr(self, role_attr)
 
 PURPOSE_CHOICES = (
     (1, 'Feedback'),
@@ -177,6 +197,17 @@ class Project(models.Model, URLAccessible, ProjectPermissionsMixin):
     @staticmethod
     def get_activity_for(project, max_count=50):
         return activity_for(project, max_count=max_count)
+
+    # Cendari code E.G. aviz
+    def get_absolute_url(self):
+        return reverse('project_view', None, [self.id])
+    # fix a bug present in editorsnotes to be removed when editorsnotes is fixed
+    def get_role_for(self, user):
+        qs = self.roles.filter(group__user=user,role='Editor')
+        return qs.get() if qs.exists() else None
+    def is_owned_by(self, user):
+        qs = self.roles.filter(group__user=user,role='Owner')
+        return qs.exists()
 
 @receiver(models.signals.post_save, sender=Project)
 def create_editor_role(sender, instance, created, **kwargs):

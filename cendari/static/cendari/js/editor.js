@@ -39,6 +39,37 @@
 //     //window.location.assign(cendari_root_url + "cendari/"+cendari_js_project_slug+"/notes/9/");
 // }
 
+//document.getElementById('smallvis_iframe').contentWindow.location.reload();
+
+
+function replaceWindowUrl(data_id){
+
+    var currentUrl = window.location.toString();
+    if(currentUrl.indexOf('add')>0){
+        var newUrl = currentUrl.replace("add", data_id);
+        window.location.replace(newUrl);
+    }
+}
+
+
+function removeElement(elemnt_) {
+    elemnt_.parentNode.removeChild(elemnt_);
+}
+
+
+function addMessageSaved(modelName){
+    $('#progress-message-list').append(modelName +'is saved');
+}
+
+function addMessageSaving(modelName){
+    $('#progress-message-list').append('Saving: '+ modelName+', please do not reload');
+}
+
+function deleteMessage(modelName){
+    $('#progress-message-list').append(msg_el);
+}
+
+
 function getCookie(name) {
     var cookieValue = null;
     if (document.cookie && document.cookie != '') {
@@ -99,41 +130,42 @@ function submitTranscript(document_id){
 
     $.ajax({
         // beforeSend: function (xhr) {xhr.setRequestHeader('X-CSRFToken', $('input[name="csrfmiddlewaretoken"]').val());},
-            url:fc.attr('action'),
-            type: fc.attr('method'),
-            data: formData,
-            // content_type:'application/json',
-            success: function(data){
-                // var currentUrl = window.location.toString();
-                // var newUrl = currentUrl.replace("add", document_id);
-                // window.location.replace(newUrl);  
-                submitScan(document_id);
-            }
-        });
+        url:fc.attr('action'),
+        type: fc.attr('method'),
+        data: formData,
+        // content_type:'application/json',
+        success: function(data){
+            // var currentUrl = window.location.toString();
+            // var newUrl = currentUrl.replace("add", document_id);
+            // window.location.replace(newUrl);  
+            submitScan(document_id);
+        }
+    });
 }
 
 function submitScan(document_id){
     console.log('sumbitting scan');
 
-    if($('#id_image').val().length){
+    if($('#id_image').length>0 && $('#id_image').val().length>0){
         $('#scanCendari').submit(function(e){
             e.preventDefault();
             var options = { 
                 success: function(){
-                    var currentUrl = window.location.toString();
-                    var newUrl = currentUrl.replace("add", document_id);
-                    window.location.replace(newUrl);  
+                    // var currentUrl = window.location.toString();
+                    // var newUrl = currentUrl.replace("add", document_id);
+                    // window.location.replace(newUrl);  
+                    replaceWindowUrl(document_id);
                 }
 
-            // other available options: 
-            //url:       url         // override for form's 'action' attribute 
-            //type:      type        // 'get' or 'post', override for form's 'method' attribute 
-            //dataType:  null        // 'xml', 'script', or 'json' (expected server response type) 
-            //clearForm: true        // clear all form fields after successful submit 
-            //resetForm: true        // reset the form after successful submit 
+                // other available options: 
+                //url:       url         // override for form's 'action' attribute 
+                //type:      type        // 'get' or 'post', override for form's 'method' attribute 
+                //dataType:  null        // 'xml', 'script', or 'json' (expected server response type) 
+                //clearForm: true        // clear all form fields after successful submit 
+                //resetForm: true        // reset the form after successful submit 
 
-            // $.ajax options can be used here too, for example: 
-            //timeout:   3000 
+                // $.ajax options can be used here too, for example: 
+                //timeout:   3000 
             }; 
             $('#scanCendari').ajaxSubmit(options);
             return false;
@@ -142,10 +174,10 @@ function submitScan(document_id){
         $('#scanCendari').submit();
     }
     else{
-        var currentUrl = window.location.toString();
-        var newUrl = currentUrl.replace("add", document_id);
-        window.location.replace(newUrl);  
-
+        // var currentUrl = window.location.toString();
+        // var newUrl = currentUrl.replace("add", document_id);
+        // window.location.replace(newUrl);  
+        replaceWindowUrl(document_id);
     }
 
 
@@ -173,7 +205,7 @@ $(document).ready(function(){
         var fc = $(this);
         // console.log("form object is:");
         // console.log(fc);
-
+        var model = "" // <<<<====
         formData = "";
         formData = formData+"csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&";
         if($('#model_id').length){
@@ -204,7 +236,6 @@ $(document).ready(function(){
 
         formData = formData+$("#saveButton").attr('name')+"="+$("#saveButton").val();
 
-
         // var formData = fc.serialize()+"&"+$("#saveButton").attr('name')+"="+$("#saveButton").val();
         // var formData = $("#saveButton").attr('name')+"="+$("#saveButton").val()+"&csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&_content_type=application/json&_content="+encodeURIComponent(content)
         // console.log("formData are : \n: "+formData);    
@@ -221,9 +252,10 @@ $(document).ready(function(){
                 }
                 else{
                     console.log('submitting non document');
-                    var currentUrl = window.location.toString();
-                    var newUrl = currentUrl.replace("add", data.id);
-                    window.location.replace(newUrl);
+                    // var currentUrl = window.location.toString();
+                    // var newUrl = currentUrl.replace("add", data.id);
+                    // window.location.replace(newUrl);
+                    replaceWindowUrl(data.id)
                 }
             }
         });

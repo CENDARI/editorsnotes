@@ -9,7 +9,11 @@ from django.utils.safestring import mark_safe
 from django.utils.html import conditional_escape
 from django.utils.encoding import force_unicode
 
-cleaner = Cleaner(style=True)
+# cleaner = Cleaner(style=True)
+# Cendari code E.G. aviz
+from lxml.html.clean import Cleaner
+cleaner = Cleaner(style=True,safe_attrs_only=False) #[jdf] fix for RDFa
+
 
 def update_attrs(attrs, extra_attrs):
     if attrs is None:

@@ -26,6 +26,10 @@ from .. import fields, utils
 from auth import ProjectPermissionsMixin, UpdatersMixin
 from base import (CreationMetadata, LastUpdateMetadata, URLAccessible, Administered, OrderingManager)
 
+# Cendari code E.G. aviz
+from cendari.iipimagestorage import IIPImageStorage
+iipimage_storage = IIPImageStorage()
+
 #CENDARI : OrderingManager is also used 
 
 __all__ = ['Document', 'Transcript', 'Footnote', 'Scan', 'DocumentLink',
@@ -112,6 +116,7 @@ class Document(LastUpdateMetadata, Administered, URLAccessible,
 
         # Remove <br/> tags which have nothing before nor after them 
         utils.remove_stray_brs(self.description)
+
     @property
     def transcript(self):
         try:
@@ -214,6 +219,32 @@ class Document(LastUpdateMetadata, Administered, URLAccessible,
         self.ordering = re.sub(r'[^\w\s]', '', utils.xhtml_to_text(self.description))[:32]
         self.description_digest = Document.hash_description(self.description)
         return super(Document, self).save(*args, **kwargs)
+
+    # Cendari code E.G. aviz
+    def get_form_kwargs(self):
+        print "KWARGS"
+        kwargs = super(ModelFormMixin, self).get_form_kwargs()
+        if hasattr(self, 'object') and self.object:
+            kwargs.update({'instance': self.object})
+        else:
+            has_project_field = all([
+                hasattr(self.model, 'project'),
+                hasattr(self.model.get_affiliation, 'field'),
+                hasattr(self.model.get_affiliation.field, 'related'),
+                self.model.get_affiliation.field.related.parent_model == Project
+            ])
+            if has_project_field:
+                # Then create an instance with the project already set
+                instance = self.model(project=self.project)
+                kwargs.update({ 'instance': instance })
+
+        return kwargs
+    def get_all_related_topics(self):
+        topics = []
+        topics += [ta.topic for ta in self.related_topics.all()]
+        return set(topics) 
+
+    
 reversion.register(Document)
 
 class TranscriptManager(models.Manager):
@@ -229,6 +260,7 @@ class Transcript(LastUpdateMetadata, Administered, URLAccessible, ProjectPermiss
     document = models.OneToOneField(Document, related_name='_transcript')
     content = fields.XHTMLField()
     objects = TranscriptManager()
+
     class Meta:
         app_label = 'main'
     def as_text(self):
@@ -252,6 +284,16 @@ class Transcript(LastUpdateMetadata, Administered, URLAccessible, ProjectPermiss
         return sorted(self.footnotes.all(),
                       key=lambda fn: fn_ids.index(fn.id)
                       if fn.id in fn_ids else 9999)
+
+    # Cendari code E.G. aviz
+    def get_absolute_url(self):
+        return reverse('transcript_edit_view', None, [self.document.project.slug,self.document.id])
+    def save(self, *args, **kwargs):
+        super(Transcript, self).save(*args, **kwargs)
+    @property    
+    def project(self):
+        return self.get_affiliation()
+
 reversion.register(Transcript)
 
 class Footnote(LastUpdateMetadata, Administered, URLAccessible,
@@ -304,6 +346,10 @@ class Scan(CreationMetadata, ProjectPermissionsMixin):
     image_thumbnail = models.ImageField(upload_to='scans/%Y/%m', blank=True, null=True)
     ordering = models.IntegerField(blank=True, null=True)
     objects = OrderingManager()
+
+    # Cendari code E.G. aviz
+    image = models.ImageField(storage=iipimage_storage, upload_to='scans/%Y/%m')
+
     class Meta:
         app_label = 'main'
         ordering = ['ordering', '-created'] 

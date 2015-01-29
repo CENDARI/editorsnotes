@@ -55,6 +55,16 @@ class Note(LastUpdateMetadata, Administered, URLAccessible,
         return project_topic.id in \
                 self.related_topics.values_list('topic_id', flat=True)
 
+    # Cendari code E.G. aviz
+    def get_all_related_topics(self):
+        topics = []
+        topics += [ta.topic for ta in self.related_topics.all()]
+        return set(topics) 
+    def get_all_related_topics_ids(self):
+        topics = []
+        topics += [ta.topic.pk for ta in self.related_topics.all()]
+        return topics
+
 class NoteSectionManager(InheritanceManagerMixin, OrderingManager):
     pass
 

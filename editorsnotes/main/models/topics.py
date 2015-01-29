@@ -12,15 +12,32 @@ from auth import Project, ProjectPermissionsMixin
 from base import (
     Administered, CreationMetadata, LastUpdateMetadata, URLAccessible)
 
+# Cendari code E.G. aviz
+from cendari.fields import RDFField
+
+
 __all__ = ['Topic', 'TopicNode', 'TopicAssignment', 'AlternateName',
            'LegacyTopic']
 
+
+# TYPE_CHOICES = (
+#     ('EVT', 'Event'),
+#     ('ORG', 'Organization'),
+#     ('PER', 'Person'),
+#     ('PUB', 'Publication')
+# )
+
+# Cendari code E.G. aviz
 TYPE_CHOICES = (
     ('EVT', 'Event'),
     ('ORG', 'Organization'),
     ('PER', 'Person'),
-    ('PUB', 'Publication')
-)
+    ('PUB', 'Publication'),
+    ('ART', 'Artifact'),
+    ('PLA', 'Place'),
+#   ('DAT', 'Date'),
+    ('TAG', 'Tag'))
+
 
 class TopicMergeError(Exception):
     pass
@@ -143,6 +160,11 @@ class Topic(LastUpdateMetadata, URLAccessible, ProjectPermissionsMixin,
     deleted = models.BooleanField(default=False, editable=False)
     merged_into = models.ForeignKey('self', blank=True, null=True, editable=False)
     objects = TopicManager()
+
+    # Cendari code E.G. aviz
+    date         = models.DateTimeField(editable=True, db_index=True, null=True,blank=True)
+    rdf          = RDFField(null=True,blank=True)
+
     class Meta:
         app_label = 'main'
         unique_together = (
@@ -241,6 +263,26 @@ class Topic(LastUpdateMetadata, URLAccessible, ProjectPermissionsMixin,
         self.save()
 
         return target
+
+    # Cendari code E.G. aviz
+    def related_objects(self, model=None):
+        qs = TopicAssignment.objects.filter(topic__topic_node_id=self.id)
+        if model is not None:
+            model_ct = ContentType.objects.get_for_model(model)
+            model_assignments = qs.filter(content_type_id=model_ct.id)
+            return model.objects.filter(
+                id__in=model_assignments.values_list('object_id', flat=True)
+            )
+        else:
+            return [obj.content_object for obj in qs] 
+
+    def get_related_notes(self):
+        notes = self.topic_node.related_objects(Note)
+        return notes
+    def get_related_documents(self):
+        documents = self.topic_node.related_objects(Document)
+        return documents
+
 reversion.register(Topic)
 
 class AlternateName(CreationMetadata, ProjectPermissionsMixin):
