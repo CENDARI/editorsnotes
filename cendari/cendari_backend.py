@@ -38,37 +38,6 @@ class CendariUserBackend(RemoteUserBackend):
 def login_user_synchronize(sender, user, request, **kwargs):
     print "Synchronized called on login for %s" % user
 
-    try:
-        memberof = request.META['isMemberOf']
-        print 'On a Cendari server'
-        groups=memberof.split(';')
-        is_admin = False
-        is_editor = False
-        for group in groups:
-            if group in group_maps['admin_groups']:
-                is_admin = True
-                print "User is admin"
-                break
-            elif group in group_maps['editor_groups']:
-                print "User is editor"
-                is_editor = True
-                break
-
-        if is_admin:
-            user.is_superuser = True
-            user.is_active = True
-            user.is_staff = True
-        elif is_editor:
-            user.is_superuser = False
-            user.is_active = True
-            user.is_staff = True
-        else:
-            user.is_superuser = False
-            user.is_active = True
-            user.is_staff = False
-    except KeyError:
-        pass
-
     pname = cendari_clean_name(user.username)
     print "Creating project %s" % pname
     project = Project.objects.filter(slug=pname)
