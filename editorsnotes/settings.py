@@ -182,8 +182,8 @@ COMPRESS_YUGLIFY_BINARY = os.path.join(EN_PROJECT_PATH, 'node_modules', '.bin', 
 REST_FRAMEWORK = {
     #'FILTER_BACKEND': 'editorsnotes.api.filters.HaystackFilterBackend',
     'DEFAULT_AUTHENTICATION_CLASSES': (
-#        'rest_framework.authentication.SessionAuthentication',
-#        'rest_framework.authentication.TokenAuthentication'
+       'rest_framework.authentication.SessionAuthentication',
+       'rest_framework.authentication.TokenAuthentication'
     )
 }
 

@@ -1,54 +1,10 @@
-// Ext.require(['*']);
-
-// function submitCendariForm()
-// {
-// 	var formCendari = $(".formCendari");
-// 	formCendari.submit(function(e) 
-// 	{
-//         //e.preventDefault();
-// 		if(tinyMCE.activeEditor!=null){
-// 			tinyMCE.activeEditor.save();
-// 		    }
-// 		//prevent Default functionality
-       	
-//         var fc = $(this);
-
-
-// 		var formData = fc.serialize();
-//         $.ajax(
-//         {
-//         		//beforeSend: function (xhr) {xhr.setRequestHeader('X-CSRFToken', $('input[name="csrfmiddlewaretoken"]').val());},
-//                 url:fc.attr('action'),
-//                 type: fc.attr('method'),
-//                 data: formData,
-//                	content_type:'application/json',
-//                 success: function(data) 
-//                 {
-//                     console.log(data);
-//                     console.log(JSON.parse(data));
-//                 	var currentUrl = window.location.toString();
-// 					var newUrl = currentUrl.replace("add", data.id);
-// 					window.location.href(newUrl);
-// 					//window.location.assign(newUrl);
-//                 	//window.location.assign(cendari_root_url + "cendari/"+cendari_js_project_slug+"/notes/"+data.id);	
-// 				}
-//          });
-
-//     });	
-//     // formCendari.submit();
-//     //window.location.assign(cendari_root_url + "cendari/"+cendari_js_project_slug+"/notes/9/");
-// }
-
-//document.getElementById('smallvis_iframe').contentWindow.location.reload();
-
-
 function replaceWindowUrl(data_id){
 
     var currentUrl = window.location.toString();
-    if(currentUrl.indexOf('add')>0){
-        var newUrl = currentUrl.replace("add", data_id);
-        window.location.replace(newUrl);
-    }
+    // if(currentUrl.indexOf('add')>0){
+    var newUrl = currentUrl.replace("add", data_id);
+    window.location.replace(newUrl);
+    // }
 }
 
 

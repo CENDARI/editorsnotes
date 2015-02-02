@@ -79,11 +79,11 @@ def runserver():
     "Run the development server"
     with lcd(PROJ_ROOT):
         if 'REMOTE_USER' not in env:
-            env['REMOTE_USER'] = 'cendari'
+            env['REMOTE_USER'] = 'emmanouil'
         if 'eppn' not in env:
             env['eppn'] = 'cendari@dariah.eu'
         if 'mail' not in env:
-            env['mail'] = 'cendari@dariah.eu'
+            env['mail'] = 'em.giannisakis@gmail.com'
         if 'cn' not in env:
             env['cn'] = 'Cendari Test User'
         local('{python} manage.py runserver'.format(**env))

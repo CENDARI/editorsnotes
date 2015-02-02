@@ -11,7 +11,8 @@ from .. import fields, utils
 from auth import Project, ProjectPermissionsMixin
 from base import (
     Administered, CreationMetadata, LastUpdateMetadata, URLAccessible)
-
+from documents import Document
+from notes import Note
 # Cendari code E.G. aviz
 from cendari.fields import RDFField
 

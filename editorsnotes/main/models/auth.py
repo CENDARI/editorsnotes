@@ -16,6 +16,8 @@ from .. import fields
 from ..management import get_all_project_permissions
 from base import URLAccessible, CreationMetadata
 
+# Cendari code E.G. aviz
+from django.core.urlresolvers import reverse
 
 __all__ = ['User', 'UserFeedback', 'Project', 'ProjectRole', 'ProjectInvitation', 'FeaturedItem']
 
