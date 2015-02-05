@@ -1,19 +1,16 @@
 from django.contrib.auth.middleware import RemoteUserMiddleware
+from django.conf import settings
 
 class CendariUserMiddleware(RemoteUserMiddleware):
-    from django.conf import settings
-
-    try:
-        group_maps = settings.LDAP_GROUP_MAPS
-    except ValueError:
-        raise ImproperlyConfigured("LDAP_GROUP_MAPS must be configured in the settings file'")
-
     def process_request(self, request):
-        print 'Cendari Middelware called with user %s' % request.user
+        user = request.user
+        print 'Cendari Middelware called with user %s' % user
         super(CendariUserMiddleware, self).process_request(request)
         try:
+
             memberof = request.META['isMemberOf']
             print 'On a Cendari server'
+            group_maps = settings.LDAP_GROUP_MAPS
             groups=memberof.split(';')
             is_admin = False
             is_editor = False
@@ -40,3 +37,5 @@ class CendariUserMiddleware(RemoteUserMiddleware):
                 user.is_staff = False
         except KeyError:
             pass
+        except ValueError:
+            raise ImproperlyConfigured("LDAP_GROUP_MAPS must be configured in the settings file'")
