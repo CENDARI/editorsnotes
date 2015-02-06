@@ -37,8 +37,10 @@
             <li><a href="{% url 'cendari_about_view' %}">About</a></li>
 
             <!--li><a href="{% url 'iframe_view'  "issuereport" %}" >Issue Report</a></li-->
-            <li><a href="https://github.com/CENDARI/CENDARI-VRE/issues" target="_blank"> Issue Report</a></li>
-            <!--li><a href="https://docs.google.com/forms/d/1d4l8P9eVKGOHIW6MQ-hYSKzZOyOJmnh6QRtJr4lOJJE/viewform?usp=send_form" target="_blank">Survey</a></li-->-
+            <li><a href="https://github.com/CENDARI/editorsnotes/issues" target="_blank">Issue Report</a></li>
+            {% if user.is_staff or user.is_superuser %}
+            <li><a href="https://dev.dariah.eu/jira/secure/ViewCollectors!default.jspa?projectKey=CVRE" target="_blank">Jira</a></li>
+	    {% endif %}
             <!--<li><a href="{% url 'iframe_view'  "survey" %}">Survey</a></li>-->
             <li class="divider-vertical"></li>
             <form class="navbar-search" action="{% url "cendari_search_view" project_slug %}" method="get">
