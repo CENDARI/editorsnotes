@@ -7,6 +7,7 @@ from django.contrib.auth.signals import user_logged_in
 from editorsnotes.main.models import (
     User, Project, ProjectInvitation, ProjectRole)
 
+import sys
 from cendari_api import *
 
 content_type = ContentType.objects.get_for_model(Project)
@@ -75,22 +76,28 @@ def login_user_synchronize(sender, user, request, **kwargs):
     except:
         print 'Cannot contact the Cendari Data API at %s' % data_api_server
         return
-    dataspaces = api.get_dataspace()
-    dprojects = {}
-    for d in dataspaces:
-        if d['name'].startswith('nte_'):
-            name=d['name'][4:]
-            dprojects[name] = d
-            project, created=Project.objects.get_or_create(slug=pname, 
-                                                           defaults={'name': pname })
-            if created or user.superuser_or_belongs_to(project):
-                print 'creating local project: %s' % pname
-                role = project.roles.get(role='Editor') # TODO get privileges from API
-                role.users.add(user)
-    for p in user.get_authorized_projects():
-        pname = "nte_"+cendari_clean_name(p.name)
-        if pname not in dprojects:
-            print 'creating remote project: %s' % pname
-            api.create_dataspace(pname,title=p.name)
-    
+    try:
+        dataspaces = api.get_dataspace()
+        dprojects = {}
+        for d in dataspaces:
+            if d['name'].startswith('nte_'):
+                name=d['name'][4:]
+                dprojects[name] = d
+                project, created=Project.objects.get_or_create(slug=pname, 
+                                                               defaults={'name': pname })
+                if created or user.superuser_or_belongs_to(project):
+                    print 'creating local project: %s' % pname
+                    role = project.roles.get(role='Editor') # TODO get privileges from API
+                    role.users.add(user)
+        for p in user.get_authorized_projects():
+            pname = "nte_"+cendari_clean_name(p.name)
+            if pname not in dprojects:
+                print 'creating remote project: %s' % pname
+                api.create_dataspace(pname,title=p.name)
+    except CendariDataAPIException as e:
+        print 'Problem synchonizing projects with DATA Api: %s' % e
+    except:
+        print "Unexpected error:", sys.exc_info()[0]
+
+
 user_logged_in.connect(login_user_synchronize)
