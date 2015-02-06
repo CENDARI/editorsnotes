@@ -3,9 +3,9 @@ from django.conf import settings
 
 class CendariUserMiddleware(RemoteUserMiddleware):
     def process_request(self, request):
+        super(CendariUserMiddleware, self).process_request(request)
         user = request.user
         print 'Cendari Middelware called with user %s' % user
-        super(CendariUserMiddleware, self).process_request(request)
         try:
 
             memberof = request.META['isMemberOf']
