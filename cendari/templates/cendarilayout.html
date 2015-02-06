@@ -36,9 +36,10 @@
             <li><a href="{% url 'cendari_browse_view' %}">Browse</a></li>
             <li><a href="{% url 'cendari_about_view' %}">About</a></li>
 
-            <li><a href="https://github.com/CENDARI/editorsnotes/issues" target="_blank">Issue Report</a></li>
             {% if user.is_staff or user.is_superuser %}
-            <li><a href="https://dev.dariah.eu/jira/secure/CreateIssue.jspa?pid=10900&issuetype=1" target="_blank"> Issue Report</a></li>
+            <li><a href="https://dev.dariah.eu/jira/browse/CVRE" target="_blank">Issue Report</a></li>
+	    {% else %}
+            <li><a href="https://dev.dariah.eu/jira/secure/CreateIssue.jspa?pid=10900&issuetype=1" target="_blank">Issue Report</a></li>
 	    {% endif %}
             <li class="divider-vertical"></li>
             <form class="navbar-search" action="{% url "cendari_search_view" project_slug %}" method="get">
