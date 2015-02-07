@@ -67,6 +67,9 @@ UBUNTU:
     edit editorsnotes/settings_local.py with new database info
     sudo -u postgres fab sync_database
 
+    Create a superuser and initial project
+    fab create_superuser
+
     sudo service elasticsearch status (> check that elasticsearch is started)
     sudo fab runserver
 

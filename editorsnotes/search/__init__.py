@@ -55,23 +55,25 @@ def update_activity_index(instances, revision, versions, **kwargs):
 
 @receiver(post_save)
 def update_elastic_search_handler(sender, instance, created, **kwargs):
-    if not en_index.is_open:
-        en_index.open()
     klass = instance.__class__
     if klass in en_index.document_types:
+        if not en_index.is_open:
+            en_index.open()
         document_type = en_index.document_types[klass]
         if created:
             document_type.index(instance)
         else:
             document_type.update(instance)
     elif isinstance(instance, main_models.notes.NoteSection):
+        if not en_index.is_open:
+            en_index.open()
         update_elastic_search_handler(sender, instance.note, False)
 
 @receiver(post_delete)
 def delete_es_document_handler(sender, instance, **kwargs):
-    if not en_index.is_open:
-        en_index.open()
     klass = instance.__class__
     if klass in en_index.document_types:
+        if not en_index.is_open:
+            en_index.open()
         document_type = en_index.document_types[klass]
         document_type.remove(instance)

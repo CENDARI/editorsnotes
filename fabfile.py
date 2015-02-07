@@ -57,22 +57,25 @@ def sync_database():
         create_cache_tables()
         local('{python} manage.py migrate reversion --noinput'.format(**env))
         local('{python} manage.py migrate --noinput'.format(**env))
-
     if new_installation:
-        print('\nDatabase synced. Follow prompts to create an initial '
-              'super user and project.')
-        username = prompt('Username: ', validate=str)
+        print('\nDatabase synced.\n'+
+              'run `fab create_superuser` to create a superuser and project.')
+
+@task
+def create_superuser():
+    username = prompt('Username: ', validate=str)
+    if username:
         local('{python} manage.py createsuperuser --username {username}'.format(
             username=username, **env))
 
-        project_name = prompt('Project name (blank to skip): ')
-        if project_name:
-            project_slug = prompt('Project slug: ', validate=str)
+    project_name = prompt('Project name (blank to skip): ')
+    if project_name:
+        project_slug = prompt('Project slug: ', validate=str)
 
-            local('{python} manage.py createproject '
-                  '"{name}" {slug} --users={username}'.format(
-                      name=project_name, slug=project_slug,
-                      username=username, **env))
+    local('{python} manage.py createproject '
+          '"{name}" {slug} --users={username}'.format(
+              name=project_name, slug=project_slug,
+              username=username, **env))
 
 @task
 def runserver():
