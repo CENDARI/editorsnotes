@@ -183,7 +183,7 @@ def xml_to_topics(xml, uri):
     g.parse(data=xml, format='rdfa')
     entities = []
     for s,p,o in g.triples( (None, RDF.type, None) ):
-#        print "%s (%s) %s" % (s, p, o)
+#        print ("%s (%s) %s" % (s, p, o)).encode("utf-8")
         v = g.value(s, NAME)
         if not v: continue
         e = { "value": v.value,
@@ -192,7 +192,7 @@ def xml_to_topics(xml, uri):
               "rdfvalue": v,
               "rdftype": o}
         entities.append(e)
-#        print "Entity %s: %s" % (e["type"], e["value"])
+#        print ("Entity %s: %s" % (e["type"], e["value"])).encode("utf-8")
     return entities
 
 def semantic_process_note(note,user=None):
@@ -262,7 +262,7 @@ def semantic_process_document(document,user=None):
 
 
 #    for s,p,o in g:
-#        print "%s (%s) %s" % (s, p, o)
+#        print ("%s (%s) %s" % (s, p, o)).encode("utf-8")
 
 
 def semantic_process_transcript(transcript,user=None):
@@ -407,7 +407,7 @@ def semantic_resolve_topic(topic):
         loaded.parse(location=uri)
     except:
         print "Exception in parsing code:"
-        print rdf_url
+        print rdf_url.encode("utf-8")
         print '-'*60
         traceback.print_exc(file=sys.stdout)
         print '-'*60 
@@ -416,7 +416,7 @@ def semantic_resolve_topic(topic):
     type = URIRef(topic_to_schema(topic.topic_node.type))
 
     print "rdf_url is :"
-    print rdf_url 
+    print rdf_url.encode("utf-8")
     print "--------------------------------------"
     print "uri is :"
     print uri 
@@ -436,9 +436,9 @@ def semantic_resolve_topic(topic):
 
 
     if (uri, RDF.type, type) in loaded:
-        print "Ontology in %s contains %s as expected"  % (rdf_url, type)
+        print ("Ontology in %s contains %s as expected"  % (rdf_url, type)).encode("utf-8")
     else:
-        print >>sys.stderr, "%s: Missing type %s"  % (rdf_url, type)
+        print >>sys.stderr, ("%s: Missing type %s"  % (rdf_url, type)).encode("utf-8")
         return
     g = Semantic.graph(identifier=uri)
     Semantic.remove_graph(g)

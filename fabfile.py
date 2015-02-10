@@ -36,8 +36,8 @@ def setup():
     install_node_packages()
     symlink_packages()
     collect_static()
-    local('mkdir rdfstore')
-    local('chmod a+rwx rdfstore')
+    local('if [ ! -d rdfstore ]; then mkdir rdfstore; fi')
+    local('chmod -R a+rwX rdfstore')
     print ('\nDevelopment environment successfully created.\n' +
            'Create a Postgres database, enter its information into ' +
            'editorsnotes/settings_local.py, and run `fab sync_database` to finish.')
