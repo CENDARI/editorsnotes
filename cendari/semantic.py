@@ -446,9 +446,9 @@ def semantic_resolve_topic(topic):
     for s,p,o in loaded.triples( (uri, None, None) ):
         if p in imported_relations:
             if p in no_duplicates and (uri, p, None) in g:
-                    print "Skipping duplicate %s %s %s" % (s, p, o)
+                    print ("Skipping duplicate %s %s %s" % (s, p, o)).encode("utf-8")
             else:
-                print "Adding %s %s %s" % (s, p, o)
+                print ("Adding %s %s %s" % (s, p, o)).encode("utf-8")
                 g.add( (s, p, o) )
 
 def semantic_refresh_topic(topic):
