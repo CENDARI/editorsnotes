@@ -50,14 +50,7 @@ except:
 if USE_ADMIN2:
     import admin2
     urlpatterns += patterns('',
-                          #  url(r'^admin2/main/project/create/$', 'cendari.projects.add_project', name='add_project_view_admin2'),
-                            #url(r'^admin2/main/project/create/$', 'cendari.views.cendari_project_add', name='add_project_view2'),
-                            url(r'^admin2/', include(djadmin2.default.urls)),
-                            #url(r'^admin2/main/user/(?P<pk>\d+)/password/$',name='password_change'),
-                            )
-
-
-
+                            url(r'^admin2/', include(djadmin2.default.urls)))
 
 # Base patterns
 urlpatterns += patterns('editorsnotes.main.views.navigation',
@@ -171,6 +164,4 @@ cendaripatterns = patterns('cendari.views',
 
 urlpatterns += cendaripatterns
 
-urlpatterns += patterns('',
-    (r'^django-rq/', include('django_rq.urls')),
-)
+
