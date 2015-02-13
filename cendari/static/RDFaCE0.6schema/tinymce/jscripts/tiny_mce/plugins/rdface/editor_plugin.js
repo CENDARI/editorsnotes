@@ -2,7 +2,7 @@
 	tinymce.PluginManager.requireLangPack("rdface");
 	tinymce.create("tinymce.plugins.RdfacePlugin", {
 		init : function(a, b) {
-							toolbar:"demo",
+			toolbar:"demo",
 			$.getJSON(b + '/schema_creator/selection.json', function(data) { 	// get selected schemas
 				a.plugins.contextmenu.onContextMenu.add(function(th, menu, event) { // added first level schemas to context menu
 					menu.removeAll(); //var add_entity = menu.addMenu({title : 'Add as Entity'}); // show only related entities	

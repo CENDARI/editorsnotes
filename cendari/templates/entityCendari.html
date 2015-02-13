@@ -159,13 +159,18 @@
 				</fieldset>	
 				<hr /> -->
 				{% if topic.id %}
-					<button id="saveButton" class="save-item" name="_method" value="PUT" >Save</button>
+					<button id="saveButton" style="visibility: hidden;" class="save-item" name="_method" value="PUT" >Save</button>
 				{% else %}
-					<button id="saveButton" class="save-item"  method="POST" name="_method" value="POST">Save</button>
+					<button id="saveButton" style="visibility: hidden;" class="save-item"  method="POST" name="_method" value="POST">Save</button>
 				{% endif %}
 
 
 			</div>
+
+			<div id="statusMessages">
+				
+			</div>
+			
 		</form>
 
 	</div>

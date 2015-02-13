@@ -20,6 +20,7 @@ __all__ = [ 'DATA_API_URL', 'cendari_clean_name', 'CendariDataAPIException', 'Ce
 DATA_API_URL = 'http://localhost:42042/v1/'
 
 def cendari_clean_name(name):
+    name = name.split('@')[0]
     if len(name) < 2:
         raise CendariDataAPIException('name too short (should be > 2)')
     name = re.sub(r'[^a-z0-9_-]', '_', name.lower())

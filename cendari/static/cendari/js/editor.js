@@ -1,3 +1,53 @@
+var messages{
+    'document':{
+        'id' : 'documentStatusMsg'
+        'beforeSend':'saving document please do not refresh',
+        'success' :'document saved',
+        'error': 'document did not saved correctly'
+    },
+    'transcript':{
+        'id' : 'transcriptStatusMsg'
+        'beforeSend':'saving transcript please do not refresh',
+        'success' :'transcript saved',
+        'error': 'transcript did not saved correctly'
+    },
+    'scan':{
+        'id' : 'scanStatusMsg'
+        'beforeSend':'uploading image please do not refresh',
+        'success' :'image uploaded',
+        'error': 'imaged did not upload correctly'
+    }.
+    'note':{
+        'id' : 'noteStatusMsg'
+        'beforeSend':'saving note please do not refresh',
+        'success' :'note saved',
+        'error': 'note did not saved correctly'
+    },
+    'entity':{
+        'id' : 'entityStatusMsg'
+        'beforeSend':'resolving entity please do not refresh',
+        'success' :'entity resolved',
+        'error': 'entity did not resolved correctly'
+    }
+    'none':{
+        'id' : 'noneStatusMsg'
+        'beforeSend':'',
+        'success' :'',
+        'error': ''
+    }
+};
+
+
+function addMessage(div,msg,msg_id){
+    var msg_el = $("<p></p>").text(msg).attr('id',msg_id);   
+    $('#'+div).append(msg_el)
+}
+
+function updateMessage(msg_id,new_msg){
+    $('#'+msg_id).text(new_msg);
+}
+
+
 function replaceWindowUrl(data_id){
 
     var currentUrl = window.location.toString();
@@ -90,12 +140,22 @@ function submitTranscript(document_id){
         type: fc.attr('method'),
         data: formData,
         // content_type:'application/json',
+        beforeSend: function(){
+            addMessage('statusMessages',messages.transcript.beforeSend,messages.transcript.id);
+        },
+
         success: function(data){
             // var currentUrl = window.location.toString();
             // var newUrl = currentUrl.replace("add", document_id);
-            // window.location.replace(newUrl);  
+            // window.location.replace(newUrl);
+            updateMessage(messages.transcript.success,messages.transcript.id);
             submitScan(document_id);
-        }
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) { 
+            alert("Status: " + textStatus); alert("Error: " + errorThrown); 
+            updateMessage(messages.transcript.error,messages.transcript.id);
+            submitScan(document_id);
+        } 
     });
 }
 
@@ -106,13 +166,21 @@ function submitScan(document_id){
         $('#scanCendari').submit(function(e){
             e.preventDefault();
             var options = { 
+                 beforeSend: function(){
+                    addMessage('statusMessages',messages.scan.beforeSend,messages.scan.id);
+                },
                 success: function(){
                     // var currentUrl = window.location.toString();
                     // var newUrl = currentUrl.replace("add", document_id);
                     // window.location.replace(newUrl);  
+                    updateMessage(messages.scan.success,messages.scan.id);
                     replaceWindowUrl(document_id);
                 }
-
+                 error: function(XMLHttpRequest, textStatus, errorThrown) { 
+                    alert("Status: " + textStatus); alert("Error: " + errorThrown); 
+                    updateMessage(messages.scan.error,messages.scan.id);
+                    replaceWindowUrl(document_id);
+                }
                 // other available options: 
                 //url:       url         // override for form's 'action' attribute 
                 //type:      type        // 'get' or 'post', override for form's 'method' attribute 
@@ -162,18 +230,21 @@ $(document).ready(function(){
         // console.log("form object is:");
         // console.log(fc);
         var model = "" // <<<<====
+        var type  = "none"
         formData = "";
         formData = formData+"csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&";
         if($('#model_id').length){
             formData=formData+"id="+$('#model_id').val()+"&";
         }
         if($('#note_title').length){
+            type = 'note';
             formData =formData +'title='+$('#note_title').val()+"&related_topics=&status=open&is_private=false&";
             if(tinyMCE.activeEditor!=null){
                 formData = formData+"content="+encodeURIComponent(tinyMCE.getInstanceById('note-description').getContent())+"&";
             }        
         }
         if($('#document-description').length){
+            type = 'document';
             if(tinyMCE.activeEditor!=null){
                 formData = formData+"&description="+encodeURIComponent(tinyMCE.getInstanceById('document-description').getContent())+"&";
             }        
@@ -186,6 +257,7 @@ $(document).ready(function(){
         
         
          if($('#rdf_id').length){
+            type = 'entity';
             formData = formData + "rdf="+$('#rdf_id').val().trim()+"&";
             formData = formData + "preferred_name="+$('#preferred_name_id').text().trim()+"&";
          }
@@ -201,6 +273,9 @@ $(document).ready(function(){
             type: fc.attr('method'),
             data: formData,
             // content_type:'application/json',
+            beforeSend:function(){
+                addMessage('statusMessages',messages[type].beforeSend,messages[type].id);
+            },
             success: function(data){
                 // console.log(data);
                 if($('#document-description').length){
@@ -213,7 +288,14 @@ $(document).ready(function(){
                     // window.location.replace(newUrl);
                     replaceWindowUrl(data.id)
                 }
-            }
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) { 
+                alert("Status: " + textStatus); alert("Error: " + errorThrown); 
+                updateMessage(messages[type].error,messages[type].id);
+                var currentUrl = window.location.toString();
+    
+                window.location.replace(currentUrl);
+            } 
         });
 
     }); 

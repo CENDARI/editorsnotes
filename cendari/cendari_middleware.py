@@ -1,11 +1,15 @@
 from django.contrib.auth.middleware import RemoteUserMiddleware
 from django.conf import settings
+from cendari_api import *
 
 class CendariUserMiddleware(RemoteUserMiddleware):
     def process_request(self, request):
+
+        request.META['REMOTE_USER'] = cendari_clean_name(request.META['REMOTE_USER'])
         super(CendariUserMiddleware, self).process_request(request)
         user = request.user
         print 'Cendari Middelware called with user %s' % user
+
         try:
 
             memberof = request.META['isMemberOf']

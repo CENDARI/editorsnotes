@@ -197,14 +197,19 @@
 					{% if document %} {{document.description|as_html}} {% endif %}
 				</textarea>
 				{% if document.id %}
-					<button id="saveButton" class="save-item" name="_method" value="PUT" >Save</button>
+					<button id="saveButton" style="visibility: hidden;" class="save-item" name="_method" value="PUT" >Save</button>
 				{% else %}
-					<button id="saveButton" class="save-item" method="post">Save</button>
+					<button id="saveButton" style="visibility: hidden;" class="save-item" method="post">Save</button>
 				{% endif %}
 
 				<div id='progress-message-list'></div>
 
 			</div>
+
+			<div id="statusMessages">
+				
+			</div>
+
 		</form>
 	
 	</div>

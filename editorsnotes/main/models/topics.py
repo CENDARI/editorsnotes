@@ -36,7 +36,7 @@ TYPE_CHOICES = (
     ('PUB', 'Publication'),
     ('ART', 'Artifact'),
     ('PLA', 'Place'),
-#   ('DAT', 'Date'),
+    ('DAT', 'Date'),
     ('TAG', 'Tag'))
 
 

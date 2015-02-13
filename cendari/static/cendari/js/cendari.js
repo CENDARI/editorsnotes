@@ -185,8 +185,8 @@ Ext.application({
 				//elements : domID,
 				content:"Description",
 				toolbar:"description",
-				plugins : "example,fullscreen,lists,advhr,advimage,advlink,iespell,inlinepopups,media,paste,directionality,fullscreen,noneditable,nonbreaking,wordcount,advlist,contextmenu,rdface, anthisplugin, fullscreen",
-				theme_advanced_buttons1 : "undo,redo,cut,copy,paste,fontsizeselect,bold,italic,underline,strikethrough,bullist,numlist,forecolor,backcolor, code,rdfaceHelp,rdfaceRun,rdfaceFacts,rdfaceSetting",
+				plugins : "example,fullscreen,lists,advhr,advimage,advlink,iespell,inlinepopups,media,paste,directionality,fullscreen,noneditable,nonbreaking,wordcount,advlist,contextmenu,fullscreen,rdface",
+				theme_advanced_buttons1 : "undo,redo,cut,copy,paste,fontsizeselect,bold,italic,underline,strikethrough,bullist,numlist,forecolor,backcolor, code,rdfaceHelp,rdfaceRun,rdfaceFacts,rdfaceSetting",//,
 				fullscreen_new_window : true,
 				width : "100%",
 				content_css : csspath + "content.css ," + csspath + "rdface.css, " + csspath + "schema_colors.css" ,
@@ -297,7 +297,8 @@ Ext.application({
 		cendari.addTab = addTab;
 		cendari.addWidgetToActiveTab = addWidgetToActiveTab;
 		cendari.currentId = 0;
-		Ext.getCmp('saveNoteID').on('click', function() {submitCendariForm();});
+		// Ext.getCmp('saveNoteID').on('click', function() {submitCendariForm();});
+		Ext.getCmp('saveNoteID').on('click', function() {$('.formCendari').submit()});
 	/*	Ext.getCmp('saveNoteID').on('click', function() {
 		    if(tinyMCE.activeEditor!=null){
 			tinyMCE.activeEditor.save();

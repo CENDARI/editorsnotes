@@ -10,8 +10,8 @@ if($api=="Ontos"){
 	$token="";
 	$url= "http://api.opencalais.com/tag/rs/enrich";
 	$additionals=array(
-	CURLOPT_HTTPHEADER=>array('Content-Type: '."text/raw; charset=UTF-8" , "Accept: ". "application/json" ,"x-calais-licenseID:".$token),
-	CURLOPT_POSTFIELDS=>$request_body
+		CURLOPT_HTTPHEADER=>array('Content-Type: '."text/raw; charset=UTF-8" , "Accept: ". "application/json" ,"x-calais-licenseID:".$token),
+		CURLOPT_POSTFIELDS=>$request_body
 	);
 }elseif($api=="Extractiv"){
 	$token="";
@@ -47,8 +47,8 @@ if($api=="Ontos"){
 	$url="http://api.saplo.com/rpc/json?";
 	//If it is needed to get a new token per each request
 	$additionals=array(
-	CURLOPT_HTTPHEADER=>array('Content-Type: '."text/raw; charset=UTF-8" , "Accept: ". "application/json"),
-	CURLOPT_POSTFIELDS=>'{"method":"auth.accessToken","params":{"api_key":"'.$api_key.'","secret_key":"'.$secret_key.'"}}'
+		CURLOPT_HTTPHEADER=>array('Content-Type: '."text/raw; charset=UTF-8" , "Accept: ". "application/json"),
+		CURLOPT_POSTFIELDS=>'{"method":"auth.accessToken","params":{"api_key":"'.$api_key.'","secret_key":"'.$secret_key.'"}}'
 	);
 	$session = curl_init ( $url);
 	if($additionals){
@@ -67,8 +67,8 @@ if($api=="Ontos"){
 	$url="http://api.saplo.com/rpc/json?access_token=".$token;
 	$input=array("method"=>"text.create","params"=>array("body"=>$request_body,"collection_id"=>$collection_id),"id"=>"0");
 	$additionals=array(
-	CURLOPT_HTTPHEADER=>array('Content-Type: '."text/raw; charset=UTF-8" , "Accept: ". "application/json"),
-	CURLOPT_POSTFIELDS=>json_encode($input)
+		CURLOPT_HTTPHEADER=>array('Content-Type: '."text/raw; charset=UTF-8" , "Accept: ". "application/json"),
+		CURLOPT_POSTFIELDS=>json_encode($input)
 	);
 	$session = curl_init ( $url);
 	if($additionals){
@@ -84,8 +84,8 @@ if($api=="Ontos"){
 	//prepare query
 	$url="http://api.saplo.com/rpc/json?access_token=".$token;
 	$additionals=array(
-	CURLOPT_HTTPHEADER=>array('Content-Type: '."text/raw; charset=UTF-8" , "Accept: ". "application/json"),
-	CURLOPT_POSTFIELDS=>'{"method":"text.tags","params":{"collection_id":'.$collection_id.',"text_id":'.$text_id.',"wait":15 },"id":0}'
+		CURLOPT_HTTPHEADER=>array('Content-Type: '."text/raw; charset=UTF-8" , "Accept: ". "application/json"),
+		CURLOPT_POSTFIELDS=>'{"method":"text.tags","params":{"collection_id":'.$collection_id.',"text_id":'.$text_id.',"wait":15 },"id":0}'
 	);
 }elseif($api=="Sindice"){
 	$token="";
