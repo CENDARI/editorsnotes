@@ -3,8 +3,8 @@ import os, subprocess
 from django.core.files.storage import FileSystemStorage
 from django.core.files.uploadedfile import UploadedFile
 from django.core.files.move import file_move_safe
-from rq import Connection, Queue
-from redis import Redis
+import django_rq
+
 
 import pdb
 
@@ -21,9 +21,8 @@ def convert_to_pyramid_tiff(path,npath):
     else:
         print "Converted %s into %s" % (path, npath)
         
+q = django_rq.get_queue("default")
 
-redis_conn = Redis()
-q = Queue(connection=redis_conn)  # no args implies the default queue
 
 class IIPImageStorage(FileSystemStorage):
 

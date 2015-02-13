@@ -1,36 +1,36 @@
-var messages{
+var messages = {
     'document':{
-        'id' : 'documentStatusMsg'
+        'id' : 'documentStatusMsg',
         'beforeSend':'saving document please do not refresh',
         'success' :'document saved',
         'error': 'document did not saved correctly'
     },
     'transcript':{
-        'id' : 'transcriptStatusMsg'
+        'id' : 'transcriptStatusMsg',
         'beforeSend':'saving transcript please do not refresh',
         'success' :'transcript saved',
         'error': 'transcript did not saved correctly'
     },
     'scan':{
-        'id' : 'scanStatusMsg'
+        'id' : 'scanStatusMsg',
         'beforeSend':'uploading image please do not refresh',
         'success' :'image uploaded',
         'error': 'imaged did not upload correctly'
-    }.
+    },
     'note':{
-        'id' : 'noteStatusMsg'
+        'id' : 'noteStatusMsg',
         'beforeSend':'saving note please do not refresh',
         'success' :'note saved',
         'error': 'note did not saved correctly'
     },
     'entity':{
-        'id' : 'entityStatusMsg'
+        'id' : 'entityStatusMsg',
         'beforeSend':'resolving entity please do not refresh',
         'success' :'entity resolved',
         'error': 'entity did not resolved correctly'
-    }
+    },
     'none':{
-        'id' : 'noneStatusMsg'
+        'id' : 'noneStatusMsg',
         'beforeSend':'',
         'success' :'',
         'error': ''
@@ -40,7 +40,7 @@ var messages{
 
 function addMessage(div,msg,msg_id){
     var msg_el = $("<p></p>").text(msg).attr('id',msg_id);   
-    $('#'+div).append(msg_el)
+    $('#'+div).append(msg_el);
 }
 
 function updateMessage(msg_id,new_msg){
@@ -101,7 +101,7 @@ function uniqueElements(el_array){
     var uniqueNames = [];
     $.each(el_array, function(i, el){
         if($.inArray(el, uniqueNames) === -1) uniqueNames.push(el);
-    })
+    });
     return uniqueNames
 }
 
@@ -175,7 +175,7 @@ function submitScan(document_id){
                     // window.location.replace(newUrl);  
                     updateMessage(messages.scan.success,messages.scan.id);
                     replaceWindowUrl(document_id);
-                }
+                },
                  error: function(XMLHttpRequest, textStatus, errorThrown) { 
                     alert("Status: " + textStatus); alert("Error: " + errorThrown); 
                     updateMessage(messages.scan.error,messages.scan.id);
@@ -229,8 +229,8 @@ $(document).ready(function(){
         var fc = $(this);
         // console.log("form object is:");
         // console.log(fc);
-        var model = "" // <<<<====
-        var type  = "none"
+        var model = ""; // <<<<====
+        var type  = "none";
         formData = "";
         formData = formData+"csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&";
         if($('#model_id').length){
