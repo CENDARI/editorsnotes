@@ -7,31 +7,28 @@ UBUNTU:
           python --version
 
 2. Postgresql
-```
-sudo apt-get install postgresql
-sudo apt-get install pgadmin3
-
-sudo -u postgres psql postgres
-sudo apt-get install postgresql-client
-sudo apt-get install postgresql-server-dev-9.1
-
-\password postgres
-
-sudo -u postgres createdb mydb
-```
+   ```
+   sudo apt-get install postgresql
+   sudo apt-get install pgadmin3
+   sudo -u postgres psql postgres
+   sudo apt-get install postgresql-client
+   sudo apt-get install postgresql-server-dev-9.1
+   \password postgres
+   sudo -u postgres createdb mydb
+   ```
      +open pgAdmin gui & create new role & connect the db
 
 3. Fabric
-```
-sudo apt-get install python-pip python-dev build-essential
-sudo pip install fabric
-```
+   ```
+   sudo apt-get install python-pip python-dev build-essential
+   sudo pip install fabric
+   ```
 
 4. libxml2 + libxslt
-```
-sudo apt-get install libxml2
-sudo apt-get install libxml2-dev libxslt-dev
-```
+   ```
+   sudo apt-get install libxml2
+   sudo apt-get install libxml2-dev libxslt-dev
+   ```
 
 5. Elastic Search
 ```
