@@ -31,73 +31,73 @@ UBUNTU:
    ```
 
 5. Elastic Search
-```
-sudo apt-get install openjdk-7-jre
-wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.1.0.deb
-sudo dpkg -i elasticsearch-1.1.0.deb
-sudo service elasticsearch start
-```
+   ```
+   sudo apt-get install openjdk-7-jre
+   wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.1.0.deb
+   sudo dpkg -i elasticsearch-1.1.0.deb
+   sudo service elasticsearch start
+   ```
 
 6. Nodejs
-```
-sudo apt-get install -y python-software-properties python g++ make
-sudo add-apt-repository -y ppa:chris-lea/node.js
-sudo apt-get update
-sudo apt-get install nodejs
-```
+   ```
+   sudo apt-get install -y python-software-properties python g++ make
+   sudo add-apt-repository -y ppa:chris-lea/node.js
+   sudo apt-get update
+   sudo apt-get install nodejs
+   ```
 
 7. Less
-```
-sudo apt-get install npm
-npm config set registry http://registry.npmjs.org
-sudo npm install -g less@1.3.3
-```
-      - you can use: `sudo apt-get install node-less` but this may not install the 1.3.3 version that we tested with 
+   ```
+   sudo apt-get install npm
+   npm config set registry http://registry.npmjs.org
+   sudo npm install -g less@1.3.3
+   ```
+   - you can use: `sudo apt-get install node-less` but this may not install the 1.3.3 version that we tested with 
 
 10. Virtual Environment
-```
-sudo pip install virtualenv
-```
+    ```
+    sudo pip install virtualenv
+    ```
 
 13.  Redis
      Install redis from http://redis.io/ for RQ (Redis Queue) to work.
      On ubuntu:
-```
-apt-get install redis-server
-```
+     ```
+     apt-get install redis-server
+     ```
 
 14. Install flup
-```
-sudo pip install flup
-```
+    ```
+    sudo pip install flup
+    ```
 
 15. For pycurl install
-```
-sudo apt-get install libcurl4-gnutls-dev
-```
+    ```
+    sudo apt-get install libcurl4-gnutls-dev
+    ```
 
 16. Inside Editors Notes Directory
-```
-fab setup
-```
+    ```
+    fab setup
+    ```
 
     Create database in pgAdmin
 
     edit editorsnotes/settings_local.py with new database info
 
-```
-sudo -u postgres fab sync_database
-```
+    ```
+    sudo -u postgres fab sync_database
+    ```
 
     Create a superuser and initial project
-```
-fab create_superuser
-sudo service elasticsearch status
-```
+    ```
+    fab create_superuser
+    sudo service elasticsearch status
+    ```
     (> check that elasticsearch is started)
-```
-sudo fab runserver
-```
+    ```
+    sudo fab runserver
+    ```
 
 17. Check the site:
     http://localhost:8000/
