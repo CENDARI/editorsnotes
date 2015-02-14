@@ -196,7 +196,7 @@ def xml_to_topics(xml, uri):
               "rdfvalue": v,
               "rdftype": o}
         entities.append(e)
-    logger.debug("Entity %s: %s", e["type"], e["value"])
+        logger.debug("Entity %s: %s", e["type"], e["value"])
     return entities
 
 def semantic_process_note(note,user=None):
@@ -237,9 +237,10 @@ def semantic_process_document(document,user=None):
     if document is None:
         return
 
+#    pdb.set_trace()
     if user is None:
         user = document.last_updater
-    # Cleanup entities related to note
+    # Cleanup entities related to document
     uri = semantic_uri(document)
     g = Semantic.graph(uri)
     Semantic.remove_graph(g)
