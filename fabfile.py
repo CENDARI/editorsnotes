@@ -91,7 +91,7 @@ def runserver():
             env['mail'] = 'em.giannisakis@gmail.com'
         if 'cn' not in env:
             env['cn'] = 'Cendari Test User'
-        local('{python} manage.py runserver'.format(**env))
+        local('{python} manage.py runserver --traceback'.format(**env))
 
 @task
 @runs_once
