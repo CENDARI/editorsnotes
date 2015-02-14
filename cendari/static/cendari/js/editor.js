@@ -1,36 +1,36 @@
-var messages{
+var messages = {
     'document':{
-        'id' : 'documentStatusMsg'
+        'id' : 'documentStatusMsg',
         'beforeSend':'saving document please do not refresh',
         'success' :'document saved',
         'error': 'document did not saved correctly'
     },
     'transcript':{
-        'id' : 'transcriptStatusMsg'
+        'id' : 'transcriptStatusMsg',
         'beforeSend':'saving transcript please do not refresh',
         'success' :'transcript saved',
         'error': 'transcript did not saved correctly'
     },
     'scan':{
-        'id' : 'scanStatusMsg'
+        'id' : 'scanStatusMsg',
         'beforeSend':'uploading image please do not refresh',
         'success' :'image uploaded',
         'error': 'imaged did not upload correctly'
-    }.
+    },
     'note':{
-        'id' : 'noteStatusMsg'
+        'id' : 'noteStatusMsg',
         'beforeSend':'saving note please do not refresh',
         'success' :'note saved',
         'error': 'note did not saved correctly'
     },
     'entity':{
-        'id' : 'entityStatusMsg'
+        'id' : 'entityStatusMsg',
         'beforeSend':'resolving entity please do not refresh',
         'success' :'entity resolved',
         'error': 'entity did not resolved correctly'
-    }
+    },
     'none':{
-        'id' : 'noneStatusMsg'
+        'id' : 'noneStatusMsg',
         'beforeSend':'',
         'success' :'',
         'error': ''
@@ -39,7 +39,7 @@ var messages{
 
 
 function addMessage(div,msg,msg_id){
-    var msg_el = $("<p></p>").text(msg).attr('id',msg_id);   
+    var msg_el = $("<div></div>").text(msg).attr('id',msg_id).addClass('alert');   
     $('#'+div).append(msg_el)
 }
 
@@ -63,17 +63,17 @@ function removeElement(elemnt_) {
 }
 
 
-function addMessageSaved(modelName){
-    $('#progress-message-list').append(modelName +'is saved');
-}
+// function addMessageSaved(modelName){
+//     $('#progress-message-list').append(modelName +'is saved');
+// }
 
-function addMessageSaving(modelName){
-    $('#progress-message-list').append('Saving: '+ modelName+', please do not reload');
-}
+// function addMessageSaving(modelName){
+//     $('#progress-message-list').append('Saving: '+ modelName+', please do not reload');
+// }
 
-function deleteMessage(modelName){
-    $('#progress-message-list').append(msg_el);
-}
+// function deleteMessage(modelName){
+//     $('#progress-message-list').append(msg_el);
+// }
 
 
 function getCookie(name) {
@@ -141,7 +141,7 @@ function submitTranscript(document_id){
         data: formData,
         // content_type:'application/json',
         beforeSend: function(){
-            addMessage('statusMessages',messages.transcript.beforeSend,messages.transcript.id);
+            addMessage('message-list',messages.transcript.beforeSend,messages.transcript.id);
         },
 
         success: function(data){
@@ -167,7 +167,7 @@ function submitScan(document_id){
             e.preventDefault();
             var options = { 
                  beforeSend: function(){
-                    addMessage('statusMessages',messages.scan.beforeSend,messages.scan.id);
+                    addMessage('message-list',messages.scan.beforeSend,messages.scan.id);
                 },
                 success: function(){
                     // var currentUrl = window.location.toString();
@@ -175,7 +175,7 @@ function submitScan(document_id){
                     // window.location.replace(newUrl);  
                     updateMessage(messages.scan.success,messages.scan.id);
                     replaceWindowUrl(document_id);
-                }
+                },
                  error: function(XMLHttpRequest, textStatus, errorThrown) { 
                     alert("Status: " + textStatus); alert("Error: " + errorThrown); 
                     updateMessage(messages.scan.error,messages.scan.id);
@@ -274,7 +274,7 @@ $(document).ready(function(){
             data: formData,
             // content_type:'application/json',
             beforeSend:function(){
-                addMessage('statusMessages',messages[type].beforeSend,messages[type].id);
+                addMessage('message-list',messages[type].beforeSend,messages[type].id);
             },
             success: function(data){
                 // console.log(data);

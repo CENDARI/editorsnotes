@@ -693,10 +693,12 @@ def editDocumentCendari(request, project_slug, document_id):
         [ ta.topic for ta in o['document'].related_topics.all() ] +
         [ c.content_object for c in o['document'].citations.filter(content_type=ContentType.objects.get_for_model(main_models.Topic)) ])
     o['scans'] = o['document'].scans.all()
-    o['domain'] = Site.objects.get_current().domain
-    print "--------------------"
-    print o['domain']
-    print "--------------------"
+
+    # o['domain'] = Site.objects.get_current().domain
+    o['domain'] = reverse('document_view', kwargs={'project_slug': project_slug,'document_id':document_id})
+    # print "--------------------"
+    # print o['domain']
+    # print "--------------------"
     notes = [ns.note for ns in main_models.CitationNS.objects\
             .select_related('note')\
             .filter(document=o['document'])]
