@@ -26,6 +26,8 @@ def cendari_clean_name(name):
     name = re.sub(r'[^a-z0-9_-]', '_', name.lower())
     if len(name) > 30:
         name = name[:30]
+    print "name is: "
+    print name,len(name)
     return name
 
 class CendariDataAPIException(Exception):

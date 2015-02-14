@@ -148,6 +148,7 @@
 				  </section>
 				  {% endif %}
 					
+<<<<<<< HEAD
 				  {% if document.id %}
 				  <form  action="{% url "api:api-scans-list" project_slug=project.slug  document_id=document.id %}" method="POST" enctype="multipart/form-data" id="scanCendari">
 				    <fieldset>
@@ -170,6 +171,35 @@
 				    </fieldset>
 				  </form>
 				  {%endif%}
+=======
+					{}
+					{% if document.id %}
+						<form  action="{% url "api:api-scans-list" project_slug=project.slug  document_id=document.id %}" method="POST" enctype="multipart/form-data" id="scanCendari">
+							<fieldset>
+								{% csrf_token %}
+								<!-- <div class="control-group "> -->
+								<!-- <label for="image" >Image:</label> -->
+								<!-- <div class="controls"> -->
+								<input id="id_image" name="image" type="file" />
+								<!-- </div> -->
+								<!-- </div> -->
+								<div class="control-group ">
+									<label for="ordering"  style="visibility: hidden;" class="control-label">ordering:</label>
+									<div class="controls">
+										<input name="ordering" type="hidden" value="0" />
+									</div>
+								</div>
+								<div style="visibility: hidden;" class="form-actions">
+									<button   class="btn btn-primary" title="Make a POST request on the Scan List resource">POST</button>
+								</div>
+							</fieldset>
+						</form>
+					{% else %}
+						Save document before adding a scan.
+					{% endif %}
+
+
+>>>>>>> 5b87781494434488222952fba924c262a2708991
 				</div>
 			</li>
 		</ul>

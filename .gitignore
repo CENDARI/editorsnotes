@@ -27,7 +27,7 @@
 /enotes
 /uploads
 /node_modules
-
+/PGDATA
 
 
 secret.txt
