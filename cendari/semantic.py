@@ -268,7 +268,7 @@ def semantic_process_document(document,user=None):
 def semantic_process_transcript(transcript,user=None):
     """Extract the semantic information from a note,
     creating topics on behalf of the specific user."""
-    print "semantic transcript"
+    logger.info("semantic transcript")
     if transcript is None:
         return
     if transcript.document is None:
@@ -304,7 +304,7 @@ def semantic_process_transcript(transcript,user=None):
 
 def semantic_process_topic(topic,user=None):
     """Extract the semantic information from a topic."""
-    print "indide semantic_process_topic "
+    logger.info("indide semantic_process_topic ")
     if topic is None:
         return
     
@@ -424,17 +424,17 @@ def semantic_resolve_topic(topic, force=False):
     for s,p,o in loaded.triples( (uri, None, None) ):
         if p in imported_relations:
             if p in no_duplicates and (uri, p, None) in g:
-                    print ("Skipping duplicate %s %s %s" % (s, p, o)).encode("utf-8")
+                    logger.info("Skipping duplicate %s %s %s", s, p, o)
             else:
-                print ("Adding %s %s %s" % (s, p, o)).encode("utf-8")
+                logger.info("Adding %s %s %s", s, p, o)
                 g.add( (s, p, o) )
 
     if topic.topic_node.type == 'PLA' and not g.value(uri, GRS['point']):
-        print "No grs:point in RDF, chasing for lat/long"
+        logger.info("No grs:point in RDF, chasing for lat/long")
         o = g.value(uri, GEO['geometry'])
         if o and str(o).startswith('POINT('):
             g.add( (uri, GRS['point'], str(o)[6:-1].split(' ')) )
-            print "Found in geo:geometry"
+            logger.info("Found in geo:geometry")
             return
         lat = g.value(uri, GEO['lat'])
         lon = g.value(uri, GEO['long'])
