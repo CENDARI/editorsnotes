@@ -114,10 +114,10 @@ OPTIONAL:
      Installation is a bit complicated. It needs apache2 and fastcgi.
      first install apache2, then mod_fastcgi, then the iipimage server
      On ubuntu:
-```
-sudo apt-get install apache2-server
-sudo apt-get install iipimage-server
-```
+     ```
+     sudo apt-get install apache2-server
+     sudo apt-get install iipimage-server
+     ```
 
      This will install `/etc/apache2/mods-available/iipsrc.conf` and
      a symbolic link to it from `/etc/apache2/mods-enabled`
@@ -126,10 +126,10 @@ sudo apt-get install iipimage-server
      Assuming your installation of editorsnotes is on a directory ENOTE,
      the images uploaded will be stored in ENOTE/uploads/scans/...
      Then, add the following line to `iipsrv.conf` (replace ENOTE with your dir):
-```
--initial-env MEMCACHED_SERVERS=localhost \
--initial-env FILESYSTEM_PREFIX=ENOTE/uploads/
-```
+     ```
+     -initial-env MEMCACHED_SERVERS=localhost \
+     -initial-env FILESYSTEM_PREFIX=ENOTE/uploads/
+     ```
 
      Sometimes this does not work due to access rights (all the directories
      on the path to ENOTE should be visible to iipsrv). In that case,
@@ -139,14 +139,14 @@ sudo apt-get install iipimage-server
 
 
 8.    Watchdog (optional)
-```
-sudo pip install watchdog
-```
+      ```
+      sudo pip install watchdog
+      ```
 
 9.    VIPS
-```
-sudo apt-get install libvips15 libvips-tools and python-vipscc
-```
+      ```
+      sudo apt-get install libvips15 libvips-tools and python-vipscc
+      ```
 
 
 
