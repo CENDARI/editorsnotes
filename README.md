@@ -121,6 +121,7 @@ OPTIONAL:
 sudo apt-get install apache2-server
 sudo apt-get install iipimage-server
 ```
+
      This will install `/etc/apache2/mods-available/iipsrc.conf` and
      a symbolic link to it from `/etc/apache2/mods-enabled`
      Add a filesystem prefix at this end of this file to limit the
@@ -128,7 +129,8 @@ sudo apt-get install iipimage-server
      Assuming your installation of editorsnotes is on a directory ENOTE,
      the images uploaded will be stored in ENOTE/uploads/scans/...
      Then, add the following line to `iipsrv.conf` (replace ENOTE with your dir):
-```-initial-env MEMCACHED_SERVERS=localhost \
+```
+-initial-env MEMCACHED_SERVERS=localhost \
 -initial-env FILESYSTEM_PREFIX=ENOTE/uploads/
 ```
 
@@ -148,7 +150,6 @@ sudo pip install watchdog
 ```
 sudo apt-get install libvips15 libvips-tools and python-vipscc
 ```
-
 
 
 
