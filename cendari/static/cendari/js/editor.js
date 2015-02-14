@@ -101,7 +101,7 @@ function uniqueElements(el_array){
     var uniqueNames = [];
     $.each(el_array, function(i, el){
         if($.inArray(el, uniqueNames) === -1) uniqueNames.push(el);
-    })
+    });
     return uniqueNames
 }
 

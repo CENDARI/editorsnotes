@@ -342,13 +342,13 @@ class Scan(CreationMetadata, ProjectPermissionsMixin):
     A scanned image of (part of) a dcument.
     """
     document = models.ForeignKey(Document, related_name='scans')
-    image = models.ImageField(upload_to='scans/%Y/%m')
+    image = models.ImageField(storage=iipimage_storage, upload_to='scans/%Y/%m')
     image_thumbnail = models.ImageField(upload_to='scans/%Y/%m', blank=True, null=True)
     ordering = models.IntegerField(blank=True, null=True)
     objects = OrderingManager()
 
     # Cendari code E.G. aviz
-    image = models.ImageField(storage=iipimage_storage, upload_to='scans/%Y/%m')
+    #image = models.ImageField(storage=iipimage_storage, upload_to='scans/%Y/%m')
 
     class Meta:
         app_label = 'main'

@@ -1,3 +1,5 @@
+import logging
+
 from editorsnotes.main.models import Document, Transcript, Topic, TopicAssignment
 from editorsnotes.main.utils import xhtml_to_text
 from editorsnotes.main.templatetags.display import as_html
@@ -18,6 +20,8 @@ import urllib2
 import json
 import sys, traceback
 import pdb
+
+logger = logging.getLogger('cendari.semantic')
 
 CENDARI = Namespace("http://resources.cendari.dariah.eu/notes/")
 #CENDARI = Namespace("http://pro2.cendari.dariah.eu/enotes/")
@@ -78,7 +82,7 @@ class SemanticHandler(object):
             self.dataset().close()
             self._connection.dataset = None
             delattr(self._connection, 'dataset')
-#            print "Closing SEMANTIC connection"
+            logger.info("Closing SEMANTIC connection")
 
 semantic = SemanticHandler()
 
@@ -144,7 +148,8 @@ def semantic_query_latlong(topic):
         return None
     url = topic.rdf
     g = Semantic.graph(url)
-    for s, p, o in g.triples( (g.identifier, GRS['point'], None) ):
+    o = g.value(g.identifier, GRS['point'])
+    if o:
         return map(float, str(o).split(' '))
     return None
 
@@ -183,7 +188,6 @@ def xml_to_topics(xml, uri):
     g.parse(data=xml, format='rdfa')
     entities = []
     for s,p,o in g.triples( (None, RDF.type, None) ):
-#        print ("%s (%s) %s" % (s, p, o)).encode("utf-8")
         v = g.value(s, NAME)
         if not v: continue
         e = { "value": v.value,
@@ -192,7 +196,7 @@ def xml_to_topics(xml, uri):
               "rdfvalue": v,
               "rdftype": o}
         entities.append(e)
-#        print ("Entity %s: %s" % (e["type"], e["value"])).encode("utf-8")
+    logger.debug("Entity %s: %s", e["type"], e["value"])
     return entities
 
 def semantic_process_note(note,user=None):
@@ -260,11 +264,6 @@ def semantic_process_document(document,user=None):
             g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
    
 
-
-#    for s,p,o in g:
-#        print ("%s (%s) %s" % (s, p, o)).encode("utf-8")
-
-
 def semantic_process_transcript(transcript,user=None):
     """Extract the semantic information from a note,
     creating topics on behalf of the specific user."""
@@ -275,7 +274,6 @@ def semantic_process_transcript(transcript,user=None):
         return
     if user is None:
         user = transcript.document.last_updater
-        
 
     # Cleanup entities related to note
     uri = semantic_uri(transcript.document)
@@ -301,8 +299,6 @@ def semantic_process_transcript(transcript,user=None):
             transcript.document.related_topics.create(creator=user, topic=topic)
             g.add( (t['rdfsubject'], OWL.sameAs, rdftopic) )
             g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
-   
-
   
 
 def semantic_process_topic(topic,user=None):
@@ -330,8 +326,6 @@ def semantic_process_topic(topic,user=None):
     g.add( (g.identifier, CENDARI['name'], Literal(topic.preferred_name)) )
     if topic.rdf is not None:
         g.add( (g.identifier, OWL['sameAs'], URIRef(topic.rdf)) )
-
-
 
 imported_relations = set([
     # Place
@@ -389,58 +383,41 @@ def dbpedia_lookup(label,type):
     return json.loads(urllib2.urlopen(req).read())
 
 
-def semantic_resolve_topic(topic):
-#    pdb.set_trace()
+def semantic_resolve_topic(topic, force=False):
     rdf_url = topic.rdf
-    print '................ trying to resolve topic ' + str(topic) + ', rdf= ' + str(rdf_url)
-    #topic.rdf = rdf_url
+    logger.debug('Trying to resolve topic %s from url %s', str(topic), str(rdf_url))
     topic.save()
     semantic_process_topic(topic)
     if rdf_url is None:
         return
     uri = URIRef(rdf_url)
+    g = Semantic.graph(identifier=uri)
+    if len(g) != 0 and not force:
+        logger.debug('Uri %s already resolved', str(uri))
+        return # already resolved
+
+    logger.debug("parsing uri %s", str(uri))
     loaded = Graph(identifier=uri)
 
-    print "parsing url"
     try:
-        # loaded.parse(location=rdf_url)
         loaded.parse(location=uri)
     except:
-        print "Exception in parsing code:"
-        print rdf_url.encode("utf-8")
-        print '-'*60
-        traceback.print_exc(file=sys.stdout)
-        print '-'*60 
+        logger.warning("Exception in parsing code from url %s", str(rdf_url))
+        #traceback.print_exc(file=sys.stdout)
         pass
 
     type = URIRef(topic_to_schema(topic.topic_node.type))
-
-    print "rdf_url is :"
-    print rdf_url.encode("utf-8")
-    print "--------------------------------------"
-    print "uri is :"
-    print uri 
-    print "--------------------------------------"
-    print "loaded functions are:"
-    print dir(loaded)
-    print "--------------------------------------"
-    print "loaded is: "
-    print len(loaded)
-    print "--------------------------------------"
-    print "RDF type is:"
-    print RDF.type
-    print "--------------------------------------"
-    print "type is:"
-    print type
-    print "--------------------------------------"
-
+    
+    logger.info("Loaded %s of type %s: %d triples", str(rdf_url), str(type), len(loaded))
 
     if (uri, RDF.type, type) in loaded:
-        print ("Ontology in %s contains %s as expected"  % (rdf_url, type)).encode("utf-8")
+        logger.info ("Ontology in %s contains %s as expected", str(rdf_url), str(type))
+    elif topic.topic_node.type=='PLA' and (uri, RDF.type, GEO['SpatialThing']) in loaded:
+        logger.warning("%s: Missing type %s", str(rdf_url), str(type))
+        loaded.add( (uri, RDF.type, type) )
     else:
-        print >>sys.stderr, ("%s: Missing type %s"  % (rdf_url, type)).encode("utf-8")
+        logger.error("%s: Missing type %s", str(rdf_url), str(type))
         return
-    g = Semantic.graph(identifier=uri)
     Semantic.remove_graph(g)
     
     for s,p,o in loaded.triples( (uri, None, None) ):
@@ -450,6 +427,22 @@ def semantic_resolve_topic(topic):
             else:
                 print ("Adding %s %s %s" % (s, p, o)).encode("utf-8")
                 g.add( (s, p, o) )
+
+    if topic.topic_node.type == 'PLA' and not g.value(uri, GRS['point']):
+        print "No grs:point in RDF, chasing for lat/long"
+        o = g.value(uri, GEO['geometry'])
+        if o and str(o).startswith('POINT('):
+            g.add( (uri, GRS['point'], str(o)[6:-1].split(' ')) )
+            print "Found in geo:geometry"
+            return
+        lat = g.value(uri, GEO['lat'])
+        lon = g.value(uri, GEO['long'])
+        if lat and lon:
+            g.add( (uri, GRS['point'], lat+" "+lon) )
+            return
+        logger.warning('No lat/long information in RDF for %s', str(uri))
+        # chase in geonames later
+        
 
 def semantic_refresh_topic(topic):
     if topic.rdf is None or topic.topic_node.type == 'DAT':
