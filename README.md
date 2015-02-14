@@ -7,74 +7,73 @@ UBUNTU:
           python --version
 
 2. Postgresql  
-     sudo apt-get install postgresql
-     sudo apt-get install pgadmin3
+     `sudo apt-get install postgresql`
+     `sudo apt-get install pgadmin3`
 
-     sudo -u postgres psql postgres
-     sudo apt-get install postgresql-client
-     sudo apt-get install postgresql-server-dev-9.1
+     `sudo -u postgres psql postgres`
+     `sudo apt-get install postgresql-client`
+     `sudo apt-get install postgresql-server-dev-9.1`
 
-     \password postgres
+     `\password postgres`
 
-     sudo -u postgres createdb mydb
-     +open pgAdmin gui & create new role & connect the db
+     `sudo -u postgres createdb mydb`
+     `+open pgAdmin gui & create new role & connect the db`
 
 3. Fabric
-          sudo apt-get install python-pip python-dev build-essential
-          sudo pip install fabric
+     `sudo apt-get install python-pip python-dev build-essential`
+     `sudo pip install fabric`
 
-4.   libxml2 + libxslt
-          sudo apt-get install libxml2
+4. libxml2 + libxslt
+     `sudo apt-get install libxml2`
+     `sudo apt-get install libxml2-dev libxslt-dev`
 
-          sudo apt-get install libxml2-dev libxslt-dev
+5. Elastic Search
+     `sudo apt-get install openjdk-7-jre`
+     `wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.1.0.deb`
+     `sudo dpkg -i elasticsearch-1.1.0.deb`
+     `sudo service elasticsearch start`
 
-5.   Elastic Search
-          sudo apt-get install openjdk-7-jre
-          wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.1.0.deb
-          sudo dpkg -i elasticsearch-1.1.0.deb
-          sudo service elasticsearch start
+6. Nodejs  
+      `sudo apt-get install -y python-software-properties python g++ make`
+      `sudo add-apt-repository -y ppa:chris-lea/node.js`
+      `sudo apt-get update`
+      `sudo apt-get install nodejs`
 
-6.    Nodejs  
-     sudo apt-get install -y python-software-properties python g++ make
-     sudo add-apt-repository -y ppa:chris-lea/node.js
-     sudo apt-get update
-     sudo apt-get install nodejs
+7. Less
+      `sudo apt-get install npm`
+      `npm config set registry http://registry.npmjs.org`
+      `sudo npm install -g less@1.3.3`
+      - you can use: `sudo apt-get install node-less` but this may not install the 1.3.3 version that we tested with 
 
-7.    Less
-          sudo apt-get install npm
-          npm config set registry http://registry.npmjs.org
-          sudo npm install -g less@1.3.3
-               - you can use: "sudo apt-get install node-less" but this may not install the 1.3.3 version that we tested with 
-
-10.  Virtual Environment
-      sudo pip install virtualenv
+10. Virtual Environment
+      `sudo pip install virtualenv`
 
 13.  Redis
-     Install redis from http://redis.io/ for RQ (Redis Queue) to work.
+     Install redis from `http://redis.io/` for RQ (Redis Queue) to work.
      On ubuntu:
-          apt-get install redis-server
+          `apt-get install redis-server`
 
 14. Install flup
-    sudo pip install flup
+    `sudo pip install flup`
 
 15. For pycurl install
-    sudo apt-get install libcurl4-gnutls-dev
+    `sudo apt-get install libcurl4-gnutls-dev`
 
 16. Inside Editors Notes Directory
-    fab setup
+    `fab setup`
 
     Create database in pgAdmin
     edit editorsnotes/settings_local.py with new database info
-    sudo -u postgres fab sync_database
+    `sudo -u postgres fab sync_database`
 
     Create a superuser and initial project
-    fab create_superuser
+    `fab create_superuser`
 
     sudo service elasticsearch status (> check that elasticsearch is started)
-    sudo fab runserver
+    `sudo fab runserver`
 
 17. Check the site:
-    http://localhost:8000/
+    `http://localhost:8000/`
 
 
 OPTIONAL:
@@ -84,21 +83,21 @@ OPTIONAL:
 
 
 12.  iipsrv
-     http://iipimage.sourceforge.net/
+     `http://iipimage.sourceforge.net/`
      Installation is a bit complicated. It needs apache2 and fastcgi.
      first install apache2, then mod_fastcgi, then the iipimage server
      On ubuntu:
-         sudo apt-get install apache2-server 
-         sudo apt-get install iipimage-server
-     This will install /etc/apache2/mods-available/iipsrc.conf and
-     a symbolic link to it from /etc/apache2/mods-enabled
+         `sudo apt-get install apache2-server`
+         `sudo apt-get install iipimage-server`
+     This will install `/etc/apache2/mods-available/iipsrc.conf` and
+     a symbolic link to it from `/etc/apache2/mods-enabled`
      Add a filesystem prefix at this end of this file to limit the
      access of the server and facilitate communication with editorsnotes.
      Assuming your installation of editorsnotes is on a directory ENOTE,
      the images uploaded will be stored in ENOTE/uploads/scans/...
-     Then, add the following line to iipsrv.conf (replace ENOTE with your dir):
-     -initial-env MEMCACHED_SERVERS=localhost \
-     -initial-env FILESYSTEM_PREFIX=ENOTE/uploads/
+     Then, add the following line to `iipsrv.conf` (replace ENOTE with your dir):
+     `-initial-env MEMCACHED_SERVERS=localhost \`
+     `-initial-env FILESYSTEM_PREFIX=ENOTE/uploads/`
 
      Sometimes this does not work due to access rights (all the directories
      on the path to ENOTE should be visible to iipsrv). In that case,
@@ -109,10 +108,10 @@ OPTIONAL:
 
 8.    Watchdog (optional)
 
-      sudo pip install watchdog
+      `sudo pip install watchdog`
 
 9.    VIPS
-      sudo apt-get install libvips15 libvips-tools and python-vipscc
+      `sudo apt-get install libvips15 libvips-tools and python-vipscc`
 
 
 
