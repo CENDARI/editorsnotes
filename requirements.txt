@@ -12,7 +12,7 @@ pyelasticsearch==0.6
 BeautifulSoup<4.0
 lxml==3.0.2
 cssselect==0.8
-Pillow==2.3.0
+Pillow==2.7.0
 psycopg2==2.4.6
 
 isodate==0.4.9
@@ -40,7 +40,7 @@ django-admin2==0.6.1
 
 #for mac  run in
 
-bsddb3==6.1.0
+#bsddb3==6.1.0
 # for mac run also export BERKELEYDB_DIR=$(brew --cellar)/berkeley-db/5.3.28;
 
 

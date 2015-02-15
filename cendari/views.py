@@ -21,7 +21,7 @@ from editorsnotes.main import models as main_models
 from editorsnotes.search import en_index
 from cendari import utils
 #from cendari.decorators import check_project_privs
-from cendari.oldstuff import  ProjectAdminView, scan_to_dict
+from cendari.image import  ProjectAdminView, scan_to_dict
 #import editorsnotes.admin_custom.forms as admin_forms
 #from editorsnotes.admin.forms.notes import NoteForm
 #import editorsnotes.admin_custom.views as admin_views

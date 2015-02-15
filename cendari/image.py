@@ -8,8 +8,8 @@ class ProjectAdminView:
 
 def scan_to_dict(scan):
     try:
-        # res = subprocess.check_output(["tiffinfo", scan.image.path]).strip()
-        res = subprocess.check_output(["identify", "-format", "%n", scan.image.path]).strip()
+        res = subprocess.check_output(["tiffinfo", scan.image.path]).strip()
+        #res = subprocess.check_output(["identify", "-format", "%n", scan.image.path]).strip()
     except subprocess.CalledProcessError:
         return None
     image_width = int(search('Image Width: {:d}', res).fixed[0])

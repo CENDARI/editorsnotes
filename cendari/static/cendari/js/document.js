@@ -33,7 +33,7 @@ function viewImage(id)
     if (id == null)
 	return;
     $('#scan-viewer').attr('src', cendari_root_url+'cendari/'+cendari_js_project_slug+'/scan/'+id);
-    value = '{project:' + cendari_js_project_slug + 'scan_id: ' + id + '}';
+    //value = '{project:' + cendari_js_project_slug + 'scan_id: ' + id + '}';
     //trace.event("_system","viewImage", "centre", value);
 }
 

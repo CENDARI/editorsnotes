@@ -10,13 +10,15 @@ import pdb
 
 def convert_to_pyramid_tiff(path,npath):
     print "Converting %s into %s" % (path, npath)
-    # if not subprocess.call(["convert", path, \
-    #                         "-define", "tiff:tile-geometry=256x256", \
-    #                         "-depth", "8",\
-    #                         "-compress", "jpeg", \
-    #                         'ptif:'+npath]):
-    if not subprocess.call(["vips", "im_vips2tiff", path, \
-                                npath+":jpeg:75,tile:256x256,pyramid"]):
+    if not subprocess.call(["convert", path, \
+                            "-define", "tiff:tile-geometry=256x256", \
+                            "-compress", "jpeg", \
+                            'ptif:'+npath]):
+    #if not subprocess.call(["vips", "im_vips2tiff", path, \
+    #                            npath+":jpeg:75,tile:256x256,pyramid"]):
+    #if not subprocess.call(["vips", "tiffsave", path, npath, \
+    #                        "-tile", "--pyramid", "--compression", "deflate", \
+    #                        "--tile-width", "256", "--tile-height", "256"]):
         print "Problem converting %s into %s" % (path, npath)
     else:
         print "Converted %s into %s" % (path, npath)

@@ -43,7 +43,7 @@ en_index = ENIndex(onOpen=register_models)
 
 activity_index = ActivityIndex()
 
-@receiver(post_revision_commit)
+#@receiver(post_revision_commit)
 def update_activity_index(instances, revision, versions, **kwargs):
     if not activity_index.is_open:
         activity_index.open()

@@ -129,6 +129,14 @@ Ext.application({
 					title : 'Image Viewer',
 					id : 'imageViewer',
 					collapsed : true,
+				    tools: [{
+					type: 'expand',
+					handler: function() {
+					    var src=$('#scan-viewer').attr('src');
+					    if (src)
+						window.open(src, 'scan');
+					}
+				    }]
 				}]
 			}, {
 				region : 'east',
