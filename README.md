@@ -102,14 +102,11 @@ UBUNTU:
 17. Check the site:
     http://localhost:8000/
 
-
-OPTIONAL:
             
-11.  ImageMagick
+18.  ImageMagick
      Download from http://www.imagemagick.org/ version > 6.4
 
-
-12.  iipsrv
+19.  iipsrv
      http://iipimage.sourceforge.net/
      Installation is a bit complicated. It needs apache2 and fastcgi.
      first install apache2, then mod_fastcgi, then the iipimage server
@@ -137,6 +134,20 @@ OPTIONAL:
      Beware of access rights ... (sudo mkdir ... and chown /var/www/uploads)
      Then, add /var/www/uploads/ to iipsrc.conf
 
+20. Image conversion 
+    When uploading images, an external process is used to do the
+    conversion into a tiled pyramid file using the Imagemagick
+    "convert" program.  The external process should run using the
+    following program (can be in background):
+
+    ```
+    bin/python manage.py rqworker default
+    ```
+
+    This background program can be managed by the `supervisord`
+    program if you have it installed. Look at the file
+    `supervisor.conf` for an example on how t set it up.
+
 
 8.    Watchdog (optional)
       ```
@@ -158,88 +169,109 @@ Already had: python,python-dev, django, django-admin (?), pip
 + brew install git
 
 1. Install brew:
-ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"
-brew doctor
+   ```
+   ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)"
+   brew doctor
+   ```
 
 2. Install libxml2 
-brew install --with-python libxml2
+   ```
+   brew install --with-python libxml2
+   ```
 
 3. Install libxslt
-brew install libxslt
+   ```
+   brew install libxslt
+   ```
 
 4. Install ElasticSearch
-brew install ElasticSearch
+   ```
+   brew install ElasticSearch
+   ```
 
 5. Install Fabric
-sudo pip install fabric
+   ```
+   sudo pip install fabric
+   ```
 
 5. Install Node.js
-http://nodejs.org/download/
-node-v0.10.21.pkg in /usr/local/bin
+   Download from `http://nodejs.org/download/`
+   `node-v0.10.21.pkg` in `/usr/local/bin`
 
-6 Install LessCss: http://lesscss.org/
-sudo npm install -g less@1.3.3
-in usr/local/bin
+6. Install LessCss: http://lesscss.org/
+  ```
+  sudo npm install -g less@1.3.3
+  ```
+
 
 7. Install Browserify
-sudo npm install browserify
+   ```
+   sudo npm install browserify
+   ```
 
 8.  Install postgreSQL
-http://www.enterprisedb.com/products-services-training/pgdownload#osx
-postgresql-9.3.1-1-osx.dmg (NOT)
+    Download from http://www.enterprisedb.com/products-services-training/pgdownload#osx
+    `postgresql-9.3.1-1-osx.dmg` (NOT?)
 
-brew install postgresql
+    ```
+    brew install postgresql
+    ```
 
-9 Install watchdog (optional)
-sudo pip install watchdog
-needs
-brew install libyaml 
-(fab watch_static command to automatically collect and compile static files as they are changed.)
+9. Install watchdog (optional)
+   ```
+   brew install libyaml 
+   sudo pip install watchdog
+   ```
+   (fab watch_static command to automatically collect and compile static files as they are changed.)
 
-10 Install virtualenv
-sudo pip install virtualenv
+10. Install virtualenv
+    ```
+    sudo pip install virtualenv
+    ```
 
-11 Start Elastic Search
-sudo elasticsearch start
+11. Start Elastic Search
+   ```
+   sudo elasticsearch start
+   ```
 
-12 Install xapian
-brew install xapian
-mayby also (??)
-sudo easy_install xapian-haystack
+12. Install flup
+    ```
+    sudo pip install flup
+    ```
 
-& xapian-bindings (./configure, sudo make install )
-http://xapian.org/download
-- wjw - I had to go back to the archive (http://oligarchy.co.uk/xapian/) find the exact version of xapian-bindings to match the version of xapian installed by brew
+13. Install bsddb3
+    ```
+    brew install berkeley-db --without-java
+    sudo BERKELEYDB_DIR=/usr/local/Cellar/berkeley-db/5.3.28/ pip install bsddb3
+    ```
+    -  wjw - this manual installation technique is documented in more here http://chriszf.posthaven.com/getting-berkeleydb-working-with-python-on-osx)
+
+14. Inside Editors Notes Directory
+    ```
+    fab setup
+    ```
+
+15. Database
+    Create database in pgAdmin
+
+    edit editorsnotes/settings_local.py with new database info
+
+    ```
+    fab sync_database
+    fab runserver
+    ```
+
+16. Check the site:
+   http://localhost:8000/
+
+17. Image conversion 
+    When uploading images, an external process is used to do the
+    conversion into a tiled pyramid file using the Imagemagick
+    "convert" program.  The external process should run using the
+    following program (can be in background):
+
+    ```
+    bin/python manage.py rqworker default
+    ```
 
 
-13 Install flup
-sudo pip install flup
-
-14 Install bsddb3
-brew install berkeley-db --without-java
-sudo BERKELEYDB_DIR=/usr/local/Cellar/berkeley-db/5.3.28/ pip install bsddb3
--  wjw - this manual installation technique is documented in more here http://chriszf.posthaven.com/getting-berkeleydb-working-with-python-on-osx)
-
-
-15 Inside Editors Notes Directory
-fab setup
-
-16 Database
-Create database in pgAdmin
-edit editorsnotes/settings_local.py with new database info
-fab sync_database
-
-fab runserver
-
-17 Check the site:
-http://localhost:8000/
-
-18 Image conversion
-When uploading images, an external process is used to do the conversion into a tiled pyramid file using the Imagemagick "convert" program.
-The external process should run using the following program (can be in background):
-bin/python manage.py rqworker default
-
-19 Haystack index reconstruction
-When the haystack models change or the database is flushed,
-the Haystack indexes should be rebuild. Use that command:
-bin/python manage.py rebuild_index

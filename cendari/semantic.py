@@ -424,7 +424,7 @@ def semantic_resolve_topic(topic, force=False):
     for s,p,o in loaded.triples( (uri, None, None) ):
         if p in imported_relations:
             if p in no_duplicates and (uri, p, None) in g:
-                    logger.info("Skipping duplicate %s %s %s", s, p, o)
+                logger.info("Skipping duplicate %s %s %s", s, p, o)
             else:
                 logger.info("Adding %s %s %s", s, p, o)
                 g.add( (s, p, o) )
