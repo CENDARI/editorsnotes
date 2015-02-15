@@ -156,7 +156,7 @@ UBUNTU:
 
 9.    VIPS
       ```
-      sudo apt-get install libvips15 libvips-tools and python-vipscc
+      sudo apt-get install libvips-tools
       ```
 
 
