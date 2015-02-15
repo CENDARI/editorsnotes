@@ -26,8 +26,8 @@ def cendari_clean_name(name):
     name = re.sub(r'[^a-z0-9_-]', '_', name.lower())
     if len(name) > 30:
         name = name[:30]
-    print "name is: "
-    print name,len(name)
+    #print "name is: "
+    #print name,len(name)
     return name
 
 class CendariDataAPIException(Exception):
@@ -222,6 +222,7 @@ class CendariDataAPI(object):
         c.setopt(c.URL, url)
         c.setopt(pycurl.HTTPHEADER, ["Authorization:"+self.key])
         c.setopt(pycurl.HTTPPOST, fields)
+        c.setopt(pycurl.CUSTOMREQUEST, "PUT")
         c.setopt(pycurl.WRITEDATA, buffer)
         c.perform()
         status = c.getinfo(c.RESPONSE_CODE)
@@ -239,13 +240,13 @@ class CendariDataAPI(object):
             raise CendariDataAPIException('Not Logged-in to Cendari Data API')
         if not id:
             id = ''
-        return self.read_url(self.url+'users/'+id)
+        return self.read_url(self.url+'users'+id)
 
     def get_privileges(self,userId=None,dataspaceId=None,role=None):
         if not self.key:
             raise CendariDataAPIException('Not Logged-in to Cendari Data API')
         if userId:
-            return self.read_url(self.url+'privileges/'+userId)
+            return self.read_url(self.url+'privileges?userId'+userId)
         elif dataspaceId:
             return self.read_url(self.url+'privileges/'+dataspaceId)
         elif role:
@@ -254,7 +255,7 @@ class CendariDataAPI(object):
             else:
                 raise CendariDataAPIException('Invalid role: %s, should be "member", "editor", or "admin"' % role)
         else:
-            return self.read_url(self.url+'privileges/')
+            return self.read_url(self.url+'privileges')
 
 
 import pprint
@@ -269,9 +270,14 @@ def test():
     ds = api.get_dataspace()
     print "Available dataspaces: %d" % len(ds)
     u = api.get_users()
-    print "Available users(%d): %s" % (len(u), ",".join(u))
+    print "Available users(%d)" % len(u)
+    for user in u:
+        print '\tusername: %s' % user['username']
+        print '\tfullname: %s' % user['fullname']
     p = api.get_privileges()
-    print "Available privileges(%d): %s" % (len(p), ",".join(p))
+    print "Available privileges(%d)" % len(p)
+    for priv in p:
+        print '\trole: %s' % priv['role']
     c = None
     for d in ds:
         if d['name'] == 'nte_test':

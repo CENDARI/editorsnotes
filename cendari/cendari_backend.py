@@ -2,13 +2,9 @@ from django.contrib.auth.backends import RemoteUserBackend
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 
-from django.contrib.auth.signals import user_logged_in
-
-from editorsnotes.main.models import (
-    User, Project, ProjectInvitation, ProjectRole)
+from editorsnotes.main.models import Project
 
 import sys
-from cendari_api import *
 
 content_type = ContentType.objects.get_for_model(Project)
 
@@ -36,68 +32,3 @@ class CendariUserBackend(RemoteUserBackend):
             user.user_permissions.add(_permission_view)
         return user
 
-def login_user_synchronize(sender, user, request, **kwargs):
-    print "Synchronized called on login for %s" % user
-
-    pname = cendari_clean_name(user.username)
-    print "Creating project %s" % pname
-    project = Project.objects.filter(slug=pname)
-    if len(project) != 0:
-        project=project[0]
-    else:
-        project=Project.objects.create(slug=pname, name=user.username)
-        project.save() # default roles are created at save time
-    role = project.roles.get(role='Editor')
-    role.users.add(user)
-
-    if 'eppn' not in request.META: 
-        print 'No eppn in META'
-        return
-    eppn = request.META['eppn']
-    if 'mail' not in request.META:
-        print 'No mail in META'
-        return
-    mail = request.META['mail']
-    if 'cn' not in request.META:
-        print 'No cn in META'
-        return
-    cn = request.META['cn']
-
-    from django.conf import settings
-    try:
-        data_api_server = settings.CENDARI_DATA_API_SERVER
-    except ValueError:
-        raise ImproperlyConfigured("CENDARI_DATA_API_SERVER must be configured in the settings file'")
-    try:
-        api = CendariDataAPI(data_api_server)
-        if not api.session(eppn=eppn, mail=mail, cn=cn):
-            print "Cendari Data API refuses the connection"
-            return
-    except:
-        print 'Cannot contact the Cendari Data API at %s' % data_api_server
-        return
-    try:
-        dataspaces = api.get_dataspace()
-        dprojects = {}
-        for d in dataspaces:
-            if d['name'].startswith('nte_'):
-                name=d['name'][4:]
-                dprojects[name] = d
-                project, created=Project.objects.get_or_create(slug=pname, 
-                                                               defaults={'name': pname })
-                if created or user.superuser_or_belongs_to(project):
-                    print 'creating local project: %s' % pname
-                    role = project.roles.get(role='Editor') # TODO get privileges from API
-                    role.users.add(user)
-        for p in user.get_authorized_projects():
-            pname = "nte_"+cendari_clean_name(p.name)
-            if pname not in dprojects:
-                print 'creating remote project: %s' % pname
-                api.create_dataspace(pname,title=p.name)
-    except CendariDataAPIException as e:
-        print 'Problem synchonizing projects with DATA Api: %s' % e
-    except:
-        print "Unexpected error:", sys.exc_info()[0]
-
-
-user_logged_in.connect(login_user_synchronize)
