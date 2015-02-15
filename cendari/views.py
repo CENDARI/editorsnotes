@@ -162,10 +162,9 @@ class EditDocumentAdminView(DocumentAdminView):
 def scan(request, scan_id, project_slug):
     print "scan view"
     o = {}
-    # o['scan'] = _check_privs(request.user, get_object_or_404(main_models.Scan, id=scan_id))
-    o['scan'] = get_object_or_404(main_models.Scan, id=scan_id)
-    info = scan_to_dict(o['scan'])
-#    print info
+    scan = get_object_or_404(main_models.Scan, id=scan_id)
+    o['scan'] = scan
+    info = scan_to_dict(scan)
     o['server'] = settings.IIPSRV
     o['credit'] = 'INRIA Aviz for the Cendari project'
     o['image'] = info['path']
