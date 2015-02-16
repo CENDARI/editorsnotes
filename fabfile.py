@@ -216,7 +216,7 @@ def install_node_packages():
                 abort('Cannot find lessc')
 
 
-
+@task
 def symlink_packages():
     "Symlink python packages not installed with pip"
     missing = []
