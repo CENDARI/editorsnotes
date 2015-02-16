@@ -194,7 +194,7 @@ def edit_topic_node(request, topic_node_id):
 class EditTranscriptAdminView(TranscriptAdminView):
     template_name = 'edittranscript.html'
     
-    print "transcript view"
+    #print "transcript view"
     
     def get_object(self, document_id):
         self.document = get_object_or_404(
