@@ -34,9 +34,9 @@ TYPE_CHOICES = (
     ('ORG', 'Organization'),
     ('PER', 'Person'),
     ('PUB', 'Publication'),
-    ('ART', 'Artifact'),
+    # ('ART', 'Artifact'),
     ('PLA', 'Place'),
-    ('DAT', 'Date'),
+    # ('DAT', 'Date'),
     ('TAG', 'Tag'))
 
 
