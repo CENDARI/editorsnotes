@@ -121,9 +121,9 @@ RQ_QUEUES = {
 
 #IIPSRV = 'http://cendari.saclay.inria.fr/fcgi-bin/iipsrv.fcgi'
 #RQ_QUEUES = {
-#    'default': {
-#        'HOST': 'localhost',
-#        'PORT': 6379,
-#        'DB': 0,
-#    }
+    'default': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+    }
 }
