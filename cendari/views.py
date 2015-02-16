@@ -636,6 +636,20 @@ class NoteCendari(NoteAdminView):
 
 class DocumentCendari(DocumentAdminView):
     template_name = 'documentCendari.html'
+    def get_breadcrumb(self):
+        breadcrumbs = (
+            (self.project.name, self.project.get_absolute_url()),
+        )
+        if self.object is None:
+            breadcrumbs += (
+                ('Add', None),
+            )
+        else:
+            breadcrumbs += (
+                (self.object.as_text(), self.object.get_absolute_url()),
+                ('Edit', None)
+            )
+        return breadcrumbs
 
 class EntityCendari(TopicAdminView):
     template_name = 'entityCendari.html'
@@ -682,7 +696,7 @@ def editDocumentCendari(request, project_slug, document_id):
     o['project_slug'] = project_slug
     o['breadcrumb'] = (
         (o['document'].project.name, o['document'].project.get_absolute_url()),
-        ('Documents', reverse('all_documents_view',kwargs={'project_slug': o['document'].project.slug})),
+#        ('Documents', reverse('all_documents_view',kwargs={'project_slug': o['document'].project.slug})),
         (o['document'].as_text(), None)
     )
     o['project'] = o['document'].project

@@ -42,5 +42,5 @@ urlpatterns = patterns('',
     url(r'^topics/$', views.TopicNodeList.as_view(), name='api-topic-nodes-list'),
     url(r'^topics/(?P<pk>\d+)/$$', views.TopicNodeDetail.as_view(), name='api-topic-nodes-detail'),
     url(r'^projects/$', views.ProjectList.as_view(), name='api-projects-list'),
-    url(r'^projects/(?P<project_slug>\w+)/', include(project_specific_patterns)),
+    url(r'^projects/(?P<project_slug>[-\w]+)/', include(project_specific_patterns)),
 )
