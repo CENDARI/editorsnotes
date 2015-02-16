@@ -57,11 +57,12 @@ def login_user_synchronize(sender, user, request, **kwargs):
     logger.debug("Synchronized called on login for %s", user)
 
     pname = cendari_clean_name(user.username)
-    logger.info("Creating project %s", pname)
     project = Project.objects.filter(slug=pname)
     if len(project) != 0:
+        logger.info("Project %s already created", pname)
         project=project[0]
     else:
+        logger.info("Creating project %s", pname)
         project=Project.objects.create(slug=pname, name=user.username)
         project.save() # default roles are created at save time
     role = project.roles.get(role='Editor')
@@ -111,10 +112,10 @@ def login_user_synchronize(sender, user, request, **kwargs):
             if d['name'].startswith('nte_'):
                 name=d['name'][4:]
                 dprojects[name] = d
-                project, created=Project.objects.get_or_create(slug=pname, 
-                                                               defaults={'name': pname })
-                if created or user.superuser_or_belongs_to(project):
-                    logger.debug('creating local project: %s', pname)
+                project, created=Project.objects.get_or_create(slug=name, 
+                                                               defaults={'name': name })
+                if created and not user.superuser_or_belongs_to(project):
+                    logger.debug('Adding editor role in local project: %s', pname)
                     role = project.roles.get(role='Editor') # TODO get privileges from API
                     role.users.add(user)
         for p in user.get_authorized_projects():
