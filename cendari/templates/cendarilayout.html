@@ -6,149 +6,171 @@
 
 {% block layout %}
 
-  {% compress js %}
-    <script type="text/javascript" src="{% static "cendari/js/cendari.js" %}"></script>
-    <script type="text/javascript" src="{% static "cendari/js/editor.js" %}"></script>
-    <script type="text/javascript" src="{% static "cendari/js/jquery.serialize-object.min.js" %}"></script>
+{% compress js %}
+  <script type="text/javascript" src="{% static "cendari/js/cendari.js" %}"></script>
+  <script type="text/javascript" src="{% static "cendari/js/editor.js" %}"></script>
+  <script type="text/javascript" src="{% static "cendari/js/jquery.serialize-object.min.js" %}"></script>
 
-    <script type="text/javascript" src="{% static "cendari/js/messagePassing.js" %}"></script>
-  {% endcompress %}
-
-  {% if not project %}
-    {% set project = user.get_an_authorized_project %}
-    {% set project_slug = project.slug %}
-
-  {% else %}
-    {% set project_slug = project.slug %}
-
-  {% endif %}
+  <script type="text/javascript" src="{% static "cendari/js/messagePassing.js" %}"></script>
 
 
+ 
 
-  <div >
-    <div class="navbar">
-      <div class="navbar-inner">
-        <div class="container">
-          <ul class="nav">
-            <li><a class="brand" href="{% url 'index_view' %}"><img src="{% static "img/cendari_logo.png" %}" height="50" width="200" border="5"/></a> </li>
-            <li class="divider-vertical"></li>
-            <li><a href="{% url 'index_view' %}">Home</a></li>
-            <li><a href="{% url 'cendari_browse_view' %}">Browse</a></li>
-            <li><a href="{% url 'cendari_about_view' %}">About</a></li>
+{% endcompress %}
 
-            {% if user.is_staff or user.is_superuser %}
+ <script type="text/javascript" src="https://dev.dariah.eu/jira/s/fa233ec786d6cfd2995f6f7fd7013a94-T/en_UK-3nf04g/6329/39/1.4.13/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector.js?locale=en-UK&collectorId=346f4388">
+  </script>
+  <script type="text/javascript">window.ATL_JQ_PAGE_PROPS =  {
+    "triggerFunction": function(showCollectorDialog) {
+      //Requries that jQuery is available! 
+      if($('#issueCollector').length){
+        jQuery("#issueCollector").click(function(e) {
+          e.preventDefault();
+          showCollectorDialog();
+        });
+      }
+    }};
+  </script>
+
+
+
+{% if not project %}
+  {% set project = user.get_an_authorized_project %}
+  {% set project_slug = project.slug %}
+
+{% else %}
+  {% set project_slug = project.slug %}
+
+{% endif %}
+
+
+
+<div >
+  <div class="navbar">
+    <div class="navbar-inner">
+      <div class="container">
+        <ul class="nav">
+          <li><a class="brand" href="{% url 'index_view' %}"><img src="{% static "img/cendari_logo.png" %}" height="50" width="200" border="5"/></a> </li>
+          <li class="divider-vertical"></li>
+          <li><a href="{% url 'index_view' %}">Home</a></li>
+          <li><a href="{% url 'cendari_browse_view' %}">Browse</a></li>
+          <li><a href="{% url 'cendari_about_view' %}">About</a></li>
+
+          {% if user.is_superuser %}
             <li><a href="https://dev.dariah.eu/jira/browse/CVRE" target="_blank">Issue Report</a></li>
-	    {% else %}
+          {% elif user.is_staff %}
             <li><a href="https://dev.dariah.eu/jira/secure/CreateIssue.jspa?pid=10900&issuetype=1" target="_blank">Issue Report</a></li>
-	    {% endif %}
+          {% else %}
+            <li><a href="" id='issueCollector'>Issue Report</a></li>
+          {% endif %}
             <li><a href="https://docs.google.com/forms/d/1LgNR3GLfMmql2acSryzVQRGPjEBmr6ZfvsVJZ8xX9QI/viewform" target="_blank">Survey</a></li>
             <li class="divider-vertical"></li>
             <form class="navbar-search" action="{% url "cendari_search_view" project_slug %}" method="get">
               <input type="text" class="search-query search-autocomplete" name="q" x-search-target="topics" placeholder="Search" />
             </form> 
-          </ul>
+        </ul>
 
-          <!--<button id="submitButtonCendari" onclick="submitCendariForm()"  value=""></button>
-          <script type="text/javascript" src="{% static "cendari/js/editor.js" %}"></script> -->
+        <!--<button id="submitButtonCendari" onclick="submitCendariForm()"  value=""></button>
+        <script type="text/javascript" src="{% static "cendari/js/editor.js" %}"></script> -->
 
 
-          {% with user=request.user %}
-            {% if user.is_authenticated %}
-              {% if user.email %}
-                <input type="hidden" id="logged-in-user-email" value="{{ user.email }}" />
-              {% endif %}
-              <ul class="nav pull-right">
-                <li class="dropdown">
-                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                  {{ user.display_name }}
-                  <b class="caret"></b>
-                  </a>
-                  <ul class="dropdown-menu">
-                    <li><a href="{{ user.get_absolute_url }}">My profile</a></li>
-                    <li><a {% if browserid_authenticated %}class="browserid-logout" {% endif %}href="{% url "user_logout_view" %}">Log out</a></li>
-                  </ul>
-                </li>
-
-                <li>
-                  <div class="btn-group">
-                    <a href="#" class="btn dropdown-toggle" data-toggle="dropdown">
-                      <i class="icon-pencil"></i>
-                      <b class="caret"></b>
-                    </a>
-                    <ul class="dropdown-menu" style="right: 0; left: auto;">
-                      {% block extra_edit_actions %}{% endblock %}
-                      {% for project in user.get_authorized_projects %}
-                        {% if not forloop.last %}<li class="divider"></li>{% endif %}
-                        <li><a href="{% url "admin:main_note_add" project_slug=project.slug %}">Add note</a></li>
-                        <li><a href="{% url "admin:main_topic_add" project_slug=project.slug %}">Add topic</a></li>
-                        <li><a href="{% url "admin:main_document_add" project_slug=project.slug %}">Add document</a></li>
-                      {% endfor %}
-                    </ul>
-                  </div> 
-                </li>
-              </ul>
-            {% else %}
-              <ul class="nav pull-right">
-                <li><a href="{% url 'django.contrib.auth.views.login' %}{% if request.path|length > 1 %}?return_to={{ request.path }}{% endif %}">Log in</a></li>
-              </ul>
+        {% with user=request.user %}
+          {% if user.is_authenticated %}
+            {% if user.email %}
+              <input type="hidden" id="logged-in-user-email" value="{{ user.email }}" />
             {% endif %}
-          {% endwith %}
+            <ul class="nav pull-right">
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                {{ user.display_name }}
+                 <b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                  <li><a href="{{ user.get_absolute_url }}">My profile</a></li>
+                  <li><a {% if browserid_authenticated %}class="browserid-logout" {% endif %}href="{% url "user_logout_view" %}">Log out</a></li>
+                </ul>
+              </li>
+
+              <li>
+                <div class="btn-group">
+                  <a href="#" class="btn dropdown-toggle" data-toggle="dropdown">
+                    <i class="icon-pencil"></i>
+                    <b class="caret"></b>
+                  </a>
+                  <ul class="dropdown-menu" style="right: 0; left: auto;">
+                    {% block extra_edit_actions %}{% endblock %}
+                    {% for project in user.get_authorized_projects %}
+                      {% if not forloop.last %}<li class="divider"></li>{% endif %}
+                      <li><a href="{% url "admin:main_note_add" project_slug=project.slug %}">Add note</a></li>
+                      <li><a href="{% url "admin:main_topic_add" project_slug=project.slug %}">Add topic</a></li>
+                      <li><a href="{% url "admin:main_document_add" project_slug=project.slug %}">Add document</a></li>
+                    {% endfor %}
+                  </ul>
+                </div> 
+              </li>
+          </ul>
+          {% else %}
+            <ul class="nav pull-right">
+              <li><a href="{% url 'django.contrib.auth.views.login' %}{% if request.path|length > 1 %}?return_to={{ request.path }}{% endif %}">Log in</a></li>
+              </ul>
+          {% endif %}
+        {% endwith %}
+      </div>
+    </div>
+  </div>
+
+  {% if messages %}
+    <div id="message-list" class="container">
+      {% for message in messages %}
+        <div class="alert {% if message.tags %} alert-{{ message.tags }}{% endif %}">
+          {{ message|safe }}
         </div>
-      </div>
+      {% endfor %}
     </div>
+  {% endif %}
+  <div id="main-wrap" class="container">
+  <div id="main">
+    {% block cendari_content %}
 
-    {% if messages %}
-      <div id="message-list" class="container">
-        {% for message in messages %}
-          <div class="alert {% if message.tags %} alert-{{ message.tags }}{% endif %}">
-            {{ message|safe }}
-          </div>
-        {% endfor %}
+      <div id="west" style="height:100%;" class="x-hide-display">
+        <iframe src="{% url 'resources_view' project_slug=project.slug %}?object_type={{object_type}}&object_id={{object_id}}&topic_type={{topic_type}}" seamless="true" width="100%" height="100%">
+          <p>Sorry, your browser does not support iframes. </p>
+        </iframe>
       </div>
-    {% endif %}
-    <div id="main-wrap" class="container">
-      <div id="main">
-        {% block cendari_content %}
 
-          <div id="west" style="height:100%;" class="x-hide-display">
-            <iframe src="{% url 'resources_view' project_slug=project.slug %}?object_type={{object_type}}&object_id={{object_id}}&topic_type={{topic_type}}" seamless="true" width="100%" height="100%">
-              <p>Sorry, your browser does not support iframes. </p>
-            </iframe>
-          </div>
-
-          <div id="east" style="height:100%;" class="x-hide-display">
-            <iframe src="{%  url 'smallvis_view' project_slug=project.slug %}" id ='smallvis_iframe' seamless="true" width="100%" height="100%">
-              <p>Sorry, your browser does not support iframes. </p>
-            </iframe>
-          </div>
-
-          <div  id="center" style="height:100%;" class="x-hide-display editor" >
-            <button id="submitButtonCendari" onclick="submitCendariForm()" >&nbsp;</button> 
-
-            {% block editor_content %}
-            {% endblock %}
-          </div>
-
-          <button id="saveNote" type="submit" ></button>
-          <div id="south" class="x-hide-display">
-            {% block south_content %}
-            {% endblock %}
-          </div>	
-        {% endblock cendari_content %} 
+      <div id="east" style="height:100%;" class="x-hide-display">
+        <iframe src="{%  url 'smallvis_view' project_slug=project.slug %}" id ='smallvis_iframe' seamless="true" width="100%" height="100%">
+          <p>Sorry, your browser does not support iframes. </p>
+        </iframe>
       </div>
-      <!--<div class="push"></div> -->
-    </div>
 
+      <div  id="center" style="height:100%;" class="x-hide-display editor" >
+        <button id="submitButtonCendari" onclick="submitCendariForm()" >&nbsp;</button> 
+
+        {% block editor_content %}
+        {% endblock %}
+      </div>
+
+      <button id="saveNote" type="submit" ></button>
+      <div id="south" class="x-hide-display">
+        {% block south_content %}
+        {% endblock %}
+      </div>	
+    {% endblock cendari_content %} 
+  </div>
+  <!--<div class="push"></div> -->
   </div>
 
+</div>
 
-  {% load deployment_info %}
-  <!--  <div class="footer">
-  <div class="footer-inner container">
-  {% deployment_info %}
-  </div>
-  </div> -->
 
-  {% if request.user.is_authenticated %}{% csrf_token %}{% endif %}
+{% load deployment_info %}
+<!--  <div class="footer">
+<div class="footer-inner container">
+{% deployment_info %}
+</div>
+</div> -->
+
+{% if request.user.is_authenticated %}{% csrf_token %}{% endif %}
 
 {% endblock layout %}
