@@ -28,10 +28,10 @@
 /uploads
 /node_modules
 /PGDATA
-
+/old
 
 secret.txt
-settings_local.py
+settings_local.py*
 settings-*.py
 
 
