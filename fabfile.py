@@ -31,6 +31,7 @@ def setup():
         abort(red('Deactivate any virtual environments before continuing.'))
     make_settings()
     make_virtual_env()
+    make_pyodbc4virtuoso()
 # CENDARI : removed 
     local('/bin/cp cendari/viewmixins.py lib/python2.7/site-packages/djadmin2') # to be removed when  django-admin2>0.6.1
     install_node_packages()
@@ -256,8 +257,10 @@ def make_pyodbc4virtuoso():
         zf.extractall('.')
         local('patch -p0 < pyodbc-spasql-datesupport.diff')
     with lcd("{}/pyodbc-2.1.8/".format(PROJ_ROOT)):
-        local('../{python} setup.py install'.format(**env))        
+        local('../{python} setup.py install'.format(**env))
     with lcd(PROJ_ROOT):
         local('rm -f pyodbc-2.1.8.zip')
         local('rm -rf pyodbc-2.1.8/')
         local('rm -f pyodbc-spasql-datesupport.diff')
+        local('rm -f lib/python2.7/site-packages/virtuoso-0.12.6-py2.7.egg-info/requires.txt')
+
