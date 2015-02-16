@@ -34,8 +34,8 @@ rdflib==4.1.0
 django-widget-tweaks==1.3
 parse==1.6.4
 django-admin2==0.6.1
-pyodbc==2.1.8
-virtuoso==0.12.6
+##pyodbc==2.1.8
+##virtuoso==0.12.6
 # Symlinks to system packages
 # Symlink djadmin2
 ## symlink: bsddb3

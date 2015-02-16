@@ -31,7 +31,7 @@ def setup():
         abort(red('Deactivate any virtual environments before continuing.'))
     make_settings()
     make_virtual_env()
-    make_pyodbc4virtuoso()
+    #make_pyodbc4virtuoso()
 # CENDARI : removed 
     local('/bin/cp cendari/viewmixins.py lib/python2.7/site-packages/djadmin2') # to be removed when  django-admin2>0.6.1
     install_node_packages()
