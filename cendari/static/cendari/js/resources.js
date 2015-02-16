@@ -71,62 +71,45 @@ $(function() {
 	    }
 	},
 	onPostInit: function(isReloading, isError){
-	    page_url = parent.location;
-	    pathname = page_url.pathname;
-	    var local_host = true;
-	    if(page_url.href.indexOf('pro2.cendari.dariah.eu')!=-1){
-		pathname = pathname.replace('enotes/','');
-		local_host = false;
-	    }
-	    //a project is selected
-	    if(pathname=='/' || pathname.indexOf('/index')!=-1){
-		$("#tree").dynatree("getTree").selectKey(cendari_js_project_slug);
-		project_node = $("#tree").dynatree("getTree").getNodeByKey(cendari_js_project_slug)
-		if(project_node!=null){
-		    project_node.expand(true);
+		console.log("NB resources.js *********** cendari_js_project_slug is "+cendari_js_project_slug);
+		console.log("NB resources.js *********** cendari_js_object_type is "+cendari_js_object_type);
+		console.log("NB resources.js *********** cendari_js_object_id is "+cendari_js_object_id);
+		console.log("NB resources.js *********** cendari_js_topic_type is "+cendari_js_topic_type);
+
+		if(cendari_js_object_type=='note'){
+		    	lazy_node = $("#tree").dynatree("getTree").getNodeByKey(cendari_js_project_slug);
+			if(lazy_node!=null){
+			    upload_keyPath = lazy_node.getKeyPath() + '/' + cendari_js_project_slug + '.notes' +'/'+ cendari_js_project_slug +'.note.'+ cendari_js_object_id;
+			    tree_loadKeyPath(upload_keyPath, cendari_js_object_type);
+			}else{
+		            console.log('==============================>>>>>>>>>> NOTE lazy_node is null');
+			}		
+		} else if (cendari_js_object_type=='document'){
+		    	lazy_node = $("#tree").dynatree("getTree").getNodeByKey(cendari_js_project_slug);		
+			if(lazy_node!=null){
+			    	upload_keyPath = lazy_node.getKeyPath() + '/'+ cendari_js_project_slug + '.documents' +'/'+ cendari_js_project_slug +'.document.'+ cendari_js_object_id;
+			    	tree_loadKeyPath(upload_keyPath, cendari_js_object_type);
+			}else{
+		            console.log('==============================>>>>>>>>>> DOCUMENT lazy_node is null');
+			}
+		} else if (cendari_js_object_type=='topic'){
+		    	lazy_node = $("#tree").dynatree("getTree").getNodeByKey(cendari_js_project_slug);		
+			if(lazy_node!=null){
+				upload_keyPath = lazy_node.getKeyPath() +'/'+cendari_js_project_slug+'.topics/'+cendari_js_project_slug+'.topic.' + cendari_js_topic_type + '/' + cendari_js_project_slug + '.topic.' + cendari_js_object_id;
+			    	tree_loadKeyPath(upload_keyPath, cendari_js_object_type);
+			}else{
+		            console.log('==============================>>>>>>>>>> TOPIC lazy_node is null');
+			}
+		} else if (cendari_js_object_type==''){//this is a project
+			$("#tree").dynatree("getTree").selectKey(cendari_js_project_slug);
+			project_node = $("#tree").dynatree("getTree").getNodeByKey(cendari_js_project_slug)
+			if(project_node!=null){
+			    project_node.expand(true);
+			}
+		} else {
+	            	console.log('==============================>>>>>>>>>> onPostInit ... does it ever get to here?');
 		}
-	    }else{
-		//a leafnode is selected
-		pathname = pathname.substring(1, pathname.length-1);
-		path_parts = pathname.split("/");
-		level = path_parts.length;
-		item_id = path_parts[level-1];
-		var lazy_node;
-		var node_type = '';
-		if(pathname.indexOf('topics')!=-1){//or level=6
-		    node_type = 'topic';
-		    $.ajax({
-			url : cendari_root_url+'cendari/'+cendari_js_project_slug+'/getTopicType/topic_id/'+item_id,
-			datatype:"jsonp",
-			success: function(response){
-			    topic_type = response.topic_type;
-			    lazy_node = $("#tree").dynatree("getTree").getNodeByKey(cendari_js_project_slug);
-			    upload_keyPath = lazy_node.getKeyPath()+'/'+cendari_js_project_slug+'.topics/'+cendari_js_project_slug+'.topic.' + topic_type + '/' + cendari_js_project_slug + '.topic.' + item_id;
-			    tree_loadKeyPath(upload_keyPath, node_type);			    
-			},
-			error: function(){}
-		    });
-		}else if(pathname.indexOf('notes')!=-1){
-		    node_type = 'note';
-		    lazy_node = $("#tree").dynatree("getTree").getNodeByKey(cendari_js_project_slug);
-		    upload_keyPath = lazy_node.getKeyPath() + '/' + cendari_js_project_slug + '.notes' +'/'+ cendari_js_project_slug +'.note.'+ item_id;
-		   // alert('postinit uploadkey = ' + upload_keyPath);
-		    tree_loadKeyPath(upload_keyPath, node_type);
-		}else if(pathname.indexOf('documents')!=-1){
-		    node_type = 'document';
-		    lazy_node = $("#tree").dynatree("getTree").getNodeByKey(cendari_js_project_slug);
-		    upload_keyPath = lazy_node.getKeyPath() + '/'+ cendari_js_project_slug + '.documents' +'/'+ cendari_js_project_slug +'.document.'+ item_id;
-		    //alert('postinit uploadkey = ' + upload_keyPath)
-		    tree_loadKeyPath(upload_keyPath, node_type);
-		}else if(pathname.indexOf('projects')!=-1){
-		    p_node = $("#tree").dynatree("getTree").getNodeByKey(cendari_js_project_slug);	
-		    if(p_node!=null){
-			p_node.makeVisible(true);
-			p_node.select(true);
-			p_node.expand(true);
-		    }
-		}
-	    }
+
 	},
 	onCreate: function(dtnode, nodeSpan){
 		// When nodes are created, add hover event handlers to trigger highlighting in the vis
