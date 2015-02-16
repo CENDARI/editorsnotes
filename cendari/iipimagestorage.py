@@ -8,7 +8,7 @@ from django.contrib.sessions.backends.db import SessionStore
 from django.utils._os import safe_join
 from django.conf import settings
 
-from cendari_middleware import DATA_API_SESSION_KEY
+#from cendari_middleware import DATA_API_SESSION_KEY
 
 import django_rq
 
