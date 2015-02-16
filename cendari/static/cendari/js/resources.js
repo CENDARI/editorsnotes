@@ -14,7 +14,7 @@ $(function() {
 	    selected_node = node.data.key;
 	    value = '{project:' + selected_node + ', node:' + node.data.title + ',url:' + node.data.url + '}';
 	    //alert('node keypath= ' + node.data.key);
-	    //trace.event("_user","select", "resources", value);
+	    trace.event("_user","select", "resources", value);
 	    
 	    level = node.getLevel();
 	    if(level==3){

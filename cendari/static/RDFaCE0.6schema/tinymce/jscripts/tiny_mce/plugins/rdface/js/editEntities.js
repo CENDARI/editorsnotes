@@ -88,7 +88,7 @@ var EditEntities = {
 	},
 	update : function() {
 	    value = '{project:' + window.parent.cendari_js_project_slug + '}';
-	    //trace.event("_user","edit_entity.update", "centre.rdface", value);
+	    trace.event("_user","edit_entity.update", "centre.rdface", value);
 		var entity_type=tinyMCEPopup.getWindowArg('entity_type');
 		var pointer=tinyMCEPopup.getWindowArg('pointer');
 		//var selected_txt=tinyMCEPopup.getWindowArg('selected_txt');

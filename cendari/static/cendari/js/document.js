@@ -33,8 +33,8 @@ function viewImage(id)
     if (id == null)
 	return;
     $('#scan-viewer').attr('src', cendari_root_url+'cendari/'+cendari_js_project_slug+'/scan/'+id);
-    //value = '{project:' + cendari_js_project_slug + 'scan_id: ' + id + '}';
-    //trace.event("_system","viewImage", "centre", value);
+    value = '{project:' + cendari_js_project_slug + 'scan_id: ' + id + '}';
+    trace.event("_system","viewImage", "centre", value);
 }
 
 $(document).ready(function() 
@@ -42,7 +42,7 @@ $(document).ready(function()
     $('a.scan').click(function(event) {
 	var scan_id = this.getAttribute('id');
 	value = '{project:' + cendari_js_project_slug + 'scan_id: ' + scan_id + '}';
-	//trace.event("_user","selectScan", "centre", value);
+	trace.event("_user","selectScan", "centre", value);
 	if (! scan_id)
 	    return;
 	event.preventDefault();
