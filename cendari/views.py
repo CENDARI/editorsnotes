@@ -672,8 +672,9 @@ def editNoteCendari(request, note_id, project_slug):
     )
     o['note'] = note
     o['project_slug'] = project_slug
-    o['objecttype'] = 'note'
-    o['entitytype'] = 'NA'
+    o['object_type'] = 'note'
+    o['object_id'] = note_id
+    o['topic_type'] = 'NA'
     o['license'] = note.license or note.project.default_license
     o['history'] = reversion.get_unique_for_object(note)
     o['topics'] = [ta.topic for ta in o['note'].related_topics.all()]
@@ -700,8 +701,9 @@ def editDocumentCendari(request, project_slug, document_id):
         (o['document'].as_text(), None)
     )
     o['project'] = o['document'].project
-    o['objecttype'] = 'document'
-    o['entitytype'] = 'NA'
+    o['object_type'] = 'document'
+    o['object_id'] = document_id
+    o['topic_type'] = 'NA'
     o['topics'] = (
         [ ta.topic for ta in o['document'].related_topics.all() ] +
         [ c.content_object for c in o['document'].citations.filter(content_type=ContentType.objects.get_for_model(main_models.Topic)) ])
@@ -735,8 +737,9 @@ def editEntityCendari(request, project_slug, topic_node_id):
     o['topic'] = topic = get_object_or_404(topic_qs,topic_node_id=topic_node_id,project__slug=project_slug)
     o['project'] = topic.project
     o['project_slug'] = project_slug
-    o['objecttype'] = 'topic'
-    o['entitytype'] = topic.topic_node.type
+    o['object_type'] = 'topic'
+    o['object_id'] = topic_node_id
+    o['topic_type'] = topic.topic_node.type
     o['breadcrumb'] = (
         (topic.project.name, topic.project.get_absolute_url()),
         ('Topics', reverse('all_topics_view', kwargs={'project_slug': topic.project.slug})),(topic.preferred_name, None)

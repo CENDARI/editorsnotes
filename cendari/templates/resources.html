@@ -12,8 +12,25 @@
   
   {% endcompress %}
   <script type="text/javascript">
+    function getParameterByName(name) {
+        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+        return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+
+
     cendari_root_url = "{%url 'index_view' %}";
     cendari_js_project_slug = '{{ project_slug }}';
+                       
+    cendari_js_object_type = getParameterByName('object_type'); 
+    cendari_js_object_id = getParameterByName('object_id');
+    cendari_js_topic_type = getParameterByName('topic_type');
+
+    console.log("NB resources.html*********** cendari_js_project_slug is "+cendari_js_project_slug);
+    console.log("NB resources.html*********** cendari_js_object_type is "+cendari_js_object_type);
+    console.log("NB resources.html*********** cendari_js_object_id is "+cendari_js_object_id);
+    console.log("NB resources.html*********** cendari_js_topic_type is "+cendari_js_topic_type);
   </script>
   
   {% compress js %}
