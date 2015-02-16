@@ -41,6 +41,12 @@ class NoteReferenceNSSerializer(serializers.ModelSerializer):
         model = NoteReferenceNS
         fields = ('section_id', 'section_type', 'ordering',
                   'note_reference', 'note_reference_title', 'content',)
+    # Cendari code  E.G. aviz
+    def save_object(self, obj, **kwargs):
+        super(NoteReferenceNSSerializer, self).save_object(obj, **kwargs)
+        print "creating semantics for note"
+        print obj
+        semantic_process_note(obj)
     def get_referenced_note_title(self, obj):
         return obj.note_reference.title
 
@@ -105,3 +111,9 @@ class MinimalNoteSerializer(RelatedTopicSerializerMixin, ProjectSpecificItemMixi
         model = Note
         fields = ('id', 'url', 'title', 'related_topics', 'content', 'status',
                   'is_private',)
+    # Cendari code  E.G. aviz
+    def save_object(self, obj, **kwargs):
+        super(MinimalNoteSerializer, self).save_object(obj, **kwargs)
+        print "creating semantics for minimal note"
+        print obj
+        semantic_process_note(obj)
