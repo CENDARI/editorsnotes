@@ -26,7 +26,7 @@ logger = logging.getLogger('cendari.semantic')
 CENDARI = Namespace("http://resources.cendari.dariah.eu/notes/")
 #CENDARI = Namespace("http://pro2.cendari.dariah.eu/enotes/")
 SCHEMA  = Namespace("http://schema.org/")
-DBPROP  = Namespace("http://dbpedia.org/property/")
+DBPPROP  = Namespace("http://dbpedia.org/property/")
 GRS     = Namespace("http://www.georss.org/georss/")
 GEO     = Namespace("http://www.w3.org/2003/01/geo/wgs84_pos#")
 DBOWL   = Namespace("http://dbpedia.org/ontology/")
@@ -35,7 +35,7 @@ INIT_NS = {
     'owl': OWL, 
     'cendari': CENDARI,
     'schema': SCHEMA,
-    'dbprop': DBPROP,
+    'dbpprop': DBPPROP,
     'grs': GRS,
     'geo': GEO,
     'dbpedia-own': DBOWL
@@ -331,8 +331,12 @@ def semantic_process_topic(topic,user=None):
 imported_relations = set([
     # Place
     RDF.type,
-    DBPROP['latitude'],
-    DBPROP['longitude'],
+    DBPPROP['latitude'],
+    DBPPROP['longitude'],
+    DBPPROP['latMin'],
+    DBPPROP['latDeg'],
+    DBPPROP['lonMin'],
+    DBPPROP['lonDeg'],
     GRS['point'],
     RDFS.label,
     OWL['sameAs'],
@@ -344,18 +348,18 @@ imported_relations = set([
     DBOWL['birthPlace'],
     DBOWL['deathDate'],
     DBOWL['deathPlace'],
-    DBPROP['birthDate'],
-    DBPROP['birthPlace'],
-    DBPROP['deathDate'],
-    DBPROP['deathPlace'],
+    DBPPROP['birthDate'],
+    DBPPROP['birthPlace'],
+    DBPPROP['deathDate'],
+    DBPPROP['deathPlace'],
     # Event/battle
     DBOWL['date'], 
     DBOWL['place']
 ])
 
 no_duplicates = set([
-    DBPROP['latitude'],
-    DBPROP['longitude'],
+    DBPPROP['latitude'],
+    DBPPROP['longitude'],
     GRS['point'],
     GEO['lat'],
     GEO['long'],
@@ -365,10 +369,10 @@ no_duplicates = set([
     DBOWL['birthPlace'],
     DBOWL['deathDate'],
     DBOWL['deathPlace'],
-    DBPROP['birthDate'],
-    DBPROP['birthPlace'],
-    DBPROP['deathDate'],
-    DBPROP['deathPlace'],
+    DBPPROP['birthDate'],
+    DBPPROP['birthPlace'],
+    DBPPROP['deathDate'],
+    DBPPROP['deathPlace'],
 ])
 
 DBPEDIA_SERVICE_URL="http://lookup.dbpedia.org/api/search.asmx/KeywordSearch"
@@ -433,14 +437,28 @@ def semantic_resolve_topic(topic, force=False):
         logger.info("No grs:point in RDF, chasing for lat/long")
         o = g.value(uri, GEO['geometry'])
         if o and str(o).startswith('POINT('):
-            g.add( (uri, GRS['point'], str(o)[6:-1].split(' ')) )
+            g.add( (uri, GRS['point'], URIRef(str(o)[6:-1].split(' '))) )
             logger.info("Found in geo:geometry")
             return
         lat = g.value(uri, GEO['lat'])
         lon = g.value(uri, GEO['long'])
         if lat and lon:
-            g.add( (uri, GRS['point'], lat+" "+lon) )
+            g.add( (uri, GRS['point'], URIRef(lat+" "+lon)) )
+            logger.info("Found in geo:lat/geo:long: %s", g.value(uri, GRS['point']))
             return
+
+        lat = g.value(uri, DBPPROP['latDeg'])
+        latmin = g.value(uri, DBPPROP['latMin'])
+        lon = g.value(uri, DBPPROP['lonDeg'])
+        lonmin = g.value(uri, DBPPROP['lonMin'])
+        if lat and latmin and lon and lonmin:
+            # Degrees + minutes/60 
+            lat = float(lat) + float(latmin)/60.0
+            lon = float(lon) + float(lonmin)/60.0
+            g.add( (uri, GRS['point'], URIRef("%f %f" % (lat, lon))) )
+            logger.info("Found in dbprop:latDeg/dbprop:lonDeg: %s", g.value(uri, GRS['point']))
+            return
+
         logger.warning('No lat/long information in RDF for %s', str(uri))
         # chase in geonames later
         
