@@ -393,7 +393,7 @@ function logHover(itemData, panelData){
                    'itemName': hoveredItemData.preferred_name,
                    'itemId': hoveredItemData.id};
     console.log("LOGGED-HOVER: " + JSON.stringify(logJSON));
-    //trace.event("_user","hover","visualizations",logJSON);  
+    trace.event("_user","hover","visualizations",logJSON);  
   }
   hoverLogTimer = setTimeout(hoverLogFunction, 1000);
 }
