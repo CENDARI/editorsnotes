@@ -6,8 +6,6 @@ from cendari_api import *
 
 import logging
 
-__all__ = [ 'DATA_API_SESSION_KEY' ]
-
 logger = logging.getLogger('cendari.middleware')
 
 DATA_API_SESSION_KEY = '_cendari_api_key'
