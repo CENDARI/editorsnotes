@@ -129,7 +129,7 @@
 					{% for scan in scans %}
 					<li>
 					  <a class="scan btn" id="{{scan.id}}" href="http://{{ domain }}{{ scan.image.url }}">
-					    <!-- http://{{ domain }}{{ scan.image.url }} -->
+					    <img src="{{scan.image_thumbnail.url}}" width=100 alt="Thumbnail of scan {{scan.id}}">
 					    {{ forloop.counter }}
 					  </a>
 					</li>

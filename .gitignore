@@ -29,6 +29,7 @@
 /node_modules
 /PGDATA
 /old
+/media
 
 secret.txt
 settings_local.py*
