@@ -76,6 +76,11 @@ UBUNTU:
     sudo apt-get install libcurl4-gnutls-dev
     ```
 
+15. For odbc install
+    ```
+    sudo apt-get install unixodbc-dev
+    ```
+
 16. Inside Editors Notes Directory
     ```
     fab setup
