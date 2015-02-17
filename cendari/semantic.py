@@ -21,6 +21,13 @@ import json
 import sys, traceback
 import pdb
 
+# if 'VIRTUOSO' in settings:
+#     from rdflib.store import Store
+#     from rdflib.plugin import get as plugin
+
+#     Virtuoso = plugin("Virtuoso", Store)
+#     store = Virtuoso("DSN=VOS;UID=dba;PWD=dba;WideAsUTF16=Y")
+
 logger = logging.getLogger('cendari.semantic')
 
 CENDARI = Namespace("http://resources.cendari.dariah.eu/notes/")
