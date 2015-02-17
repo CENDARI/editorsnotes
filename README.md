@@ -81,6 +81,11 @@ UBUNTU:
     sudo apt-get install unixodbc-dev
     ```
 
+15. For Pillow/Image loading, install
+    ```
+    sudo apt-get install libjpeg-dev libtiff5-dev libopenjpeg-dev zlib1g-dev 
+    ```
+
 16. Inside Editors Notes Directory
     ```
     fab setup
@@ -131,6 +136,17 @@ UBUNTU:
      ```
      -initial-env MEMCACHED_SERVERS=localhost \
      -initial-env FILESYSTEM_PREFIX=ENOTE/uploads/
+     ```
+
+     or using the new syntax:
+     ```
+     FcgidInitialEnv MEMCACHED_SERVERS "localhost"
+     FcgidInitialEnv FILESYSTEM_PREFIX "ENOTE/uploads/"
+     ``` 
+
+     To enable fcgi module on apache2 for ubutu 14.04, you may have to do:
+     ```
+     sudo a2enmod fcgid
      ```
 
      Sometimes this does not work due to access rights (all the directories
