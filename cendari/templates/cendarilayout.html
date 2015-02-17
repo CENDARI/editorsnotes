@@ -65,7 +65,7 @@
           {% endif %}
             <li><a href="https://docs.google.com/forms/d/1LgNR3GLfMmql2acSryzVQRGPjEBmr6ZfvsVJZ8xX9QI/viewform" target="_blank">Survey</a></li>
             <li class="divider-vertical"></li>
-            <form class="navbar-search" action="{% url "cendari_search_view" project_slug %}" method="get">
+            <form class="navbar-search" action="{% url "cendari_search_view" project_slug=project.slug %}" method="get">
               <input type="text" class="search-query search-autocomplete" name="q" x-search-target="topics" placeholder="Search" />
             </form> 
         </ul>

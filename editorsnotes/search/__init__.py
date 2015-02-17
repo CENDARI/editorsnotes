@@ -43,14 +43,14 @@ en_index = ENIndex(onOpen=register_models)
 
 activity_index = ActivityIndex()
 
-#@receiver(post_revision_commit)
+@receiver(post_revision_commit)
 def update_activity_index(instances, revision, versions, **kwargs):
-    if not activity_index.is_open:
-        activity_index.open()
     handled = [(instance, version) for (instance, version)
                in zip(instances, versions)
                if issubclass(instance.__class__, main_models.base.Administered)]
     for instance, version in handled:
+        if not activity_index.is_open:
+            activity_index.open()
         activity_index.handle_edit(instance, version)
 
 @receiver(post_save)

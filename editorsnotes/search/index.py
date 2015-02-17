@@ -2,6 +2,7 @@ from collections import OrderedDict
 from itertools import chain
 import json
 import re
+import pprint
 
 from django.conf import settings
 
@@ -154,7 +155,6 @@ class ENIndex(ElasticSearchIndex):
                               doc_type=doc_type.type_label, **kwargs)
 
     def search(self, query, highlight=False, **kwargs):
-        self.open()
 
         if isinstance(query, basestring):
             prepared_query = {
@@ -165,6 +165,13 @@ class ENIndex(ElasticSearchIndex):
 
         else:
             prepared_query = query
+
+        if 'project' in kwargs:
+            project = kwargs['project']
+            del kwargs['project']
+            prepared_query['filter'] = {
+                "term": { 'serialized.project.name': project }
+            }
 
         if highlight:
             prepared_query['highlight'] = {
@@ -178,6 +185,7 @@ class ENIndex(ElasticSearchIndex):
             for field_name in highlight_fields:
                 prepared_query['highlight']['fields'][field_name] = {}
 
+        pprint.pprint(prepared_query)
         return self.open().search(prepared_query, index=self.name, **kwargs)
 
 VERSION_ACTIONS = {
