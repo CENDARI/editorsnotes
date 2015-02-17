@@ -56,7 +56,8 @@ def update_activity_index(instances, revision, versions, **kwargs):
 @receiver(post_save)
 def update_elastic_search_handler(sender, instance, created, **kwargs):
     klass = instance.__class__
-    if klass in en_index.document_types:
+    #if klass in en_index.document_types:
+    if klass in [ main_models.Document, main_models.Note, main_models.Topic]:
         if not en_index.is_open:
             en_index.open()
         document_type = en_index.document_types[klass]
@@ -72,7 +73,8 @@ def update_elastic_search_handler(sender, instance, created, **kwargs):
 @receiver(post_delete)
 def delete_es_document_handler(sender, instance, **kwargs):
     klass = instance.__class__
-    if klass in en_index.document_types:
+    #if klass in en_index.document_types:
+    if klass in [ main_models.Document, main_models.Note, main_models.Topic]:
         if not en_index.is_open:
             en_index.open()
         document_type = en_index.document_types[klass]
