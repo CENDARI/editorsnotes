@@ -21,6 +21,8 @@ import json
 import sys, traceback
 import pdb
 
+__all__ = [ 'CENDARI', 'SCHEMA', 'DBPPROP', 'GRS', 'GEO', 'DBOWL', 'semantic', 'semantic_query_latlong' ]
+
 # if 'VIRTUOSO' in settings:
 #     from rdflib.store import Store
 #     from rdflib.plugin import get as plugin
@@ -333,6 +335,10 @@ def semantic_process_topic(topic,user=None):
     g.add( (g.identifier, SCHEMA['dateModified'], Literal(topic.last_updated)) )
     g.add( (g.identifier, CENDARI['name'], Literal(topic.preferred_name)) )
     if topic.rdf is not None:
+        # fix url if necessary
+        WRONG_PREFIX = "http://dbpedia.org/page/"
+        if topic.rdf.startswith(WRONG_PREFIX):
+            topic.rdf = "http://dbpedia.org/resource/"+topic.rdf[len(WRONG_PREFIX):]
         g.add( (g.identifier, OWL['sameAs'], URIRef(topic.rdf)) )
 
 imported_relations = set([
