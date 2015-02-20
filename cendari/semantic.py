@@ -17,6 +17,7 @@ from threading import local
 
 import urllib
 import urllib2
+import urlparse
 import json
 import sys, traceback
 import pdb
@@ -50,6 +51,15 @@ INIT_NS = {
     'dbpedia-own': DBOWL
 }
 
+WRONG_PREFIX = "http://dbpedia.org/page/"
+
+def fix_uri(uri):
+    if uri.startswith(WRONG_PREFIX):
+        uri = "http://dbpedia.org/resource/"+uri[len(WRONG_PREFIX):]
+    loc=list(urlparse.urlsplit(uri))
+    loc[2] = urllib.quote(loc[2].encode('utf8'))
+    loc = urlparse.urlunsplit(loc)
+    return loc
 
 class SemanticHandler(object):
     def __init__(self, store_path=None):
@@ -159,7 +169,7 @@ def semantic_query_latlong(topic):
     g = Semantic.graph(url)
     o = g.value(g.identifier, GRS['point'])
     if o:
-        return map(float, str(o).split(' '))
+        return map(float, unicode(o).split(' '))
     return None
 
 schema_topic = {
@@ -335,10 +345,7 @@ def semantic_process_topic(topic,user=None):
     g.add( (g.identifier, SCHEMA['dateModified'], Literal(topic.last_updated)) )
     g.add( (g.identifier, CENDARI['name'], Literal(topic.preferred_name)) )
     if topic.rdf is not None:
-        # fix url if necessary
-        WRONG_PREFIX = "http://dbpedia.org/page/"
-        if topic.rdf.startswith(WRONG_PREFIX):
-            topic.rdf = "http://dbpedia.org/resource/"+topic.rdf[len(WRONG_PREFIX):]
+        topic.rdf = fix_uri(topic.rdf)
         g.add( (g.identifier, OWL['sameAs'], URIRef(topic.rdf)) )
 
 imported_relations = set([
@@ -402,40 +409,40 @@ def dbpedia_lookup(label,type):
 
 
 def semantic_resolve_topic(topic, force=False):
-    rdf_url = topic.rdf
-    logger.debug('Trying to resolve topic %s from url %s', str(topic), str(rdf_url))
     topic.save()
     semantic_process_topic(topic)
-    if rdf_url is None:
+    if topic.rdf is None:
         return
+    rdf_url = topic.rdf
+    logger.debug(u'Trying to resolve topic %s from url %s', unicode(topic), unicode(rdf_url))
     uri = URIRef(rdf_url)
     g = Semantic.graph(identifier=uri)
     if len(g) != 0 and not force:
-        logger.debug('Uri %s already resolved', str(uri))
+        logger.debug('Uri %s already resolved', unicode(uri))
         return # already resolved
 
-    logger.debug("parsing uri %s", str(uri))
+    logger.debug("parsing uri %s", unicode(uri))
     loaded = Graph(identifier=uri)
 
     try:
         loaded.parse(location=uri)
     except:
-        logger.warning("Exception in parsing code from url %s", str(rdf_url))
+        logger.warning("Exception in parsing code from url %s", unicode(rdf_url))
         #traceback.print_exc(file=sys.stdout)
         pass
 
     type = URIRef(topic_to_schema(topic.topic_node.type))
     
-    logger.info("Loaded %s of type %s: %d triples", str(rdf_url), str(type), len(loaded))
+    logger.info("Loaded %s of type %s: %d triples", unicode(rdf_url), unicode(type), len(loaded))
 
     if (uri, RDF.type, type) in loaded:
-        logger.info ("Ontology in %s contains %s as expected", str(rdf_url), str(type))
+        logger.info ("Ontology in %s contains %s as expected", unicode(rdf_url), unicode(type))
     elif topic.topic_node.type=='PLA' and (uri, RDF.type, GEO['SpatialThing']) in loaded:
-        logger.warning("%s: Missing type %s", str(rdf_url), str(type))
+        logger.warning("%s: Missing type %s", unicode(rdf_url), unicode(type))
         loaded.add( (uri, RDF.type, type) )
     else:
-        logger.error("%s: Missing type %s", str(rdf_url), str(type))
-        return
+        logger.warning("%s: Missing type %s", unicode(rdf_url), unicode(type))
+
     Semantic.remove_graph(g)
     
     for s,p,o in loaded.triples( (uri, None, None) ):
@@ -449,8 +456,8 @@ def semantic_resolve_topic(topic, force=False):
     if topic.topic_node.type == 'PLA' and not g.value(uri, GRS['point']):
         logger.info("No grs:point in RDF, chasing for lat/long")
         o = g.value(uri, GEO['geometry'])
-        if o and str(o).startswith('POINT('):
-            g.add( (uri, GRS['point'], URIRef(str(o)[6:-1].split(' '))) )
+        if o and unicode(o).startswith('POINT('):
+            g.add( (uri, GRS['point'], URIRef(unicode(o)[6:-1].split(' '))) )
             logger.info("Found in geo:geometry")
             return
         lat = g.value(uri, GEO['lat'])
@@ -472,7 +479,7 @@ def semantic_resolve_topic(topic, force=False):
             logger.info("Found in dbprop:latDeg/dbprop:lonDeg: %s", g.value(uri, GRS['point']))
             return
 
-        logger.warning('No lat/long information in RDF for %s', str(uri))
+        logger.warning('No lat/long information in RDF for %s', unicode(uri))
         # chase in geonames later
         
 
