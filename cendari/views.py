@@ -394,7 +394,7 @@ def small_vis_data_lazy(request, project_slug):
             ll = semantic_query_latlong(t)
             if ll:
                 v['latlong'] = ', '.join(map(str, ll))
-                print "LatLong of %s: %s" % (t.preferred_name, v['latlong'])
+                #print "LatLong of %s: %s" % (t.preferred_name, v['latlong'])
 
             dict_match = topics_dict.get(t.pk, v)
             if dict_match == v:
@@ -537,7 +537,7 @@ def getTopicType(request, project_slug, topic_id):
 def querySPARQL(request,q):
     if request.method == 'GET':
         q = q.replace('@', '?') # the ? don't work well in urls
-    print "querySPARQL is %s" % q
+    #print "querySPARQL is %s" % q
     res = semantic_query(q, request.user)
     res = list(res)
     ret = json.dumps(res, encoding="utf-8")
@@ -756,8 +756,8 @@ def editEntityCendari(request, project_slug, topic_node_id):
     # o['documents'] = main_models.Document.objects.filter(id__in=[d['id'] for d in documents])
     o['related_topics'] = main_models.Topic.objects.filter(id__in=[t['id'] for t in topics])
     note_objects = main_models.Note.objects.in_bulk([n['id'] for n in notes])
-    print len(note_objects)
-    print note_objects
+    #print len(note_objects)
+    #print note_objects
     for note in notes:
         if ('id' in note.keys()) and (note['id'] in note_objects.keys()):
             related_topics = list((topic for topic in note['related_topics']
