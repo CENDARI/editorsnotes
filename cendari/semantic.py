@@ -345,7 +345,11 @@ def semantic_process_topic(topic,user=None):
     g.add( (g.identifier, SCHEMA['dateModified'], Literal(topic.last_updated)) )
     g.add( (g.identifier, CENDARI['name'], Literal(topic.preferred_name)) )
     if topic.rdf is not None:
-        topic.rdf = fix_uri(topic.rdf)
+        uri = fix_uri(topic.rdf)
+        if uri != topic.rdf:
+            topic.rdf = uri
+            logger.debug('Fixing rdf URI from %s to %s', topic.rdf.encode('utf8'), uri)
+            topic.save()
         g.add( (g.identifier, OWL['sameAs'], URIRef(topic.rdf)) )
 
 imported_relations = set([
