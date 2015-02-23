@@ -35,6 +35,8 @@ django-widget-tweaks==1.3
 parse==1.6.4
 django-admin2==0.6.1
 # For virtuoso-python, remove if installation breaks
+-e git+https://github.com/maparent/pyodbc.git@v3-virtuoso#egg=pyodbc
+uricore==0.1.2
 -e git+https://github.com/maparent/virtuoso-python#egg=virtuoso-python
 # Symlinks to system packages
 # Symlink djadmin2
