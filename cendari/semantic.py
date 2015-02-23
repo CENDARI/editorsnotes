@@ -9,9 +9,13 @@ from django.utils import six
 from django.core import signals
 import utils as utils
 
-from rdflib import Dataset, Graph, URIRef, Literal, BNode
-
+from rdflib import Dataset, Graph, ConjunctiveGraph, URIRef, Literal, BNode
+from rdflib.store import Store
+from rdflib.plugin import get as plugin
 from rdflib.namespace import Namespace, NamespaceManager, RDF, RDFS, OWL
+
+from virtuoso.vstore import Virtuoso
+from virtuoso.vsparql import Result
 
 from threading import local
 
@@ -24,12 +28,7 @@ import pdb
 
 __all__ = [ 'CENDARI', 'SCHEMA', 'DBPPROP', 'GRS', 'GEO', 'DBOWL', 'semantic', 'semantic_query_latlong' ]
 
-# if 'VIRTUOSO' in settings:
-#     from rdflib.store import Store
-#     from rdflib.plugin import get as plugin
 
-#     Virtuoso = plugin("Virtuoso", Store)
-#     store = Virtuoso("DSN=VOS;UID=dba;PWD=dba;WideAsUTF16=Y")
 
 logger = logging.getLogger('cendari.semantic')
 
@@ -53,27 +52,47 @@ INIT_NS = {
 
 WRONG_PREFIX = "http://dbpedia.org/page/"
 
+def is_ascii(s):
+    return all(ord(c) < 128 for c in s)
+
 def fix_uri(uri):
     if uri.startswith(WRONG_PREFIX):
         uri = "http://dbpedia.org/resource/"+uri[len(WRONG_PREFIX):]
     loc=list(urlparse.urlsplit(uri))
-    loc[2] = urllib.quote(loc[2].encode('utf8'))
+    if not is_ascii(loc[2]):
+        loc[2] = urllib.quote(loc[2].encode('utf8'))
     loc = urlparse.urlunsplit(loc)
     return loc
 
 class SemanticHandler(object):
-    def __init__(self, store_path=None):
-        if store_path is None:
-            self.store_path = settings.SEMANTIC_PATH
-        else:
-            self.store_path = store_path
+    def __init__(self):
+        try:
+            if settings.SEMANTIC_STORE=='Sleepycat':
+                self.store = settings.SEMANTIC_STORE
+                self.store_path = settings.SEMANTIC_PATH
+            elif settings.SEMANTIC_STORE=='Virtuoso':
+                pwd=settings.VIRTUOSO.get('dba_password','dba')
+                uid=settings.VIRTUOSO.get('dba_user','dba')
+                dsn=settings.VIRTUOSO.get('dsn','VOS')
+                connection = ('DSN=%s;UID=%s;PWD=%s;WideAsUTF16=Y' % (dsn, uid, pwd))
+                self.store = Virtuoso(connection)
+            else:
+                raise ImproperlyConfigured("SEMANTIC_STORE invalid in the settings file'")
+        except ValueError:
+            raise ImproperlyConfigured("SEMANTIC_PATH must be configured in the settings file'")
         self._connection = local()
 
     def dataset(self):
+        #pdb.set_trace()
         if hasattr(self._connection, 'dataset'):
             return getattr(self._connection, 'dataset')
-        dataset = Dataset(store='Sleepycat', default_union=True)
-        dataset.open(self.store_path, create = True)
+        if self.store=='Sleepycat':
+            dataset = Dataset(store=self.store, default_union=True)
+            dataset.open(self.store_path, create = True)
+        else:
+            #dataset = Dataset(store=self.store, default_union=True)
+            dataset = ConjunctiveGraph(store=self.store,identifier=CENDARI)
+            self.store.connection # force connection
         setattr(self._connection, 'dataset', dataset)
         nm = NamespaceManager(dataset)
         for (prefix, ns) in INIT_NS.iteritems():
@@ -84,10 +103,15 @@ class SemanticHandler(object):
     def graph(self, identifier):
         if isinstance(identifier, six.string_types):
             uri = URIRef(identifier)
-        return self.dataset().graph(identifier)
+        if self.store == 'Sleepycat':
+            return self.dataset().graph(identifier)
+        return self.dataset().get_context(identifier)
 
     def remove_graph(self, g):
-        self.dataset().remove_graph(g)
+        if self.store == 'Sleepycat':
+            self.dataset().remove_graph(g)
+        g.remove((None, None, None))
+        return g
 
     def query(self, query_object, processor='sparql',
               result='sparql', initNs=None, initBindings=None,
@@ -103,12 +127,15 @@ class SemanticHandler(object):
             delattr(self._connection, 'dataset')
             logger.info("Closing SEMANTIC connection")
 
+    def commit(self):
+        if self.store!='Sleepycat':
+            self.store.commit()
+
 semantic = SemanticHandler()
 
 def close_connection(**kwargs):
     global semantic
     semantic._close()
-
 
 
 signals.request_finished.connect(close_connection)
@@ -249,6 +276,7 @@ def semantic_process_note(note,user=None):
             note.related_topics.create(creator=user, topic=topic)
             g.add( (t['rdfsubject'], OWL.sameAs, rdftopic) )
             g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
+    semantic.commit()
 
 def semantic_process_document(document,user=None):
     """Extract the semantic information from a note,
@@ -269,7 +297,7 @@ def semantic_process_document(document,user=None):
     g.add( (g.identifier, SCHEMA['creator'], URIRef(document.creator.get_absolute_url()[1:])) )
     g.add( (g.identifier, SCHEMA['dateCreated'], Literal(document.created)) )
     g.add( (g.identifier, SCHEMA['dateModified'], Literal(document.last_updated)) )
-    g.add( (g.identifier, CENDARI['name'], Literal(document.description)) )
+    g.add( (g.identifier, CENDARI['name'], Literal(xhtml_to_text(document.description))) )
 
     topics = xml_to_topics(document.description, uri) 
     done=set()
@@ -282,7 +310,7 @@ def semantic_process_document(document,user=None):
             document.related_topics.create(creator=user, topic=topic)
             g.add( (t['rdfsubject'], OWL.sameAs, rdftopic) )
             g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
-   
+    semantic.commit()   
 
 def semantic_process_transcript(transcript,user=None):
     """Extract the semantic information from a note,
@@ -319,11 +347,11 @@ def semantic_process_transcript(transcript,user=None):
             transcript.document.related_topics.create(creator=user, topic=topic)
             g.add( (t['rdfsubject'], OWL.sameAs, rdftopic) )
             g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
-  
+    semantic.commit()  
 
-def semantic_process_topic(topic,user=None):
+def semantic_process_topic(topic,user=None,doCommit=True):
     """Extract the semantic information from a topic."""
-    logger.info("indide semantic_process_topic ")
+    logger.info("inside semantic_process_topic ")
     if topic is None:
         return
     
@@ -347,10 +375,12 @@ def semantic_process_topic(topic,user=None):
     if topic.rdf is not None:
         uri = fix_uri(topic.rdf)
         if uri != topic.rdf:
-            topic.rdf = uri
             logger.debug('Fixing rdf URI from %s to %s', topic.rdf.encode('utf8'), uri)
+            topic.rdf = uri
             topic.save()
         g.add( (g.identifier, OWL['sameAs'], URIRef(topic.rdf)) )
+    if doCommit:
+        semantic.commit()
 
 imported_relations = set([
     # Place
@@ -414,8 +444,9 @@ def dbpedia_lookup(label,type):
 
 def semantic_resolve_topic(topic, force=False):
     topic.save()
-    semantic_process_topic(topic)
+    semantic_process_topic(topic,doCommit=False)
     if topic.rdf is None:
+        semantic.commit()
         return
     rdf_url = topic.rdf
     logger.debug(u'Trying to resolve topic %s from url %s', unicode(topic), unicode(rdf_url))
@@ -461,13 +492,13 @@ def semantic_resolve_topic(topic, force=False):
         logger.info("No grs:point in RDF, chasing for lat/long")
         o = g.value(uri, GEO['geometry'])
         if o and unicode(o).startswith('POINT('):
-            g.add( (uri, GRS['point'], URIRef(unicode(o)[6:-1].split(' '))) )
+            g.add( (uri, GRS['point'], Literal(unicode(o)[6:-1].split(' '))) )
             logger.info("Found in geo:geometry")
             return
         lat = g.value(uri, GEO['lat'])
         lon = g.value(uri, GEO['long'])
         if lat and lon:
-            g.add( (uri, GRS['point'], URIRef(lat+" "+lon)) )
+            g.add( (uri, GRS['point'], Literal(lat+" "+lon)) )
             logger.info("Found in geo:lat/geo:long: %s", g.value(uri, GRS['point']))
             return
 
@@ -479,13 +510,13 @@ def semantic_resolve_topic(topic, force=False):
             # Degrees + minutes/60 
             lat = float(lat) + float(latmin)/60.0
             lon = float(lon) + float(lonmin)/60.0
-            g.add( (uri, GRS['point'], URIRef("%f %f" % (lat, lon))) )
+            g.add( (uri, GRS['point'], Literal("%f %f" % (lat, lon))) )
             logger.info("Found in dbprop:latDeg/dbprop:lonDeg: %s", g.value(uri, GRS['point']))
             return
 
         logger.warning('No lat/long information in RDF for %s', unicode(uri))
         # chase in geonames later
-        
+    semantic.commit()        
 
 def semantic_refresh_topic(topic):
     if topic.rdf is None or topic.topic_node.type == 'DAT':

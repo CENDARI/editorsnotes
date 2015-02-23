@@ -11,10 +11,14 @@ POSTGRES_DB = {
     'PORT': ''
 }
 
+SEMANTIC_STORE = 'Sleepycat'
+#SEMANTIC_PATH = os.path.abspath(os.path.join(STORAGE_PATH, 'rdfstore'))
+#SEMANTIC_STORE = 'Virtuoso'
+
 VIRTUOSO = {
-    'dba_password': '***',
-    'dav_password': '***',
-    'HOST': '***virtuoso_host***'
+    'dba_password': 'dba',
+    'dav_password': 'dav',
+    'HOST': 'localhost'
 }
 
 CENDARI_DATA_API_SERVER = "http://localhost:42042/v1/"

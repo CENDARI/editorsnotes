@@ -170,17 +170,35 @@ UBUNTU:
     `supervisor.conf` for an example on how t set it up.
 
 
-8.    Watchdog (optional)
+21.    Watchdog (optional)
       ```
       sudo pip install watchdog
       ```
 
-9.    VIPS
+22.    VIPS
       ```
       sudo apt-get install libvips-tools
       ```
+23.   Virtuoso
+      The installation is too complex, based on virtuoso opensource 6.1
 
+      ```
+      sudo apt-get install libodbc1 odbcinst odbcinst1debian2 unixodbc-bin unixodbc-dev
+      sudo apt-get install virtuoso-minimal virtuoso-opensource virtuoso-opensource-6.1-bin virtuoso-opensource-6.1-common virtuoso-server virtuoso-vad-conductor virtuoso-vad-isparql virtuoso-vad-ods virtuoso-vad-rdfmappers libvirtodbc0
+      ```
 
+      Following the documentation of virtuoso-python, create a file in `/etc/odbc.ini` containing the lines:
+      ```
+      [VOS]
+      Description = Virtuoso
+      Driver = /usr/lib/odbc/virtodbcu_r.so
+      Servername = localhost
+      Port = 1111
+      UserName = dba 
+      Locale = en.UTF-8
+      ```
+
+      That should work then with the default user dba.
 
 MAC
 Current realease doesnt work:

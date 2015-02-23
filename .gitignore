@@ -47,4 +47,4 @@ topic-list.txt
 document-list.txt
 fabfile_local.py
 vhost-editorsnotes.local.conf
-/rdfstore
+/rdfstore*
