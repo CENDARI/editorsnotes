@@ -74,8 +74,8 @@ class SemanticHandler(object):
                 pwd=settings.VIRTUOSO.get('dba_password','dba')
                 uid=settings.VIRTUOSO.get('dba_user','dba')
                 dsn=settings.VIRTUOSO.get('dsn','VOS')
-                connection = ('DSN=%s;UID=%s;PWD=%s;WideAsUTF16=Y' % (dsn, uid, pwd))
-                self.store = Virtuoso(connection)
+                self.connection = ('DSN=%s;UID=%s;PWD=%s;WideAsUTF16=Y' % (dsn, uid, pwd))
+                self.store = 'Virtuoso'
             else:
                 raise ImproperlyConfigured("SEMANTIC_STORE invalid in the settings file'")
         except ValueError:
@@ -90,6 +90,7 @@ class SemanticHandler(object):
             dataset = Dataset(store=self.store, default_union=True)
             dataset.open(self.store_path, create = True)
         else:
+            self.store = Virtuoso(self.connection)
             #dataset = Dataset(store=self.store, default_union=True)
             dataset = ConjunctiveGraph(store=self.store,identifier=CENDARI)
             self.store.connection # force connection
@@ -375,7 +376,7 @@ def semantic_process_topic(topic,user=None,doCommit=True):
     if topic.rdf is not None:
         uri = fix_uri(topic.rdf)
         if uri != topic.rdf:
-            logger.debug('Fixing rdf URI from %s to %s', topic.rdf.encode('utf8'), uri)
+            logger.debug(u'Fixing rdf URI from %s to %s', topic.rdf.encode('ascii','xmlcharrefreplace'), uri)
             topic.rdf = uri
             topic.save()
         g.add( (g.identifier, OWL['sameAs'], URIRef(topic.rdf)) )

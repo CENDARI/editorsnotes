@@ -36,7 +36,6 @@ parse==1.6.4
 django-admin2==0.6.1
 # For virtuoso-python
 -e git+https://github.com/maparent/virtuoso-python#egg=virtuoso-python
--e git+https://github.com/maparent/pyodbc.git@v3-virtuoso#egg=pyodbc
 # Symlinks to system packages
 # Symlink djadmin2
 ## symlink: bsddb3
