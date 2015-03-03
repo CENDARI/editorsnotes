@@ -243,24 +243,24 @@ def generate_secret_key():
     SECRET_CHARS = 'abcdefghijklmnopqrstuvwxyz1234567890-=!@#$$%^&&*()_+'
     return ''.join([random.choice(SECRET_CHARS) for i in range(50)])
 
-@task
-def make_pyodbc4virtuoso():
-    """
-    cf: http://river.styx.org/ww/2010/10/pyodbc-spasql/index
-    needs:
-    sudo apt-get install unixodbc-dev
-    """
-    with lcd(PROJ_ROOT):
-        local('wget http://pyodbc.googlecode.com/files/pyodbc-2.1.8.zip')
-        local('wget http://river.styx.org/ww/2010/10/pyodbc-spasql/pyodbc-spasql-datesupport.diff')
-        zf = ZipFile('pyodbc-2.1.8.zip')
-        zf.extractall('.')
-        local('patch -p0 < pyodbc-spasql-datesupport.diff')
-    with lcd("{}/pyodbc-2.1.8/".format(PROJ_ROOT)):
-        local('../{python} setup.py install'.format(**env))
-    with lcd(PROJ_ROOT):
-        local('rm -f pyodbc-2.1.8.zip')
-        local('rm -rf pyodbc-2.1.8/')
-        local('rm -f pyodbc-spasql-datesupport.diff')
-        local('rm -f lib/python2.7/site-packages/virtuoso-0.12.6-py2.7.egg-info/requires.txt')
+# @task
+# def make_pyodbc4virtuoso():
+#     """
+#     cf: http://river.styx.org/ww/2010/10/pyodbc-spasql/index
+#     needs:
+#     sudo apt-get install unixodbc-dev
+#     """
+#     with lcd(PROJ_ROOT):
+#         local('wget http://pyodbc.googlecode.com/files/pyodbc-2.1.8.zip')
+#         local('wget http://river.styx.org/ww/2010/10/pyodbc-spasql/pyodbc-spasql-datesupport.diff')
+#         zf = ZipFile('pyodbc-2.1.8.zip')
+#         zf.extractall('.')
+#         local('patch -p0 < pyodbc-spasql-datesupport.diff')
+#     with lcd("{}/pyodbc-2.1.8/".format(PROJ_ROOT)):
+#         local('../{python} setup.py install'.format(**env))
+#     with lcd(PROJ_ROOT):
+#         local('rm -f pyodbc-2.1.8.zip')
+#         local('rm -rf pyodbc-2.1.8/')
+#         local('rm -f pyodbc-spasql-datesupport.diff')
+#         local('rm -f lib/python2.7/site-packages/virtuoso-0.12.6-py2.7.egg-info/requires.txt')
 

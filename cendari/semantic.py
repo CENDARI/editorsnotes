@@ -96,7 +96,9 @@ class SemanticHandler(object):
                 pwd=settings.VIRTUOSO.get('dba_password','dba')
                 uid=settings.VIRTUOSO.get('dba_user','dba')
                 dsn=settings.VIRTUOSO.get('dsn','VOS')
-                self.connection = ('DSN=%s;UID=%s;PWD=%s;WideAsUTF16=Y' % (dsn, uid, pwd))
+                host=settings.VIRTUOSO.get('HOST','localhost')
+                self.connection = ('Server=%s:DSN=%s;UID=%s;PWD=%s;WideAsUTF16=\
+Y' % (host, dsn, uid, pwd))
                 self.store = 'Virtuoso'
             else:
                 raise ImproperlyConfigured("SEMANTIC_STORE invalid in the settings file'")
