@@ -4,7 +4,6 @@ import calendar
 from django.conf import settings
 from django.contrib import auth
 from django.contrib import messages
-#from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.core.mail import mail_admins
@@ -20,23 +19,17 @@ from django.utils.functional import lazy
 from editorsnotes.main import models as main_models
 from editorsnotes.search import en_index
 from cendari import utils
-#from cendari.decorators import check_project_privs
 from cendari.image import  ProjectAdminView, scan_to_dict
-#import editorsnotes.admin_custom.forms as admin_forms
-#from editorsnotes.admin.forms.notes import NoteForm
-#import editorsnotes.admin_custom.views as admin_views
 from editorsnotes.admin.views.topics import TopicAdminView
 from editorsnotes.admin.views.notes import NoteAdminView
 from editorsnotes.admin.views.documents import DocumentAdminView, TranscriptAdminView
 from editorsnotes.admin.views.projects import add_project, change_project
 from editorsnotes.admin import forms
 
-#import editorsnotes.main.api_views as api_views
 from editorsnotes.main.templatetags.display import as_html
 from django.core.urlresolvers import reverse
-#from haystack.query import SearchQuerySet
 from forms import ImportFromJigsawForm
-from semantic import semantic_process_note,semantic_process_document,semantic_process_transcript, semantic_process_topic, semantic_query, semantic_query_latlong, semantic_resolve_topic
+from semantic import *
 import json
 
 from editorsnotes.admin import forms
@@ -783,3 +776,27 @@ def footnote(request, project_slug, document_id, footnote_id):
     return render_to_response(
         'footnote.html', o, context_instance=RequestContext(request))
 
+def rdfa_view_note(request, project_slug, note_id):
+    user = request.user
+    if not user.is_authenticated():
+        raise PermissionDenied("anonymous access not allowed")
+    note = get_object_or_404(main_models.Note, id=note_id)
+    project = note.project
+    if project.slug!=project_slug:
+        raise PermissionDenied("Note %d does not belong to project %s"%(note_id,project_slug))
+    if not user.superuser_or_belongs_to(project):
+        raise PermissionDenied("not authorized on %s project" % project.slug)
+    return HttpResponse(semantic_rdfa(note))
+    
+def rdfa_view_document(request, project_slug, document_id):
+    user = request.user
+    if not user.is_authenticated():
+        raise PermissionDenied("anonymous access not allowed")
+    document = get_object_or_404(main_models.Document, id=document_id)
+    project = document.project
+    if project.slug!=project_slug:
+        raise PermissionDenied("Document %d does not belong to project %s"%(document_id,project_slug))
+    if not user.superuser_or_belongs_to(project):
+        raise PermissionDenied("not authorized on %s project" % project.slug)
+    return HttpResponse(semantic_rdfa(document))
+    

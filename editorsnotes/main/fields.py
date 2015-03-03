@@ -4,7 +4,7 @@ import re
 from django import forms
 from django.db import models
 from lxml import etree, html
-from lxml.html.clean import Cleaner
+from lxml.html.clean import Cleaner, autolink
 from django.utils.safestring import mark_safe
 from django.utils.html import conditional_escape
 from django.utils.encoding import force_unicode
@@ -79,6 +79,7 @@ class XHTMLField(models.Field):
             fragment = html.fragment_fromstring(value)
         except etree.ParserError:
             fragment = html.fragment_fromstring(value, create_parent='div')
+        autolink(fragment)
         return cleaner.clean_html(fragment)
     def get_prep_value(self, value):
         if value is None:
