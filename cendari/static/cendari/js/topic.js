@@ -25,7 +25,7 @@ Ext.application(
 			else
 				Ext.getCmp('editortab').tab.setText("Topic "+id);
 		                value = '{project:' + cendari_js_project_slug + 'topic_id: ' + id +'}';
-		                trace.event("_user","editTopic", "centre", value);
+		                //trace.event("_user","editTopic", "centre", value);
 		}
 		//cendari.edittopic = edittopic;
    }
