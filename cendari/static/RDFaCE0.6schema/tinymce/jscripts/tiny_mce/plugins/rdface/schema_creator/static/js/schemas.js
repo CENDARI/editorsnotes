@@ -77,6 +77,7 @@ function initiate_form(schema){
 	create_form(schema,'','properties');
 }
 function create_form(schema,property,container){
+	console.log("schema = " + schema);
 	var tmp='';
 	var selected=all_schemas.types[schema];
 	var id;
@@ -99,6 +100,7 @@ function create_form(schema,property,container){
 		tmp=tmp+'</div>';
 		tmp=tmp+'</div>';
 		$('#form_'+id).append(tmp);
+		FBSuggest(schema);
 		$('#entity_uri').mouseover(function() {
 			   $('#entity_uri').tooltip({
 			        placement : 'right',
