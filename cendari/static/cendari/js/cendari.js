@@ -34,7 +34,8 @@ Ext.application({
 				autoScroll : true,
 				animCollapse : true,
 				margins : '0 0 0 2'
-			}, {
+			}, 
+			{
 				region : 'center',
 				layout : 'border',
 				border : false,
@@ -183,7 +184,6 @@ Ext.application({
 			this.editButtonID = editButtonID;
 			this.labelTitle = labeltitle;
 			var editor = tinyMCE.init({
-				
 				mode : "specific_textareas",
         		editor_selector : "mceEditor",
 				theme : "advanced",
@@ -193,8 +193,9 @@ Ext.application({
 				//elements : domID,
 				content:"Description",
 				toolbar:"description",
-				plugins : "example,fullscreen,lists,advhr,advimage,advlink,iespell,inlinepopups,media,paste,directionality,fullscreen,noneditable,nonbreaking,wordcount,advlist,contextmenu,fullscreen,rdface",
+				plugins : "example,lists,advhr,advimage,advlink,iespell,inlinepopups,media,paste,directionality,noneditable,nonbreaking,wordcount,advlist,contextmenu,fullscreen,rdface",
 				theme_advanced_buttons1 : "undo,redo,cut,copy,paste,fontsizeselect,bold,italic,underline,strikethrough,bullist,numlist,forecolor,backcolor, code,rdfaceHelp,rdfaceRun,rdfaceFacts,rdfaceSetting",//,
+				theme_advanced_buttons2 : "link,unlink,anchor,|,justifyleft,justifycenter,justifyright,justifyfull,|,styleselect,formatselect,fontselect,fontsizeselect",
 				fullscreen_new_window : true,
 				width : "100%",
 				content_css : csspath + "content.css ," + csspath + "rdface.css, " + csspath + "schema_colors.css" ,
@@ -217,6 +218,10 @@ Ext.application({
 	                        ed.focus();
 	                    }
 	                });
+	                ed.onInit.add(function(ed) {
+			          console.log('Editor is done: ',ed);
+			          editors_crc32[ed.id] = CRC32(tinyMCE.getInstanceById(ed.id).getContent());
+				    });
             	}
 			});
 		
@@ -319,32 +324,32 @@ Ext.application({
 			var transForm 		= transDoc.getElementById('transcriptform');
 			transForm.submit();
 		    value = '{project:' + cendari_js_project_slug + '}';
-		    //trace.event("_user","saveNote", "centre", value);
+		    trace.event("_user","saveNote", "centre", value);
 			return false;
 		});*/
 		Ext.getCmp('NewNoteId').on('click', function() {
 			console.log("New note called");
 			window.location.assign(cendari_root_url + "cendari/"+cendari_js_project_slug+"/notes/add/");
 		    value = '{project:' + cendari_js_project_slug + '}';
-		    //race.event("_user","NewNote", "centre", value);
+		    trace.event("_user","NewNote", "centre", value);
 		});
 		Ext.getCmp('NewDocumentId').on('click', function() {
 			console.log("New document called");
 			window.location.assign(cendari_root_url + "cendari/"+cendari_js_project_slug+"/documents/add/");
 		    value = '{project:' + cendari_js_project_slug + '}';
-		    //trace.event("_user","NewDocument", "centre", value);
+		    trace.event("_user","NewDocument", "centre", value);
 		});
 		Ext.getCmp('NewProjectId').on('click', function() {
 			console.log("New project called");
 			window.location.assign(cendari_root_url + "cendari/projects/add/");
 		    value = '{project:' + cendari_js_project_slug + '}';
-		    //trace.event("_user","NewProject", "centre", value);
+		    trace.event("_user","NewProject", "centre", value);
 		});
 		Ext.getCmp('jigsawImport').on('click', function() {
 			console.log("Jigsaw");
 			window.open(cendari_root_url + "cendari/"+cendari_js_project_slug + "/importfromjigsaw/");
 		    value = '{project:' + cendari_js_project_slug + '}';
-		    //trace.event("_user","jagsawImport", "centre", value);
+		    trace.event("_user","jagsawImport", "centre", value);
 		});
 		cendari.init.map(function(fn) {
 			fn.call();
@@ -363,17 +368,17 @@ function switchtabs(noOfTabs, type)
 		case  "note":
 			height = $(".tab-content.note").height();
 		    value = '{project:' + cendari_js_project_slug + '}';
-		    //trace.event("_system","switch to Note tab", "centre", value);
+		    trace.event("_system","switch to Note tab", "centre", value);
 			break;
 		case "document":
 			height = $(".tab-content.document").height();
 		    value = '{project:' + cendari_js_project_slug + '}';
-		    //trace.event("_system","switch to Document tab", "centre", value);
+		    trace.event("_system","switch to Document tab", "centre", value);
 			break;
 		case "entity":
 			height = $(".tab-content.note").height();
 		    value = '{project:' + cendari_js_project_slug + '}';
-		    //trace.event("_system","switch to Entity tab", "centre", value);
+		    trace.event("_system","switch to Entity tab", "centre", value);
 			break;
 			
 	}

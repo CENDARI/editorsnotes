@@ -1,0 +1,25 @@
+{% extends "form.html" %}
+{% load typogrify display %}
+{% load staticfiles compress %}
+
+{% block form_content %}
+
+<meta name="note_id" id="note_id" content="{{ note.id }}" />
+<input id="editorEditBut" type="button" value="Edit"/>
+
+
+<div id="editorsDom">
+</div>
+
+
+<script>
+    cendari.addInit(function() { 
+    	cendari.addTab("My working space");
+    	cendari.addWidgetToActiveTab("panel","editorsDom" ,"border");
+
+    });
+
+</script>
+
+{% endblock %}
+

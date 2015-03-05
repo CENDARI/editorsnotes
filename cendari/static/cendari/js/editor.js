@@ -37,6 +37,64 @@ var messages = {
     }
 };
 
+var type_class_mapping = {
+    "PER" : "form-entities r_person",
+    "ORG" : "form-entities r_organization",
+    "EVT" : "form-entities r_event",
+    "PLA" : "form-entities r_place",
+    "TAG" : "form-entities r_thing",
+    ""    : "form-entities"
+};
+
+function updateIframe(iframe_id){
+    document.getElementById(iframe_id).src = document.getElementById(iframe_id).src
+}
+
+
+
+function createEntityLink(absolute_url,type,name){
+    var html = '<a  href="'+absolute_url+'" class="'+type_class_mapping[type]+'"> '+name+' </a>'
+
+    return html;
+}
+
+function  updatedEnitiesTab(prefix,related_topics){
+    var entities_html = "";
+    var related_topics_jq = $('#'+prefix+'-related-topics');
+    for(var i=0;i<related_topics.length;i++){
+        entities_html += createEntityLink(related_topics[i].absolute_url,related_topics[i].type,related_topics[i].preferred_name);
+    }
+
+    related_topics_jq.empty();
+    console.log("entities_html",entities_html);
+    related_topics_jq.append(entities_html);
+
+    $('#entitiesTab').text('Entities ('+related_topics.length+')');
+}
+
+
+function createScanElement(thumbnail_url,id){
+    var html = "";
+    html +='<li>'+
+            '<a class="scan btn" id="1" href="'+thumbnail_url+'">'+
+            '<img id="ext-gen1206" src="/media/scans/2015/02/HB043T_TIF_thumb.gif" alt="Thumbnail of scan 1" width="100">'+
+            id +'</a></li>'
+                    
+
+}
+
+function updateScanTab(scans){
+    var scans_jq = $('#scan-list');
+    var scans_html = "";
+
+    for(var i=0;i<scans.length;i++){
+        scans_html += createScanElement(scans[i].image_thumbnail_url,scans[i].id);
+    }
+
+    scans_jq.empty();
+    scans_jq.append(scans_html);
+
+}
 
 function addMessage(div,msg,msg_id){
     var msg_el = $("<div></div>").text(msg).attr('id',msg_id).addClass('alert');   
@@ -51,29 +109,20 @@ function updateMessage(msg_id,new_msg){
 function replaceWindowUrl(data_id){
 
     var currentUrl = window.location.toString();
-    // if(currentUrl.indexOf('add')>0){
-    var newUrl = currentUrl.replace("add", data_id);
-    window.location.replace(newUrl);
-    // }
+    if(id.length===0){
+        var newUrl = currentUrl.replace("add", data_id);
+        window.location.replace(newUrl);
+    }
+    else{
+        updateIframe('resourcesIframe');
+        updateIframe('smallvisIframe');
+    }
 }
 
 
 function removeElement(elemnt_) {
     elemnt_.parentNode.removeChild(elemnt_);
 }
-
-
-// function addMessageSaved(modelName){
-//     $('#progress-message-list').append(modelName +'is saved');
-// }
-
-// function addMessageSaving(modelName){
-//     $('#progress-message-list').append('Saving: '+ modelName+', please do not reload');
-// }
-
-// function deleteMessage(modelName){
-//     $('#progress-message-list').append(msg_el);
-// }
 
 
 function getCookie(name) {
@@ -114,7 +163,7 @@ function submitTranscript(document_id){
     formData = "";
     formData = formData+"csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&";
 
-     if($('#transcript-description').length){
+    if($('#transcript-description').length){
         formData =formData +'document='+encodeURIComponent($('#transcript-document').val())+'&creator='+$('#transcript-creator').val()+'&last_updater='+$('#transcript-uploader').val()+'&';
         if(tinyMCE.activeEditor!=null){
             if(tinyMCE.getInstanceById('transcript-description').getContent().length){
@@ -141,19 +190,23 @@ function submitTranscript(document_id){
         data: formData,
         // content_type:'application/json',
         beforeSend: function(){
-            addMessage('message-list',messages.transcript.beforeSend,messages.transcript.id);
+            // addMessage('message-list',messages.transcript.beforeSend,messages.transcript.id);
+            toastr['info'](messages.transcript.beforeSend)
         },
 
         success: function(data){
             // var currentUrl = window.location.toString();
             // var newUrl = currentUrl.replace("add", document_id);
             // window.location.replace(newUrl);
-            updateMessage(messages.transcript.success,messages.transcript.id);
+            // updateMessage(messages.transcript.success,messages.transcript.id);
+            toastr['success'](messages.transcript.success)
             submitScan(document_id);
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) { 
-            alert("Status: " + textStatus); alert("Error: " + errorThrown); 
-            updateMessage(messages.transcript.error,messages.transcript.id);
+            // alert("Status: " + textStatus); alert("Error: " + errorThrown); 
+            console.log("Error with status "+textStatus+":",errorThrown);
+            // updateMessage(messages.transcript.error,messages.transcript.id);
+            toastr['error'](messages.transcript.error)
             submitScan(document_id);
         } 
     });
@@ -167,29 +220,19 @@ function submitScan(document_id){
             e.preventDefault();
             var options = { 
                  beforeSend: function(){
-                    addMessage('message-list',messages.scan.beforeSend,messages.scan.id);
+                    toastr['info'](messages.scan.beforeSend)
                 },
                 success: function(){
-                    // var currentUrl = window.location.toString();
-                    // var newUrl = currentUrl.replace("add", document_id);
-                    // window.location.replace(newUrl);  
-                    updateMessage(messages.scan.success,messages.scan.id);
+                   
+                    toastr['success'](messages.scan.success)
                     replaceWindowUrl(document_id);
                 },
                  error: function(XMLHttpRequest, textStatus, errorThrown) { 
-                    alert("Status: " + textStatus); alert("Error: " + errorThrown); 
-                    updateMessage(messages.scan.error,messages.scan.id);
+                    console.log("Error with status "+textStatus+":",errorThrown);
+                    toastr['error'](messages.scan.error)
                     replaceWindowUrl(document_id);
                 }
-                // other available options: 
-                //url:       url         // override for form's 'action' attribute 
-                //type:      type        // 'get' or 'post', override for form's 'method' attribute 
-                //dataType:  null        // 'xml', 'script', or 'json' (expected server response type) 
-                //clearForm: true        // clear all form fields after successful submit 
-                //resetForm: true        // reset the form after successful submit 
-
-                // $.ajax options can be used here too, for example: 
-                //timeout:   3000 
+                
             }; 
             $('#scanCendari').ajaxSubmit(options);
             return false;
@@ -198,20 +241,239 @@ function submitScan(document_id){
         $('#scanCendari').submit();
     }
     else{
-        // var currentUrl = window.location.toString();
-        // var newUrl = currentUrl.replace("add", document_id);
-        // window.location.replace(newUrl);  
+        toastr['success'](messages.scan.success);
         replaceWindowUrl(document_id);
     }
-
-
-    
-
 }
+
+
+function submitDocument(fc){
+    var formData = "";
+    formData = formData+"csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&";
+    formData = formData+"&description="+encodeURIComponent(tinyMCE.getInstanceById('document-description').getContent())+"&";
+    formData = formData+$("#saveButton").attr('name')+"="+$("#saveButton").val();
+
+    $.ajax({
+        // beforeSend: function (xhr) {xhr.setRequestHeader('X-CSRFToken', $('input[name="csrfmiddlewaretoken"]').val());},
+        url:fc.attr('action'),
+        type: fc.attr('method'),
+        data: formData,
+        // content_type:'application/json',
+        beforeSend:function(){
+        // addMessage('message-list',messages[type].beforeSend,messages[type].id);
+            console.log("saving ....")
+            toastr['info'](messages.document.beforeSend)
+        },
+        success: function(data){
+            console.log("response data:",data);
+
+            toastr['success'](messages.document.success)
+            
+            updatedEnitiesTab(cendari_js_object_type,data.related_topics);
+            updateScanTab(data.scans);
+
+            submitTranscript(data.id);
+            
+            console.log('submitting non document');
+            replaceWindowUrl(data.id)
+            
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) { 
+       
+
+            console.log("Error with status "+textStatus+":",errorThrown);
+            toastr['error'](messages.document.error)
+
+        } 
+    });
+}
+
+function submitNote(fc){
+    var formData = "";
+    formData = formData+"csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&";
+    formData=formData+"id="+$('#model_id').val()+"&";
+    formData =formData +'title='+$('#note_title').val()+"&related_topics=&status=open&is_private=false&";
+    formData = formData+"content="+encodeURIComponent(tinyMCE.getInstanceById('note-description').getContent())+"&";
+    formData = formData+$("#saveButton").attr('name')+"="+$("#saveButton").val();
+
+    $.ajax({
+        // beforeSend: function (xhr) {xhr.setRequestHeader('X-CSRFToken', $('input[name="csrfmiddlewaretoken"]').val());},
+        url:fc.attr('action'),
+        type: fc.attr('method'),
+        data: formData,
+        // content_type:'application/json',
+        beforeSend:function(){
+        // addMessage('message-list',messages[type].beforeSend,messages[type].id);
+            console.log("saving ....")
+            toastr['info'](messages.note.beforeSend)
+        },
+        success: function(data){
+            toastr['success'](messages.note.success)
+            updatedEnitiesTab(cendari_js_object_type,data.related_topics);
+            submitTranscript(data.id);
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) { 
+            console.log("Error with status "+textStatus+":",errorThrown);
+            toastr['error'](messages.note.error)
+
+        } 
+    });
+}
+
+function submitEntity(fc){
+    var formData = "";
+    formData = formData+"csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&";
+    formData=formData+"id="+$('#model_id').val()+"&";
+    formData = formData + "rdf="+$('#rdf_id').val().trim()+"&";
+    formData = formData + "preferred_name="+$('#preferred_name_id').text().trim()+"&";
+    formData = formData+$("#saveButton").attr('name')+"="+$("#saveButton").val();
+
+    $.ajax({
+        url:fc.attr('action'),
+        type: fc.attr('method'),
+        data: formData,
+        beforeSend:function(){
+
+            console.log("saving ....")
+            toastr['info'](messages.entity.beforeSend)
+        },
+        success: function(data){
+            toastr['success'](messages.entity.success)
+            updatedEnitiesTab(cendari_js_object_type,data.related_topics);           
+            replaceWindowUrl(data.id)
+            
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) { 
+            console.log("Error with status "+textStatus+":",errorThrown);
+            toastr['error'](messages.entity.error)
+
+        } 
+    });
+}
+
 
 
 $(document).ready(function(){
     var csrftoken = getCookie('csrftoken');
+    // if(cendari_js_object_type === 'note' || cendari_js_object_type==='document'){
+    //     main_editor_crc32 = CRC32($('#'+cendari_js_object_type+'-description').text())
+    //     if(cendari_js_object_type === 'document'){
+    //         transcript_editor_crc32 = CRC32($('#transcript-description').text());   
+    //     }
+    // }
+    
+    
+    toastr.options = {
+        "closeButton": true,
+        "debug": false,
+        "newestOnTop": true,
+        "progressBar": false,
+        "positionClass": "toast-top-center",
+        "preventDuplicates": true,
+        "onclick": null,
+        "showDuration": "300",
+        "hideDuration": "1000",
+        "timeOut": "5000",
+        "extendedTimeOut": "1000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+    }
+
+    $('.formCendari').submit(function(e){
+        e.preventDefault();
+       
+        for (var edId in tinyMCE.editors){
+            if(tinyMCE.editors[edId]!=null){
+                tinyMCE.editors[edId].save();
+            }
+        }
+
+        var fc = $(this);
+        
+        if(cendari_js_object_type == 'note'){
+            submitNote(fc)
+        }
+        if(cendari_js_object_type == 'document'){
+            submitDocument(fc)
+        }
+        if(cendari_js_object_type == 'entity'){
+            submitEntity(fc)
+        }
+
+    }); 
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/** deprecated 
+$(document).ready(function(){
+    var csrftoken = getCookie('csrftoken');
+    if(cendari_js_object_type === 'note' || cendari_js_object_type==='document'){
+        main_editor_crc32 = CRC32($('#'+cendari_js_object_type+'-description').text())
+        if(cendari_js_object_type === 'document'){
+            transcript_editor_crc32 = CRC32($('#transcript-description').text());   
+        }
+    }
+    
+    
+    toastr.options = {
+        "closeButton": true,
+        "debug": false,
+        "newestOnTop": true,
+        "progressBar": false,
+        "positionClass": "toast-top-center",
+        "preventDuplicates": true,
+        "onclick": null,
+        "showDuration": "300",
+        "hideDuration": "1000",
+        "timeOut": "5000",
+        "extendedTimeOut": "1000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+    }
 
     $('.formCendari').submit(function(e){
         e.preventDefault();
@@ -219,6 +481,10 @@ $(document).ready(function(){
         // if(tinyMCE.activeEditor!=null){
         //     tinyMCE.activeEditor.save();
         // }
+        if(id.length>0){
+            if(tinyMCE.getInstanceById(cendari_js_object_type'-description')){}
+
+        }
 
         for (var edId in tinyMCE.editors){
             if(tinyMCE.editors[edId]!=null){
@@ -266,7 +532,7 @@ $(document).ready(function(){
 
         // var formData = fc.serialize()+"&"+$("#saveButton").attr('name')+"="+$("#saveButton").val();
         // var formData = $("#saveButton").attr('name')+"="+$("#saveButton").val()+"&csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&_content_type=application/json&_content="+encodeURIComponent(content)
-        // console.log("formData are : \n: "+formData);    
+        console.log("formData are : \n: "+formData);    
         $.ajax({
         // beforeSend: function (xhr) {xhr.setRequestHeader('X-CSRFToken', $('input[name="csrfmiddlewaretoken"]').val());},
             url:fc.attr('action'),
@@ -274,10 +540,22 @@ $(document).ready(function(){
             data: formData,
             // content_type:'application/json',
             beforeSend:function(){
-                addMessage('message-list',messages[type].beforeSend,messages[type].id);
+                // addMessage('message-list',messages[type].beforeSend,messages[type].id);
+                console.log("saving ....")
+                toastr['info'](messages[type].beforeSend)
             },
             success: function(data){
-                // console.log(data);
+                console.log("response data:",data);
+                
+                toastr['success'](messages[type].success)
+                console.log(type);
+                console.log(type==='document');
+                console.log(type==='note');
+
+                if(type.length>0 && (type==='document' || type==='note')){
+                    updatedEnitiesTab(type,data.related_topics);
+                }
+
                 if($('#document-description').length){
                     submitTranscript(data.id);
                 }
@@ -286,18 +564,25 @@ $(document).ready(function(){
                     // var currentUrl = window.location.toString();
                     // var newUrl = currentUrl.replace("add", data.id);
                     // window.location.replace(newUrl);
+
                     replaceWindowUrl(data.id)
                 }
             },
             error: function(XMLHttpRequest, textStatus, errorThrown) { 
-                alert("Status: " + textStatus); alert("Error: " + errorThrown); 
-                updateMessage(messages[type].error,messages[type].id);
-                var currentUrl = window.location.toString();
-    
-                window.location.replace(currentUrl);
+                // alert("Status: " + textStatus); alert("Error: " + errorThrown); 
+                // updateMessage(messages[type].error,messages[type].id);
+                // var currentUrl = window.location.toString();
+                
+                console.log("Error with status "+textStatus+":",errorThrown);
+                // updateMessage(messages.transcript.error,messages.transcript.id);
+                toastr['error'](messages[type].error)
+
+                // window.location.replace(currentUrl);
             } 
         });
 
     }); 
 
 });
+**/
+

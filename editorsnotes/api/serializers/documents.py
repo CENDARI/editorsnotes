@@ -36,10 +36,18 @@ class ScanSerializer(serializers.ModelSerializer):
     creator = serializers.Field('creator.username')
     image = HyperLinkedImageField()
     image_thumbnail = HyperLinkedImageField(read_only=True)
+    
+     # Cendari code E.G. aviz
+    image_thumbnail_url = serializers.SerializerMethodField('it_url')
+    
     class Meta:
         model = Scan
         fields = ('id', 'image', 'image_thumbnail', 'ordering', 'created',
-                  'creator',)
+                  'creator','image_thumbnail_url',)
+    
+    # Cendari code E.G. aviz
+    def it_url(self,scan):
+        return scan.image_thumbnail.url
 
 class DocumentSerializer(RelatedTopicSerializerMixin, ProjectSpecificItemMixin,
                          serializers.ModelSerializer):

@@ -11,6 +11,7 @@
 	<meta name="document_id" id="document_id" content="{{ document.id }}" />
 	<meta name="document_name" id="document_name" content="{{ document.import_id }}" />
 	<script type="text/javascript" src="{% static "cendari/js/document.js" %}"></script>
+	
 {% endblock init %}
 
 {% block model_fields %}
@@ -18,7 +19,7 @@
 		<ul class="tabs document">
 			<li> <!-- ENTITIES TAB --> 
 				<input type="radio" checked name="tabs" id="tab1">
-				<label for="tab1">
+				<label id='entitiesTab' for="tab1">
 				<script > document.write("Entities (" + "{{ document.get_all_related_topics|length }}" + ")"); </script>
 				</label>
 				<div id="tab-content1" class="tab-content  document animated fadeIn">

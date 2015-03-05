@@ -90,7 +90,9 @@ class TopicAssignmentField(RelatedField):
         return {
             'id': ta.topic.id,
             'preferred_name': ta.topic.preferred_name,
-            'url': url
+            'url': url,
+            'type':ta.topic.topic_node.type,
+            'absolute_url':ta.topic.get_absolute_url()
         }
     def field_to_native(self, obj, field_name):
         if obj is None:

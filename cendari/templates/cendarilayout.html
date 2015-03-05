@@ -6,11 +6,19 @@
 
 {% block layout %}
 
+{% compress css %}  
+  <!-- editors base css-->
+  <link rel="stylesheet" href="{% static "cendari/css/toastr.min.css" %}" type="text/less"/>
+ 
+{% endcompress %}
+
+
 {% compress js %}
+  <script type="text/javascript" src="{% static "cendari/js/crc32.min.js" %}"></script>
   <script type="text/javascript" src="{% static "cendari/js/cendari.js" %}"></script>
+  <script type="text/javascript" src="{% static "cendari/js/toastr.min.js" %}"></script>
   <script type="text/javascript" src="{% static "cendari/js/editor.js" %}"></script>
   <script type="text/javascript" src="{% static "cendari/js/jquery.serialize-object.min.js" %}"></script>
-
   <script type="text/javascript" src="{% static "cendari/js/messagePassing.js" %}"></script>
 
 
@@ -133,13 +141,13 @@
     {% block cendari_content %}
 
       <div id="west" style="height:100%;" class="x-hide-display">
-        <iframe src="{% url 'resources_view' project_slug=project.slug %}?object_type={{object_type}}&object_id={{object_id}}&topic_type={{topic_type}}" seamless="true" width="100%" height="100%">
+        <iframe src="{% url 'resources_view' project_slug=project.slug %}?object_type={{object_type}}&object_id={{object_id}}&topic_type={{topic_type}}" id ='resourcesIframe' seamless="true" width="100%" height="100%">
           <p>Sorry, your browser does not support iframes. </p>
         </iframe>
       </div>
 
       <div id="east" style="height:100%;" class="x-hide-display">
-        <iframe src="{%  url 'smallvis_view' project_slug=project.slug %}" id ='smallvis_iframe' seamless="true" width="100%" height="100%">
+        <iframe src="{%  url 'smallvis_view' project_slug=project.slug %}" id ='smallvisIframe' seamless="true" width="100%" height="100%">
           <p>Sorry, your browser does not support iframes. </p>
         </iframe>
       </div>

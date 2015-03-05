@@ -1,0 +1,215 @@
+{% extends "form.html" %}
+{% load typogrify display %}
+{% load staticfiles compress %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" media="all" href="{% static "iipmooviewer/css/iip.css" %}" />
+{% endblock %}
+
+{% block form_init %}
+
+<meta name="document_id" id="document_id" content="{{ document.id }}" />
+<meta name="document_name" id="document_name" content="{{ document.import_id }}" />
+<script type="text/javascript" src="{% static "cendari/js/document.js" %}"></script>
+{% endblock form_init%}
+
+{% block form_content %}
+<div class="form-menu-document">
+<ul class="tabs document">
+	<li>
+		<input type="radio" checked name="tabs" id="tab1">
+		<label for="tab1">
+			<script >
+				document.write("Entities (" + "{{ document.get_all_related_topics|length }}" + ")");
+			</script></label>
+		<div id="tab-content1" class="tab-content  document animated fadeIn">
+			<div class="form-entities">
+				{% with formset=formsets.topicassignment %}
+				<fieldset class="collapsable related-topics">
+					{% include "includes/bootstrap_formset.html" %}
+				</fieldset>
+				{% endwith %}
+
+				{% if document %}
+				{% for topic in document.get_all_related_topics %}
+				<a href= {{ topic.get_absolute_url }}
+				{% if 		topic.topic_node.type == "PER" %} class ="form-entities r_person"
+				{% elif 	topic.topic_node.type == "ORG" %} class ="form-entities organization"
+				{% elif 	topic.topic_node.type == "EVT" %} class ="form-entities r_event"
+				{% elif 	topic.topic_node.type == "PLA" %} class ="form-entities r_place"
+				{% elif 	topic.topic_node.type == "TAG" %} class ="form-entities r_thing"
+				{% else 						%} class = "form-entities"
+				{% endif %}
+				> {{ topic }} </a>
+				{% endfor %}
+
+				{% if not document.get_all_related_topics|length > 0 %}
+				<div>
+					No Entities.
+				</div>
+				<div>
+					select the Entity & right-click to add it
+				</div>
+				{% endif %}
+
+				{% endif %}
+
+				{% if not document.id > 0 %}
+				<div>
+					No Entities.
+				</div>
+				<div>
+					Save this document to add your Entities
+				</div>
+				{% endif %}
+
+			</div>
+		</div>
+	</li>
+
+	<li>
+		<input type="radio" name="tabs" id="tab2">
+		<label for="tab2">Transcript {% if document.has_transcript %} (1) {% else %} (0) {% endif %}</label>
+		<div id="tab-content2" class="tab-content document animated fadeIn">
+			{% if document.id %}
+			<iframe   scrolling="no" id="transciptIframe" class="transcript-form" width="100%" src="{% url 'transcript_edit_view' project.slug document.id %}"></iframe>
+			{% else %}
+			Save document before adding a transcript.
+			{% endif %}
+
+		</div>
+	</li>
+	<li>
+		<input type="radio" name="tabs" id="tab3">
+		<label for="tab3">Zotero data ({% if not document.zotero_link %}0{% else %}1{% endif%})</label>
+		<div id="tab-content3" class="tab-content document animated fadeIn">
+			<fieldset class="collapsable">
+				{% include "includes/bootstrap_errors.html" with errors=form.zotero_string.errors %}
+				<div class="fieldset-content">
+					<!-- <div class="zotero-container"></div> -->
+					{{ form.zotero_string }}
+				</div>
+			</fieldset>
+		</div>
+	</li>
+
+	<li>
+		<input type="radio" name="tabs" id="tab4">
+		<label for="tab4">Document Links ({% if not document.get_link_count %}0{% else %}{{ document.get_link_count }} {% endif%})</label>
+		<div id="tab-content4" class="tab-content document animated fadeIn">
+			{% with formset=formsets.documentlink %}
+			<fieldset >
+				{% include "includes/bootstrap_formset.html" %}
+			</fieldset>
+			{% endwith %}
+		</div>
+	</li>
+
+	<li>
+		<input type="radio" name="tabs" id="tab5">
+		<label for="tab5">Scans ({% if not document.get_scan_count %}0{% else %}{{ document.get_scan_count }} {% endif%})</label>
+		<div id="tab-content5" class="tab-content document animated fadeIn">
+			{% with formset=formsets.scan %}
+			<fieldset >
+				<div class="fieldset-content">
+
+					<div class="additional-scan">
+						{% if formset.non_form_errors %}
+						<div class="alert alert-error">
+							{% for error in formset.non_form_errors %}
+							{{ error }}
+							{% endfor %}
+						</div>
+						{% endif %}
+
+						{{ formset.management_form }}
+
+						<ol>
+							{% for form in formset %}
+							<li class="existing-scan">
+								{{ form.id }}
+								{{ form.document }}
+								{{ form.ordering }}
+								{% if not forloop.last %}
+								<a class="scan btn" id="{{ form.id.value }}"
+								href="{{ form.image.value.url }}"> {{ forloop.counter }} </a>
+								{{ form.DELETE }}
+							</li>
+							{% else %}
+						</ol>
+						<div>
+							<hr />
+							<hr />
+							<hr />
+							<hr />
+
+							<label >Add scans:</label>
+							{{ form.image }}
+						</div>
+						{% endif %}
+						{% endfor %}
+					</div>
+				</div>
+			</fieldset>
+
+			{% endwith %}
+			<iframe width="100%" allowfullscreen="true" id="scan-viewer" ></iframe>
+
+		</div>
+	</li>
+</ul>
+
+</div>
+
+
+<div class="stop-float"></div>
+<div style="height:5px">
+	&nbsp;
+</div>
+
+<div class="form-main" >
+	<!-- <fieldset >
+		<div class="inline-block">
+			{{ form.title }}
+		</div>
+	</fieldset> -->
+
+	<fieldset class="description-field collapsable doc-editor">
+		{% include "includes/bootstrap_errors.html" with errors=form.content.errors %}
+		<div class="fieldset-content" >
+			{% include "includes/wysihtml5_full_toolbar.html" with toolbar_id="content-toolbar" %}
+			<input  class="editorlabel" id="documentDescEditBut" type="button" value= {% if document.id > 0 %} " [ Read Only ]                --- click here for Edit mode" {% else %} " [ Editable ]                    --- click here for Read-Only mode" {% endif %} />
+			{{ form.description }}
+		</div>
+	</fieldset>
+
+</div>
+
+{% endblock form_content %}
+
+{% block form_functions %}
+
+<script>
+	switchtabs(5, "document");
+	var isReadOnly = false, title = "New Document";
+
+	if (( id = document.getElementById("document_id").getAttribute("content")) > 0) {
+		var name = document.getElementById("document_name").getAttribute("content");
+		title = "Document " + id + ": " + name;
+		isReadOnly = true;
+	}
+
+	var descriptionLabel = "Document Description ";
+	var temp = document.getElementById("documentDescEditBut").getAttribute("value");
+
+	document.getElementById("documentDescEditBut").value = descriptionLabel + temp;
+
+	cendari.addInit(function() {
+		cendari.createEditor($('#noteform').height(), "id_description", false, "documentDescEditBut", descriptionLabel);
+		cendari.addTab(title);
+		cendari.addWidgetToActiveTab("form", "noteform", "border");
+		cendari.addImageViewer("panel", "scan-viewer");
+	}); 
+</script>
+
+{% endblock form_functions %}
