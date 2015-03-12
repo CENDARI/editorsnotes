@@ -39,15 +39,19 @@ class ScanSerializer(serializers.ModelSerializer):
     
      # Cendari code E.G. aviz
     image_thumbnail_url = serializers.SerializerMethodField('it_url')
+    image_url = serializers.SerializerMethodField('i_url')
     
     class Meta:
         model = Scan
         fields = ('id', 'image', 'image_thumbnail', 'ordering', 'created',
-                  'creator','image_thumbnail_url',)
+                  'creator','image_thumbnail_url','image_url',)
     
     # Cendari code E.G. aviz
     def it_url(self,scan):
         return scan.image_thumbnail.url
+
+    def i_url(self,scan):
+        return scan.image.url 
 
 class DocumentSerializer(RelatedTopicSerializerMixin, ProjectSpecificItemMixin,
                          serializers.ModelSerializer):
