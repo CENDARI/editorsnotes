@@ -46,6 +46,49 @@ var type_class_mapping = {
     ""    : "form-entities"
 };
 
+
+var toastr_options = {
+    "closeButton": true,
+    "debug": false,
+    "newestOnTop": true,
+    "progressBar": false,
+    "positionClass": "toast-top-center",
+    "preventDuplicates": true,
+    "onclick": null,
+    "showDuration": "300",
+    "hideDuration": "1000",
+    "timeOut": "5000000000000000",
+    "extendedTimeOut": "5000000000000000",
+    "showEasing": "swing",
+    "hideEasing": "linear",
+    "showMethod": "fadeIn",
+    "hideMethod": "fadeOut"
+}
+
+function showToastrMessage(type,message){
+    console.log('clearing messages.....');
+    toastr.clear();
+    console.log('adding new message ......')
+    toastr[type](message);
+}
+
+function showErrorMessage(message){
+    toastr.options.timeOut="500";
+    toastr.options.extendedTimeOut="1000";
+    showToastrMessage('error',message)
+}
+
+function showSuccessMessage(message){
+    toastr.options.timeOut="500";
+    toastr.options.extendedTimeOut="1000";
+    showToastrMessage('success',message)
+}
+
+function showInfoMessage(message){
+    showToastrMessage('info',message)
+}
+
+
 function updateIframe(iframe_id){
     document.getElementById(iframe_id).src = document.getElementById(iframe_id).src
 }
@@ -73,12 +116,12 @@ function  updatedEnitiesTab(prefix,related_topics){
 }
 
 
-function createScanElement(thumbnail_url,id){
+function createScanElement(image_url,thumbnail_url,id){
     var html = "";
     html +='<li>'+
-            '<a class="scan btn" id="1" href="'+thumbnail_url+'">'+
-            '<img id="ext-gen1206" src="/media/scans/2015/02/HB043T_TIF_thumb.gif" alt="Thumbnail of scan 1" width="100">'+
-            id +'</a></li>'
+            '<a class="scan btn" id="1" href="http://'+window.location.pathname+image_url+'">'+
+            '<img id="ext-gen1206" src="'+thumbnail_url+'" alt="Thumbnail of scan 1" width="100"></a></li>'
+    return html;
                     
 
 }
@@ -87,12 +130,18 @@ function updateScanTab(scans){
     var scans_jq = $('#scan-list');
     var scans_html = "";
 
+    console.log('scans',scans);
+
     for(var i=0;i<scans.length;i++){
-        scans_html += createScanElement(scans[i].image_thumbnail_url,scans[i].id);
+        scans_html += createScanElement(scans[i].image_url,scans[i].image_thumbnail_url,scans[i].id);
     }
 
+    console.log('scans_html',scans_html);
+    
     scans_jq.empty();
     scans_jq.append(scans_html);
+    $('#scansTab').text('Scans ('+scans.length+')');
+    $('#id_image').val('');
 
 }
 
@@ -157,10 +206,10 @@ function uniqueElements(el_array){
 
 
 
-function submitTranscript(document_id){
+function submitTranscript(document_id,fc_document){
     console.log("sumbitting transcript");
-    fc = $('#transcriptCendari');
-    formData = "";
+    var fc = $('#transcriptCendari');
+    var formData = "";
     formData = formData+"csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&";
 
     if($('#transcript-description').length){
@@ -170,13 +219,13 @@ function submitTranscript(document_id){
                 formData = formData+"&content="+encodeURIComponent(tinyMCE.getInstanceById('transcript-description').getContent())+"&";
             }
             else{
-                submitScan(document_id);
+                submitScan(document_id,fc);
                 return;
             }
         }
     }
     else{
-        submitScan(document_id);
+        submitScan(document_id,fc);
         return;
     }
 
@@ -188,108 +237,120 @@ function submitTranscript(document_id){
         url:fc.attr('action'),
         type: fc.attr('method'),
         data: formData,
-        // content_type:'application/json',
-        beforeSend: function(){
-            // addMessage('message-list',messages.transcript.beforeSend,messages.transcript.id);
-            toastr['info'](messages.transcript.beforeSend)
-        },
-
         success: function(data){
-            // var currentUrl = window.location.toString();
-            // var newUrl = currentUrl.replace("add", document_id);
-            // window.location.replace(newUrl);
-            // updateMessage(messages.transcript.success,messages.transcript.id);
-            toastr['success'](messages.transcript.success)
-            submitScan(document_id);
+            
+            submitScan(document_id,fc_document);
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) { 
-            // alert("Status: " + textStatus); alert("Error: " + errorThrown); 
             console.log("Error with status "+textStatus+":",errorThrown);
-            // updateMessage(messages.transcript.error,messages.transcript.id);
-            toastr['error'](messages.transcript.error)
-            submitScan(document_id);
+            showErrorMessage(messages.transcript.error);
+            submitScan(document_id,fc_document);
         } 
     });
 }
 
-function submitScan(document_id){
+function submitScan(document_id,fc_document){
     console.log('sumbitting scan');
 
     if($('#id_image').length>0 && $('#id_image').val().length>0){
         $('#scanCendari').submit(function(e){
             e.preventDefault();
             var options = { 
-                 beforeSend: function(){
-                    toastr['info'](messages.scan.beforeSend)
-                },
                 success: function(){
-                   
-                    toastr['success'](messages.scan.success)
-                    replaceWindowUrl(document_id);
+                    submitDocument(fc_document)
                 },
                  error: function(XMLHttpRequest, textStatus, errorThrown) { 
                     console.log("Error with status "+textStatus+":",errorThrown);
-                    toastr['error'](messages.scan.error)
-                    replaceWindowUrl(document_id);
+                    showErrorMessage(messages.scan.error);
+                    submitDocument(fc_document)
                 }
                 
             }; 
             $('#scanCendari').ajaxSubmit(options);
             return false;
         });
-        
         $('#scanCendari').submit();
     }
     else{
-        toastr['success'](messages.scan.success);
-        replaceWindowUrl(document_id);
+        submitDocument(fc_document)
     }
 }
 
 
+
+function submitScanAutomatic(){
+
+    
+    var bar = $('.bar');
+    var percent = $('.percent');
+    var status = $('#status');
+
+    $('#scanCendari').submit(function(e){
+        e.preventDefault();
+        var options = {
+            beforeSend: function() {
+                status.empty();
+                var percentVal = '0%';
+                bar.width(percentVal)
+                percent.html(percentVal);
+            },
+            uploadProgress: function(event, position, total, percentComplete) {
+                var percentVal = percentComplete + '%';
+                bar.width(percentVal)
+                percent.html(percentVal);
+                //console.log(percentVal, position, total);
+            },
+            success: function(e) {
+                console.log('response',e);
+                var percentVal = '100%';
+                bar.width(percentVal)
+                percent.html(percentVal);
+            },
+            complete: function(xhr) {
+                status.html(xhr.responseText);
+            }
+        }
+        $('#scanCendari').ajaxSubmit(options);
+        return false;
+    })
+    $('#scanCendari').submit();
+
+}
+
+
 function submitDocument(fc){
+    console.log('sumbitting document');
+
     var formData = "";
+    
     formData = formData+"csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&";
     formData = formData+"&description="+encodeURIComponent(tinyMCE.getInstanceById('document-description').getContent())+"&";
     formData = formData+$("#saveButton").attr('name')+"="+$("#saveButton").val();
-
+    console.log('formData:',formData);
     $.ajax({
-        // beforeSend: function (xhr) {xhr.setRequestHeader('X-CSRFToken', $('input[name="csrfmiddlewaretoken"]').val());},
         url:fc.attr('action'),
         type: fc.attr('method'),
         data: formData,
-        // content_type:'application/json',
-        beforeSend:function(){
-        // addMessage('message-list',messages[type].beforeSend,messages[type].id);
-            console.log("saving ....")
-            toastr['info'](messages.document.beforeSend)
-        },
         success: function(data){
             console.log("response data:",data);
 
-            toastr['success'](messages.document.success)
-            
+            showSuccessMessage(messages.document.success)
             updatedEnitiesTab(cendari_js_object_type,data.related_topics);
             updateScanTab(data.scans);
-
-            submitTranscript(data.id);
             
-            console.log('submitting non document');
             replaceWindowUrl(data.id)
             
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) { 
-       
-
             console.log("Error with status "+textStatus+":",errorThrown);
-            toastr['error'](messages.document.error)
-
+            showErrorMessage(messages.document.error)
         } 
     });
 }
 
 function submitNote(fc){
     var formData = "";
+
     formData = formData+"csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&";
     formData=formData+"id="+$('#model_id').val()+"&";
     formData =formData +'title='+$('#note_title').val()+"&related_topics=&status=open&is_private=false&";
@@ -302,19 +363,19 @@ function submitNote(fc){
         type: fc.attr('method'),
         data: formData,
         // content_type:'application/json',
-        beforeSend:function(){
-        // addMessage('message-list',messages[type].beforeSend,messages[type].id);
-            console.log("saving ....")
-            toastr['info'](messages.note.beforeSend)
-        },
+        // beforeSend:function(){
+        // // addMessage('message-list',messages[type].beforeSend,messages[type].id);
+        //     console.log("saving ....")
+        //     toastr['info'](messages.note.beforeSend)
+        // },
         success: function(data){
-            toastr['success'](messages.note.success)
+            showSuccessMessage(messages.note.success)
             updatedEnitiesTab(cendari_js_object_type,data.related_topics);
-            submitTranscript(data.id);
+            replaceWindowUrl(data.id)
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) { 
             console.log("Error with status "+textStatus+":",errorThrown);
-            toastr['error'](messages.note.error)
+            showErrorMessage(messages.note.error)
 
         } 
     });
@@ -322,6 +383,7 @@ function submitNote(fc){
 
 function submitEntity(fc){
     var formData = "";
+    
     formData = formData+"csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&";
     formData=formData+"id="+$('#model_id').val()+"&";
     formData = formData + "rdf="+$('#rdf_id').val().trim()+"&";
@@ -332,25 +394,19 @@ function submitEntity(fc){
         url:fc.attr('action'),
         type: fc.attr('method'),
         data: formData,
-        beforeSend:function(){
-
-            console.log("saving ....")
-            toastr['info'](messages.entity.beforeSend)
-        },
         success: function(data){
-            toastr['success'](messages.entity.success)
+            showSuccessMessage(messages.entity.success)
             updatedEnitiesTab(cendari_js_object_type,data.related_topics);           
             replaceWindowUrl(data.id)
             
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) { 
             console.log("Error with status "+textStatus+":",errorThrown);
-            toastr['error'](messages.entity.error)
+            showErrorMessage(messages.entity.error)
 
         } 
     });
 }
-
 
 
 $(document).ready(function(){
@@ -361,25 +417,28 @@ $(document).ready(function(){
     //         transcript_editor_crc32 = CRC32($('#transcript-description').text());   
     //     }
     // }
+    // if($('#id_image').length>0){
+    //     $(function () {
+    //         $('#id_image').fileupload({
+    //             // dataType: 'json',
+    //             done: function (e, data) {
+    //                 $.each(data.result.files, function (index, file) {
+    //                     $('<p/>').text(file.name).appendTo(document.body);
+    //                 });
+    //             },
+    //             fail: function(e,data){},
+    //             progressall: function (e, data) {
+    //                 var progress = parseInt(data.loaded / data.total * 100, 10);
+    //                 $('#progress .bar').css(
+    //                 'width',
+    //                 progress + '%'
+    //             );
+    // }
+    //         });
+    //     });
+    // }
     
-    
-    toastr.options = {
-        "closeButton": true,
-        "debug": false,
-        "newestOnTop": true,
-        "progressBar": false,
-        "positionClass": "toast-top-center",
-        "preventDuplicates": true,
-        "onclick": null,
-        "showDuration": "300",
-        "hideDuration": "1000",
-        "timeOut": "5000",
-        "extendedTimeOut": "1000",
-        "showEasing": "swing",
-        "hideEasing": "linear",
-        "showMethod": "fadeIn",
-        "hideMethod": "fadeOut"
-    }
+    toastr.options = toastr_options
 
     $('.formCendari').submit(function(e){
         e.preventDefault();
@@ -391,14 +450,22 @@ $(document).ready(function(){
         }
 
         var fc = $(this);
-        
+        console.log('fc',fc);
         if(cendari_js_object_type == 'note'){
+            showInfoMessage(messages.note.beforeSend)
             submitNote(fc)
         }
         if(cendari_js_object_type == 'document'){
-            submitDocument(fc)
+            showInfoMessage(messages.document.beforeSend)
+            if(cendari_js_object_id.length === 0){
+                submitDocument(fc)
+            }
+            else{
+                submitTranscript(cendari_js_object_id,fc)
+            }
         }
         if(cendari_js_object_type == 'entity'){
+            showInfoMessage(messages.entity.beforeSend)
             submitEntity(fc)
         }
 

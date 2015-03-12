@@ -516,11 +516,18 @@ function setupHighlightMessageReciever(){
       return; 
     }
     //check that the message is a higlight
-    if(!event.data || event.data.messageType != 'cendari_highlight')
+    if(!event.data || event.data.messageType != 'cendari_highlight'){
+      console.error('Recieved message is not cendari_highlight type!',event.data.messageType);
       return;
+    }
     //TODO: check to see that the data is actually an array of keys
     var entityIds = event.data.entityIds;
     var highlightMode = event.data.highlightMode;
+
+    console.log('::::::::::::message::::::::::::')
+    console.log(entityIds,highlightMode);
+    console.log('::::::::::::message::::::::::::')
+
     highlightVis(entityIds, highlightMode);
   };
 

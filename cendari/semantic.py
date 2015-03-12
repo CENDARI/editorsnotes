@@ -376,10 +376,13 @@ def semantic_process_note(note,user=None):
     g.add( (g.identifier, SCHEMA['dateModified'], Literal(note.last_updated)) )
     g.add( (g.identifier, CENDARI['name'], Literal(note.title)) )
 
-    pdb.set_trace()
+    #pdb.set_trace()
    
-    if fix_links(note.contents):
+    if fix_links(note.content):
         note.save()
+
+    xml = note.content
+
     topics = xml_to_topics(xml, uri) 
     done=set()
     note.related_topics.all().delete()

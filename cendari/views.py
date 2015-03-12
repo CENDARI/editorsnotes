@@ -626,6 +626,10 @@ class NoteCendari(NoteAdminView):
         # obj, action = super(EditNoteAdminView, self).save_object(form, formsets)
 #         semantic_process_note(obj, user)
          #return obj, action
+    def get_context_data(self, **kwargs):
+        context = super(NoteCendari, self).get_context_data(**kwargs)       
+        context['object_type'] = 'note'
+        return context
 
 class DocumentCendari(DocumentAdminView):
     template_name = 'documentCendari.html'
@@ -643,6 +647,11 @@ class DocumentCendari(DocumentAdminView):
                 ('Edit', None)
             )
         return breadcrumbs
+
+    def get_context_data(self, **kwargs):
+        context = super(DocumentCendari, self).get_context_data(**kwargs)       
+        context['object_type'] = 'document'
+        return context
 
 class EntityCendari(TopicAdminView):
     template_name = 'entityCendari.html'
