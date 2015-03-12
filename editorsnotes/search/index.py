@@ -61,6 +61,12 @@ class ElasticSearchIndex(object):
         server_url, _ = self.open().servers.get()
         resp = self.es.session.head(server_url + '/' + self.name)
         return resp.status_code == 200
+        # try:
+        #     self.open().send_request('HEAD', [self.name])
+        # except InvalidJsonResponseError as exc:
+        #     if exc.response.status_code == 200:
+        #         return True
+        # return False
 
     def create(self):
         print 'Creating index '+self.name

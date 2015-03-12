@@ -294,13 +294,11 @@ Ext.application({
 		function addImageViewer(type, id) {
 			Ext.getCmp('imageViewer').expand();			
 			var widget = Ext.widget(type, {
-
 				contentEl : id,
 				frame : true,
 				bodyPadding : '0 0 0',
 				autoScroll : true,
-				overflowY: 'scroll',
-
+				overflowY: 'scroll'
 			});
 			Ext.getCmp('imageViewer').add(widget);
 			//Ext.getCmp('editortab').tab.setText("Document");

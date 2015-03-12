@@ -8,7 +8,7 @@ django-reversion==1.7
 django-licensing==0.2.4
 djangorestframework==2.3.13
 
-pyelasticsearch==1.2
+pyelasticsearch==0.6
 BeautifulSoup<4.0
 lxml==3.0.2
 cssselect==0.8
