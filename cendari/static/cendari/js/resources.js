@@ -8,7 +8,7 @@ $(function() {
 	initAjax: {
 	    data: {key:''},
 	    url: cendari_root_url+'cendari/'+cendari_js_project_slug+'/getResourcesData/',
-	    dataType: "jsonp",
+	    dataType: "jsonp"
 	},
 	onClick: function(node, event) {
 	    selected_node = node.data.key;
@@ -46,9 +46,8 @@ $(function() {
 			    } 
 			});
 	    }else{
-	    	console.log()
 			if (node.data.url ) {
-				console.log("node.data.url is  "+node.data.url)
+				console.log("node.data.url is  "+node.data.url);
 			    page_url = parent.location;
 			    pathname = page_url.pathname;
 			    if(page_url.href.indexOf('pro2.cendari.dariah.eu')!=-1){
@@ -62,7 +61,7 @@ $(function() {
 			    //unselect other nodes (strange as selectMode:1)
 			    console.log('I do not have a node.data.url');
 			    $("#tree").dynatree("getRoot").visit(function(n){
-					console.log(node.data.key+"!="+n.data.key)
+					console.log(node.data.key+"!="+n.data.key);
 					if (node.data.key!=n.data.key){
 					    n.select(false);
 					}			 
@@ -102,7 +101,7 @@ $(function() {
 			}
 		} else if (cendari_js_object_type==''){//this is a project
 			$("#tree").dynatree("getTree").selectKey(cendari_js_project_slug);
-			project_node = $("#tree").dynatree("getTree").getNodeByKey(cendari_js_project_slug)
+			project_node = $("#tree").dynatree("getTree").getNodeByKey(cendari_js_project_slug);
 			if(project_node!=null){
 			    project_node.expand(true);
 			}
@@ -145,7 +144,7 @@ $(function() {
             //console.log('==========>>>>>>>>>> burl is : '+burl);
 	    node.appendAjax({
                 url: burl,
-		dataType: "jsonp",
+		dataType: "jsonp"
 	    });
 	}
     });

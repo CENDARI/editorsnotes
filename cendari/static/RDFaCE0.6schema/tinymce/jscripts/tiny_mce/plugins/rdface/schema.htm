@@ -29,19 +29,13 @@
 	<!-- [NB] for Freebase Suggest -->
 	<script type="text/javascript" src="https://www.gstatic.com/freebase/suggest/4_2/suggest.min.js"></script>
 	<script type="text/javascript">
-		function FBSuggest(entity_type) {
-			if (entity_type == 'Person') {
-				$("#entity_uri").suggest({filter:'(all type:/people/person)'});
-			} else if (entity_type == 'Place') {
-				$("#entity_uri").suggest({filter:'(all type:/location/location)'});
-			} else if (entity_type == 'Event') {
-				$("#entity_uri").suggest({filter:'(all type:/time/event)'});
-			} else if (entity_type == 'Organization') {
-				$("#entity_uri").suggest({filter:'(all type:/organization/organization)'});
-			} else if (entity_type == 'CreativeWork') {
-				$("#entity_uri").suggest({filter:'(all type:/publishing/published_work)'});
-			} 
-		}
+    	  var Schema2Frebase = {
+	      'Person': '/people/person',
+	      'Place': '/location/location',
+	      'Event': '/time/event',
+	      'Organization': '/organization/organization',
+	      'CreativeWork': '/publishing/published_work'
+	  };
 	</script>
 
 </head>

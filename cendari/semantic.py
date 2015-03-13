@@ -258,6 +258,8 @@ def xml_to_topics(xml, uri):
         xml=as_html(xml)
     xml = ("<div about='%s'>" % uri) + xml + "</div>"
     g.parse(data=xml, format='rdfa')
+#    for s,p,o in g.triples( (None, None, None) ):
+#        print ("%s %s %s" % (unicode(s), unicode(p), unicode(o))).encode('ascii', 'replace')
     for s,p,o in g.triples( (None, RDF.type, None) ):
         v = g.value(s, NAME)
         if not v: continue
@@ -392,8 +394,12 @@ def semantic_process_note(note,user=None):
             done.add(topic)
             rdftopic = semantic_uri(topic)
             note.related_topics.create(creator=user, topic=topic)
-            g.add( (t['rdfsubject'], OWL.sameAs, rdftopic) )
+            subject = t['rdfsubject']
+            g.add( (subject, OWL.sameAs, rdftopic) )
             g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
+            if topic.rdf is None and subject.startswith('http'):
+                topic.rdf = unicode(subject)
+                topic.save()
     semantic.commit()
 
 def semantic_process_document(document,user=None):
@@ -428,8 +434,12 @@ def semantic_process_document(document,user=None):
             done.add(topic)
             rdftopic = semantic_uri(topic)
             document.related_topics.create(creator=user, topic=topic)
-            g.add( (t['rdfsubject'], OWL.sameAs, rdftopic) )
+            subject = t['rdfsubject']
+            g.add( (subject, OWL.sameAs, rdftopic) )
             g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
+            if topic.rdf is None and subject.startswith('http'):
+                topic.rdf = unicode(subject)
+                topic.save()
     semantic.commit()   
 
 def semantic_process_transcript(transcript,user=None):
@@ -465,8 +475,12 @@ def semantic_process_transcript(transcript,user=None):
             done.add(topic)
             rdftopic = semantic_uri(topic)
             transcript.document.related_topics.create(creator=user, topic=topic)
-            g.add( (t['rdfsubject'], OWL.sameAs, rdftopic) )
+            subject = t['rdfsubject']
+            g.add( (subject, OWL.sameAs, rdftopic) )
             g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
+            if topic.rdf is None and subject.startswith('http'):
+                topic.rdf = unicode(subject)
+                topic.save()
     semantic.commit()  
 
 def semantic_process_topic(topic,user=None,doCommit=True):
@@ -583,8 +597,14 @@ def semantic_resolve_topic(topic, force=False):
         loaded.parse(location=uri)
     except:
         logger.warning("Exception in parsing code from url %s", unicode(rdf_url))
-        #traceback.print_exc(file=sys.stdout)
-        pass
+        if rdf_url.startswith('http://rdf.freebase') or rdf_url.startswith('https://rdf.freebase'):
+            try:
+                rdf = urllib2.urlopen(rdf_url).read()
+                rdf = re.sub(r'\\x(..)', '\\u00\1', rdf)
+                loaded.parse(data=rdf, format="n3")
+            except:
+                traceback.print_exc(file=sys.stdout)
+                pass
 
     type = URIRef(topic_to_schema(topic.topic_node.type))
     

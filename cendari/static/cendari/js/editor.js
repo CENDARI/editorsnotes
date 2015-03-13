@@ -68,35 +68,35 @@ var toastr_options = {
 function showToastrMessage(type,message){
     console.log('clearing messages.....');
     toastr.clear();
-    console.log('adding new message ......')
+    console.log('adding new message ......');
     toastr[type](message);
 }
 
 function showErrorMessage(message){
     toastr.options.timeOut="500";
     toastr.options.extendedTimeOut="1000";
-    showToastrMessage('error',message)
+    showToastrMessage('error',message);
 }
 
 function showSuccessMessage(message){
     toastr.options.timeOut="500";
     toastr.options.extendedTimeOut="1000";
-    showToastrMessage('success',message)
+    showToastrMessage('success',message);
 }
 
 function showInfoMessage(message){
-    showToastrMessage('info',message)
+    showToastrMessage('info',message);
 }
 
 
 function updateIframe(iframe_id){
-    document.getElementById(iframe_id).src = document.getElementById(iframe_id).src
+    document.getElementById(iframe_id).src = document.getElementById(iframe_id).src;
 }
 
 
 
 function createEntityLink(absolute_url,type,name){
-    var html = '<a  href="'+absolute_url+'" class="'+type_class_mapping[type]+'"> '+name+' </a>'
+    var html = '<a  href="'+absolute_url+'" class="'+type_class_mapping[type]+'"> '+name+' </a>';
 
     return html;
 }
@@ -120,7 +120,7 @@ function createScanElement(image_url,thumbnail_url,id){
     var html = "";
     html +='<li>'+
             '<a class="scan btn" id="1" href="http://'+window.location.pathname+image_url+'">'+
-            '<img id="ext-gen1206" src="'+thumbnail_url+'" alt="Thumbnail of scan 1" width="100"></a></li>'
+            '<img id="ext-gen1206" src="'+thumbnail_url+'" alt="Thumbnail of scan 1" width="100"></a></li>';
     return html;
                     
 
@@ -147,7 +147,7 @@ function updateScanTab(scans){
 
 function addMessage(div,msg,msg_id){
     var msg_el = $("<div></div>").text(msg).attr('id',msg_id).addClass('alert');   
-    $('#'+div).append(msg_el)
+    $('#'+div).append(msg_el);
 }
 
 function updateMessage(msg_id,new_msg){
@@ -200,7 +200,7 @@ function uniqueElements(el_array){
     $.each(el_array, function(i, el){
         if($.inArray(el, uniqueNames) === -1) uniqueNames.push(el);
     });
-    return uniqueNames
+    return uniqueNames;
 }
 
 
@@ -272,7 +272,7 @@ function submitScan(document_id,fc_document){
         $('#scanCendari').submit();
     }
     else{
-        submitDocument(fc_document)
+        submitDocument(fc_document);
     }
 }
 
@@ -296,23 +296,23 @@ function submitScanAutomatic(){
             },
             uploadProgress: function(event, position, total, percentComplete) {
                 var percentVal = percentComplete + '%';
-                bar.width(percentVal)
+                bar.width(percentVal);
                 percent.html(percentVal);
                 //console.log(percentVal, position, total);
             },
             success: function(e) {
                 console.log('response',e);
                 var percentVal = '100%';
-                bar.width(percentVal)
+                bar.width(percentVal);
                 percent.html(percentVal);
             },
             complete: function(xhr) {
                 status.html(xhr.responseText);
             }
-        }
+        };
         $('#scanCendari').ajaxSubmit(options);
         return false;
-    })
+    });
     $('#scanCendari').submit();
 
 }
@@ -334,16 +334,16 @@ function submitDocument(fc){
         success: function(data){
             console.log("response data:",data);
 
-            showSuccessMessage(messages.document.success)
+            showSuccessMessage(messages.document.success);
             updatedEnitiesTab(cendari_js_object_type,data.related_topics);
             updateScanTab(data.scans);
             
-            replaceWindowUrl(data.id)
+            replaceWindowUrl(data.id);
             
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) { 
             console.log("Error with status "+textStatus+":",errorThrown);
-            showErrorMessage(messages.document.error)
+            showErrorMessage(messages.document.error);
         } 
     });
 }
@@ -369,13 +369,13 @@ function submitNote(fc){
         //     toastr['info'](messages.note.beforeSend)
         // },
         success: function(data){
-            showSuccessMessage(messages.note.success)
+            showSuccessMessage(messages.note.success);
             updatedEnitiesTab(cendari_js_object_type,data.related_topics);
-            replaceWindowUrl(data.id)
+            replaceWindowUrl(data.id);
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) { 
             console.log("Error with status "+textStatus+":",errorThrown);
-            showErrorMessage(messages.note.error)
+            showErrorMessage(messages.note.error);
 
         } 
     });
@@ -395,14 +395,14 @@ function submitEntity(fc){
         type: fc.attr('method'),
         data: formData,
         success: function(data){
-            showSuccessMessage(messages.entity.success)
+            showSuccessMessage(messages.entity.success);
             updatedEnitiesTab(cendari_js_object_type,data.related_topics);           
-            replaceWindowUrl(data.id)
+            replaceWindowUrl(data.id);
             
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) { 
             console.log("Error with status "+textStatus+":",errorThrown);
-            showErrorMessage(messages.entity.error)
+            showErrorMessage(messages.entity.error);
 
         } 
     });
@@ -438,7 +438,7 @@ $(document).ready(function(){
     //     });
     // }
     
-    toastr.options = toastr_options
+    toastr.options = toastr_options;
 
     $('.formCendari').submit(function(e){
         e.preventDefault();
@@ -452,21 +452,21 @@ $(document).ready(function(){
         var fc = $(this);
         console.log('fc',fc);
         if(cendari_js_object_type == 'note'){
-            showInfoMessage(messages.note.beforeSend)
-            submitNote(fc)
+            showInfoMessage(messages.note.beforeSend);
+            submitNote(fc);
         }
         if(cendari_js_object_type == 'document'){
-            showInfoMessage(messages.document.beforeSend)
+            showInfoMessage(messages.document.beforeSend);
             if(cendari_js_object_id.length === 0){
-                submitDocument(fc)
+                submitDocument(fc);
             }
             else{
-                submitTranscript(cendari_js_object_id,fc)
+                submitTranscript(cendari_js_object_id,fc);
             }
         }
         if(cendari_js_object_type == 'entity'){
-            showInfoMessage(messages.entity.beforeSend)
-            submitEntity(fc)
+            showInfoMessage(messages.entity.beforeSend);
+            submitEntity(fc);
         }
 
     }); 

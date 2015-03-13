@@ -11,7 +11,7 @@
 					var all_datatypes = [];
 					$.each(data.types, function(i, v) {
 						all_datatypes.push(v.id);
-					})
+					});
 					
 					while (parent_node.length) {
 						if (parent_node.hasClass('r_entity')) {
@@ -27,7 +27,7 @@
 										}
 									});
 								}
-							})
+							});
 							break;
 						}
 						parent_node = parent_node.parent();
@@ -62,7 +62,7 @@
 							//}else{
 							//others[v.id] = v.label;
 							//}
-						})
+						});
 						//more_entities = add_entity.addMenu({title : 'More...'});
 						//	$.each(others,function(i,v){
 						//	more_entities.add({title : v, onclick: function(){
@@ -91,7 +91,7 @@
 										}
 									});
 								}
-							})
+							});
 							break;
 						}
 						parent_node = parent_node.parent();
@@ -186,8 +186,8 @@
 					height : 260 + parseInt(a.getLang("rdface.delta_height", 0)),
 					inline : 1
 				}, {
-					plugin_url : b,
-				})
+					plugin_url : b
+				});
 			});
 			a.addCommand("mceRdfaceHelp", function() {
 				a.windowManager.open({
@@ -196,8 +196,8 @@
 					height : 260 + parseInt(a.getLang("rdface.delta_height", 0)),
 					inline : 1
 				}, {
-					plugin_url : b,
-				})
+					plugin_url : b
+				});
 			});
 			a.addCommand("editEntity", function(v1) {
 				var entity_type, param;
@@ -214,7 +214,7 @@
 				var file, height, width;
 				file = b + "/schema.htm";
 				height = 500;
-				width = 500;
+				width = 700;
 				a.windowManager.open({
 					file : file,
 					width : width + parseInt(a.getLang("rdfa.delta_width", 0)),
@@ -226,7 +226,7 @@
 					selected_txt : param,
 					annotationF : aF,
 					pointer : v1
-				})
+				});
 			});
 			a.addCommand("mceRdfaHighlight", function() {
 				showTooltips(a, b);
@@ -237,7 +237,7 @@
 			});
 			a.onNodeChange.add(function(d, c, e) {
 				showTooltips(a, b);
-			})
+			});
 			a.onLoadContent.add(function(ed, o) {
 				//detect existing annotations
 				//todo:check if they are in the scope of selected schemas or not
@@ -251,7 +251,7 @@
 			});
 		},
 		createControl : function(b, a) {
-			return null
+			return null;
 		},
 		getInfo : function() {
 			return {
@@ -260,8 +260,8 @@
 				authorurl : "http://aksw.org/AliKhalili",
 				infourl : "http://aksw.org/Projects/RDFaCE",
 				version : "0.5"
-			}
+			};
 		}
 	});
-	tinymce.PluginManager.add("rdface", tinymce.plugins.RdfacePlugin)
+	tinymce.PluginManager.add("rdface", tinymce.plugins.RdfacePlugin);
 })(); 

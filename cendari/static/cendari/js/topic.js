@@ -11,7 +11,7 @@ Ext.application(
 		    [{
 		    	contentEl:'noteform',
 		    	border:false,
-		    	autoScroll: true,
+		    	autoScroll: true
 		    }]
 		    });
 		Ext.getCmp('editortab').add(formPanel);		
