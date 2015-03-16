@@ -20,7 +20,7 @@ class TopicNodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = TopicNode
         fields = ('id', 'name', 'url', 'alternate_forms', 'type',
-                  'project_topics',)
+                  'project_topics', 'rdf', 'date')
     def get_alternate_forms(self, obj):
         topics = obj.project_topics.select_related('alternate_names')
         alternate_forms = set() 
@@ -62,7 +62,7 @@ class TopicSerializer(RelatedTopicSerializerMixin, ProjectSpecificItemMixin,
         # Cendari code E.G. aviz -- added rdf to fields
         fields = ('id', 'topic_node_id', 'preferred_name', 'type', 'url',
                   'alternate_names', 'related_topics', 'project',
-                  'last_updated', 'summary', 'citations','rdf')
+                  'last_updated', 'summary', 'citations','rdf', 'date')
     def save_object(self, obj, **kwargs):
         if not obj.id:
             topic_node_id = self.context.get('topic_node_id', None)

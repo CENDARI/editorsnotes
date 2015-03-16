@@ -187,15 +187,15 @@ def is_project_creator(user):
     return user.is_staff and _has_project_perms(user)
 
 
-def custom_exception_handler(exc, context):
+def custom_exception_handler(exc):
     # Call REST framework's default exception handler first,
     # to get the standard error response.
-    response = exception_handler(exc, context)
-    print 'Received exception %s: %s' % (type(exc), response.status_code)
+    response = exception_handler(exc)
 
-    logger.debug('Received exception %s: %s', type(exc), response.status_code)
     # Now add the HTTP status code to the response.
     if response is not None:
+        logger.debug('Received exception %s: %s', type(exc), response.status_code)
         response.data['status_code'] = response.status_code
-
+    else:
+        logger.debug('Received exception %s', type(exc))
     return response

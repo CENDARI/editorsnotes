@@ -238,6 +238,7 @@ schema_topic = {
 topic_schema = dict((v,k) for k, v in schema_topic.iteritems())
 
 NAME =  URIRef("http://schema.org/name") 
+URL =  URIRef("http://schema.org/url") 
 
 def schema_to_topic(schema):
     if schema in schema_topic:
@@ -261,9 +262,12 @@ def xml_to_topics(xml, uri):
 #    for s,p,o in g.triples( (None, None, None) ):
 #        print ("%s %s %s" % (unicode(s), unicode(p), unicode(o))).encode('ascii', 'replace')
     for s,p,o in g.triples( (None, RDF.type, None) ):
-        v = g.value(s, NAME)
+        if o==SCHEMA['CreativeWork']:
+            v = g.value(s, URL)
+        else:
+            v = g.value(s, NAME)
         if not v: continue
-        e = { "value": v.value,
+        e = { "value": unicode(v),
               "type": schema_to_topic(unicode(o)),
               "rdfsubject": s,
               "rdfvalue": v,
@@ -392,13 +396,23 @@ def semantic_process_note(note,user=None):
         topic=utils.get_or_create_topic(user, t['value'], t['type'],note.project)
         if topic not in done:
             done.add(topic)
-            rdftopic = semantic_uri(topic)
             note.related_topics.create(creator=user, topic=topic)
+            rdftopic = semantic_uri(topic)
             subject = t['rdfsubject']
+            value = t['value']
             g.add( (subject, OWL.sameAs, rdftopic) )
             g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
             if topic.rdf is None and subject.startswith('http'):
                 topic.rdf = unicode(subject)
+                topic.save()
+            elif topic.rdf is None and t['type']=='PUB'\
+                 and value.startswith('http'):
+                topic.rdf = value
+                topic.save()
+            elif t['type']=='EVT'\
+                 and utils.parse_well_known_date(value):
+                topic.date = utils.parse_well_known_date(value)
+                logger.debug('Found a valid date: %s', topic.date)
                 topic.save()
     semantic.commit()
 
