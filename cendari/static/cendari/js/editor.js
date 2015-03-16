@@ -219,13 +219,13 @@ function submitTranscript(document_id,fc_document){
                 formData = formData+"&content="+encodeURIComponent(tinyMCE.getInstanceById('transcript-description').getContent())+"&";
             }
             else{
-                submitScan(document_id,fc);
+                submitScan(document_id,fc_document);
                 return;
             }
         }
     }
     else{
-        submitScan(document_id,fc);
+        submitScan(document_id,fc_document);
         return;
     }
 
@@ -238,7 +238,6 @@ function submitTranscript(document_id,fc_document){
         type: fc.attr('method'),
         data: formData,
         success: function(data){
-            
             submitScan(document_id,fc_document);
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) { 

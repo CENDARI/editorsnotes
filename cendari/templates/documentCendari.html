@@ -152,7 +152,7 @@
 								<textarea id="transcript-description" class="mceEditor" type="text" name="content" rows="4"> 
 									{% if document.transcript %} {{document.transcript.content|as_html}} {% endif %}
 								</textarea>
-								<button id="saveButtonTrascript" class="save-item" name="_method" value="PUT"  style="visibility: hidden;">Save</button>
+								<button id="saveButtonTranscript" class="save-item" name="_method" value="PUT"  style="visibility: hidden;">Save</button>
 							</div>
 						</form>	
 					{% else %}
@@ -197,8 +197,6 @@
 				<input type="radio" name="tabs" id="tab5">
 				<label id="scansTab" for="tab5">Scans ({% if not scans %}0{% else %}{{ document.get_scan_count }} {% endif%})</label>
 				<div id="tab-content5" class="tab-content document animated fadeIn">
-<<<<<<< HEAD
-				  {% if scans %}
 				  <section id="scans-tab" >
 				    <div id="scanlist-container">
 				      <ul id="scan-list">
@@ -222,28 +220,6 @@
 				      <div id="progressbar"></div>
 				    </div>
 				  </section>
-				  {% endif %}
-=======
->>>>>>> 4e0f2c7a5726eff978ffebcd42f63a38a09a5492
-					
-					<section id="scans-tab" >
-						<div id="scanlist-container">
-							<ul id="scan-list">
-								{% if scans %}
-									{% for scan in scans %}
-										<li class='scan-list-item'>
-											<a class="scan btn" id="{{scan.id}}" href="http://{{ domain }}{{ scan.image.url }}">
-												<img src="{{scan.image_thumbnail.url}}" width=100 alt="Thumbnail of scan {{scan.id}}">
-												<!-- {{ forloop.counter }} -->
-											</a>
-										</li>
-									{% endfor %}
-								{% endif %}
-							</ul>
-						</div>
-
-						<br/>
-					</section>
 					
 					<!-- The global progress bar -->
 				    <div id="progress">
@@ -292,11 +268,10 @@
 
 		{% if document.id %}
 			<form class="formCendari" id="documentCendari" action="{% url "api:api-documents-detail" project_slug=project.slug  pk=document.id %}" method="POST">  
-			{% csrf_token %}
 		{% else %}
 			<form class="formCendari" id="documentCendari" action="{% url "api:api-documents-list" project_slug=project.slug %}" method="POST" >
-			{% csrf_token %}
 		{% endif %}
+			{% csrf_token %}
 			<div class="form-main edit-section" >
 				<input  class="editorlabel" id="documentDescEditBut" type="button" value= {% if document.id > 0 %} " [ Read Only ]                --- click here for Edit mode" {% else %} " [ Editable ]                    --- click here for Read-Only mode" {% endif %} />
 				<p>Document's description</p>

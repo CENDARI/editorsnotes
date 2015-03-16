@@ -15,7 +15,7 @@ Ext.application({
 			autoScroll : true,
 			layout : {
 				type : 'border',
-				padding : 1,
+				padding : 1
 			},
 			defaults : {
 				split : false
@@ -79,7 +79,7 @@ Ext.application({
 							id : 'optionsID',
 							menu : [{
 								text : 'From Jigsaw',
-								id : 'jigsawImport',
+								id : 'jigsawImport'
 
 							}, {
 								text : 'From ... '
@@ -267,8 +267,7 @@ Ext.application({
 				border : false,
 				layout : 'fit',
 				autoScroll : true,
-				overflowY: 'scroll',
-				 //closable: false,
+				overflowY: 'scroll'
 			});
 			Ext.getCmp('centerTabPanel').add(tab).show();
 
@@ -283,16 +282,14 @@ Ext.application({
 				autoScroll : true,
 				overflowY: 'scroll',
 				margins : '0 0 0 0',
-				layout : 'fit',
-
-				
+				layout : 'fit'
 			});
 
 			Ext.getCmp('centerTabPanel').getActiveTab().add(widget);
 		}
 
 		function addImageViewer(type, id) {
-			Ext.getCmp('imageViewer').expand();			
+			Ext.getCmp('imageViewer').expand();
 			var widget = Ext.widget(type, {
 				contentEl : id,
 				frame : true,
@@ -309,7 +306,10 @@ Ext.application({
 		cendari.addWidgetToActiveTab = addWidgetToActiveTab;
 		cendari.currentId = 0;
 		// Ext.getCmp('saveNoteID').on('click', function() {submitCendariForm();});
-		Ext.getCmp('saveNoteID').on('click', function() {$('.formCendari').submit()});
+		Ext.getCmp('saveNoteID').on('click', function() {
+		    var el = $('.formCendari');
+		    el.submit();
+		});
 	/*	Ext.getCmp('saveNoteID').on('click', function() {
 		    if(tinyMCE.activeEditor!=null){
 			tinyMCE.activeEditor.save();

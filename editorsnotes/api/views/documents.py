@@ -3,6 +3,8 @@ from rest_framework.parsers import MultiPartParser, JSONParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+#import pdb
+
 from editorsnotes.main.models import Document, Scan, Transcript
 
 from .base import (BaseListAPIView, BaseDetailView, DeleteConfirmAPIView,
@@ -95,10 +97,11 @@ class ScanDetail(BaseDetailView):
 # Cendari code E.G. aviz
 # added from the editors note repository
 class Transcript(BaseDetailView):
-    model = Transcript
+    queryset = Transcript.objects.all()
     serializer_class = TranscriptSerializer
     def get_object(self, queryset=None):
-        transcript_qs = self.model.objects\
+        #pdb.set_trace()
+        transcript_qs = self.get_queryset()\
                 .select_related('document__project')\
                 .filter(
                     document__id=self.kwargs.get('document_id'),
