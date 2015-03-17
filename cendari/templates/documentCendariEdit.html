@@ -61,7 +61,7 @@
 				showInfoMessage(messages.scan.beforeSend);
 			},
 			done: function (e, data) {
-				showSuccesMessage(messages.scan.success);
+				showSuccessMessage(messages.scan.success);
 				var scan_el = createScanElement(data.result.image_url,data.result.image_thumbnail_url,data.result.id);
 				$('#scan-list').append(scan_el);
 				$('#scansTab').text('Scans ('+$('#scan-list li').size()+')');
