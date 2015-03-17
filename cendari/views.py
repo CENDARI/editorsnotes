@@ -619,7 +619,7 @@ def iframe_view(request,type):
                               'iframe.html',{'iframe_url':url, 'title':title}, context_instance=RequestContext(request))
     
 class NoteCendari(NoteAdminView):
-    template_name = 'noteCendari.html'
+    template_name = 'noteCendariEdit.html'
     def save_object(self, form, formsets):
          print "Save_object on note"
          user = self.request.user
@@ -632,7 +632,7 @@ class NoteCendari(NoteAdminView):
         return context
 
 class DocumentCendari(DocumentAdminView):
-    template_name = 'documentCendari.html'
+    template_name = 'documentCendariEdit.html'
     def get_breadcrumb(self):
         breadcrumbs = (
             (self.project.name, self.project.get_absolute_url()),
@@ -690,7 +690,41 @@ def editNoteCendari(request, note_id, project_slug):
         request.user.is_authenticated() and
         request.user.has_project_perm(o['note'].project, 'main.change_note'))
 
-    return render_to_response( 'noteCendari.html', o, context_instance=RequestContext(request))
+    return render_to_response( 'noteCendariEdit.html', o, context_instance=RequestContext(request))
+
+def readNoteCendari(request, note_id, project_slug):
+    o = {}
+    qs = main_models.Note.objects.select_related('license', 'project__default_license').prefetch_related('related_topics')
+    note = get_object_or_404(qs, id=note_id, project__slug=project_slug)
+    if note.is_private:
+         can_view = (request.user.is_authenticated() and request.user.has_project_perm(note.project, 'main.view_private_note'))
+         if not can_view:
+             raise PermissionDenied()
+    o['project'] = note.project
+    o['breadcrumb'] = (
+        (note.project.name, note.project.get_absolute_url()),
+        ("Notes", reverse('all_notes_view', kwargs={'project_slug': note.project.slug})),
+        (note.title, None),
+    )
+    o['note'] = note
+    o['project_slug'] = project_slug
+    o['object_type'] = 'note'
+    o['object_id'] = note_id
+    o['topic_type'] = 'NA'
+    o['license'] = note.license or note.project.default_license
+    o['history'] = reversion.get_unique_for_object(note)
+    o['topics'] = [ta.topic for ta in o['note'].related_topics.all()]
+    o['sections'] = note.sections\
+            .order_by('ordering', 'note_section_id')\
+            .all()\
+            .select_subclasses()\
+            .select_related('citationns__document__project',
+                            'notereferencens__note_reference__project')
+    o['can_edit'] = (
+        request.user.is_authenticated() and
+        request.user.has_project_perm(o['note'].project, 'main.change_note'))
+
+    return render_to_response( 'noteCendariRead.html', o, context_instance=RequestContext(request))
 
 def editDocumentCendari(request, project_slug, document_id):
     o = {}
@@ -727,7 +761,44 @@ def editDocumentCendari(request, project_slug, document_id):
         if o['document'].zotero_link:
             o['zotero_url'] = o['document'].zotero_link.zotero_url
             o['zotero_date_information'] = o['document'].zotero_link.date_information
-    return render_to_response('documentCendari.html', o, context_instance=RequestContext(request))
+    return render_to_response('documentCendariEdit.html', o, context_instance=RequestContext(request))
+
+def readDocumentCendari(request, project_slug, document_id):
+    o = {}
+    qs = main_models.Document.objects.select_related('project')
+    o['document'] = get_object_or_404(main_models.Document, id=document_id, project__slug=project_slug)
+    o['project_slug'] = project_slug
+    o['breadcrumb'] = (
+        (o['document'].project.name, o['document'].project.get_absolute_url()),
+#        ('Documents', reverse('all_documents_view',kwargs={'project_slug': o['document'].project.slug})),
+        (o['document'].as_text(), None)
+    )
+    o['project'] = o['document'].project
+    o['object_type'] = 'document'
+    o['object_id'] = document_id
+    o['topic_type'] = 'NA'
+    o['topics'] = (
+        [ ta.topic for ta in o['document'].related_topics.all() ] +
+        [ c.content_object for c in o['document'].citations.filter(content_type=ContentType.objects.get_for_model(main_models.Topic)) ])
+    o['scans'] = o['document'].scans.all()
+
+    # o['domain'] = Site.objects.get_current().domain
+    o['domain'] = reverse('document_view', kwargs={'project_slug': project_slug,'document_id':document_id})
+    # print "--------------------"
+    # print o['domain']
+    # print "--------------------"
+    notes = [ns.note for ns in main_models.CitationNS.objects\
+            .select_related('note')\
+            .filter(document=o['document'])]
+    note_topics = [ [ ta.topic for ta in n.related_topics.all() ] for n in notes ]
+    o['notes'] = zip(notes, note_topics)
+
+    if o['document'].zotero_data:
+        o['zotero_data'] = as_readable(o['document'].zotero_data)
+        if o['document'].zotero_link:
+            o['zotero_url'] = o['document'].zotero_link.zotero_url
+            o['zotero_date_information'] = o['document'].zotero_link.date_information
+    return render_to_response('documentCendariRead.html', o, context_instance=RequestContext(request))
     
 
 
@@ -769,7 +840,7 @@ def editEntityCendari(request, project_slug, topic_node_id):
     o['documents'] = topic.get_related_documents()
     o['notes'] = topic.get_related_notes()
     return render_to_response(
-        'entityCendari.html', o, context_instance=RequestContext(request))
+        'entityCendariEdit.html', o, context_instance=RequestContext(request))
 
 
 def transcript(request, project_slug, document_id):
