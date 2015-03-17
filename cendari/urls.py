@@ -121,6 +121,7 @@ cendaripatterns = patterns('cendari.views',
     #url(r'^cendari/(?P<project_slug>[-\w]+)/notes/(?P<note_id>\d+)/$',                          NoteCendari.as_view(),                    name='note_view'),
     url(r'^cendari/(?P<project_slug>[-\w]+)/notes/add/$',                                       NoteCendari.as_view(),                name='addnote_view'),
     url(r'^cendari/(?P<project_slug>[-\w]+)/notes/(?P<note_id>\d+)/$',                          'editNoteCendari',                name='note_view'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/notes/(?P<note_id>\d+)/read$',                          'readNoteCendari',                name='note_read'),
     url(r'^cendari/(?P<project_slug>[-\w]+)/notes/(?P<note_id>\d+)/rdfa/$', 'rdfa_view_note', name='rdfa_view_note'),
 
 
@@ -129,6 +130,7 @@ cendaripatterns = patterns('cendari.views',
     url(r'^cendari/(?P<project_slug>[-\w]+)/documents/(?P<document_id>\d+)/rdfa/$', 'rdfa_view_document', name='rdfa_view_document'),
    # url(r'^cendari/(?P<project_slug>[-\w]+)/documents/(?P<document_id>\d+)/$',                  EditDocumentAdminView.as_view(),     name='document_view'),
     url(r'^cendari/(?P<project_slug>[-\w]+)/documents/(?P<document_id>\d+)/$',                 'editDocumentCendari',                name='document_view'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/documents/(?P<document_id>\d+)/read/$',                 'readDocumentCendari',                name='document_read'),
    # url(r'^cendari/(?P<project_slug>[-\w]+)/documents/add/$',                                   EditDocumentAdminView.as_view(),     name='adddocument_view'),
     url(r'^cendari/(?P<project_slug>[-\w]+)/documents/add/$',                                   DocumentCendari.as_view(),     name='adddocument_view'),
 

@@ -46,7 +46,6 @@ var type_class_mapping = {
     ""    : "form-entities"
 };
 
-
 var toastr_options = {
     "closeButton": true,
     "debug": false,
@@ -85,7 +84,9 @@ function showSuccessMessage(message){
 }
 
 function showInfoMessage(message){
-    showToastrMessage('info',message);
+    toastr.options.timeOut="5000000000000000";
+    toastr.options.extendedTimeOut="5000000000000000";
+    showToastrMessage('info',message)
 }
 
 
@@ -214,18 +215,18 @@ function submitTranscript(document_id,fc_document){
 
     if($('#transcript-description').length){
         formData =formData +'document='+encodeURIComponent($('#transcript-document').val())+'&creator='+$('#transcript-creator').val()+'&last_updater='+$('#transcript-uploader').val()+'&';
-        if(tinyMCE.activeEditor!=null){
-            if(tinyMCE.getInstanceById('transcript-description').getContent().length){
+        if(tinyMCE.getInstanceById('transcript-description')!=null){
+            if(tinyMCE.getInstanceById('transcript-description').getContent().length && CRC32(tinyMCE.getInstanceById('transcript-description').getContent().length) !== editors_crc32['transcript-description']){
                 formData = formData+"&content="+encodeURIComponent(tinyMCE.getInstanceById('transcript-description').getContent())+"&";
             }
             else{
-                submitScan(document_id,fc_document);
+                submitDocument(fc_document);
                 return;
             }
         }
     }
     else{
-        submitScan(document_id,fc_document);
+        submitDocument(fc_document);
         return;
     }
 
@@ -409,35 +410,8 @@ function submitEntity(fc){
 
 
 $(document).ready(function(){
-    var csrftoken = getCookie('csrftoken');
-    // if(cendari_js_object_type === 'note' || cendari_js_object_type==='document'){
-    //     main_editor_crc32 = CRC32($('#'+cendari_js_object_type+'-description').text())
-    //     if(cendari_js_object_type === 'document'){
-    //         transcript_editor_crc32 = CRC32($('#transcript-description').text());   
-    //     }
-    // }
-    // if($('#id_image').length>0){
-    //     $(function () {
-    //         $('#id_image').fileupload({
-    //             // dataType: 'json',
-    //             done: function (e, data) {
-    //                 $.each(data.result.files, function (index, file) {
-    //                     $('<p/>').text(file.name).appendTo(document.body);
-    //                 });
-    //             },
-    //             fail: function(e,data){},
-    //             progressall: function (e, data) {
-    //                 var progress = parseInt(data.loaded / data.total * 100, 10);
-    //                 $('#progress .bar').css(
-    //                 'width',
-    //                 progress + '%'
-    //             );
-    // }
-    //         });
-    //     });
-    // }
-    
-    toastr.options = toastr_options;
+    var csrftoken = getCookie('csrftoken');    
+    toastr.options = toastr_options
 
     $('.formCendari').submit(function(e){
         e.preventDefault();
@@ -463,9 +437,9 @@ $(document).ready(function(){
                 submitTranscript(cendari_js_object_id,fc);
             }
         }
-        if(cendari_js_object_type == 'entity'){
-            showInfoMessage(messages.entity.beforeSend);
-            submitEntity(fc);
+        if(cendari_js_object_type == 'topic'){
+            showInfoMessage(messages.entity.beforeSend)
+            submitEntity(fc)
         }
 
     }); 

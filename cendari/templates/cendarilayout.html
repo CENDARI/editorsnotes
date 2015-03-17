@@ -20,10 +20,6 @@
   <script type="text/javascript" src="{% static "cendari/js/editor.js" %}"></script>
   <script type="text/javascript" src="{% static "cendari/js/jquery.serialize-object.min.js" %}"></script>
   <script type="text/javascript" src="{% static "cendari/js/messagePassing.js" %}"></script>
-
-
- 
-
 {% endcompress %}
 
  <script type="text/javascript" src="https://dev.dariah.eu/jira/s/fa233ec786d6cfd2995f6f7fd7013a94-T/en_UK-3nf04g/6329/39/1.4.13/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector.js?locale=en-UK&collectorId=346f4388">
@@ -80,7 +76,6 @@
 
         <!--<button id="submitButtonCendari" onclick="submitCendariForm()"  value=""></button>
         <script type="text/javascript" src="{% static "cendari/js/editor.js" %}"></script> -->
-
 
         {% with user=request.user %}
           {% if user.is_authenticated %}
@@ -153,7 +148,7 @@
       </div>
 
       <div  id="center" style="height:100%;" class="x-hide-display editor" >
-        <button id="submitButtonCendari" onclick="submitCendariForm()" >&nbsp;</button> 
+        <!-- <button id="submitButtonCendari" onclick="submitCendariForm()" >&nbsp;</button>  -->
 
         {% block editor_content %}
         {% endblock %}
