@@ -30,4 +30,5 @@ class CendariUserBackend(RemoteUserBackend):
             user.user_permissions.add(_permission_del)
         if not user.has_perm('main.view_project'):
             user.user_permissions.add(_permission_view)
+        return user
 
