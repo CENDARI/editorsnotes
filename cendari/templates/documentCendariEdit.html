@@ -49,9 +49,6 @@
 			autoUpload: false,
 			acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
 			maxFileSize: 5000000, // 5 MB
-			// Enable image resizing, except for Android and Opera,
-			// which actually support image resizing, but fail to
-			// send Blob objects via XHR requests:
 			disableImageResize: /Android(?!.*Chrome)|Opera/
 			.test(window.navigator.userAgent),
 			previewMaxWidth: 100,
@@ -69,14 +66,7 @@
 			},
 			fail: function(e,data){
 				showErrorMessage(messages.scan.error)
-			},
-			// progressall: function (e, data) {
-			// 	var progress = parseInt(data.loaded / data.total * 100, 10);
-			// 	$('#progress .bar').css(
-			// 		'width',
-			// 		progress + '%'
-			// 	);
-			// }
+			}
 		}).on('fileuploadadd', function (e, data) {
 			data.context = $('<div/>').prepend('#files');
 			$.each(data.files, function (index, file) {
@@ -129,7 +119,7 @@
 
 			<li> <!-- TRANSCRIPT TAB -->
 				<input type="radio" name="tabs" id="tab2">
-				<label for="tab2">Transcript {% if document.transcript %} (1) {% else %} (0) {% endif %}</label>
+				<label id='transcriptTab' for="tab2">Transcript {% if document.transcript %} (1) {% else %} (0) {% endif %}</label>
 				<div id="tab-content2" class="tab-content document animated fadeIn resizable">
 					<!-- {% if document.id %}
 						<iframe   scrolling="no" id="transciptIframe" class="transcript-form" width="100%" src="{% url 'transcript_view' project.slug document.id %}"></iframe>
@@ -239,11 +229,15 @@
 							<ul id="scan-list">
 								{% if scans %}
 									{% for scan in scans %}
-									<li class='scan-list-item'>
-										<a class="scan btn" id="{{scan.id}}" href="http://{{ domain }}{{ scan.image.url }}">
-										<img src="{{scan.image_thumbnail.url}}" width=100 alt="Thumbnail of scan {{scan.id}}">
+									<li class='scan-list-item btn'>
+
+										<a class="scan" id="{{scan.id}}" href="http://{{ domain }}{{ scan.image.url }}">
+											<img src="{{scan.image_thumbnail.url}}" width=100 alt="Thumbnail of scan {{scan.id}}">
 										<!-- {{ forloop.counter }} -->
-									</a>
+										 
+										</a>
+										<a href="{% url "api:api-scans-detail" project_slug=project.slug  document_id=document.id scan_id=scan.id  %}" class="delete" data-confirm="Are you sure to delete this scan?"><img src="{% static "cendari/img/fileclose.png" %}"></a>
+
 									</li>
 									{% endfor %}
 								{% endif %}
@@ -335,9 +329,37 @@
 					return elt.clone(true);
 				}
 			});
+			$( "body" ).delegate('.delete','click',function(event){
+				event.preventDefault();
+				var choice = confirm(this.getAttribute('data-confirm'));
+				if (choice) {
+					
 
+					var li_jq = $($(this).parent());
+
+					var formData ="csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&_method=DELETE";
+					$.ajax({
+					// beforeSend: function (xhr) {xhr.setRequestHeader('X-CSRFToken', $('input[name="csrfmiddlewaretoken"]').val());},
+						url:this.getAttribute('href'),
+						type: 'POST',
+						data: formData,
+						success: function(data){
+							li_jq.remove();
+							$('#scansTab').text('Scans ('+$('#scan-list').find('li').size()+')')
+						},
+						error: function(XMLHttpRequest, textStatus, errorThrown) { 
+						console.log("Error with status "+textStatus+":",errorThrown);
+						showErrorMessage(messages.transcript.error);
+						} 
+					});
+				}
+					
+			})
 			
 		});
+
+
+
 		{% if document %}
 			Ext.onReady(function(){
 				$('#extraButtonId').text('Read Mode');

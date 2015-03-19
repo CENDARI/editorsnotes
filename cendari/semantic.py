@@ -440,6 +440,10 @@ def semantic_process_document(document,user=None):
     #g.add( (g.identifier, CENDARI['name'], Literal(xhtml_to_text(document.description))) )
 
     topics = xml_to_topics(document.description, uri) 
+    #E.G. add this until I figure something else
+    if(document.transcript):
+        topics += xml_to_topics(document.transcript.content, uri)
+
     done=set()
     document.related_topics.all().delete()
     for t in topics:

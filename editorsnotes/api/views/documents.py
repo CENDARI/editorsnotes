@@ -96,15 +96,29 @@ class ScanDetail(BaseDetailView):
 
 # Cendari code E.G. aviz
 # added from the editors note repository
+
 class Transcript(BaseDetailView):
-    queryset = Transcript.objects.all()
+    model = Transcript
     serializer_class = TranscriptSerializer
     def get_object(self, queryset=None):
-        #pdb.set_trace()
-        transcript_qs = self.get_queryset()\
-                .select_related('document__project')\
-                .filter(
-                    document__id=self.kwargs.get('document_id'),
-                    document__project__slug=self.kwargs.get('project_slug')
-                )
+        transcript_qs = self.model.objects\
+            .select_related('document__project')\
+            .filter(
+                document__id=self.kwargs.get('document_id'),
+                document__project__slug=self.kwargs.get('project_slug')
+            )
         return get_object_or_404(transcript_qs)
+
+
+# class Transcript(BaseDetailView):
+#     queryset = Transcript.objects.all()
+#     serializer_class = TranscriptSerializer
+#     def get_object(self, queryset=None):
+#         #pdb.set_trace()
+#         transcript_qs = self.get_queryset()\
+#                 .select_related('document__project')\
+#                 .filter(
+#                     document__id=self.kwargs.get('document_id'),
+#                     document__project__slug=self.kwargs.get('project_slug')
+#                 )
+#         return get_object_or_404(transcript_qs)

@@ -358,6 +358,7 @@ def small_vis_data_lazy(request, project_slug):
     print 'docs: %d' % (len(documents))
     for document in documents:
         topics = document.get_all_related_topics()
+        print 'len of topics: %d ' % len(topics)
         for t in topics:
             timestamp = calendar.timegm(t.date.timetuple()) * 1000 if t.date else ''
             v = {'preferred_name':t.preferred_name, 

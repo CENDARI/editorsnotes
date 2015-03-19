@@ -119,9 +119,11 @@ function  updatedEnitiesTab(prefix,related_topics){
 
 function createScanElement(image_url,thumbnail_url,id){
     var html = "";
-    html +='<li>'+
+    html +='<li class="scan-list-item btn">'+
             '<a class="scan btn" id="1" href="http://'+window.location.pathname+image_url+'">'+
-            '<img id="ext-gen1206" src="'+thumbnail_url+'" alt="Thumbnail of scan 1" width="100"></a></li>';
+            '<img id="ext-gen1206" src="'+thumbnail_url+'" alt="Thumbnail of scan 1" width="100"></a>'+
+            '<a href="/api/projects/project1/documents/'+cendari_js_object_id+'/scans/'+id+'/" class="delete" data-confirm="Are you sure to delete this item?"><img src="/static/cendari/img/fileclose.png"></a>'+
+            '</li>';
     return html;
                     
 
@@ -137,7 +139,6 @@ function updateScanTab(scans){
         scans_html += createScanElement(scans[i].image_url,scans[i].image_thumbnail_url,scans[i].id);
     }
 
-    console.log('scans_html',scans_html);
     
     scans_jq.empty();
     scans_jq.append(scans_html);
@@ -239,12 +240,13 @@ function submitTranscript(document_id,fc_document){
         type: fc.attr('method'),
         data: formData,
         success: function(data){
-            submitScan(document_id,fc_document);
+            $("#transcriptTab").text('Transcript (1)');
+            submitDocument(fc_document);
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) { 
             console.log("Error with status "+textStatus+":",errorThrown);
             showErrorMessage(messages.transcript.error);
-            submitScan(document_id,fc_document);
+            submitDocument(fc_document);
         } 
     });
 }
@@ -336,7 +338,7 @@ function submitDocument(fc){
 
             showSuccessMessage(messages.document.success);
             updatedEnitiesTab(cendari_js_object_type,data.related_topics);
-            updateScanTab(data.scans);
+            // updateScanTab(data.scans);
             
             replaceWindowUrl(data.id);
             
