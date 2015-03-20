@@ -217,7 +217,7 @@ function submitTranscript(document_id,fc_document){
     if($('#transcript-description').length){
         formData =formData +'document='+encodeURIComponent($('#transcript-document').val())+'&creator='+$('#transcript-creator').val()+'&last_updater='+$('#transcript-uploader').val()+'&';
         if(tinyMCE.getInstanceById('transcript-description')!=null){
-            if(tinyMCE.getInstanceById('transcript-description').getContent().length && CRC32(tinyMCE.getInstanceById('transcript-description').getContent().length) !== editors_crc32['transcript-description']){
+            if(tinyMCE.getInstanceById('transcript-description').getContent().length && CRC32(tinyMCE.getInstanceById('transcript-description').getContent()) !== editors_crc32['transcript-description']){
                 formData = formData+"&content="+encodeURIComponent(tinyMCE.getInstanceById('transcript-description').getContent())+"&";
             }
             else{
