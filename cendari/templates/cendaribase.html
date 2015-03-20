@@ -25,6 +25,15 @@
 	<link rel="stylesheet" href="{% static "style/jquery-ui/jquery-ui-1.8.10.custom.css" %}" type="text/css"/>	
 	<!-- extjs css-->
 	<link rel="stylesheet" type="text/css" href="{% static "extjs/resources/css/ext-custom.css" %}" />
+
+
+	<style type="text/css">
+		.resizable {
+			resize: both;   /* Options: horizontal, vertical, both */
+		    overflow: auto; /* fix for Safari */
+		}
+	</style>
+
 {% endcompress %}
 	
 {% compress css %}{% block css %}{% endblock %}{% endcompress %}
@@ -40,13 +49,15 @@
 <script type="text/javascript">
 			cendari_js_project_slug = '{{ project.slug }}'||'{{project_slug}}';
 			cendari_js_object_type = '{{object_type}}';
-			cendari_js_object_id = '{{object_id}}';
-			cendari_js_topic_type = '{{topic_type}}';
-			console.log("NB cendaribase.html*********** cendari_js_project_slug is "+cendari_js_project_slug);
-			console.log("NB cendaribase.html*********** cendari_js_object_type is "+cendari_js_object_type);
-			console.log("NB cendaribase.html*********** cendari_js_object_id is "+cendari_js_object_id);
-			console.log("NB cendaribase.html*********** cendari_js_topic_type is "+cendari_js_topic_type);
-		    	cendari_root_url = "{%url 'index_view' %}";
+			cendari_js_object_id = '{{object_id}}' || '';
+			cendari_js_topic_type = '{{topic_type}}' || '';
+			// console.log("NB cendaribase.html*********** cendari_js_project_slug is "+cendari_js_project_slug);
+			// console.log("NB cendaribase.html*********** cendari_js_object_type is "+cendari_js_object_type);
+			// console.log("NB cendaribase.html*********** cendari_js_object_id is "+cendari_js_object_id);
+			// console.log("NB cendaribase.html*********** cendari_js_topic_type is "+cendari_js_topic_type);
+		    cendari_root_url = "{%url 'index_view' %}";
+
+		    editors_crc32 = {}
 </script>
 
 {% if not project %}
@@ -68,6 +79,10 @@
 	<script type="text/javascript" src="{% static "function/underscore-min.js" %}"></script>
 	<script type="text/javascript" src="{% static "function/jquery/jquery.timeago.js" %}"></script>
 	<script type="text/javascript" src="{% static "function/jquery/jquery.ba-bbq.min.js" %}"></script>
+
+	<script type="text/javascript" src="{% static "cendari/js/jquery_upload/js/vendor/jquery.ui.widget.js" %}"></script>
+	<script type="text/javascript" src="{% static "cendari/js/jquery_upload/js/jquery.fileupload.js" %}"></script>
+
 	<script type="text/javascript" src="{% static "function/base.js" %}"></script>
 	<script type="text/javascript" src="{% static "function/bootstrap.min.js" %}"></script>
 

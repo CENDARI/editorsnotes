@@ -4,6 +4,12 @@
 
 {% block css %}
 	<link rel="stylesheet" type="text/css" media="all" href="{% static "iipmooviewer/css/iip.css" %}" />
+	<style type="text/css">
+		.bar {
+			height: 18px;
+			background: green;
+		}
+	</style>
 {% endblock %}
 
 
@@ -11,6 +17,75 @@
 	<meta name="document_id" id="document_id" content="{{ document.id }}" />
 	<meta name="document_name" id="document_name" content="{{ document.import_id }}" />
 	<script type="text/javascript" src="{% static "cendari/js/document.js" %}"></script>
+
+
+	<!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
+	<script src="{% static "cendari/js/jquery_upload/js/vendor/jquery.ui.widget.js" %}"></script>
+	<!-- The Load Image plugin is included for the preview images and image resizing functionality -->
+	<script src="http://blueimp.github.io/JavaScript-Load-Image/js/load-image.all.min.js"></script>
+	<!-- The Canvas to Blob plugin is included for image resizing functionality -->
+	<script src="http://blueimp.github.io/JavaScript-Canvas-to-Blob/js/canvas-to-blob.min.js"></script>
+	<!-- Bootstrap JS is not required, but included for the responsive demo navigation -->
+	<script src="http://netdna.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+	<!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
+	<script src="{% static "cendari/js/jquery_upload/js/jquery.iframe-transport.js" %}"></script>
+	<!-- The basic File Upload plugin -->
+	<script src="{% static "cendari/js/jquery_upload/js/jquery.fileupload.js" %}"></script>
+	<!-- The File Upload processing plugin -->
+	<script src="{% static "cendari/js/jquery_upload/js/jquery.fileupload-process.js" %}"></script>
+	<!-- The File Upload image preview & resize plugin -->
+	<script src="{% static "cendari/js/jquery_upload/js/jquery.fileupload-image.js" %}"></script>
+	<!-- The File Upload audio preview plugin -->
+	<script src="{% static "cendari/js/jquery_upload/js/jquery.fileupload-audio.js" %}"></script>
+	<!-- The File Upload video preview plugin -->
+	<script src="{% static "cendari/js/jquery_upload/js/jquery.fileupload-video.js" %}"></script>
+	<!-- The File Upload validation plugin -->
+	<script src="{% static "cendari/js/jquery_upload/js/jquery.fileupload-validate.js" %}"></script>
+	{% if document.id %}
+	<script>
+	$(function () {
+		'use strict';
+		// Change this to the location of your server-side upload handler:
+		var url ="{% url "api:api-scans-list" project_slug=project.slug  document_id=document.id %}"
+		$('#id_image').fileupload({
+			url: url,
+			dataType: 'json',
+			autoUpload: false,
+			acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
+			maxFileSize: 5000000, // 5 MB
+			// Enable image resizing, except for Android and Opera,
+			// which actually support image resizing, but fail to
+			// send Blob objects via XHR requests:
+			disableImageResize: /Android(?!.*Chrome)|Opera/
+			.test(window.navigator.userAgent),
+			previewMaxWidth: 100,
+			previewMaxHeight: 100,
+			previewCrop: true,
+			done: function (e, data) {
+
+				var scan_el = createScanElement(data.result.image_url,data.result.image_thumbnail_url,data.result.id);
+				$('#scan-list').append(scan_el);
+				$('#scansTab').text('Scans ('+$('#scan-list li').size()+')');
+
+			},
+			progressall: function (e, data) {
+				var progress = parseInt(data.loaded / data.total * 100, 10);
+				$('#progress .bar').css(
+					'width',
+					progress + '%'
+				);
+			}
+		}).on('fileuploadadd', function (e, data) {
+			data.context = $('<div/>').prepend('#files');
+			$.each(data.files, function (index, file) {
+				data.submit()
+			});
+		})
+	});
+</script>
+{% endif %}
+
 {% endblock init %}
 
 {% block model_fields %}
@@ -18,7 +93,7 @@
 		<ul class="tabs document">
 			<li> <!-- ENTITIES TAB --> 
 				<input type="radio" checked name="tabs" id="tab1">
-				<label for="tab1">
+				<label id='entitiesTab' for="tab1">
 				<script > document.write("Entities (" + "{{ document.get_all_related_topics|length }}" + ")"); </script>
 				</label>
 				<div id="tab-content1" class="tab-content  document animated fadeIn">
@@ -54,7 +129,7 @@
 			<li> <!-- TRANSCRIPT TAB -->
 				<input type="radio" name="tabs" id="tab2">
 				<label for="tab2">Transcript {% if document.transcript %} (1) {% else %} (0) {% endif %}</label>
-				<div id="tab-content2" class="tab-content document animated fadeIn">
+				<div id="tab-content2" class="tab-content document animated fadeIn resizable">
 					<!-- {% if document.id %}
 						<iframe   scrolling="no" id="transciptIframe" class="transcript-form" width="100%" src="{% url 'transcript_view' project.slug document.id %}"></iframe>
 					{% else %}
@@ -77,7 +152,7 @@
 								<textarea id="transcript-description" class="mceEditor" type="text" name="content" rows="4"> 
 									{% if document.transcript %} {{document.transcript.content|as_html}} {% endif %}
 								</textarea>
-								<button id="saveButtonTrascript" class="save-item" name="_method" value="PUT"  style="visibility: hidden;">Save</button>
+								<button id="saveButtonTranscript" class="save-item" name="_method" value="PUT"  style="visibility: hidden;">Save</button>
 							</div>
 						</form>	
 					{% else %}
@@ -120,16 +195,15 @@
 
 			<li> <!-- SCANS TAB -->
 				<input type="radio" name="tabs" id="tab5">
-				<label for="tab5">Scans ({% if not scans %}0{% else %}{{ document.get_scan_count }} {% endif%})</label>
+				<label id="scansTab" for="tab5">Scans ({% if not scans %}0{% else %}{{ document.get_scan_count }} {% endif%})</label>
 				<div id="tab-content5" class="tab-content document animated fadeIn">
-				  {% if scans %}
 				  <section id="scans-tab" >
 				    <div id="scanlist-container">
 				      <ul id="scan-list">
 					{% for scan in scans %}
 					<li>
 					  <a class="scan btn" id="{{scan.id}}" href="http://{{ domain }}{{ scan.image.url }}">
-					    <img src="{{scan.image_thumbnail.url}}" width=100 alt="Thumbnail of scan {{scan.id}}">
+					    <img class="thumbnail" src="{{scan.image_thumbnail.url}}" alt="Thumbnail of scan {{scan.id}}">
 					    {{ forloop.counter }}
 					  </a>
 					</li>
@@ -146,32 +220,44 @@
 				      <div id="progressbar"></div>
 				    </div>
 				  </section>
-				  {% endif %}
 					
-				  {% if document.id %}
-				  <form  action="{% url "api:api-scans-list" project_slug=project.slug  document_id=document.id %}" method="POST" enctype="multipart/form-data" id="scanCendari">
-				    <fieldset>
-				      {% csrf_token %}
-				      <!-- <div class="control-group "> -->
-				      <!-- <label for="image" >Image:</label> -->
-				      <!-- <div class="controls"> -->
-				      <input id="id_image" name="image" type="file" />
-				      <!-- </div> -->
-				      <!-- </div> -->
-				      <div class="control-group ">
-					<label for="ordering"  style="visibility: hidden;" class="control-label">ordering:</label>
-					<div class="controls">
-					  <input name="ordering" type="hidden" value="0" />
+					<!-- The global progress bar -->
+				    <div id="progress">
+    					<div class="bar" style="width: 0%;"></div>
 					</div>
-				      </div>
-				      <div style="visibility: hidden;" class="form-actions">
-					<button   class="btn btn-primary" title="Make a POST request on the Scan List resource">POST</button>
-				      </div>
-				    </fieldset>
-				  </form>
-				  {% else %}
-				  Save document before adding a scan.
-				  {%endif%}
+					<div id="files" class="files"></div>
+    				<br>
+					{% if document.id %}
+						<form  action="{% url "api:api-scans-list" project_slug=project.slug  document_id=document.id %}" method="POST" enctype="multipart/form-data" id="scanCendari">
+							<fieldset>
+								{% csrf_token %}
+								<!-- <div class="control-group "> -->
+								<!-- <label for="image" >Image:</label> -->
+								<!-- <div class="controls"> -->
+								<input id="id_image" name="image" type="file" multiple/>
+								<!-- </div> -->
+								<!-- </div> -->
+								<div class="control-group ">
+									<label for="ordering"  style="visibility: hidden;" class="control-label">ordering:</label>
+									<div class="controls">
+										<input name="ordering" type="hidden" value="0" />
+									</div>
+								</div>
+								<!-- <div style="visibility: hidden;" class="form-actions"> -->
+									<!-- <button   class="btn btn-primary" title="Make a POST request on the Scan List resource">POST</button> -->
+								<!-- </div> -->
+								<!-- <input value="Upload image" type="submit"> -->
+
+								<!-- <div class="progress">
+									<div class="bar"></div>
+									<div class="percent">0%</div>
+								</div> -->
+
+							</fieldset>
+						</form>
+					{% else %}
+						Save document before adding a scan.
+					{%endif%}
 				</div>
 			</li>
 		</ul>
@@ -182,11 +268,10 @@
 
 		{% if document.id %}
 			<form class="formCendari" id="documentCendari" action="{% url "api:api-documents-detail" project_slug=project.slug  pk=document.id %}" method="POST">  
-			{% csrf_token %}
 		{% else %}
 			<form class="formCendari" id="documentCendari" action="{% url "api:api-documents-list" project_slug=project.slug %}" method="POST" >
-			{% csrf_token %}
 		{% endif %}
+			{% csrf_token %}
 			<div class="form-main edit-section" >
 				<input  class="editorlabel" id="documentDescEditBut" type="button" value= {% if document.id > 0 %} " [ Read Only ]                --- click here for Edit mode" {% else %} " [ Editable ]                    --- click here for Read-Only mode" {% endif %} />
 				<p>Document's description</p>
@@ -250,6 +335,14 @@
 		// 	    // return false;  
 		// 	})
 		// });
+
+		$(document).ready(function(){
+			$('#scan-list').sortable({
+				helper: function(e, elt) {
+					return elt.clone(true);
+				}
+			})
+		});
 
 
 	</script>

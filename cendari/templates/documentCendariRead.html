@@ -1,0 +1,282 @@
+{% extends "centerCendari.html" %}
+{% load set_var %}
+{% load staticfiles typogrify display  compress %}
+
+{% block css %}
+	<link rel="stylesheet" type="text/css" media="all" href="{% static "iipmooviewer/css/iip.css" %}" />
+	<style type="text/css">
+		.toc {
+			background: #fefefe;
+			border: 1px solid #ddd;
+			color: #333;
+			width: 300px;
+		}
+
+		.toc a {
+			color: #333;
+		}
+
+		.toc .tocH2 {
+			margin-left: 10px
+		}
+		.toc .tocH3 {
+			margin-left: 20px
+		}
+
+		.toc .tocH4 {
+			margin-left: 30px
+		}
+
+		.toc .tocH5 {
+			margin-left: 40px
+		}
+
+		.toc .tocH6 {
+			margin-left: 50px
+		}
+
+		.toc-active {
+			color: #000;
+			font-weight: bold;
+		}
+		.toc.right {
+			right: 0
+		}
+
+	</style>
+{% endblock %}
+
+
+{% block init %}
+	<meta name="document_id" id="document_id" content="{{ document.id }}" />
+	<meta name="document_name" id="document_name" content="{{ document.import_id }}" />
+	<script type="text/javascript" src="{% static "cendari/js/document.js" %}"></script>
+	<script type="text/javascript" src="{% static "cendari/js/toc.min.js" %}"></script>
+
+{% endblock init %}
+
+{% block model_fields %}
+	<div class="form-menu-document" >
+		<ul class="tabs document">
+			<li> <!-- ENTITIES TAB --> 
+				<input type="radio" checked name="tabs" id="tab1">
+				<label id='entitiesTab' for="tab1">
+				<script > document.write("Entities (" + "{{ document.get_all_related_topics|length }}" + ")"); </script>
+				</label>
+				<div id="tab-content1" class="tab-content  document animated fadeIn">
+					<div class="form-entities" id="document-related-topics">					
+						{% if document %}						
+							{% for topic in document.get_all_related_topics %}
+								<a href= {{ topic.get_absolute_url }}
+									{% if 		topic.topic_node.type == "PER" %} class ="form-entities r_person"
+									{% elif 	topic.topic_node.type == "ORG" %} class ="form-entities r_organization"
+									{% elif 	topic.topic_node.type == "EVT" %} class ="form-entities r_event"
+									{% elif 	topic.topic_node.type == "PLA" %} class ="form-entities r_place"
+									{% elif 	topic.topic_node.type == "TAG" %} class ="form-entities r_thing"
+									{% else 						%} class = "form-entities"
+									{% endif %}
+								> {{ topic }} </a>
+							{% endfor %}
+							{% if not document.get_all_related_topics|length > 0 %}
+								<div> No Entities. </div> 
+								<div> select the Entity & right-click to add it</div>
+							{% endif %}
+
+						{% endif %}
+
+						{% if not document.id > 0 %}
+							<div> No Entities. </div> 
+							<div> Save this document to add your Entities</div>
+						{% endif %}
+
+					</div>
+				</div>
+			</li> <!-- end of ENTITIES TAB --> 
+
+			<li> <!-- TRANSCRIPT TAB -->
+				<input type="radio" name="tabs" id="tab2">
+				<label for="tab2">Transcript {% if document.transcript %} (1) {% else %} (0) {% endif %}</label>
+				<div id="tab-content2" class="tab-content document animated fadeIn resizable">
+					<!-- {% if document.id %}
+						<iframe   scrolling="no" id="transciptIframe" class="transcript-form" width="100%" src="{% url 'transcript_view' project.slug document.id %}"></iframe>
+					{% else %}
+						Save document before adding a transcript.
+					{% endif %}	 -->
+					{% if document.transcript %}
+						<div id="transcript_toc" class='toc'></div>
+						<div id="transcript_content">
+							{{document.transcript.content|as_html}}
+						</div>
+						
+					{% else %}
+						No transcript.
+					{% endif %}	
+				</div>
+			</li> <!-- end of TRANSCRIPT TAB -->
+
+			<li> <!-- ZOTERO TAB -->
+				<input type="radio" name="tabs" id="tab3">
+				<label for="tab3">Zotero data ({% if not document.zotero_link %}0{% else %}1{% endif%})</label>
+				<div id="tab-content3" class="tab-content document animated fadeIn">
+					{% if zotero_data %}
+						{% include "zotero_item.html" %}
+					{% else %}
+						<p>This document has no connected Zotero data.</p>
+					{% endif %}
+				</div>
+			</li> <!-- end of ZOTERO TAB -->
+
+			<li> <!-- LINKS TAB -->
+				<input type="radio" name="tabs" id="tab4">
+				<label for="tab4">Links ({% if not document.has_links %}0{% else %}{{ document.links.count }} {% endif%})</label>
+				<div id="tab-content4" class="tab-content document animated fadeIn">
+					{% if document.has_links %}
+						<h4>External link{% if document.links.count > 1 %}s{% endif %}</h4>
+						<ul class="unstyled">
+							{% for link in document.links.all %}
+							<li>
+								<a style="text-decoration: underline;" href="{{ link }}">{{ link }}</a>
+								<div>
+									{{ link.description }}
+								</div>
+							</li>
+							{% endfor %}
+						</ul>
+					{% endif %}				
+				</div>
+			</li> <!-- end of LINKS TAB -->
+
+			<li> <!-- SCANS TAB -->
+				<input type="radio" name="tabs" id="tab5">
+				<label id="scansTab" for="tab5">Scans ({% if not scans %}0{% else %}{{ document.get_scan_count }} {% endif%})</label>
+				<div id="tab-content5" class="tab-content document animated fadeIn"
+					
+					<section id="scans-tab" >
+						<div id="scanlist-container">
+							<ul id="scan-list">
+								{% if scans %}
+									{% for scan in scans %}
+										<li class='scan-list-item'>
+											<a class="scan btn" id="{{scan.id}}" href="http://{{ domain }}{{ scan.image.url }}">
+												<img src="{{scan.image_thumbnail.url}}" width=100 alt="Thumbnail of scan {{scan.id}}">
+												<!-- {{ forloop.counter }} -->
+											</a>
+										</li>
+									{% endfor %}
+								{% else %}
+									No scans.
+								{% endif %}
+							</ul>
+						</div>
+
+						<br/>
+					</section>
+					
+				</div>
+			</li>
+		</ul>
+
+
+		<div class="stop-float"></div>
+		<div style="height:5px"> &nbsp;</div>
+		{% if document %} 
+			<div id="document_toc" class='toc'></div>
+			<div id="document_content"> 
+				{{document.description|as_html}}
+			</div>
+		{% endif %}	
+	</div>
+
+	
+{% endblock model_fields %}
+
+{% block functions %}
+
+	<script>
+		switchtabs(5, "document");
+		var isReadOnly = false, title = "New Document";
+
+		if (( id = document.getElementById("document_id").getAttribute("content")) > 0) {
+			var name = document.getElementById("document_name").getAttribute("content");
+			title = "Document " + id + ": " + name;
+			isReadOnly = true;
+		}
+
+
+		var descriptionLabel = "Document Description ";
+		// var temp = document.getElementById("documentDescEditBut").getAttribute("value");
+
+		// document.getElementById("documentDescEditBut").value = descriptionLabel + temp;
+
+		cendari.addInit(function() {
+			// cendari.createEditor(500, "document-description", false, "documentDescEditBut", descriptionLabel);
+			cendari.addTab(title);
+			cendari.addWidgetToActiveTab("form", "noteform", "border");
+			cendari.addImageViewer("panel", "scan-viewer");
+		});
+		
+		
+
+		$(document).ready(function(){
+			 $('#scanCendari').submit(function(e) { 
+			    e.preventDefault();
+			    $(this).ajaxSubmit(); 
+			    // return false to prevent normal browser submit and page navigation 
+			    // return false;  
+			})
+
+			$('#scan-list').sortable({
+				helper: function(e, elt) {
+					return elt.clone(true);
+				}
+			});
+
+			$('#transcript_toc').toc({
+				'container': '#transcript_content',
+				'selectors': 'h1,h2,h3,h4,h5,h6',
+				'smoothScrolling': true, //enable or disable smooth scrolling on click
+			    'prefix': 'toc', //prefix for anchor tags and class names
+			    'onHighlight': function(el) {}, //called when a new section is highlighted 
+			    'highlightOnScroll': true, //add class to heading that is currently in focus
+			    'highlightOffset': 100, //offset to trigger the next headline
+			    'anchorName': function(i, heading, prefix) { //custom function for anchor name
+			        return prefix+i;
+			    },
+			    'headerText': function(i, heading, $heading) { //custom function building the header-item text
+			        return $heading.text();
+			    },
+				'itemClass': function(i, heading, $heading, prefix) { // custom function for item class
+				  return $heading[0].tagName.toLowerCase();
+				}
+			});
+			$('#document_toc').toc({
+				'container': '#document_content',
+				'selectors': 'h1,h2,h3,h4,h5,h6',
+				'smoothScrolling': true, //enable or disable smooth scrolling on click
+			    'prefix': 'toc', //prefix for anchor tags and class names
+			    'onHighlight': function(el) {}, //called when a new section is highlighted 
+			    'highlightOnScroll': true, //add class to heading that is currently in focus
+			    'highlightOffset': 100, //offset to trigger the next headline
+			    'anchorName': function(i, heading, prefix) { //custom function for anchor name
+			        return prefix+i;
+			    },
+			    'headerText': function(i, heading, $heading) { //custom function building the header-item text
+			        return $heading.text();
+			    },
+				'itemClass': function(i, heading, $heading, prefix) { // custom function for item class
+				  return $heading[0].tagName.toLowerCase();
+				}
+			});
+		});
+
+		Ext.onReady(function(){
+			$('#extraButtonId').text('Edit Mode');
+			$('#extraButtonId').on('click',function(e){
+				var readModeUrl = '{% url "document_view" project_slug=project.slug  document_id=document.id %}';
+				window.location.replace(readModeUrl);
+			});
+
+		})
+
+	</script>
+{% endblock functions %}

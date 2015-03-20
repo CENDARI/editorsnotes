@@ -122,7 +122,7 @@ UBUNTU:
      first install apache2, then mod_fastcgi, then the iipimage server
      On ubuntu:
      ```
-     sudo apt-get install apache2-server
+     sudo apt-get install apache2-server libapache2-mod-fastcgi
      sudo apt-get install iipimage-server
      ```
 
@@ -144,9 +144,9 @@ UBUNTU:
      FcgidInitialEnv FILESYSTEM_PREFIX "ENOTE/uploads/"
      ``` 
 
-     To enable fcgi module on apache2 for ubutu 14.04, you may have to do:
+     To enable fastcgi module on apache2 for ubutu 14.04, you may have to do:
      ```
-     sudo a2enmod fcgid
+     sudo a2enmod fastcgi
      ```
 
      Sometimes this does not work due to access rights (all the directories

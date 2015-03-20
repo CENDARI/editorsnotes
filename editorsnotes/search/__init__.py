@@ -36,7 +36,9 @@ def register_models(en_index):
     en_index.register(main_models.Topic,
                       display_field='serialized.preferred_name',
                       highlight_fields=('serialized.preferred_name',
-                                        'serialized.summary'))
+                                        'serialized.summary',
+                                        'serialized.rdf',
+                                        'serialized.date'))
     en_index.register(main_models.Document, adapter=DocumentAdapter)
 
 en_index = ENIndex(onOpen=register_models)

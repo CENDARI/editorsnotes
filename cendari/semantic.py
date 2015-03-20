@@ -1,6 +1,6 @@
 import logging
 
-from editorsnotes.main.models import Document, Transcript, Topic, TopicAssignment
+from editorsnotes.main.models import Note, Document, Transcript, Topic, TopicAssignment
 from editorsnotes.main.utils import xhtml_to_text
 from editorsnotes.main.templatetags.display import as_html
 
@@ -8,6 +8,9 @@ from django.conf import settings
 from django.utils import six
 from django.core import signals
 import utils as utils
+
+from lxml import etree, html
+from lxml.html import builder as E
 
 from rdflib import Dataset, Graph, ConjunctiveGraph, URIRef, Literal, BNode
 from rdflib.store import Store
@@ -24,9 +27,28 @@ import urllib2
 import urlparse
 import json
 import sys, traceback
+import re
 import pdb
 
-__all__ = [ 'CENDARI', 'SCHEMA', 'DBPPROP', 'GRS', 'GEO', 'DBOWL', 'semantic', 'semantic_query_latlong' ]
+__all__ = [
+    'CENDARI',
+    'SCHEMA',
+    'DBPPROP',
+    'GRS',
+    'GEO',
+    'DBOWL',
+    'semantic',
+    'semantic_query_latlong',
+    'semantic_process_note',
+    'semantic_process_document',
+    'semantic_process_transcript',
+    'semantic_process_topic',
+    'semantic_query',
+    'semantic_query_latlong',
+    'semantic_resolve_topic',
+    'semantic_rdfa'
+]
+
 
 
 
@@ -74,7 +96,9 @@ class SemanticHandler(object):
                 pwd=settings.VIRTUOSO.get('dba_password','dba')
                 uid=settings.VIRTUOSO.get('dba_user','dba')
                 dsn=settings.VIRTUOSO.get('dsn','VOS')
-                self.connection = ('DSN=%s;UID=%s;PWD=%s;WideAsUTF16=Y' % (dsn, uid, pwd))
+                host=settings.VIRTUOSO.get('HOST','localhost')
+                self.connection = ('Server=%s:DSN=%s;UID=%s;PWD=%s;WideAsUTF16=\
+Y' % (host, dsn, uid, pwd))
                 self.store = 'Virtuoso'
             else:
                 raise ImproperlyConfigured("SEMANTIC_STORE invalid in the settings file'")
@@ -173,6 +197,7 @@ def semantic_prepare_query(q):
     from rdflib.plugins.sparql import prepareQuery
     return prepareQuery(q, initNs = INIT_NS )
 
+
 GEO_QUERY = None
 
 def get_query_geo():
@@ -213,6 +238,7 @@ schema_topic = {
 topic_schema = dict((v,k) for k, v in schema_topic.iteritems())
 
 NAME =  URIRef("http://schema.org/name") 
+URL =  URIRef("http://schema.org/url") 
 
 def schema_to_topic(schema):
     if schema in schema_topic:
@@ -228,16 +254,20 @@ def xml_to_topics(xml, uri):
     if xml is None:
         return []
     g = Semantic.graph(uri)
-#    pdb.set_trace()
+    entities = []
     if not (isinstance(xml, str) or isinstance(xml, unicode)):
         xml=as_html(xml)
     xml = ("<div about='%s'>" % uri) + xml + "</div>"
     g.parse(data=xml, format='rdfa')
-    entities = []
+#    for s,p,o in g.triples( (None, None, None) ):
+#        print ("%s %s %s" % (unicode(s), unicode(p), unicode(o))).encode('ascii', 'replace')
     for s,p,o in g.triples( (None, RDF.type, None) ):
-        v = g.value(s, NAME)
+        if o==SCHEMA['CreativeWork']:
+            v = g.value(s, URL)
+        else:
+            v = g.value(s, NAME)
         if not v: continue
-        e = { "value": v.value,
+        e = { "value": unicode(v),
               "type": schema_to_topic(unicode(o)),
               "rdfsubject": s,
               "rdfvalue": v,
@@ -245,6 +275,92 @@ def xml_to_topics(xml, uri):
         entities.append(e)
         logger.debug("Entity %s: %s", e["type"], e["value"])
     return entities
+
+def fix_links(xml):
+    """
+    Transform <a href='uri'>...</a> into
+    <span class="r_entity r_creativework" typeof="schema:CreativeWork">
+      <a class="r_prop r_url" property="schema:url" href='<uri>'>...</a>
+    </span>
+    to become proper RDFa and also to be understood by the RDFace editor.
+
+    # test simple case
+    >>> from lxml import html
+    >>> import lxml.html.usedoctest
+    
+    >>> xml = html.fragment_fromstring('<div><a href="http://example.com">example</a></div>')
+    >>> fix_links(xml)
+    True
+    >>> print html.tostring(xml)
+    <div><span class="r_entity r_creativework" typeof="schema:CreativeWork"><a class="r_prop r_url" property="schema:url" href="http://example.com">example</a></span></div>
+
+    >>> xml = html.fragment_fromstring('<div>Simple <a href="http://example.com">example</a> to test</div>')
+    >>> fix_links(xml)
+    True
+    >>> print html.tostring(xml)
+    <div>Simple <span class="r_entity r_creativework" typeof="schema:CreativeWork"><a class="r_prop r_url" property="schema:url" href="http://example.com">example</a></span> to test</div>
+
+    # Also, make sure that if the structure is right, it's not changed:
+    >>> xml=html.fragment_fromstring('<div>Simple <span class="r_entity r_creativework" typeof="schema:CreativeWork"><a class="r_prop r_url" property="schema:url" href="http://example.com">example</a></span> to test</div>')
+    >>> fix_links(xml)
+    False
+    >>> print html.tostring(xml)
+    <div>Simple <span class="r_entity r_creativework" typeof="schema:CreativeWork"><a class="r_prop r_url" property="schema:url" href="http://example.com">example</a></span> to test</div>
+    
+    # More complicated are almost-good configuration that need not to be touched
+    >>> xml=html.fragment_fromstring('<div>Simple <span class="r_entity r_somethingelse" typeof="schema:Thing"><a class="r_prop r_url" property="schema:url" href="http://example.com">example</a></span> to test</div>')
+    >>> fix_links(xml)
+    False
+    >>> print html.tostring(xml)
+    <div>Simple <span class="r_entity r_somethingelse" typeof="schema:Thing"><a class="r_prop r_url" property="schema:url" href="http://example.com">example</a></span> to test</div>
+    """
+    if xml is None:
+        return False
+    changed = False
+    for (el, at, lnk, pos) in xml.iterlinks():
+        o = u'schema:CreativeWork'
+        if el.tag=='a' and el.get("href"):
+            parent = el.getparent()
+            span = parent
+            if not el.get('property'):
+                changed = True
+                el.set('property', "schema:url")
+                el.set('class', el.get('class', default='')+"r_prop r_url")
+            elif el.get('property') != "schema:url":
+                # don't change it
+                continue # restart at the next for loop
+
+            if parent.tag=='span' and parent.get('typeof')==o:
+                pass # do nothing
+            elif parent.get('typeof',o)!=o:
+                continue # the parent already has a typeof
+            elif parent.tag=='span' and parent.get('typeof') is None:
+                changed = True
+                parent.set('typeof', o)
+            elif parent.tag!='span':
+                changed = True
+                span=el.makeelement('span')
+                span.set('typeof', o)
+                span.tail = el.tail
+                el.tail = ''
+                parent.replace(el, span)
+                span.append(el)
+
+            cls = span.get('class')
+            if cls is None:
+                changed = True
+                span.set('class', 'r_entity r_creativework')
+            else:
+                c=re.split(r'[ ]+', cls)
+                if 'r_entity' not in c:
+                    changed = True
+                    c.append('r_entity')
+                if 'r_creativework' not in c:
+                    changed = True
+                    c.append('r_creativework')
+                if changed:
+                    span.set('class', u' '.join(c))
+    return changed
 
 def semantic_process_note(note,user=None):
     """Extract the semantic information from a note,
@@ -259,24 +375,45 @@ def semantic_process_note(note,user=None):
     g = Semantic.graph(uri)
     Semantic.remove_graph(g)
 
-    # This not is a creative work
+    # This note is a creative work
     g.add( (g.identifier, RDF.type, SCHEMA['CreativeWork']) )
     g.add( (g.identifier, SCHEMA['creator'], URIRef(note.creator.get_absolute_url()[1:])) )
     g.add( (g.identifier, SCHEMA['dateCreated'], Literal(note.created)) )
     g.add( (g.identifier, SCHEMA['dateModified'], Literal(note.last_updated)) )
     g.add( (g.identifier, CENDARI['name'], Literal(note.title)) )
 
-    topics = xml_to_topics(note.content, uri) 
+    #pdb.set_trace()
+   
+    if fix_links(note.content):
+        note.save()
+
+    xml = note.content
+
+    topics = xml_to_topics(xml, uri) 
     done=set()
     note.related_topics.all().delete()
     for t in topics:
         topic=utils.get_or_create_topic(user, t['value'], t['type'],note.project)
         if topic not in done:
             done.add(topic)
-            rdftopic = semantic_uri(topic)
             note.related_topics.create(creator=user, topic=topic)
-            g.add( (t['rdfsubject'], OWL.sameAs, rdftopic) )
+            rdftopic = semantic_uri(topic)
+            subject = t['rdfsubject']
+            value = t['value']
+            g.add( (subject, OWL.sameAs, rdftopic) )
             g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
+            if topic.rdf is None and subject.startswith('http'):
+                topic.rdf = unicode(subject)
+                topic.save()
+            elif topic.rdf is None and t['type']=='PUB'\
+                 and value.startswith('http'):
+                topic.rdf = value
+                topic.save()
+            elif t['type']=='EVT'\
+                 and utils.parse_well_known_date(value):
+                topic.date = utils.parse_well_known_date(value)
+                logger.debug('Found a valid date: %s', topic.date)
+                topic.save()
     semantic.commit()
 
 def semantic_process_document(document,user=None):
@@ -288,6 +425,8 @@ def semantic_process_document(document,user=None):
 #    pdb.set_trace()
     if user is None:
         user = document.last_updater
+    if fix_links(document.description):
+        document.save()
     # Cleanup entities related to document
     uri = semantic_uri(document)
     g = Semantic.graph(uri)
@@ -298,9 +437,13 @@ def semantic_process_document(document,user=None):
     g.add( (g.identifier, SCHEMA['creator'], URIRef(document.creator.get_absolute_url()[1:])) )
     g.add( (g.identifier, SCHEMA['dateCreated'], Literal(document.created)) )
     g.add( (g.identifier, SCHEMA['dateModified'], Literal(document.last_updated)) )
-    g.add( (g.identifier, CENDARI['name'], Literal(xhtml_to_text(document.description))) )
+    #g.add( (g.identifier, CENDARI['name'], Literal(xhtml_to_text(document.description))) )
 
     topics = xml_to_topics(document.description, uri) 
+    #E.G. add this until I figure something else
+    if(document.transcript):
+        topics += xml_to_topics(document.transcript.content, uri)
+
     done=set()
     document.related_topics.all().delete()
     for t in topics:
@@ -309,8 +452,12 @@ def semantic_process_document(document,user=None):
             done.add(topic)
             rdftopic = semantic_uri(topic)
             document.related_topics.create(creator=user, topic=topic)
-            g.add( (t['rdfsubject'], OWL.sameAs, rdftopic) )
+            subject = t['rdfsubject']
+            g.add( (subject, OWL.sameAs, rdftopic) )
             g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
+            if topic.rdf is None and subject.startswith('http'):
+                topic.rdf = unicode(subject)
+                topic.save()
     semantic.commit()   
 
 def semantic_process_transcript(transcript,user=None):
@@ -346,8 +493,12 @@ def semantic_process_transcript(transcript,user=None):
             done.add(topic)
             rdftopic = semantic_uri(topic)
             transcript.document.related_topics.create(creator=user, topic=topic)
-            g.add( (t['rdfsubject'], OWL.sameAs, rdftopic) )
+            subject = t['rdfsubject']
+            g.add( (subject, OWL.sameAs, rdftopic) )
             g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
+            if topic.rdf is None and subject.startswith('http'):
+                topic.rdf = unicode(subject)
+                topic.save()
     semantic.commit()  
 
 def semantic_process_topic(topic,user=None,doCommit=True):
@@ -464,8 +615,14 @@ def semantic_resolve_topic(topic, force=False):
         loaded.parse(location=uri)
     except:
         logger.warning("Exception in parsing code from url %s", unicode(rdf_url))
-        #traceback.print_exc(file=sys.stdout)
-        pass
+        if rdf_url.startswith('http://rdf.freebase') or rdf_url.startswith('https://rdf.freebase'):
+            try:
+                rdf = urllib2.urlopen(rdf_url).read()
+                rdf = re.sub(r'\\x(..)', '\\u00\1', rdf)
+                loaded.parse(data=rdf, format="n3")
+            except:
+                traceback.print_exc(file=sys.stdout)
+                pass
 
     type = URIRef(topic_to_schema(topic.topic_node.type))
     
@@ -525,3 +682,24 @@ def semantic_refresh_topic(topic):
     uri = unicode(topic.rdf.identifier)
     if uri:
         semantic_resolve_topic(topic, uri)
+
+def semantic_rdfa(obj):
+    uri = semantic_uri(obj)
+    g = Semantic.graph(uri)
+    xml = None
+    if isinstance(obj, Note):
+        xml = obj.content
+    elif isinstance(obj, Document):
+        xml = obj.description
+    else:
+        return None
+    
+    head = E.HEAD()
+    for s,p,o in g.triples( (URIRef(uri), None, None) ):
+        head.append(E.META(property=unicode(p), content=unicode(o)))
+    document = E.HTML(head, E.BODY(xml, about=uri), version="XHTML+RDFa 1.0")
+    return etree.tostring(document, encoding='utf8', pretty_print=True)
+
+__test__ = {  
+    "fix_links": fix_links
+}  

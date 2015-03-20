@@ -1,0 +1,259 @@
+{% extends "centerCendari.html" %}
+{% load set_var %}
+{% load typogrify display note_sections staticfiles compress %}
+
+{% block css %}
+	<link rel="stylesheet" type="text/css" media="all" href="{% static "iipmooviewer/css/iip.css" %}" />
+	<style type="text/css">
+		.toc {
+			background: #fefefe;
+			border: 1px solid #ddd;
+			color: #333;
+			width: 300px;
+		}
+
+		.toc a {
+			color: #333;
+		}
+
+		.toc .tocH2 {
+			margin-left: 10px
+		}
+		.toc .tocH3 {
+			margin-left: 20px
+		}
+
+		.toc .tocH4 {
+			margin-left: 30px
+		}
+
+		.toc .tocH5 {
+			margin-left: 40px
+		}
+
+		.toc .tocH6 {
+			margin-left: 50px
+		}
+
+		.toc-active {
+			color: #000;
+			font-weight: bold;
+		}
+		.toc.right {
+			right: 0
+		}
+	</style>
+{% endblock %}
+
+{% block init %}
+	<meta name="note_id" id="note_id" content="{{ note.id }}" />
+	<meta name="note_name" id="note_name" content="{{ note.title }}" />
+	<script type="text/javascript" src="{% static "cendari/js/toc.min.js" %}"></script>
+{% endblock init %}
+
+
+{% block model_fields %}
+	<div class="form-menu-document" >
+		<!-- <section id="note-details>" -->
+		<ul class="tabs note">
+			<li><!-- ENTITIES TAB -->
+				<input type="radio" checked name="tabs" id="tab1">
+
+				<label id='entitiesTab' for="tab1">
+					<script > document.write("Entities (" + "{{ note.get_all_related_topics|length }}" + ")"); </script> 
+				</label>
+
+				<div id="tab-content1" class="tab-content  note animated fadeIn">
+					<div class="form-entities" id="note-related-topics">
+						{% if note %}
+							{% for topic in note.get_all_related_topics %}
+								<a href= {{ topic.get_absolute_url }}
+								{% if 		topic.topic_node.type == "PER" %} class ="form-entities r_person"
+								{% elif 	topic.topic_node.type == "ORG" %} class ="form-entities r_organization"
+								{% elif 	topic.topic_node.type == "EVT" %} class ="form-entities r_event"
+								{% elif 	topic.topic_node.type == "PLA" %} class ="form-entities r_place"
+								{% elif 	topic.topic_node.type == "TAG" %} class ="form-entities r_thing"
+								{% else 						%} class = "form-entities"
+								{% endif %}
+								> 
+									{{ topic }} 
+								</a>
+							{% endfor %}
+							{% if not note.get_all_related_topics|length > 0 %}
+								<div>
+									No Entities.
+								</div>
+								<div>
+									select the Entity & right-click to add it
+								</div>
+							{% endif %}
+
+						{% endif %}
+						{% if not note.id > 0 %}
+							<div>
+								No Entities.
+							</div>
+							<div>
+								Save this note to add your Entities
+							</div>
+						{% endif %}
+
+					</div>
+				</div>
+			</li>
+
+			<li><!-- STATUS TAB -->
+				<input type="radio" name="tabs" id="tab2">
+				<label for="tab2">Status {% if note.status == "0" %} (Closed) {% elif note.status == "2" %} (Hibernating)  {% else %} (Open) {% endif %}</label>
+				<div id="tab-content2" class="tab-content note animated fadeIn">
+					<div class="form-status" id="note-status">
+						<select name="status">
+							<option value="open" {% if note.status == 'open' %} selected="selected" {% endif %}><span class="note-status-closed">Closed</span></option>
+							<option value="closed" {% if note.status == 'closed' %} selected="selected" {% endif %}><span class="note-status-closed">Closed</option>
+							<option value="hibernate" {% if note.status == 'hibernating' %} selected="selected" {% endif %}><span class="note-status-hibernating" >Hibernating</span></option>
+						</select>
+					</div>
+				</div>
+			</li>
+
+			<li><!-- AUTHORSHIP TAB (Project, Private, Licence, Author, Last updated ) -->
+				<input type="radio" name="tabs" id="tab3">
+				<label for="tab3">Authorship</label>
+				<div id="tab-content3" class="tab-content note animated fadeIn">
+					<div style="height:50px; overflow: auto;" >
+						<dl id="note-authorship" >
+						<!-- class="dl-horizontal">-->
+						{% if note %}
+							<dt>
+								Project
+							</dt>
+							<dd>
+								{{ note.project|as_link }}
+							</dd>
+							<dt>
+								Private
+							</dt>
+							<dd>
+								{% if note.is_private %}Yes{% else %}No{% endif %}
+							</dd>
+							<dt>
+								License
+							</dt>
+							<dd>
+								<a class="license-link" href="{{ license.url }}" title="{{ license }}"> {% for symbol in license.symbols %}<i class="license-symbol">{{ symbol }}</i>{% endfor %} </a>
+							</dd>
+							{% with authors=note.get_all_updaters %}
+								<dt>
+									Author{% if authors|length > 1 %}s{% endif %}
+								</dt>
+								<dd>
+									{% for author in authors %}
+										<li>
+											{{ author|as_link }}
+										</li>
+									{% endfor %}
+								</dd>
+							{% endwith %}
+							<br>
+							<dt>
+								Last updated
+							</dt>
+							<dd>
+								{{ note.last_updated }} (<a href="#">view history</a>)
+							</dd>
+						{% endif %}
+						</dl>
+					</div>
+				</div>
+			</li>
+		</ul>
+		<!-- </section> -->
+
+
+
+
+		<div class="stop-float"></div>
+		<div style="height:5px"> &nbsp;</div>
+
+		
+		{% if note %}
+			<h1> {{note.title}} </h1>
+
+			<div id="note_toc" class='toc'></div>
+			<div id="note_content"> 
+				{{note.content|as_html}}
+			</div>
+
+		{% endif %}
+		<section id="note-sections">
+				{% for section in sections %}{% include section|ns_template_name %}{% endfor %}
+		</section>
+	</div>
+{% endblock model_fields %}
+
+{% block functions %}
+
+	<script>
+		switchtabs(3, "note");
+		$("#note-title").attr("placeholder", "Insert Note Title  . . . ");
+		var isReadOnly = false, title = "New Note", id = document.getElementById("note_id").getAttribute("content");
+
+		// if (id > 0) {
+		// 	var name = document.getElementById("note_name").getAttribute("content");
+		// 	title = "Note " + id + ": " + name;
+		// 	isReadOnly = false;
+		// }
+
+		// var descriptionLabel = "Note Description ";
+		// var temp = document.getElementById("noteDescEditBut").getAttribute("value");
+		// document.getElementById("noteDescEditBut").value = descriptionLabel + temp;
+		cendari.addInit(function() {
+			// cendari.createEditor(500, "note-description", isReadOnly, "noteDescEditBut", descriptionLabel);
+			cendari.addTab(title);
+			cendari.addWidgetToActiveTab("form", "noteform", "border");
+		});
+		{% if note %}
+			// highlight associated entities in the paired vis panel
+			var currentNoteEntities = "{{ note.get_all_related_topics_ids }}";
+			window.postMessage({
+				'messageType' : 'cendari_highlight',
+				'targetWindowIds' : 'east',
+				'entityIds' : currentNoteEntities,
+				'highlightMode' : 1
+			}, document.location.origin);
+		{% endif %}
+
+
+		$(document).ready(function(){
+			
+			$('#note_toc').toc({
+				'container': '#note_content',
+				'selectors': 'h1,h2,h3,h4,h5,h6',
+				'smoothScrolling': true, //enable or disable smooth scrolling on click
+			    'prefix': 'toc', //prefix for anchor tags and class names
+			    'onHighlight': function(el) {}, //called when a new section is highlighted 
+			    'highlightOnScroll': true, //add class to heading that is currently in focus
+			    'highlightOffset': 100, //offset to trigger the next headline
+			    'anchorName': function(i, heading, prefix) { //custom function for anchor name
+			        return prefix+i;
+			    },
+			    'headerText': function(i, heading, $heading) { //custom function building the header-item text
+			        return $heading.text();
+			    },
+				'itemClass': function(i, heading, $heading, prefix) { // custom function for item class
+				  return $heading[0].tagName.toLowerCase();
+				}
+			});
+		});
+
+		Ext.onReady(function(){
+			$('#extraButtonId').text('Edit Mode');
+			$('#extraButtonId').on('click',function(e){
+				var readModeUrl = '{% url "note_view" project_slug=project.slug  note_id=note.id %}';
+				window.location.replace(readModeUrl);
+			});
+
+		})
+
+	</script>
+{% endblock functions %}

@@ -41,17 +41,17 @@ function load_schemas(){
 			if(v.level==1)
 				$('#schema_menu').append('<li><a onclick="initiate_form(\''+v.id+'\')" tabindex="-1" href="#'+v.id+'" title="'+v.comment_plain+'">'+v.label+'</a></li>');
 			else
-				secondlevles.push('<li class="seond-level schema_hidden"><a onclick="initiate_form(\''+v.id+'\')" tabindex="-1" href="#'+v.id+'" title="'+v.comment_plain+'">'+v.label+'</a></li>')
-		})
+				secondlevles.push('<li class="seond-level schema_hidden"><a onclick="initiate_form(\''+v.id+'\')" tabindex="-1" href="#'+v.id+'" title="'+v.comment_plain+'">'+v.label+'</a></li>');
+		});
 		$.each(data.datatypes,function(i,v){
 			all_datatypes.push(i);
-		})		
+		});		
 		$('#schema_menu').append('<li class="divider"></li>');
 		$('#schema_menu').append('<li id="more_schemas_btn"><a tabindex="-1" onclick="showmore_schemas()" class="hand-pointer">More...</a></li>');
 		$('#schema_menu').append('<li><a tabindex="-1"><input id="schema_search_menu" type="text" class="input span2 search-query" placeholder="Search for Schema" style="display:none;"></a></li>');
 		$.each(secondlevles,function(i,v){
 			$('#schema_menu').append(v);
-		})	
+		});	
 		$('.dropdown-menu').show();
 		$("#schema_search_menu").keyup(function(event){
 			
@@ -77,6 +77,7 @@ function initiate_form(schema){
 	create_form(schema,'','properties');
 }
 function create_form(schema,property,container){
+	console.log("schema = " + schema);
 	var tmp='';
 	var selected=all_schemas.types[schema];
 	var id;
@@ -92,19 +93,27 @@ function create_form(schema,property,container){
 	// add URI field for entity
 	if(property==''){
 		tmp='<div class="control-group">';
-		tmp=tmp+'<label class="control-label" for="entity_uri">Entity URI</label>';
+		tmp=tmp+'<label class="control-label" for="entity_freebase">Entity Freebase Name</label>';
 		tmp=tmp+'<div class="controls">';
-		tmp=tmp+'<input type="text" id="entity_uri" placeholder="URI of the entity">';
-		tmp=tmp+'<span class="add-on subschema-icon" onclick="form_suggestURI()" title="Search for URI"><i class="icon-search"></i></span>';
+		tmp=tmp+'<input type="text" id="entity_freebase" placeholder="Freebase name of the entity">';
+		tmp=tmp+'<span class="add-on subschema-icon" onclick="form_suggestURI()" title="Search for Name"><i class="icon-search"></i></span>';
 		tmp=tmp+'</div>';
 		tmp=tmp+'</div>';
 		$('#form_'+id).append(tmp);
-		$('#entity_uri').mouseover(function() {
-			   $('#entity_uri').tooltip({
+		FBSuggest(schema);
+		$('#entity_freebase').mouseover(function() {
+			   $('#entity_freebase').tooltip({
 			        placement : 'right',
 			        title : 'resolvable URI of the entity'
 			    });
-		});			
+		});
+		tmp='<div class="control-group">';
+		tmp=tmp+'<label class="control-label" for="entity_uri">Entity URI</label>';
+		tmp=tmp+'<div class="controls">';
+		tmp=tmp+'<input type="text" id="entity_uri" placeholder="URI of the entity">';
+		tmp=tmp+'</div>';
+		tmp=tmp+'</div>';
+		$('#form_'+id).append(tmp);
 	}
 	// create form fields
 	$.each(selected.properties, function(i,v){
@@ -113,7 +122,7 @@ function create_form(schema,property,container){
 			}else{
 				build_form_element(property,v,'form_'+id,0);
 			}
-	})
+	});
 	// end form
 	$('#schema_form_'+id).linkify();
 }
@@ -198,25 +207,42 @@ function build_changetype_box(current_type){
 		if(v.level==1 && v.id!=current_type)
 			output=output+'<li><a onclick="EditEntities.changeType(\''+v.id+'\')" tabindex="-1" href="#'+v.id+'" title="'+v.comment_plain+'">'+v.label+'</a></li>';
 		else
-			secondlevles.push('<li class="seond-level schema_hidden"><a onclick="EditEntities.changeType(\''+v.id+'\')" tabindex="-1" href="#'+v.id+'" title="'+v.comment_plain+'">'+v.label+'</a></li>')
-	})	
+			secondlevles.push('<li class="seond-level schema_hidden"><a onclick="EditEntities.changeType(\''+v.id+'\')" tabindex="-1" href="#'+v.id+'" title="'+v.comment_plain+'">'+v.label+'</a></li>');
+	});
 	output=output+'<li class="divider"></li>';
 	output=output+'<li id="more_schemas_btn"><a tabindex="-1" onclick="event.stopPropagation();showmore_schemas();" class="hand-pointer">More...</li>';
 	output=output+'<li><a tabindex="-1" onclick="event.stopPropagation();"><input id="schema_search_menu" type="text" class="input span2 search-query" placeholder="Search for Schema" style="display:none;"></a></li>';
 	$.each(secondlevles,function(i,v){
 		output=output+v;
-	})	
+	});
 	output=output+'</ul></div>';
 	return output;
 }
+
+function FBSuggest(entity_type) {
+    var fb = Schema2Frebase[entity_type];
+
+    if (fb) {
+	$("#entity_freebase")
+	    .suggest({filter: '(all type:'+fb+')',
+		      key: 'AIzaSyD4Zfuwj7btEkqSPAK_Flq1nqvKr9lDN4U'})
+	.bind("fb-select", function(e, data) {
+	    console.log('fb-select: '+data.name+', '+data.id);
+	    $('#entity_uri').val('http://rdf.freebase.com'+data.mid);
+	})
+	.bind("fb-select-new", function(e, val) {
+	    console.log('fb-select-new: '+val);
+	});
+    } 
+}
 function form_suggestURI(){
-	var term=$('#entity_uri').val().trim();
+	var term=$('#entity_freebase').val().trim();
 	var str=term.toLowerCase();
 	var n1=str.search('http://');
 	var n2=str.search('www.');
 	if (n1==-1 && term!=''){
 		if(n2==-1){
-			$('#entity_uri').val(suggestURI(proxy_url,"api=Sindice&query="+term,true));
+			$('#entity_freebase').val(suggestURI(proxy_url,"api=Sindice&query="+term,true));
 		}else{
 			alert('Please type a keyword to search');
 		}
@@ -623,6 +649,9 @@ function create_microdata_tags_from_json(obj,pointer){
 function fillout_form_from_json(obj,property,form_container){
 	// console.log(obj);
 	var tmp;
+        if (obj.properties.name != null) {
+	    $('#entity_freebase').val(obj.properties.name.value);
+	}
 	$.each(obj.properties,function(i,v){
 		if(v.is_repeated){
 			// number of instances
@@ -727,5 +756,5 @@ function fillout_form_from_json(obj,property,form_container){
 				}
 			}
 		}
-	})
+	});
 }

@@ -70,7 +70,8 @@ class DocumentTypeAdapter(object):
                             'related_topics': {
                                 'properties': {
                                     'preferred_name': {'type': 'string', 'index': 'not_analyzed'},
-                                    'url': {'type': 'string', 'index': 'not_analyzed'}
+                                    'url': {'type': 'string', 'index': 'not_analyzed'},
+                                    'date': {'type': 'date'}
                                 }
                             },
                         }

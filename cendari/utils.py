@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from rest_framework.views import exception_handler
 
 import os.path
 from datetime import datetime
@@ -12,7 +13,12 @@ from django.utils.encoding import smart_text
 from editorsnotes.main.models import Document, Transcript, Topic, TopicNode, TopicAssignment
 import urllib
 import json
+
 import pdb
+
+import logging
+
+logger = logging.getLogger('cendari.utils')
 
 WELL_KNOWN_DATE_FORMATS=[
     "%m/%d/%Y",
@@ -179,3 +185,17 @@ def _has_project_perms(user):
              user.has_perm('main.view_project'))
 def is_project_creator(user):
     return user.is_staff and _has_project_perms(user)
+
+
+def custom_exception_handler(exc):
+    # Call REST framework's default exception handler first,
+    # to get the standard error response.
+    response = exception_handler(exc)
+
+    # Now add the HTTP status code to the response.
+    if response is not None:
+        logger.debug('Received exception %s: %s', type(exc), response.status_code)
+        response.data['status_code'] = response.status_code
+    else:
+        logger.debug('Received exception %s', type(exc))
+    return response

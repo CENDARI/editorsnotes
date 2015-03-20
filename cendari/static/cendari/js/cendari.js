@@ -15,7 +15,7 @@ Ext.application({
 			autoScroll : true,
 			layout : {
 				type : 'border',
-				padding : 1,
+				padding : 1
 			},
 			defaults : {
 				split : false
@@ -34,17 +34,21 @@ Ext.application({
 				autoScroll : true,
 				animCollapse : true,
 				margins : '0 0 0 2'
-			}, {
+			}, 
+			{
 				region : 'center',
 				layout : 'border',
 				border : false,
 				autoScroll : true,
 				overflowY: 'scroll',
 				margins : '0 0 0 0',
+				// contentEl : 'center',
+				id : 'center-panel', // see Ext.getCmp() below
 				dockedItems : 
 				[{
 					xtype : 'toolbar',
 					dock : 'top',
+					id: 'toolbarId',
 					height:25,
 						items : [{
 							text : 'New',
@@ -63,7 +67,12 @@ Ext.application({
 							text : 'Save',
 							//contentEl : 'submitButtonCendari',
 							id : 'saveNoteID'
-						}, {
+						},
+						{
+							text : 'Button',
+							id: 'extraButtonId'
+						},
+						{
 							itemId : 'toggleCw',
 							text : 'Pop-up Window',
 							layout : 'fit',
@@ -78,7 +87,7 @@ Ext.application({
 							id : 'optionsID',
 							menu : [{
 								text : 'From Jigsaw',
-								id : 'jigsawImport',
+								id : 'jigsawImport'
 
 							}, {
 								text : 'From ... '
@@ -183,7 +192,6 @@ Ext.application({
 			this.editButtonID = editButtonID;
 			this.labelTitle = labeltitle;
 			var editor = tinyMCE.init({
-				
 				mode : "specific_textareas",
         		editor_selector : "mceEditor",
 				theme : "advanced",
@@ -193,8 +201,9 @@ Ext.application({
 				//elements : domID,
 				content:"Description",
 				toolbar:"description",
-				plugins : "example,fullscreen,lists,advhr,advimage,advlink,iespell,inlinepopups,media,paste,directionality,fullscreen,noneditable,nonbreaking,wordcount,advlist,contextmenu,fullscreen,rdface",
+				plugins : "style,table,noneditable,example,lists,advhr,advimage,advlink,iespell,inlinepopups,media,paste,directionality,noneditable,nonbreaking,wordcount,advlist,contextmenu,fullscreen,rdface",
 				theme_advanced_buttons1 : "undo,redo,cut,copy,paste,fontsizeselect,bold,italic,underline,strikethrough,bullist,numlist,forecolor,backcolor, code,rdfaceHelp,rdfaceRun,rdfaceFacts,rdfaceSetting",//,
+				theme_advanced_buttons2 : "tablecontrols,|,link,unlink,anchor,|,justifyleft,justifycenter,justifyright,justifyfull,|,styleselect,formatselect,fontselect,fontsizeselect",
 				fullscreen_new_window : true,
 				width : "100%",
 				content_css : csspath + "content.css ," + csspath + "rdface.css, " + csspath + "schema_colors.css" ,
@@ -217,6 +226,10 @@ Ext.application({
 	                        ed.focus();
 	                    }
 	                });
+	                ed.onInit.add(function(ed) {
+			          console.log('Editor is done: ',ed);
+			          editors_crc32[ed.id] = CRC32(tinyMCE.getInstanceById(ed.id).getContent());
+				    });
             	}
 			});
 		
@@ -262,8 +275,7 @@ Ext.application({
 				border : false,
 				layout : 'fit',
 				autoScroll : true,
-				overflowY: 'scroll',
-				 //closable: false,
+				overflowY: 'scroll'
 			});
 			Ext.getCmp('centerTabPanel').add(tab).show();
 
@@ -278,24 +290,20 @@ Ext.application({
 				autoScroll : true,
 				overflowY: 'scroll',
 				margins : '0 0 0 0',
-				layout : 'fit',
-
-				
+				layout : 'fit'
 			});
 
 			Ext.getCmp('centerTabPanel').getActiveTab().add(widget);
 		}
 
 		function addImageViewer(type, id) {
-			Ext.getCmp('imageViewer').expand();			
+			Ext.getCmp('imageViewer').expand();
 			var widget = Ext.widget(type, {
-
 				contentEl : id,
 				frame : true,
 				bodyPadding : '0 0 0',
 				autoScroll : true,
-				overflowY: 'scroll',
-
+				overflowY: 'scroll'
 			});
 			Ext.getCmp('imageViewer').add(widget);
 			//Ext.getCmp('editortab').tab.setText("Document");
@@ -307,6 +315,7 @@ Ext.application({
 		cendari.currentId = 0;
 		// Ext.getCmp('saveNoteID').on('click', function() {submitCendariForm();});
 		Ext.getCmp('saveNoteID').on('click', function() {$('.formCendari').submit()});
+		// Ext.getCmp('readModeID').on('click', function() {});
 	/*	Ext.getCmp('saveNoteID').on('click', function() {
 		    if(tinyMCE.activeEditor!=null){
 			tinyMCE.activeEditor.save();

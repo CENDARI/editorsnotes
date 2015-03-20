@@ -11,9 +11,12 @@
 	<link rel="stylesheet" href="libs/bootstrap/css/bootstrap.min.css" media="all" />
 	<link rel="stylesheet" href="libs/bootstrap/plugins/datepicker/css/datepicker.css" media="all" />
 	<link rel="stylesheet" href="libs/bootstrap/plugins/datetimepicker/css/datetimepicker.css" media="all" />
+	<link type="text/css" rel="stylesheet" href="https://www.gstatic.com/freebase/suggest/4_2/suggest.min.css" />
 
 	<script type="text/javascript" src="libs/jstree/_lib/jquery.js"></script>
 	<script type="text/javascript" src="libs/jstree/_lib/jquery.cookie.js"></script>
+	<!-- [NB] to make Freebase Suggest -->
+	<script type="text/javascript" src="libs/jstree/_lib/jquery.browser.min.js"></script>
 	<script type="text/javascript" src="libs/bootstrap/js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="libs/bootstrap/plugins/datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
 	<script type="text/javascript" src="libs/bootstrap/plugins/datepicker/js/bootstrap-datepicker.js"></script>
@@ -23,12 +26,25 @@
 	<script type="text/javascript" src="js/editEntities.js"></script>
 	<script type="text/javascript" src="js/util/config.js"></script>
 	<script type="text/javascript" src="js/util/functions.js"></script>
+	<!-- [NB] for Freebase Suggest -->
+	<script type="text/javascript" src="https://www.gstatic.com/freebase/suggest/4_2/suggest.min.js"></script>
+	<script type="text/javascript">
+    	  var Schema2Frebase = {
+	      'Person': '/people/person',
+	      'Place': '/location/location',
+	      'Event': '/time/event',
+	      'Organization': '/organization/organization',
+	      'CreativeWork': '/publishing/published_work'
+	  };
+	</script>
+
 </head>
 <body>
 <div id="button_area">
 </div>
 <div id="action_area">
 </div>
+
 <style>
 body{
 	padding-left:10px;
@@ -79,5 +95,8 @@ text-align:left;
 	padding-right:10px;
 }
 </style>
+
 </body>
+
+
 </html>

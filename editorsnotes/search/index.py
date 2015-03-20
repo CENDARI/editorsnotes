@@ -3,6 +3,8 @@ from itertools import chain
 import json
 import re
 import pprint
+import logging
+
 
 from django.conf import settings
 
@@ -16,6 +18,8 @@ from .types import DocumentTypeAdapter
 from .utils import clean_query_string
 
 __all__ = ['ElasticSearchIndex', 'ENIndex' ]
+
+logger = logging.getLogger('editorsnotes.search')
 
 class OrderedResponseElasticSearch(ElasticSearch):
     def _decode_response(self, response):
@@ -39,10 +43,11 @@ class ElasticSearchIndex(object):
     def open(self):
         if self.is_open:
             return self.es
-        print('opening ElasticSearch')
+        logger.info('opening ElasticSearch')
         self.es = OrderedResponseElasticSearch(settings.ELASTICSEARCH_URLS)
         self.is_open = True
         if not self.exists():
+            logger.info('Creating ElasticSearch index')
             self.create()
             self.created = True
         else:
@@ -58,9 +63,15 @@ class ElasticSearchIndex(object):
         pass
 
     def exists(self):
-        server_url, _ = self.open().servers.get()
-        resp = self.es.session.head(server_url + '/' + self.name)
-        return resp.status_code == 200
+        #server_url, _ = self.open().servers.get()
+        #resp = self.es.session.head(server_url + '/' + self.name)
+        #return resp.status_code == 200
+        try:
+            self.open().send_request('HEAD', [self.name])
+        except InvalidJsonResponseError as exc:
+            if exc.response.status_code == 200:
+                return True
+        return False
 
     def create(self):
         print 'Creating index '+self.name
@@ -115,16 +126,17 @@ class ENIndex(ElasticSearchIndex):
         }
 
     def put_type_mappings(self):
-        existing_types = self.open().get_mapping()\
+        existing_types = self.es.get_mapping(index=self.name)\
                 .get(self.name, {})\
                 .get('mappings', {})\
                 .keys()
 
-        unmapped_types = (document_type for document_type in self.document_types
-                          if document_type not in existing_types)
+        unmapped_types = (d for d,dt in self.document_types.items()
+                          if dt.type_label not in existing_types)
 
         # TODO: Warn/log when a field's type mapping changes
         for document_type in unmapped_types:
+            logger.info('put type mapping for %s', document_type.__name__)
             self.document_types[document_type].put_mapping()
 
     def register(self, model, adapter=None, highlight_fields=None,
@@ -155,7 +167,7 @@ class ENIndex(ElasticSearchIndex):
                               doc_type=doc_type.type_label, **kwargs)
 
     def search(self, query, highlight=False, **kwargs):
-
+        self.open()
         if isinstance(query, basestring):
             prepared_query = {
                 'query': {

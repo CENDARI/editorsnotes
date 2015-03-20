@@ -1,0 +1,23 @@
+{% extends "form.html" %}
+{% load typogrify display %}
+{% load staticfiles compress %}
+
+{% block form_content %}
+
+<meta name="note_id" id="note_id" content="{{ note.id }}" />
+<input id="editorEditBut" type="button" value="Edit"/>
+
+<textarea  id="editorsDom"> </textarea>
+
+<script>
+    cendari.addInit(function() { 
+    	cendari.createEditor($('#noteform').height(), "editorsDom", false,"editorEditBut");
+    	cendari.addTab("Editor");
+    	cendari.addWidgetToActiveTab("panel","editorsDom" ,"border");
+
+    });
+
+</script>
+
+{% endblock %}
+

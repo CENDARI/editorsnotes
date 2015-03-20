@@ -1,0 +1,44 @@
+{% extends "cendarilayout.html" %}
+{% load typogrify display %}
+{% load staticfiles compress %}
+
+{%  block cendari_content %}
+
+<style type="text/css">
+  #about-message {
+    line-height: 20px;
+  }
+  .test {
+    margin: 1.5em 0;
+  }
+  h3 {
+    margin-top: -4px;
+  }
+</style>
+
+
+
+<h3>About</h3>
+<div id="about-message">
+
+CENDARI Is a European Infrastructure project funded by the EU for 4 years: 2012-2016.
+The Collaborative EuropeaN Digital Archive Infrastructure (CENDARI) will provide and facilitate access to existing archives and resources in Europe for the study of medieval and modern European history (specifically the First World War period) through the development of an ‘enquiry environment’.
+This environment will increase access to records of historic importance across the European Research Area, creating a powerful new platform for accessing and investigating historical data in a transnational fashion overcoming the national and institutional data silos that now exist. It will leverage the power of the European infrastructure for Digital Humanities (DARIAH) bringing these technical experts together with leading historians and existing research infrastructures (archives, libraries and individual digital projects) within a programme of technical research informed by cutting edge reflection on the impact of the digital age on scholarly practice.
+Lead institution: Trinity College, Dublin, Ireland
+Partner institutions: Die Freie Universitaet Berlin (FUB) Germany, Mathematical Institute of the Serbian Academy of Sciences and Arts (MISANU), Serbia, University of Birmingham, UK, Georg August Universitaet Goettingen, Germany, Czech National Library, Czech Republic, International Society for the Study of Medieval Latin, Italy, Fondazione Ezio Francheschini, Italy, Bibliothek fuer Zeitgeschichte, Germany, Institut National de Recherche en Informatique et en Automatique, France, Consortium of European Research Libraries, UK, The De Koninkljike Bibliotheek - European Library, Netherlands
+
+Research Agenda
+to develop a portal that allows integrated discovery of and access to resources held in the participating archives and other web-accessible resources, in coherence with the architecture and functional specifications defined by project partners (WP8)
+to develop functionalities that allows integrated discovery of and access to resources held in the participating archives and other web-accessible resources
+to develop an enquiry environment that
+provides shared access to tools for integrating and processing data;
+provides a collaborative space for sharing and discussion;
+supports the research lifecycle of the targeted communities
+to develop visualisation tools and services to ensure that available information can be maximally exploited by researchers according to his/her research interests
+
+</div>
+
+
+
+
+{% endblock cendari_content %}

@@ -37,10 +37,119 @@ var messages = {
     }
 };
 
+var type_class_mapping = {
+    "PER" : "form-entities r_person",
+    "ORG" : "form-entities r_organization",
+    "EVT" : "form-entities r_event",
+    "PLA" : "form-entities r_place",
+    "TAG" : "form-entities r_thing",
+    ""    : "form-entities"
+};
+
+var toastr_options = {
+    "closeButton": true,
+    "debug": false,
+    "newestOnTop": true,
+    "progressBar": false,
+    "positionClass": "toast-top-center",
+    "preventDuplicates": true,
+    "onclick": null,
+    "showDuration": "300",
+    "hideDuration": "1000",
+    "timeOut": "5000000000000000",
+    "extendedTimeOut": "5000000000000000",
+    "showEasing": "swing",
+    "hideEasing": "linear",
+    "showMethod": "fadeIn",
+    "hideMethod": "fadeOut"
+}
+
+function showToastrMessage(type,message){
+    console.log('clearing messages.....');
+    toastr.clear();
+    console.log('adding new message ......');
+    toastr[type](message);
+}
+
+function showErrorMessage(message){
+    toastr.options.timeOut="500";
+    toastr.options.extendedTimeOut="1000";
+    showToastrMessage('error',message);
+}
+
+function showSuccessMessage(message){
+    toastr.options.timeOut="500";
+    toastr.options.extendedTimeOut="1000";
+    showToastrMessage('success',message);
+}
+
+function showInfoMessage(message){
+    toastr.options.timeOut="5000000000000000";
+    toastr.options.extendedTimeOut="5000000000000000";
+    showToastrMessage('info',message)
+}
+
+
+function updateIframe(iframe_id){
+    document.getElementById(iframe_id).src = document.getElementById(iframe_id).src;
+}
+
+
+
+function createEntityLink(absolute_url,type,name){
+    var html = '<a  href="'+absolute_url+'" class="'+type_class_mapping[type]+'"> '+name+' </a>';
+
+    return html;
+}
+
+function  updatedEnitiesTab(prefix,related_topics){
+    var entities_html = "";
+    var related_topics_jq = $('#'+prefix+'-related-topics');
+    for(var i=0;i<related_topics.length;i++){
+        entities_html += createEntityLink(related_topics[i].absolute_url,related_topics[i].type,related_topics[i].preferred_name);
+    }
+
+    related_topics_jq.empty();
+    console.log("entities_html",entities_html);
+    related_topics_jq.append(entities_html);
+
+    $('#entitiesTab').text('Entities ('+related_topics.length+')');
+}
+
+
+function createScanElement(image_url,thumbnail_url,id){
+    var html = "";
+    html +='<li class="scan-list-item btn">'+
+            '<a class="scan btn" id="1" href="http://'+window.location.pathname+image_url+'">'+
+            '<img id="ext-gen1206" src="'+thumbnail_url+'" alt="Thumbnail of scan 1" width="100"></a>'+
+            '<a href="/api/projects/project1/documents/'+cendari_js_object_id+'/scans/'+id+'/" class="delete" data-confirm="Are you sure to delete this item?"><img src="/static/cendari/img/fileclose.png"></a>'+
+            '</li>';
+    return html;
+                    
+
+}
+
+function updateScanTab(scans){
+    var scans_jq = $('#scan-list');
+    var scans_html = "";
+
+    console.log('scans',scans);
+
+    for(var i=0;i<scans.length;i++){
+        scans_html += createScanElement(scans[i].image_url,scans[i].image_thumbnail_url,scans[i].id);
+    }
+
+    
+    scans_jq.empty();
+    scans_jq.append(scans_html);
+    $('#scansTab').text('Scans ('+scans.length+')');
+    $('#id_image').val('');
+
+}
 
 function addMessage(div,msg,msg_id){
     var msg_el = $("<div></div>").text(msg).attr('id',msg_id).addClass('alert');   
-    $('#'+div).append(msg_el)
+    $('#'+div).append(msg_el);
 }
 
 function updateMessage(msg_id,new_msg){
@@ -51,29 +160,20 @@ function updateMessage(msg_id,new_msg){
 function replaceWindowUrl(data_id){
 
     var currentUrl = window.location.toString();
-    // if(currentUrl.indexOf('add')>0){
-    var newUrl = currentUrl.replace("add", data_id);
-    window.location.replace(newUrl);
-    // }
+    if(id.length===0){
+        var newUrl = currentUrl.replace("add", data_id);
+        window.location.replace(newUrl);
+    }
+    else{
+        updateIframe('resourcesIframe');
+        updateIframe('smallvisIframe');
+    }
 }
 
 
 function removeElement(elemnt_) {
     elemnt_.parentNode.removeChild(elemnt_);
 }
-
-
-// function addMessageSaved(modelName){
-//     $('#progress-message-list').append(modelName +'is saved');
-// }
-
-// function addMessageSaving(modelName){
-//     $('#progress-message-list').append('Saving: '+ modelName+', please do not reload');
-// }
-
-// function deleteMessage(modelName){
-//     $('#progress-message-list').append(msg_el);
-// }
 
 
 function getCookie(name) {
@@ -102,32 +202,32 @@ function uniqueElements(el_array){
     $.each(el_array, function(i, el){
         if($.inArray(el, uniqueNames) === -1) uniqueNames.push(el);
     });
-    return uniqueNames
+    return uniqueNames;
 }
 
 
 
 
-function submitTranscript(document_id){
+function submitTranscript(document_id,fc_document){
     console.log("sumbitting transcript");
-    fc = $('#transcriptCendari');
-    formData = "";
+    var fc = $('#transcriptCendari');
+    var formData = "";
     formData = formData+"csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&";
 
-     if($('#transcript-description').length){
+    if($('#transcript-description').length){
         formData =formData +'document='+encodeURIComponent($('#transcript-document').val())+'&creator='+$('#transcript-creator').val()+'&last_updater='+$('#transcript-uploader').val()+'&';
-        if(tinyMCE.activeEditor!=null){
-            if(tinyMCE.getInstanceById('transcript-description').getContent().length){
+        if(tinyMCE.getInstanceById('transcript-description')!=null){
+            if(tinyMCE.getInstanceById('transcript-description').getContent().length && CRC32(tinyMCE.getInstanceById('transcript-description').getContent()) !== editors_crc32['transcript-description']){
                 formData = formData+"&content="+encodeURIComponent(tinyMCE.getInstanceById('transcript-description').getContent())+"&";
             }
             else{
-                submitScan(document_id);
+                submitDocument(fc_document);
                 return;
             }
         }
     }
     else{
-        submitScan(document_id);
+        submitDocument(fc_document);
         return;
     }
 
@@ -139,79 +239,283 @@ function submitTranscript(document_id){
         url:fc.attr('action'),
         type: fc.attr('method'),
         data: formData,
-        // content_type:'application/json',
-        beforeSend: function(){
-            addMessage('message-list',messages.transcript.beforeSend,messages.transcript.id);
-        },
-
         success: function(data){
-            // var currentUrl = window.location.toString();
-            // var newUrl = currentUrl.replace("add", document_id);
-            // window.location.replace(newUrl);
-            updateMessage(messages.transcript.success,messages.transcript.id);
-            submitScan(document_id);
+            $("#transcriptTab").text('Transcript (1)');
+            submitDocument(fc_document);
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) { 
-            alert("Status: " + textStatus); alert("Error: " + errorThrown); 
-            updateMessage(messages.transcript.error,messages.transcript.id);
-            submitScan(document_id);
+            console.log("Error with status "+textStatus+":",errorThrown);
+            showErrorMessage(messages.transcript.error);
+            submitDocument(fc_document);
         } 
     });
 }
 
-function submitScan(document_id){
+function submitScan(document_id,fc_document){
     console.log('sumbitting scan');
 
     if($('#id_image').length>0 && $('#id_image').val().length>0){
         $('#scanCendari').submit(function(e){
             e.preventDefault();
             var options = { 
-                 beforeSend: function(){
-                    addMessage('message-list',messages.scan.beforeSend,messages.scan.id);
-                },
                 success: function(){
-                    // var currentUrl = window.location.toString();
-                    // var newUrl = currentUrl.replace("add", document_id);
-                    // window.location.replace(newUrl);  
-                    updateMessage(messages.scan.success,messages.scan.id);
-                    replaceWindowUrl(document_id);
+                    submitDocument(fc_document)
                 },
                  error: function(XMLHttpRequest, textStatus, errorThrown) { 
-                    alert("Status: " + textStatus); alert("Error: " + errorThrown); 
-                    updateMessage(messages.scan.error,messages.scan.id);
-                    replaceWindowUrl(document_id);
+                    console.log("Error with status "+textStatus+":",errorThrown);
+                    showErrorMessage(messages.scan.error);
+                    submitDocument(fc_document)
                 }
-                // other available options: 
-                //url:       url         // override for form's 'action' attribute 
-                //type:      type        // 'get' or 'post', override for form's 'method' attribute 
-                //dataType:  null        // 'xml', 'script', or 'json' (expected server response type) 
-                //clearForm: true        // clear all form fields after successful submit 
-                //resetForm: true        // reset the form after successful submit 
-
-                // $.ajax options can be used here too, for example: 
-                //timeout:   3000 
+                
             }; 
             $('#scanCendari').ajaxSubmit(options);
             return false;
         });
-        
         $('#scanCendari').submit();
     }
     else{
-        // var currentUrl = window.location.toString();
-        // var newUrl = currentUrl.replace("add", document_id);
-        // window.location.replace(newUrl);  
-        replaceWindowUrl(document_id);
+        submitDocument(fc_document);
     }
+}
 
+
+
+function submitScanAutomatic(){
 
     
+    var bar = $('.bar');
+    var percent = $('.percent');
+    var status = $('#status');
+
+    $('#scanCendari').submit(function(e){
+        e.preventDefault();
+        var options = {
+            beforeSend: function() {
+                status.empty();
+                var percentVal = '0%';
+                bar.width(percentVal)
+                percent.html(percentVal);
+            },
+            uploadProgress: function(event, position, total, percentComplete) {
+                var percentVal = percentComplete + '%';
+                bar.width(percentVal);
+                percent.html(percentVal);
+                //console.log(percentVal, position, total);
+            },
+            success: function(e) {
+                console.log('response',e);
+                var percentVal = '100%';
+                bar.width(percentVal);
+                percent.html(percentVal);
+            },
+            complete: function(xhr) {
+                status.html(xhr.responseText);
+            }
+        };
+        $('#scanCendari').ajaxSubmit(options);
+        return false;
+    });
+    $('#scanCendari').submit();
 
 }
 
 
+function submitDocument(fc){
+    console.log('sumbitting document');
+
+    var formData = "";
+    
+    formData = formData+"csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&";
+    formData = formData+"&description="+encodeURIComponent(tinyMCE.getInstanceById('document-description').getContent())+"&";
+    formData = formData+$("#saveButton").attr('name')+"="+$("#saveButton").val();
+    console.log('formData:',formData);
+    $.ajax({
+        url:fc.attr('action'),
+        type: fc.attr('method'),
+        data: formData,
+        success: function(data){
+            console.log("response data:",data);
+
+            showSuccessMessage(messages.document.success);
+            updatedEnitiesTab(cendari_js_object_type,data.related_topics);
+            // updateScanTab(data.scans);
+            
+            replaceWindowUrl(data.id);
+            
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) { 
+            console.log("Error with status "+textStatus+":",errorThrown);
+            showErrorMessage(messages.document.error);
+        } 
+    });
+}
+
+function submitNote(fc){
+    var formData = "";
+
+    formData = formData+"csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&";
+    formData=formData+"id="+$('#model_id').val()+"&";
+    formData =formData +'title='+$('#note_title').val()+"&related_topics=&status=open&is_private=false&";
+    formData = formData+"content="+encodeURIComponent(tinyMCE.getInstanceById('note-description').getContent())+"&";
+    formData = formData+$("#saveButton").attr('name')+"="+$("#saveButton").val();
+
+    $.ajax({
+        // beforeSend: function (xhr) {xhr.setRequestHeader('X-CSRFToken', $('input[name="csrfmiddlewaretoken"]').val());},
+        url:fc.attr('action'),
+        type: fc.attr('method'),
+        data: formData,
+        // content_type:'application/json',
+        // beforeSend:function(){
+        // // addMessage('message-list',messages[type].beforeSend,messages[type].id);
+        //     console.log("saving ....")
+        //     toastr['info'](messages.note.beforeSend)
+        // },
+        success: function(data){
+            showSuccessMessage(messages.note.success);
+            updatedEnitiesTab(cendari_js_object_type,data.related_topics);
+            replaceWindowUrl(data.id);
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) { 
+            console.log("Error with status "+textStatus+":",errorThrown);
+            showErrorMessage(messages.note.error);
+
+        } 
+    });
+}
+
+function submitEntity(fc){
+    var formData = "";
+    
+    formData = formData+"csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&";
+    formData=formData+"id="+$('#model_id').val()+"&";
+    formData = formData + "rdf="+$('#rdf_id').val().trim()+"&";
+    formData = formData + "preferred_name="+$('#preferred_name_id').text().trim()+"&";
+    formData = formData+$("#saveButton").attr('name')+"="+$("#saveButton").val();
+
+    $.ajax({
+        url:fc.attr('action'),
+        type: fc.attr('method'),
+        data: formData,
+        success: function(data){
+            showSuccessMessage(messages.entity.success);
+            updatedEnitiesTab(cendari_js_object_type,data.related_topics);           
+            replaceWindowUrl(data.id);
+            
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) { 
+            console.log("Error with status "+textStatus+":",errorThrown);
+            showErrorMessage(messages.entity.error);
+
+        } 
+    });
+}
+
+
+$(document).ready(function(){
+    var csrftoken = getCookie('csrftoken');    
+    toastr.options = toastr_options
+
+    $('.formCendari').submit(function(e){
+        e.preventDefault();
+       
+        for (var edId in tinyMCE.editors){
+            if(tinyMCE.editors[edId]!=null){
+                tinyMCE.editors[edId].save();
+            }
+        }
+
+        var fc = $(this);
+        console.log('fc',fc);
+        if(cendari_js_object_type == 'note'){
+            showInfoMessage(messages.note.beforeSend);
+            submitNote(fc);
+        }
+        if(cendari_js_object_type == 'document'){
+            showInfoMessage(messages.document.beforeSend);
+            if(cendari_js_object_id.length === 0){
+                submitDocument(fc);
+            }
+            else{
+                submitTranscript(cendari_js_object_id,fc);
+            }
+        }
+        if(cendari_js_object_type == 'topic'){
+            showInfoMessage(messages.entity.beforeSend)
+            submitEntity(fc)
+        }
+
+    }); 
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/** deprecated 
 $(document).ready(function(){
     var csrftoken = getCookie('csrftoken');
+    if(cendari_js_object_type === 'note' || cendari_js_object_type==='document'){
+        main_editor_crc32 = CRC32($('#'+cendari_js_object_type+'-description').text())
+        if(cendari_js_object_type === 'document'){
+            transcript_editor_crc32 = CRC32($('#transcript-description').text());   
+        }
+    }
+    
+    
+    toastr.options = {
+        "closeButton": true,
+        "debug": false,
+        "newestOnTop": true,
+        "progressBar": false,
+        "positionClass": "toast-top-center",
+        "preventDuplicates": true,
+        "onclick": null,
+        "showDuration": "300",
+        "hideDuration": "1000",
+        "timeOut": "5000",
+        "extendedTimeOut": "1000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+    }
 
     $('.formCendari').submit(function(e){
         e.preventDefault();
@@ -219,6 +523,10 @@ $(document).ready(function(){
         // if(tinyMCE.activeEditor!=null){
         //     tinyMCE.activeEditor.save();
         // }
+        if(id.length>0){
+            if(tinyMCE.getInstanceById(cendari_js_object_type'-description')){}
+
+        }
 
         for (var edId in tinyMCE.editors){
             if(tinyMCE.editors[edId]!=null){
@@ -266,7 +574,7 @@ $(document).ready(function(){
 
         // var formData = fc.serialize()+"&"+$("#saveButton").attr('name')+"="+$("#saveButton").val();
         // var formData = $("#saveButton").attr('name')+"="+$("#saveButton").val()+"&csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&_content_type=application/json&_content="+encodeURIComponent(content)
-        // console.log("formData are : \n: "+formData);    
+        console.log("formData are : \n: "+formData);    
         $.ajax({
         // beforeSend: function (xhr) {xhr.setRequestHeader('X-CSRFToken', $('input[name="csrfmiddlewaretoken"]').val());},
             url:fc.attr('action'),
@@ -274,10 +582,22 @@ $(document).ready(function(){
             data: formData,
             // content_type:'application/json',
             beforeSend:function(){
-                addMessage('message-list',messages[type].beforeSend,messages[type].id);
+                // addMessage('message-list',messages[type].beforeSend,messages[type].id);
+                console.log("saving ....")
+                toastr['info'](messages[type].beforeSend)
             },
             success: function(data){
-                // console.log(data);
+                console.log("response data:",data);
+                
+                toastr['success'](messages[type].success)
+                console.log(type);
+                console.log(type==='document');
+                console.log(type==='note');
+
+                if(type.length>0 && (type==='document' || type==='note')){
+                    updatedEnitiesTab(type,data.related_topics);
+                }
+
                 if($('#document-description').length){
                     submitTranscript(data.id);
                 }
@@ -286,18 +606,25 @@ $(document).ready(function(){
                     // var currentUrl = window.location.toString();
                     // var newUrl = currentUrl.replace("add", data.id);
                     // window.location.replace(newUrl);
+
                     replaceWindowUrl(data.id)
                 }
             },
             error: function(XMLHttpRequest, textStatus, errorThrown) { 
-                alert("Status: " + textStatus); alert("Error: " + errorThrown); 
-                updateMessage(messages[type].error,messages[type].id);
-                var currentUrl = window.location.toString();
-    
-                window.location.replace(currentUrl);
+                // alert("Status: " + textStatus); alert("Error: " + errorThrown); 
+                // updateMessage(messages[type].error,messages[type].id);
+                // var currentUrl = window.location.toString();
+                
+                console.log("Error with status "+textStatus+":",errorThrown);
+                // updateMessage(messages.transcript.error,messages.transcript.id);
+                toastr['error'](messages[type].error)
+
+                // window.location.replace(currentUrl);
             } 
         });
 
     }); 
 
 });
+**/
+
