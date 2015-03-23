@@ -19,7 +19,6 @@
         return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
     }
 
-
     cendari_root_url = "{%url 'index_view' %}";
     cendari_js_project_slug = '{{ project_slug }}';
                        
@@ -31,8 +30,10 @@
     //console.log("NB resources.html*********** cendari_js_object_type is "+cendari_js_object_type);
     //console.log("NB resources.html*********** cendari_js_object_id is "+cendari_js_object_id);
     //console.log("NB resources.html*********** cendari_js_topic_type is "+cendari_js_topic_type);
+
   </script>
-  
+
+
   {% compress js %}
   <script type="text/javascript" src="{% static "function/jquery/jquery-1.8.2.min.js" %}"></script>
   <script type="text/javascript" src="{% static "dynatree/jquery/jquery-ui.custom.js" %}"></script>
@@ -44,6 +45,18 @@
   {% endcompress %}
   
   <script type="text/javascript">
+    //resources are ordered alphabetically by default
+    var sfield = "alpha";
+    function sortTree(field){
+	sfield = field;
+    	$("#tree").dynatree("option", "initAjax", {
+      		data: {key:''},
+      		url: cendari_root_url+'cendari/'+cendari_js_project_slug+'/getResourcesData/sfield/'+ sfield,
+      		dataType: "jsonp",
+    	});
+   	 $('#tree').dynatree("getTree").reload();
+    }
+
   $(document).ready(function(){
     cendari_js_project_slug = '{{ project_slug }}';
     //console.log("reloading tree with project slug: "+cendari_js_project_slug);
@@ -51,13 +64,12 @@
     //console.log($('#tree'));
     //console.log($('#tree').dynatree("getTree"));
     //console.log($('#tree').dynatree("getTree").reload);
+
     $("#tree").dynatree("option", "initAjax", {
       data: {key:''},
-      url: cendari_root_url+'cendari/'+cendari_js_project_slug+'/getResourcesData/',
+      url: cendari_root_url+'cendari/'+cendari_js_project_slug+'/getResourcesData/sfield/'+ sfield,
       dataType: "jsonp",
     });
-
-    $("#tree").dynatree("getTree").reload();
     $('#tree').dynatree("getTree").reload();
   });
   </script>
@@ -66,6 +78,11 @@
   </head>
   
   <body class="example">
+  <p>
+    Sort by <a href="#" id="btnSortCreation" onclick="sortTree('creation')">creation</a> -
+    <a href="#" id="btnSortAccess" onclick="sortTree('access')">last access</a> -
+    <a href="#" id="btnSortAlpha" onclick="sortTree('alpha')">alphanumeric</a>
+  </p>
     <div id="tree"></div>
   </body>
 </html>

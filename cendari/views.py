@@ -398,7 +398,8 @@ def small_vis_data_lazy(request, project_slug):
     return HttpResponse(json.dumps(topics_dict.values()), mimetype='application/json')
 
 @login_required
-def getResourcesData(request, project_slug):  
+def getResourcesData(request, project_slug, sfield):  
+    print("************************ NB sort resources by = " + sfield)
     my_tree = { 'title':'My resources:', 'key':'root', 'isFolder':'true', 'addClass': '', 'url':'', 'children': [] }
     my_projects = { 'title':'My projects', 'key':'my_projects', 'isFolder':'true', 'addClass':'',  'url':'', 'children' : [] }
     other_projects = { 'title':'Other projects', 'key':'other_projects', 'isFolder':'true', 'addClass':'',  'url':'', 'children' : [] }    

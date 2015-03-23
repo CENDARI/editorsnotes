@@ -5,11 +5,6 @@ $(function() {
 	clickFolderMode: 3,
 	//selectExpandsFolders: false,
 	//persist: true,
-	initAjax: {
-	    data: {key:''},
-	    url: cendari_root_url+'cendari/'+cendari_js_project_slug+'/getResourcesData/',
-	    dataType: "jsonp"
-	},
 	onClick: function(node, event) {
 	    selected_node = node.data.key;
 	    value = '{project:' + selected_node + ', node:' + node.data.title + ',url:' + node.data.url + '}';
