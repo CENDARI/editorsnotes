@@ -492,13 +492,14 @@ def getNoteResources(request, project_slug):
         note_list.append({'title':str(e), 'key':str(project_slug)+'.note.'+str(e.id), 'addClass':'', 'url':e.get_absolute_url()})
     return note_list
 
+from django.core import serializers
 @login_required
 def getDocumentResources(request, project_slug):
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     max_count = 10000
     doc_list = []
     scan_query_set = []
-    doc_query_set = main_models.Document.objects.filter(project__slug=project_slug).order_by('description_digest')[:max_count]
+    doc_query_set = main_models.Document.objects.filter(project__slug=project_slug)[:max_count]
     for e in doc_query_set:
         doc = {'title':str(e), 'key':str(project_slug)+'.document.'+str(e.id), 'addClass':'', 'url':e.get_absolute_url(), 'children':[]}
         doc_list.append(doc)        
