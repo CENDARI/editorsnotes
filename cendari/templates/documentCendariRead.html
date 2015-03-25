@@ -5,43 +5,30 @@
 {% block css %}
 	<link rel="stylesheet" type="text/css" media="all" href="{% static "iipmooviewer/css/iip.css" %}" />
 	<style type="text/css">
-		.toc {
-			background: #fefefe;
-			border: 1px solid #ddd;
-			color: #333;
-			width: 300px;
-		}
-
-		.toc a {
-			color: #333;
-		}
-
-		.toc .tocH2 {
-			margin-left: 10px
-		}
-		.toc .tocH3 {
-			margin-left: 20px
-		}
-
-		.toc .tocH4 {
-			margin-left: 30px
-		}
-
-		.toc .tocH5 {
-			margin-left: 40px
-		}
-
-		.toc .tocH6 {
-			margin-left: 50px
-		}
-
-		.toc-active {
+		.toc  a{
 			color: #000;
-			font-weight: bold;
+			text-decoration: underline;
+
 		}
-		.toc.right {
-			right: 0
+		.toc  li {
+		    list-style:decimal;}
+		.toc  ol li {
+			list-style-type:lower-roman;
 		}
+		.toc  ol ol li {
+			list-style-type:lower-latin;
+		}
+		.toc{
+			padding-left: 2em;
+		}
+		.toc ul, .toc ol{
+		    padding-left: 2em;
+		}
+
+		.toc  {
+	    	list-style-position:inside;
+	    	border: 1px solid black;
+	 	} 
 
 	</style>
 {% endblock %}
@@ -50,9 +37,7 @@
 {% block init %}
 	<meta name="document_id" id="document_id" content="{{ document.id }}" />
 	<meta name="document_name" id="document_name" content="{{ document.import_id }}" />
-	<script type="text/javascript" src="{% static "cendari/js/document.js" %}"></script>
-	<script type="text/javascript" src="{% static "cendari/js/toc.min.js" %}"></script>
-
+	<script type="text/javascript" src="{% static "cendari/js/jquery.toc.min.js" %}"></script>
 {% endblock init %}
 
 {% block model_fields %}
@@ -103,8 +88,11 @@
 						Save document before adding a transcript.
 					{% endif %}	 -->
 					{% if document.transcript %}
-						<div id="transcript_toc" class='toc'></div>
-						<div id="transcript_content">
+						<div id='transcript_toc_wrapper'>
+						<!-- 	<p>Table of contents (<a class='visibilityToc' href="">hide</a>)</p>
+							<ol id="transcript_toc" class='toc'></ol>
+						</div> -->
+						<div id="transcript_content" class="form-main edit-section">
 							{{document.transcript.content|as_html}}
 						</div>
 						
@@ -180,7 +168,10 @@
 		<div class="stop-float"></div>
 		<div style="height:5px"> &nbsp;</div>
 		{% if document %} 
-			<div id="document_toc" class='toc'></div>
+			<div id='document_toc_wrapper'>
+				<p>Table of contents (<a class='visibilityToc' href="">hide</a>)</p>
+				<ol id="document_toc" class='toc'></ol>
+			</div>
 			<div id="document_content"> 
 				{{document.description|as_html}}
 			</div>
@@ -231,42 +222,38 @@
 				}
 			});
 
-			$('#transcript_toc').toc({
-				'container': '#transcript_content',
-				'selectors': 'h1,h2,h3,h4,h5,h6',
-				'smoothScrolling': true, //enable or disable smooth scrolling on click
-			    'prefix': 'toc', //prefix for anchor tags and class names
-			    'onHighlight': function(el) {}, //called when a new section is highlighted 
-			    'highlightOnScroll': true, //add class to heading that is currently in focus
-			    'highlightOffset': 100, //offset to trigger the next headline
-			    'anchorName': function(i, heading, prefix) { //custom function for anchor name
-			        return prefix+i;
-			    },
-			    'headerText': function(i, heading, $heading) { //custom function building the header-item text
-			        return $heading.text();
-			    },
-				'itemClass': function(i, heading, $heading, prefix) { // custom function for item class
-				  return $heading[0].tagName.toLowerCase();
+			// $('#transcript_toc').toc({
+			// 	'container': '#transcript_content',
+			// 	'selectors': 'h1,h2,h3,h4,h5,h6',
+			// 	'smoothScrolling': true, //enable or disable smooth scrolling on click
+			//     'prefix': 'toc', //prefix for anchor tags and class names
+			//     'onHighlight': function(el) {}, //called when a new section is highlighted 
+			//     'highlightOnScroll': true, //add class to heading that is currently in focus
+			//     'highlightOffset': 100, //offset to trigger the next headline
+			//     'anchorName': function(i, heading, prefix) { //custom function for anchor name
+			//         return prefix+i;
+			//     },
+			//     'headerText': function(i, heading, $heading) { //custom function building the header-item text
+			//         return $heading.text();
+			//     },
+			// 	'itemClass': function(i, heading, $heading, prefix) { // custom function for item class
+			// 	  return $heading[0].tagName.toLowerCase();
+			// 	}
+			// });
+			$('#transcript_toc').toc({content: "#transcript_content", headings: "h1,h2,h3,h4,h5,h6"});
+			$('#document_toc').toc({content: "#document_content", headings: "h1,h2,h3,h4,h5,h6"});
+			$('.visibilityToc').on('click',function(e){
+				e.preventDefault();
+				id = $(this).parent().parent().find('.toc').attr('id')
+				if($(this).text().indexOf('show')>-1){
+					$(this).text('hide');
+					$('#'+id).show();
 				}
-			});
-			$('#document_toc').toc({
-				'container': '#document_content',
-				'selectors': 'h1,h2,h3,h4,h5,h6',
-				'smoothScrolling': true, //enable or disable smooth scrolling on click
-			    'prefix': 'toc', //prefix for anchor tags and class names
-			    'onHighlight': function(el) {}, //called when a new section is highlighted 
-			    'highlightOnScroll': true, //add class to heading that is currently in focus
-			    'highlightOffset': 100, //offset to trigger the next headline
-			    'anchorName': function(i, heading, prefix) { //custom function for anchor name
-			        return prefix+i;
-			    },
-			    'headerText': function(i, heading, $heading) { //custom function building the header-item text
-			        return $heading.text();
-			    },
-				'itemClass': function(i, heading, $heading, prefix) { // custom function for item class
-				  return $heading[0].tagName.toLowerCase();
+				else{
+					$(this).text('show');
+					$('#'+id).hide();
 				}
-			});
+			})
 		});
 
 		Ext.onReady(function(){
