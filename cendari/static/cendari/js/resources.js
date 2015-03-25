@@ -135,7 +135,7 @@ $(function() {
 	onLazyRead: function(node){
 	    burl = '';
 	    title = node.data.title;
-            burl = cendari_root_url+'cendari/'+cendari_js_project_slug+'/getLazyProjectData/'; 
+            burl = cendari_root_url+'cendari/'+cendari_js_project_slug+'/getLazyProjectData/sfield/'+sfield; 
             //console.log('==========>>>>>>>>>> burl is : '+burl);
 	    node.appendAjax({
                 url: burl,

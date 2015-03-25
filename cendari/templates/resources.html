@@ -60,64 +60,67 @@
     </script>
 
 
-    {% compress js %}
+ {% compress js %}
+	 
       <script type="text/javascript" src="{% static "function/jquery/jquery-1.8.2.min.js" %}"></script>
       <script type="text/javascript" src="{% static "dynatree/jquery/jquery-ui.custom.js" %}"></script>
       <script type="text/javascript" src="{% static "dynatree/src/jquery.dynatree.js" %}"></script>
       <script type="text/javascript" src="{% static "dynatree/jquery/jquery.cookie.js" %}"></script>
-      <script type="text/javascript" src="{% static "cendari/js/resources.js" %}"></script> 
       <script type="text/javascript" src="{% static "tracing/trace_test_130529.js" %}"></script>
 
-    {% endcompress %}
+      <script type="text/javascript"> 
+        	//resources are ordered alphabetically by default
+		var sfield="alpha";
+	        if($.cookie('sfield')!==null){
+            		sfield = $.cookie('sfield');
+		}		
+      </script>
 
-    <script type="text/javascript">
-      //resources are ordered alphabetically by default
-      var sfield = "alpha";
+      <script type="text/javascript" src="{% static "cendari/js/resources.js" %}"></script>
+      <script type="text/javascript">       
 
-      function sortTree(sfield){
-        console.log('sfield',sfield)
-        $.cookie('sfield',sfield);
-        
-        $("#tree").dynatree("option", "initAjax", {
-          data: {key:''},
-          url: cendari_root_url+'cendari/'+cendari_js_project_slug+'/getResourcesData/sfield/'+ sfield,
-          dataType: "jsonp",
-        });
+      function sortTree(field){
+          sfield = field;
+          console.log('sfield',sfield);
+          $.cookie('sfield',sfield);
+          
+          $("#tree").dynatree("option", "initAjax", {
+            data: {key:''},
+            url: cendari_root_url+'cendari/'+cendari_js_project_slug+'/getResourcesData/sfield/'+ sfield,
+            dataType: "jsonp",
+          });
 
-        $('#tree').dynatree("getTree").reload();
-      }
-
-      $(document).ready(function(){
-        cendari_js_project_slug = '{{ project_slug }}';
-
-        // $("#tree").dynatree("option", "initAjax", {
-        //   data: {key:''},
-        //   url: cendari_root_url+'cendari/'+cendari_js_project_slug+'/getResourcesData/sfield/'+ sfield,
-        //   dataType: "jsonp",
-        // });
-        // $('#tree').dynatree("getTree").reload();
-        if($.cookie('sfield')!==null){
-          sfield = $.cookie('sfield');
-          $('.sfield_label').removeClass('active');
-          $('#label_'+sfield).addClass('active');
+          $('#tree').dynatree("getTree").reload();
         }
-        
-        sortTree(sfield);
 
-        $('.sfield_label').on('click', function() {
-          console.log('it is clicked :D')
-          $('.sfield_label').removeClass('active');
-          $(this).addClass('active');
-          var radio_id = $(this).attr('for');
-          console.log('radio_id',radio_id);
-          sortTree($('#'+radio_id).val());
+        $(document).ready(function(){
+          cendari_js_project_slug = '{{ project_slug }}';
+          // $("#tree").dynatree("option", "initAjax", {
+          //   data: {key:''},
+          //   url: cendari_root_url+'cendari/'+cendari_js_project_slug+'/getResourcesData/sfield/'+ sfield,
+          //   dataType: "jsonp",
+          // });
+          // $('#tree').dynatree("getTree").reload();
+          if($.cookie('sfield')!==null){
+            sfield = $.cookie('sfield');
+            $('.sfield_label').removeClass('active');
+            $('#label_'+sfield).addClass('active');
+          }          
+          sortTree(sfield);
+          $('.sfield_label').on('click', function() {
+            console.log('it is clicked :D')
+            $('.sfield_label').removeClass('active');
+            $(this).addClass('active');
+            var radio_id = $(this).attr('for');
+            console.log('radio_id',radio_id);
+            sortTree($('#'+radio_id).val());
+          });
+
         });
 
-      });
-
-
-
-    </script>
+      </script>      
+       
+  {% endcompress %}
 
 
   </head>
@@ -132,17 +135,16 @@
     <p> 
       <span style="font-size:10pt;font-weight:bold;">Sort by:</span> <br>
 
-      <input type="radio" class='radio_link' name="sfield" value="creation" id="radio_button_creation" />
-      <label class ='sfield_label radio_link' id='label_creation'  for="radio_button_creation">creation</label>
-      
-      <input type="radio" class='radio_link' name="sfield" value="access" id="radio_button_access" />
-      <label class ='sfield_label radio_link' id='label_access' for="radio_button_access">last accessed</label>
-      
       <input type="radio" class='radio_link' name="sfield" value="alpha" id="radio_button_alpha" />
       <label class ='sfield_label radio_link' id='label_alpha' for="radio_button_alpha">alphabetical</label>
+
+      <input type="radio" class='radio_link' name="sfield" value="created" id="radio_button_creation" />
+      <label class ='sfield_label radio_link' id='label_creation'  for="radio_button_creation">creation</label>
+      
+      <input type="radio" class='radio_link' name="sfield" value="last_updated" id="radio_button_access" />
+      <label class ='sfield_label radio_link' id='label_access' for="radio_button_access">last updated</label>
+      
     </p>
-
-
 
     <div id="tree"></div>
   </body>

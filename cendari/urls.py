@@ -144,7 +144,7 @@ cendaripatterns = patterns('cendari.views',
     # Cendari Resources Tree
     url(r'^cendari/(?P<project_slug>[-\w]+)/resources/$',                                       'resources',                         name='resources_view'),
     url(r'^cendari/(?P<project_slug>[-\w]+)/getResourcesData/sfield/(?P<sfield>[-\w]+)/$',	'getResourcesData',                  name='getResourcesData_view'),
-    url(r'^cendari/(?P<project_slug>[-\w]+)/getLazyProjectData/$',                              'getLazyProjectData',                name='getLazyProjectData_view'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/getLazyProjectData/sfield/(?P<sfield>[-\w]+)/$',    'getLazyProjectData',                name='getLazyProjectData_view'),
     url(r'^cendari/(?P<project_slug>[-\w]+)/getTopicType/topic_id/(?P<topic_id>\d+)/$',         'getTopicType',                      name='getTopicType_view'),
     url(r'^cendari/(?P<project_slug>[-\w]+)/getProjectID/new_slug/(?P<new_slug>[-\w]+)/$',         'getProjectID',                      name='getProjectID_view'),
 
