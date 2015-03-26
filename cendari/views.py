@@ -466,11 +466,11 @@ def getTopicResources(request, project_slug, sfield):
     for (topic_type, topic_name) in sorted_topic_types:
         my_list = []	
 	if sfield == "created":
-        	query_set = main_models.Topic.objects.filter(project__slug=project_slug,topic_node__type=topic_type).order_by('created')[:max_count]   
+        	query_set = main_models.Topic.objects.filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False).order_by('created')[:max_count]   
 	elif sfield == "last_updated":
-        	query_set = main_models.Topic.objects.filter(project__slug=project_slug,topic_node__type=topic_type).order_by('last_updated')[:max_count]       
+        	query_set = main_models.Topic.objects.filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False).order_by('last_updated')[:max_count]       
 	else:
-	        query_set = main_models.Topic.objects.filter(project__slug=project_slug,topic_node__type=topic_type).order_by('preferred_name')[:max_count]          
+	        query_set = main_models.Topic.objects.filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False).order_by('preferred_name')[:max_count]          
         set_count = query_set.count()
         topic_count += 1
 	for e in query_set:

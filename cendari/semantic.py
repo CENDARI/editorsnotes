@@ -415,6 +415,7 @@ def semantic_process_note(note,user=None):
                 logger.debug('Found a valid date: %s', topic.date)
                 topic.save()
     semantic.commit()
+    utils.update_delete_status(note.project)
 
 def semantic_process_document(document,user=None):
     """Extract the semantic information from a note,
@@ -458,7 +459,8 @@ def semantic_process_document(document,user=None):
             if topic.rdf is None and subject.startswith('http'):
                 topic.rdf = unicode(subject)
                 topic.save()
-    semantic.commit()   
+    semantic.commit()
+    utils.update_delete_status(document.project)   
 
 def semantic_process_transcript(transcript,user=None):
     """Extract the semantic information from a note,
@@ -500,6 +502,7 @@ def semantic_process_transcript(transcript,user=None):
                 topic.rdf = unicode(subject)
                 topic.save()
     semantic.commit()  
+    utils.update_delete_status(transcript.document.project)
 
 def semantic_process_topic(topic,user=None,doCommit=True):
     """Extract the semantic information from a topic."""

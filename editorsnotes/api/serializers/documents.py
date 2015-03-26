@@ -103,9 +103,9 @@ class TranscriptSerializer(serializers.ModelSerializer):
     # Cendari code E.G. aviz
     def save_object(self, obj, **kwargs):
         super(TranscriptSerializer, self).save_object(obj, **kwargs)
-        print "creating semantics for transcript"
-        print obj
-        semantic_process_transcript(obj)
+        # print "creating semantics for transcript"
+        # print obj
+        # semantic_process_transcript(obj)
 
     class Meta:
         model = Transcript
