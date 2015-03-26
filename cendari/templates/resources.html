@@ -80,7 +80,18 @@
       <script type="text/javascript">       
 
       function sortTree(field){
-          sfield = field;
+	  previous_sfield = $.cookie('sfield');
+	  rev = '-';
+	  //alert("previous sfield = " + previous_sfield);
+	  if(previous_sfield!=null && previous_sfield == field){
+		if(previous_sfield.substring(0,1)=='-'){
+			sfield = field;
+		}else{
+			sfield = rev.concat(field);
+		}
+	  }else{
+                sfield = field;
+	  }
           console.log('sfield',sfield);
           $.cookie('sfield',sfield);
           
