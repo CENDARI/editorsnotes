@@ -61,6 +61,7 @@ DBPPROP  = Namespace("http://dbpedia.org/property/")
 GRS     = Namespace("http://www.georss.org/georss/")
 GEO     = Namespace("http://www.w3.org/2003/01/geo/wgs84_pos#")
 DBOWL   = Namespace("http://dbpedia.org/ontology/")
+FREEBASE = Namespace("http://rdf.freebase.com/ns/")
 
 INIT_NS = {
     'owl': OWL, 
@@ -69,7 +70,8 @@ INIT_NS = {
     'dbpprop': DBPPROP,
     'grs': GRS,
     'geo': GEO,
-    'dbpedia-own': DBOWL
+    'dbpedia-owl': DBOWL,
+    'ns': FREEBASE
 }
 
 WRONG_PREFIX = "http://dbpedia.org/page/"
@@ -384,8 +386,8 @@ def semantic_process_note(note,user=None):
 
     #pdb.set_trace()
    
-    if fix_links(note.content):
-        note.save()
+#    if fix_links(note.content):
+#        note.save()
 
     xml = note.content
 
@@ -425,8 +427,8 @@ def semantic_process_document(document,user=None):
 #    pdb.set_trace()
     if user is None:
         user = document.last_updater
-    if fix_links(document.description):
-        document.save()
+#    if fix_links(document.description):
+#        document.save()
     # Cleanup entities related to document
     uri = semantic_uri(document)
     g = Semantic.graph(uri)
@@ -556,7 +558,9 @@ imported_relations = set([
     DBPPROP['deathPlace'],
     # Event/battle
     DBOWL['date'], 
-    DBOWL['place']
+    DBOWL['place'],
+    FREEBASE['topic_server.geolocation_latitude'],
+    FREEBASE['topic_server.geolocation_longitude'],
 ])
 
 no_duplicates = set([
@@ -614,7 +618,7 @@ def semantic_resolve_topic(topic, force=False):
         if rdf_url.startswith('http://rdf.freebase') or rdf_url.startswith('https://rdf.freebase'):
             try:
                 rdf = urllib2.urlopen(rdf_url).read()
-                rdf = re.sub(r'\\x(..)', '\\u00\1', rdf)
+                rdf = re.sub(r'\\x(..)', r'\\u00\1', rdf)
                 loaded.parse(data=rdf, format="n3")
             except:
                 traceback.print_exc(file=sys.stdout)
@@ -667,6 +671,14 @@ def semantic_resolve_topic(topic, force=False):
             g.add( (uri, GRS['point'], Literal("%f %f" % (lat, lon))) )
             logger.info("Found in dbprop:latDeg/dbprop:lonDeg: %s", g.value(uri, GRS['point']))
             return
+
+        lat = g.value(uri, FREEBASE['topic_server.geolocation_latitude'])
+        lon = g.value(uri, FREEBASE['topic_server.geolocation_longitude'])
+        if lat and lon:
+            g.add( (uri, GRS['point'], Literal(lat+" "+lon)) )
+            logger.info("Found in ns:latitude/ns:longitude: %s", g.value(uri, GRS['point']))
+            return
+            
 
         logger.warning('No lat/long information in RDF for %s', unicode(uri))
         # chase in geonames later
