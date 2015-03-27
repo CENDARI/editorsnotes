@@ -119,9 +119,11 @@ function  updatedEnitiesTab(prefix,related_topics){
 
 function createScanElement(image_url,thumbnail_url,id){
     var html = "";
-    html +='<li>'+
-            '<a class="scan btn" id="1" href="http://'+window.location.pathname+image_url+'">'+
-            '<img id="ext-gen1206" src="'+thumbnail_url+'" alt="Thumbnail of scan 1" width="100"></a></li>';
+    html +='<li class="scan-list-item btn">'+
+            '<a class="scan" id="1" href="http://'+window.location.pathname+image_url+'">'+
+            '<img id="ext-gen1206" src="'+thumbnail_url+'" alt="Thumbnail of scan 1" width="100"></a>'+
+            '<a href="'+cendari_root_url+'api/projects/'+cendari_js_project_slug+'/documents/'+cendari_js_object_id+'/scans/'+id+'/" class="delete" data-confirm="Are you sure to delete this item?"><img src="'+cendari_root_url+'static/cendari/img/fileclose.png"></a>'+
+            '</li>';
     return html;
                     
 
@@ -137,7 +139,6 @@ function updateScanTab(scans){
         scans_html += createScanElement(scans[i].image_url,scans[i].image_thumbnail_url,scans[i].id);
     }
 
-    console.log('scans_html',scans_html);
     
     scans_jq.empty();
     scans_jq.append(scans_html);
@@ -216,7 +217,7 @@ function submitTranscript(document_id,fc_document){
     if($('#transcript-description').length){
         formData =formData +'document='+encodeURIComponent($('#transcript-document').val())+'&creator='+$('#transcript-creator').val()+'&last_updater='+$('#transcript-uploader').val()+'&';
         if(tinyMCE.getInstanceById('transcript-description')!=null){
-            if(tinyMCE.getInstanceById('transcript-description').getContent().length && CRC32(tinyMCE.getInstanceById('transcript-description').getContent().length) !== editors_crc32['transcript-description']){
+            if(tinyMCE.getInstanceById('transcript-description').getContent().length && CRC32(tinyMCE.getInstanceById('transcript-description').getContent()) !== editors_crc32['transcript-description']){
                 formData = formData+"&content="+encodeURIComponent(tinyMCE.getInstanceById('transcript-description').getContent())+"&";
             }
             else{
@@ -239,12 +240,13 @@ function submitTranscript(document_id,fc_document){
         type: fc.attr('method'),
         data: formData,
         success: function(data){
-            submitScan(document_id,fc_document);
+            $("#transcriptTab").text('Transcript (1)');
+            submitDocument(fc_document);
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) { 
             console.log("Error with status "+textStatus+":",errorThrown);
             showErrorMessage(messages.transcript.error);
-            submitScan(document_id,fc_document);
+            submitDocument(fc_document);
         } 
     });
 }
@@ -336,7 +338,7 @@ function submitDocument(fc){
 
             showSuccessMessage(messages.document.success);
             updatedEnitiesTab(cendari_js_object_type,data.related_topics);
-            updateScanTab(data.scans);
+            // updateScanTab(data.scans);
             
             replaceWindowUrl(data.id);
             
@@ -430,6 +432,7 @@ $(document).ready(function(){
         }
         if(cendari_js_object_type == 'document'){
             showInfoMessage(messages.document.beforeSend);
+            console.log("cendari_js_object_id ===>",cendari_js_object_id)
             if(cendari_js_object_id.length === 0){
                 submitDocument(fc);
             }

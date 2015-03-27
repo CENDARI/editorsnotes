@@ -524,9 +524,9 @@ function setupHighlightMessageReciever(){
     var entityIds = event.data.entityIds;
     var highlightMode = event.data.highlightMode;
 
-    console.log('::::::::::::message::::::::::::')
-    console.log(entityIds,highlightMode);
-    console.log('::::::::::::message::::::::::::')
+    //console.log('::::::::::::message::::::::::::')
+    //console.log(entityIds,highlightMode);
+    //console.log('::::::::::::message::::::::::::')
 
     highlightVis(entityIds, highlightMode);
   };

@@ -39,17 +39,18 @@ function viewImage(id)
 
 $(document).ready(function() 
 {
-    $('a.scan').click(function(event) {
-	var scan_id = this.getAttribute('id');
-	value = '{project:' + cendari_js_project_slug + 'scan_id: ' + scan_id + '}';
-	//trace.event("_user","selectScan", "centre", value);
-	if (! scan_id)
-	    return;
-	event.preventDefault();
+	$('#scan-list').delegate('a.scan','click',funcion(){
+    // $('a.scan').click(function(event) {
+		var scan_id = this.getAttribute('id');
+		value = '{project:' + cendari_js_project_slug + 'scan_id: ' + scan_id + '}';
+		//trace.event("_user","selectScan", "centre", value);
+		if (! scan_id)
+		    return;
+		event.preventDefault();
 
-	$('a.btn-info').removeClass('btn-info');
-	$(this).addClass('btn-info');
-	viewImage(scan_id);
+		$('a.btn-info').removeClass('btn-info');
+		$(this).addClass('btn-info');
+		viewImage(scan_id);
     });
 });
 

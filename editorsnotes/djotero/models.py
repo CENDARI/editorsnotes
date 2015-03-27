@@ -63,3 +63,4 @@ class CachedArchive(models.Model):
 
 class CachedCreator(models.Model):
     name = models.TextField()
+

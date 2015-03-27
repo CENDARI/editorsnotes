@@ -358,6 +358,7 @@ def small_vis_data_lazy(request, project_slug):
     print 'docs: %d' % (len(documents))
     for document in documents:
         topics = document.get_all_related_topics()
+        print 'len of topics: %d ' % len(topics)
         for t in topics:
             timestamp = calendar.timegm(t.date.timetuple()) * 1000 if t.date else ''
             v = {'preferred_name':t.preferred_name, 
@@ -397,11 +398,12 @@ def small_vis_data_lazy(request, project_slug):
     return HttpResponse(json.dumps(topics_dict.values()), mimetype='application/json')
 
 @login_required
-def getResourcesData(request, project_slug):  
+def getResourcesData(request, project_slug, sfield):  
     my_tree = { 'title':'My resources:', 'key':'root', 'isFolder':'true', 'addClass': '', 'url':'', 'children': [] }
     my_projects = { 'title':'My projects', 'key':'my_projects', 'isFolder':'true', 'addClass':'',  'url':'', 'children' : [] }
     other_projects = { 'title':'Other projects', 'key':'other_projects', 'isFolder':'true', 'addClass':'',  'url':'', 'children' : [] }    
     projects = request.user.get_authorized_projects().order_by('name')
+
     if request.user.is_superuser:
 	    for p in projects:
 		    p_role = p.get_role_for(request.user)
@@ -425,7 +427,7 @@ def getResourcesData(request, project_slug):
     return HttpResponse(response_dict, mimetype='application/json')
 
 @login_required
-def getLazyProjectData(request, project_slug):
+def getLazyProjectData(request, project_slug, sfield):
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     projects = request.user.get_authorized_projects()
     for p in projects:
@@ -436,26 +438,26 @@ def getLazyProjectData(request, project_slug):
 			    model_name = model._meta.module_name  
 			    if model_name == 'topic':
 				    node_title = 'Entities' +  ' (' + str(len(main_models.topics.TYPE_CHOICES)) + ')'
-				    topic_list = getTopicResources(request, p.slug)
+				    topic_list = getTopicResources(request, p.slug, sfield)
 				    result_list.append({'title':node_title, 'key':str(p.slug)+'.topics', 'isFolder':'true', 'addClass': '', 'url':'', 'children' : topic_list })
 			    elif model_name == 'note':
 				    query_set = model.objects.filter(project__slug=p.slug).order_by('-last_updated')[:max_count]
 				    set_count = query_set.count()
 				    node_title = (model_name + 's').title() + ' (' + str(set_count)  + ')'
-				    note_list = getNoteResources(request, p.slug); 
+				    note_list = getNoteResources(request, p.slug, sfield); 
 				    result_list.append( {'title':node_title, 'key':str(p.slug)+'.'+str(model_name)+'s', 'isFolder':'false', 'addClass':'','url':'', 'children':note_list } )
 			    elif model_name == 'document':
 				    query_set = model.objects.filter(project__slug=p.slug).order_by('-last_updated')[:max_count]
 				    set_count = query_set.count()
 				    node_title = (model_name + 's').title() + ' (' + str(set_count)  + ')'
-				    document_list = getDocumentResources(request, p.slug)
+				    document_list = getDocumentResources(request, p.slug, sfield)
 				    result_list.append( {'title':node_title, 'key':str(p.slug)+'.'+str(model_name)+'s', 'isFolder':'false', 'addClass':'','url':'', 'children':document_list } )
     res = json.dumps(result_list, encoding="utf-8")
     response_dict = request.GET['callback'] + "(" + res + ")"
     return HttpResponse(response_dict, mimetype='application/json')
 
 @login_required
-def getTopicResources(request, project_slug):
+def getTopicResources(request, project_slug, sfield):
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     max_count = 10000
     topic_count = 0
@@ -463,8 +465,13 @@ def getTopicResources(request, project_slug):
     topic_types = main_models.topics.TYPE_CHOICES
     sorted_topic_types =  sorted(topic_types, key = lambda x: (x[0], x[1]))
     for (topic_type, topic_name) in sorted_topic_types:
-        my_list = []
-        query_set = main_models.Topic.objects.filter(project__slug=project_slug,topic_node__type=topic_type).order_by('preferred_name')[:max_count]       
+        my_list = []	
+    	if sfield == "created" or sfield == "-created" or sfield == "last_updated" or sfield == "-last_updated":
+        	query_set = main_models.Topic.objects.filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False).order_by(sfield)[:max_count]   
+	elif sfield == "-alpha":
+        	query_set = main_models.Topic.objects.filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False).order_by('-preferred_name')[:max_count]       
+	else:
+	        query_set = main_models.Topic.objects.filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False).order_by('preferred_name')[:max_count]          
         set_count = query_set.count()
         topic_count += 1
 	for e in query_set:
@@ -479,12 +486,17 @@ def getTopicResources(request, project_slug):
     return topic_list
 
 @login_required
-def getNoteResources(request, project_slug):
+def getNoteResources(request, project_slug, sfield):
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     max_count = 10000
     node_count = 0
     note_list = []
-    query_set = main_models.Note.objects.filter(project__slug=project_slug).order_by('title')[:max_count]
+    if sfield == "created" or sfield == "-created" or sfield == "last_updated" or sfield == "-last_updated":
+       	query_set = main_models.Note.objects.filter(project__slug=project_slug).order_by(sfield)[:max_count]   
+    elif sfield == "-alpha":
+    	query_set = main_models.Note.objects.filter(project__slug=project_slug).order_by('-title')[:max_count]      
+    else:	
+    	query_set = main_models.Note.objects.filter(project__slug=project_slug).order_by('title')[:max_count]
     set_count = query_set.count()
     for e in query_set:
         node_count += 1
@@ -492,13 +504,26 @@ def getNoteResources(request, project_slug):
     return note_list
 
 @login_required
-def getDocumentResources(request, project_slug):
+def getDocumentResources(request, project_slug, sfield):
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     max_count = 10000
-    doc_list = []
-    scan_query_set = []
-    doc_query_set = main_models.Document.objects.filter(project__slug=project_slug).order_by('description_digest')[:max_count]
-    for e in doc_query_set:
+    doc_list = []   
+    if sfield == "created" or sfield == "-created" or sfield == "last_updated" or sfield == "-last_updated":
+       	query_set = main_models.Document.objects.filter(project__slug=project_slug).order_by(sfield)[:max_count]   
+    elif sfield == "-alpha":
+	#unsorted_query_set = main_models.Document.objects.filter(project__slug=project_slug)[:max_count]
+	#query_set =  sorted(unsorted_query_set, key = lambda doc: doc.description, reverse = True) 
+	#query_set =  sorted(unsorted_query_set, key = lambda x:'description', reverse = True)  
+    	sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document order by CAST(description AS text) DESC'
+    	query_set =  main_models.Document.objects.raw(sql_query) 
+    else:
+	#unsorted_query_set = main_models.Document.objects.filter(project__slug=project_slug)[:max_count]
+	#query_set =  sorted(unsorted_query_set, key = lambda doc: doc.description, reverse = False) 
+	#query_set =  sorted(unsorted_query_set, key = lambda x:'description', reverse = False)
+    	sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document order by CAST(description AS text)'
+    	query_set =  main_models.Document.objects.raw(sql_query) 
+
+    for e in query_set:
         doc = {'title':str(e), 'key':str(project_slug)+'.document.'+str(e.id), 'addClass':'', 'url':e.get_absolute_url(), 'children':[]}
         doc_list.append(doc)        
     return doc_list

@@ -2,70 +2,163 @@
 <html>
   <head>
     {% load staticfiles compress %}
-    
+
     <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
-  <title>Dynatree - Example</title>
-  
-  {% compress css %}
-  <link rel="stylesheet" href="{% static "style/jquery-ui/jquery-ui-1.8.10.custom.css" %}" type="text/css"/>
-  <link rel="stylesheet" type="text/css" href="{% static "dynatree/dist/skin/ui.dynatree-custom.css" %}" /> 
-  
-  {% endcompress %}
-  <script type="text/javascript">
-    function getParameterByName(name) {
+    <title>Dynatree - Example</title>
+
+    {% compress css %}
+      <link rel="stylesheet" href="{% static "style/jquery-ui/jquery-ui-1.8.10.custom.css" %}" type="text/css"/>
+      <link rel="stylesheet" type="text/css" href="{% static "dynatree/dist/skin/ui.dynatree-custom.css" %}" /> 
+      
+      <style type="text/css">
+        input[type="radio"].radio_link {
+          display: none;
+        }
+
+        label.radio_link {
+          /*display: block;
+          float: left;*/
+          margin-right: 5px;
+          /*font-style: italic;*/
+          font-weight: bold;
+          font-size: 10pt;
+          font-family: tahoma,arial,helvetica;
+          padding: 2px;
+          cursor: pointer;
+
+        }
+
+        label.radio_link.active {
+          text-decoration: underline;
+          /*font-style: italic;*/
+          /*font-weight: bold;*/
+          /*font-size: 8pt;*/
+          /*border: 1px solid blue;
+          color: blue;*/
+        }
+      </style>
+    {% endcompress %}
+
+    <script type="text/javascript">
+      function getParameterByName(name) {
         name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
         var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
         results = regex.exec(location.search);
         return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-    }
+      }
+
+      cendari_root_url = "{%url 'index_view' %}";
+      cendari_js_project_slug = '{{ project_slug }}';
+
+      cendari_js_object_type = getParameterByName('object_type'); 
+      cendari_js_object_id = getParameterByName('object_id');
+      cendari_js_topic_type = getParameterByName('topic_type');
+
+      //console.log("NB resources.html*********** cendari_js_project_slug is "+cendari_js_project_slug);
+      //console.log("NB resources.html*********** cendari_js_object_type is "+cendari_js_object_type);
+      //console.log("NB resources.html*********** cendari_js_object_id is "+cendari_js_object_id);
+      //console.log("NB resources.html*********** cendari_js_topic_type is "+cendari_js_topic_type);
+
+    </script>
 
 
-    cendari_root_url = "{%url 'index_view' %}";
-    cendari_js_project_slug = '{{ project_slug }}';
-                       
-    cendari_js_object_type = getParameterByName('object_type'); 
-    cendari_js_object_id = getParameterByName('object_id');
-    cendari_js_topic_type = getParameterByName('topic_type');
+ {% compress js %}
+	 
+      <script type="text/javascript" src="{% static "function/jquery/jquery-1.8.2.min.js" %}"></script>
+      <script type="text/javascript" src="{% static "dynatree/jquery/jquery-ui.custom.js" %}"></script>
+      <script type="text/javascript" src="{% static "dynatree/src/jquery.dynatree.js" %}"></script>
+      <script type="text/javascript" src="{% static "dynatree/jquery/jquery.cookie.js" %}"></script>
+      <script type="text/javascript" src="{% static "tracing/trace_test_130529.js" %}"></script>
 
-    //console.log("NB resources.html*********** cendari_js_project_slug is "+cendari_js_project_slug);
-    //console.log("NB resources.html*********** cendari_js_object_type is "+cendari_js_object_type);
-    //console.log("NB resources.html*********** cendari_js_object_id is "+cendari_js_object_id);
-    //console.log("NB resources.html*********** cendari_js_topic_type is "+cendari_js_topic_type);
-  </script>
-  
-  {% compress js %}
-  <script type="text/javascript" src="{% static "function/jquery/jquery-1.8.2.min.js" %}"></script>
-  <script type="text/javascript" src="{% static "dynatree/jquery/jquery-ui.custom.js" %}"></script>
-  <script type="text/javascript" src="{% static "dynatree/src/jquery.dynatree.js" %}"></script>
-  <script type="text/javascript" src="{% static "dynatree/jquery/jquery.cookie.js" %}"></script>
-  <script type="text/javascript" src="{% static "cendari/js/resources.js" %}"></script> 
-  <script type="text/javascript" src="{% static "tracing/trace_test_130529.js" %}"></script>
+      <script type="text/javascript"> 
+        	//resources are ordered alphabetically by default
+		var sfield="alpha";
+	        if($.cookie('sfield')!==null){
+            		sfield = $.cookie('sfield');
+		}		
+      </script>
 
+      <script type="text/javascript" src="{% static "cendari/js/resources.js" %}"></script>
+      <script type="text/javascript">       
+
+      function sortTree(field){
+	  previous_sfield = $.cookie('sfield');
+	  rev = '-';
+	  //alert("previous sfield = " + previous_sfield);
+	  if(previous_sfield!=null && previous_sfield == field){
+		if(previous_sfield.substring(0,1)=='-'){
+			sfield = field;
+		}else{
+			sfield = rev.concat(field);
+		}
+	  }else{
+                sfield = field;
+	  }
+          console.log('sfield',sfield);
+          $.cookie('sfield',sfield);
+          
+          $("#tree").dynatree("option", "initAjax", {
+            data: {key:''},
+            url: cendari_root_url+'cendari/'+cendari_js_project_slug+'/getResourcesData/sfield/'+ sfield,
+            dataType: "jsonp",
+          });
+
+          $('#tree').dynatree("getTree").reload();
+        }
+
+        $(document).ready(function(){
+          cendari_js_project_slug = '{{ project_slug }}';
+          // $("#tree").dynatree("option", "initAjax", {
+          //   data: {key:''},
+          //   url: cendari_root_url+'cendari/'+cendari_js_project_slug+'/getResourcesData/sfield/'+ sfield,
+          //   dataType: "jsonp",
+          // });
+          // $('#tree').dynatree("getTree").reload();
+          if($.cookie('sfield')!==null){
+            sfield = $.cookie('sfield');
+            $('.sfield_label').removeClass('active');
+            $('#label_'+sfield).addClass('active');
+          }          
+          sortTree(sfield);
+          $('.sfield_label').on('click', function() {
+            console.log('it is clicked :D')
+            $('.sfield_label').removeClass('active');
+            $(this).addClass('active');
+            var radio_id = $(this).attr('for');
+            console.log('radio_id',radio_id);
+            sortTree($('#'+radio_id).val());
+          });
+
+        });
+
+      </script>      
+       
   {% endcompress %}
-  
-  <script type="text/javascript">
-  $(document).ready(function(){
-    cendari_js_project_slug = '{{ project_slug }}';
-    //console.log("reloading tree with project slug: "+cendari_js_project_slug);
-    //console.log('tree is :');
-    //console.log($('#tree'));
-    //console.log($('#tree').dynatree("getTree"));
-    //console.log($('#tree').dynatree("getTree").reload);
-    $("#tree").dynatree("option", "initAjax", {
-      data: {key:''},
-      url: cendari_root_url+'cendari/'+cendari_js_project_slug+'/getResourcesData/',
-      dataType: "jsonp",
-    });
-
-    $("#tree").dynatree("getTree").reload();
-    $('#tree').dynatree("getTree").reload();
-  });
-  </script>
 
 
   </head>
-  
+
   <body class="example">
+    <!-- <p>
+    Sort by <a href="#" id="btnSortCreation" onclick="sortTree('creation')">creation</a> -
+    <a href="#" id="btnSortAccess" onclick="sortTree('access')">last access</a> -
+    <a href="#" id="btnSortAlpha" onclick="sortTree('alpha')">alphanumeric</a>
+    </p> -->
+
+    <p> 
+      <span style="font-family:tahoma,arial,helvetica;font-size:10pt;font-weight:bold;">Sort by:</span> <br>
+
+      <input type="radio" class='radio_link' name="sfield" value="alpha" id="radio_button_alpha" />
+      <label class ='sfield_label radio_link' id='label_alpha' for="radio_button_alpha">alphabetical</label>
+
+      <input type="radio" class='radio_link' name="sfield" value="created" id="radio_button_creation" />
+      <label class ='sfield_label radio_link' id='label_creation'  for="radio_button_creation">creation</label>
+      
+      <input type="radio" class='radio_link' name="sfield" value="last_updated" id="radio_button_access" />
+      <label class ='sfield_label radio_link' id='label_access' for="radio_button_access">last updated</label>
+      
+    </p>
+
     <div id="tree"></div>
   </body>
 </html>

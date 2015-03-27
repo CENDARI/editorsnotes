@@ -87,6 +87,7 @@ class TopicAssignmentField(RelatedField):
         url = reverse('api:api-topics-detail',
                       args=(ta.topic.project.slug, ta.topic.id),
                       request=self.context['request'])
+        # Cendari code E.G. aviz
         return {
             'id': ta.topic.id,
             'preferred_name': ta.topic.preferred_name,

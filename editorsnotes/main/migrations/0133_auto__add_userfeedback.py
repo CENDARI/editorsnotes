@@ -18,11 +18,33 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal('main', ['UserFeedback'])
 
+        # Adding field 'Topic.date'
+        # db.add_column(u'main_topic', 'date',
+        #               self.gf('django.db.models.fields.DateTimeField')(db_index=True, null=True, blank=True),
+        #               keep_default=False)
+
+        # Adding field 'Topic.rdf'
+        # db.add_column(u'main_topic', 'rdf',
+        #               self.gf('cendari.fields.RDFField')(null=True, blank=True),
+        #               keep_default=False)
+
+
+        # Changing field 'User.zotero_uid'
+        db.alter_column(u'main_user', 'zotero_uid', self.gf('django.db.models.fields.CharField')(max_length='10', null=True))
 
     def backwards(self, orm):
         # Deleting model 'UserFeedback'
         db.delete_table(u'main_userfeedback')
 
+        # Deleting field 'Topic.date'
+        # db.delete_column(u'main_topic', 'date')
+
+        # Deleting field 'Topic.rdf'
+        # db.delete_column(u'main_topic', 'rdf')
+
+
+        # Changing field 'User.zotero_uid'
+        db.alter_column(u'main_user', 'zotero_uid', self.gf('django.db.models.fields.CharField')(max_length='6', null=True))
 
     models = {
         u'auth.group': {
@@ -246,6 +268,7 @@ class Migration(SchemaMigration):
             'Meta': {'unique_together': "(('project', 'preferred_name'), ('project', 'topic_node'))", 'object_name': 'Topic'},
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'creator': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'created_topic_set'", 'to': "orm['main.User']"}),
+            'date': ('django.db.models.fields.DateTimeField', [], {'db_index': 'True', 'null': 'True', 'blank': 'True'}),
             'deleted': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'last_updated': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
@@ -253,6 +276,7 @@ class Migration(SchemaMigration):
             'merged_into': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['main.Topic']", 'null': 'True', 'blank': 'True'}),
             'preferred_name': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
             'project': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'topics'", 'to': "orm['main.Project']"}),
+            'rdf': ('cendari.fields.RDFField', [], {'null': 'True', 'blank': 'True'}),
             'summary': ('editorsnotes.main.fields.XHTMLField', [], {'null': 'True', 'blank': 'True'}),
             'topic_node': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'project_topics'", 'to': "orm['main.TopicNode']"})
         },
@@ -303,7 +327,7 @@ class Migration(SchemaMigration):
             'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'}),
             'username': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '30'}),
             'zotero_key': ('django.db.models.fields.CharField', [], {'max_length': "'24'", 'null': 'True', 'blank': 'True'}),
-            'zotero_uid': ('django.db.models.fields.CharField', [], {'max_length': "'6'", 'null': 'True', 'blank': 'True'})
+            'zotero_uid': ('django.db.models.fields.CharField', [], {'max_length': "'10'", 'null': 'True', 'blank': 'True'})
         },
         'main.userfeedback': {
             'Meta': {'object_name': 'UserFeedback'},

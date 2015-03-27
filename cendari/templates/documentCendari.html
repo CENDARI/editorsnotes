@@ -108,6 +108,7 @@
 									{% elif 	topic.topic_node.type == "TAG" %} class ="form-entities r_thing"
 									{% else 						%} class = "form-entities"
 									{% endif %}
+									{%if topic.rdf%}
 								> {{ topic }} </a>
 							{% endfor %}
 							{% if not document.get_all_related_topics|length > 0 %}

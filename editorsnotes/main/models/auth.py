@@ -26,7 +26,8 @@ __all__ = ['User', 'UserFeedback', 'Project', 'ProjectRole', 'ProjectInvitation'
 
 class User(AbstractUser, URLAccessible):
     zotero_key = models.CharField(max_length='24', blank=True, null=True)
-    zotero_uid = models.CharField(max_length='6', blank=True, null=True)
+    # Cendari code E.G. aviz
+    zotero_uid = models.CharField(max_length='10', blank=True, null=True)
     class Meta:
         app_label = 'main'
     def _get_display_name(self):
