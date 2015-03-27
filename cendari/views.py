@@ -403,6 +403,7 @@ def getResourcesData(request, project_slug, sfield):
     my_projects = { 'title':'My projects', 'key':'my_projects', 'isFolder':'true', 'addClass':'',  'url':'', 'children' : [] }
     other_projects = { 'title':'Other projects', 'key':'other_projects', 'isFolder':'true', 'addClass':'',  'url':'', 'children' : [] }    
     projects = request.user.get_authorized_projects().order_by('name')
+
     if request.user.is_superuser:
 	    for p in projects:
 		    p_role = p.get_role_for(request.user)
@@ -465,10 +466,10 @@ def getTopicResources(request, project_slug, sfield):
     sorted_topic_types =  sorted(topic_types, key = lambda x: (x[0], x[1]))
     for (topic_type, topic_name) in sorted_topic_types:
         my_list = []	
-	if sfield == "created":
-        	query_set = main_models.Topic.objects.filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False).order_by('created')[:max_count]   
-	elif sfield == "last_updated":
-        	query_set = main_models.Topic.objects.filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False).order_by('last_updated')[:max_count]       
+    	if sfield == "created" or sfield == "-created" or sfield == "last_updated" or sfield == "-last_updated":
+        	query_set = main_models.Topic.objects.filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False).order_by(sfield)[:max_count]   
+	elif sfield == "-alpha":
+        	query_set = main_models.Topic.objects.filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False).order_by('-preferred_name')[:max_count]       
 	else:
 	        query_set = main_models.Topic.objects.filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False).order_by('preferred_name')[:max_count]          
         set_count = query_set.count()
@@ -490,10 +491,10 @@ def getNoteResources(request, project_slug, sfield):
     max_count = 10000
     node_count = 0
     note_list = []
-    if sfield == "created":
-       	query_set = main_models.Note.objects.filter(project__slug=project_slug).order_by('created')[:max_count]   
-    elif sfield == "last_updated":
-    	query_set = main_models.Note.objects.filter(project__slug=project_slug).order_by('last_updated')[:max_count]      
+    if sfield == "created" or sfield == "-created" or sfield == "last_updated" or sfield == "-last_updated":
+       	query_set = main_models.Note.objects.filter(project__slug=project_slug).order_by(sfield)[:max_count]   
+    elif sfield == "-alpha":
+    	query_set = main_models.Note.objects.filter(project__slug=project_slug).order_by('-title')[:max_count]      
     else:	
     	query_set = main_models.Note.objects.filter(project__slug=project_slug).order_by('title')[:max_count]
     set_count = query_set.count()
@@ -507,14 +508,20 @@ def getDocumentResources(request, project_slug, sfield):
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     max_count = 10000
     doc_list = []   
-    if sfield == "created" or sfield == "-created" or sfield == "last_updated" or sfield == "-lastupdated":
+    if sfield == "created" or sfield == "-created" or sfield == "last_updated" or sfield == "-last_updated":
        	query_set = main_models.Document.objects.filter(project__slug=project_slug).order_by(sfield)[:max_count]   
     elif sfield == "-alpha":
-	unsorted_query_set = main_models.Document.objects.filter(project__slug=project_slug)[:max_count]
-	query_set =  sorted(unsorted_query_set, key = lambda x: ('description'), reverse = True)  
+	#unsorted_query_set = main_models.Document.objects.filter(project__slug=project_slug)[:max_count]
+	#query_set =  sorted(unsorted_query_set, key = lambda doc: doc.description, reverse = True) 
+	#query_set =  sorted(unsorted_query_set, key = lambda x:'description', reverse = True)  
+    	sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document order by CAST(description AS text) DESC'
+    	query_set =  main_models.Document.objects.raw(sql_query) 
     else:
-	unsorted_query_set = main_models.Document.objects.filter(project__slug=project_slug)[:max_count]
-	query_set =  sorted(unsorted_query_set, key = lambda x: ('description'), reverse = False)
+	#unsorted_query_set = main_models.Document.objects.filter(project__slug=project_slug)[:max_count]
+	#query_set =  sorted(unsorted_query_set, key = lambda doc: doc.description, reverse = False) 
+	#query_set =  sorted(unsorted_query_set, key = lambda x:'description', reverse = False)
+    	sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document order by CAST(description AS text)'
+    	query_set =  main_models.Document.objects.raw(sql_query) 
 
     for e in query_set:
         doc = {'title':str(e), 'key':str(project_slug)+'.document.'+str(e.id), 'addClass':'', 'url':e.get_absolute_url(), 'children':[]}
