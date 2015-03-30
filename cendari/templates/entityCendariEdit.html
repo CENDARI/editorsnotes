@@ -78,34 +78,7 @@
 				</div>
 			</li> <!-- end of RELATED ENTITIES TAB -->
 
-			<li> <!-- ARTICLE TAB -->
-				<input type="radio" name="tabs" id="tab4">
-				<label for="tab4">Article</label>
-				<div id="tab-content4" class="tab-content note animated fadeIn">
-					<section id="article-tab" class="tab-pane active">
-						<article id="{{ topic.slug }}-summary" class="note">
-							{% if topic.has_summary %}
-								<div class="note-content">
-									{{ topic.summary|as_html }}
-								</div>
-							{% else %}
-								<div>
-									There is no article about <em>{{ topic.preferred_name }}</em> yet.
-								</div>
-							{% endif %}
-							{% if topic.summary_cites.all %}
-								<h4>Sources</h4>
-								<div class="citation-list">
-									{% for cite in topic.summary_cites.all %}
-										{% include "citation.include" %}
-									{% endfor %}
-								</div>
-							{% endif %}
-						</article>
-					</section>
 
-				</div>
-			</li> <!-- end of ARTICLE TAB -->
 		</ul>
 
 
@@ -141,6 +114,12 @@
 				<div id = "preferred_name_id" class="fieldset-content">
 					{{ topic.preferred_name }} 
 				</div>
+
+				<label class="editorlabel bold">  Description: 	</label> 
+
+				<section data-error-target="content">
+					<input  type="text" id="entity_description" name="entity_description" value="{%if topic.rdf%}{{ topic.summary|as_text }}{%endif%}"/>
+				</section>
 
 				<label class="editorlabel bold"> Resolve: </label> (e.g. to resolve the entity place 'Berlin' use the URL: http://dbpedia.org/resource/Berlin )
 				<section data-error-target="content">

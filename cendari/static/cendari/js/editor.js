@@ -388,10 +388,10 @@ function submitEntity(fc){
     
     formData = formData+"csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&";
     formData=formData+"id="+$('#model_id').val()+"&";
+    formData = formData + "summary="+$('#entity_description').val().trim()+"&";
     formData = formData + "rdf="+$('#rdf_id').val().trim()+"&";
     formData = formData + "preferred_name="+$('#preferred_name_id').text().trim()+"&";
     formData = formData+$("#saveButton").attr('name')+"="+$("#saveButton").val();
-
     $.ajax({
         url:fc.attr('action'),
         type: fc.attr('method'),

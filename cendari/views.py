@@ -838,6 +838,7 @@ def editEntityCendari(request, project_slug, topic_node_id):
     o['object_type'] = 'topic'
     o['object_id'] = topic_node_id
     o['topic_type'] = topic.topic_node.type
+    print "...................... topic.summary = " + str(topic.summary)
     o['breadcrumb'] = (
         (topic.project.name, topic.project.get_absolute_url()),
         ('Topics', reverse('all_topics_view', kwargs={'project_slug': topic.project.slug})),(topic.preferred_name, None)
