@@ -411,11 +411,20 @@ def semantic_process_note(note,user=None):
                  and value.startswith('http'):
                 topic.rdf = value
                 topic.save()
-            elif t['type']=='EVT'\
-                 and utils.parse_well_known_date(value):
-                topic.date = utils.parse_well_known_date(value)
-                logger.debug('Found a valid date: %s', topic.date)
-                topic.save()
+            elif t['type']=='EVT':
+         	if utils.parse_well_known_date(value):
+                	topic.date = utils.parse_well_known_date(value)
+                	logger.debug('Found a valid date: %s', topic.date)
+			topic.save()	
+ 		else:
+			results_reg = re.search('\[(.*?)\]', value)
+			if results_reg!=None:
+				results_reg = str(results_reg.group(0))
+				explicit_date = results_reg[1:len(results_reg)-1]
+				if utils.parse_well_known_date(explicit_date):
+                			topic.date = utils.parse_well_known_date(explicit_date)
+                			logger.debug('Found a valid date between []: %s', topic.date)
+					topic.save()	
     semantic.commit()
     utils.update_delete_status(note.project)
 
