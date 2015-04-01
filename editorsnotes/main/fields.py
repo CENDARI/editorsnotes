@@ -79,7 +79,7 @@ class XHTMLField(models.Field):
             fragment = html.fragment_fromstring(value)
         except etree.ParserError:
             fragment = html.fragment_fromstring(value, create_parent='div')
-        autolink(fragment)
+        #autolink(fragment)
         # Stop cleaning for now, the cleaner to is too aggressive for RDFa [jdf]
         return fragment # cleaner.clean_html(fragment)
     def get_prep_value(self, value):

@@ -10,7 +10,7 @@ djangorestframework==2.3.13
 
 pyelasticsearch==0.6
 BeautifulSoup<4.0
-lxml==3.0.2
+lxml==3.4.2
 cssselect==0.8
 Pillow==2.7.0
 psycopg2==2.4.6
