@@ -82,54 +82,54 @@
       <script type="text/javascript">       
 
       function sortTree(field){
-	  previous_sfield = $.cookie('sfield');
-	  rev = '-';
-	  //alert("previous sfield = " + previous_sfield);
-	  if(previous_sfield!=null && previous_sfield == field){
-		if(previous_sfield.substring(0,1)=='-'){
-			sfield = field;
-		}else{
-			sfield = rev.concat(field);
-		}
-	  }else{
-                sfield = field;
-	  }
-          console.log('sfield',sfield);
-          $.cookie('sfield',sfield);
-          
-          $("#tree").dynatree("option", "initAjax", {
-            data: {key:''},
-            url: cendari_root_url+'cendari/'+cendari_js_project_slug+'/getResourcesData/sfield/'+ sfield,
-            dataType: "jsonp",
-          });
-
-          $('#tree').dynatree("getTree").reload();
+        previous_sfield = $.cookie('sfield');
+        rev = '-';
+        //alert("previous sfield = " + previous_sfield);
+        if(previous_sfield!=null && previous_sfield == field){
+          if(previous_sfield.substring(0,1)=='-'){
+            sfield = field;
+          }else{
+            sfield = rev.concat(field);
+          }
+        }else{
+          sfield = field;
         }
+        console.log('sfield',field);
+        $.cookie('sfield',field);
 
-        $(document).ready(function(){
-          cendari_js_project_slug = '{{ project_slug }}';
-          // $("#tree").dynatree("option", "initAjax", {
-          //   data: {key:''},
-          //   url: cendari_root_url+'cendari/'+cendari_js_project_slug+'/getResourcesData/sfield/'+ sfield,
-          //   dataType: "jsonp",
-          // });
-          // $('#tree').dynatree("getTree").reload();
-          if($.cookie('sfield')!==null){
-            sfield = $.cookie('sfield');
-            $('.sfield_label').removeClass('active');
-            $('#label_'+sfield).addClass('active');
-          }          
-          sortTree(sfield);
-          $('.sfield_label').on('click', function() {
-            console.log('it is clicked :D')
-            $('.sfield_label').removeClass('active');
-            $(this).addClass('active');
-            var radio_id = $(this).attr('for');
-            console.log('radio_id',radio_id);
-            sortTree($('#'+radio_id).val());
-          });
-
+        $("#tree").dynatree("option", "initAjax", {
+          data: {key:''},
+          url: cendari_root_url+'cendari/'+cendari_js_project_slug+'/getResourcesData/sfield/'+ sfield,
+         dataType: "jsonp",
         });
+
+        $('#tree').dynatree("getTree").reload();
+      }
+
+      $(document).ready(function(){
+      cendari_js_project_slug = '{{ project_slug }}';
+      // $("#tree").dynatree("option", "initAjax", {
+      //   data: {key:''},
+      //   url: cendari_root_url+'cendari/'+cendari_js_project_slug+'/getResourcesData/sfield/'+ sfield,
+      //   dataType: "jsonp",
+      // });
+      // $('#tree').dynatree("getTree").reload();
+      if($.cookie('sfield')!==null){
+      sfield = $.cookie('sfield');
+      $('.sfield_label').removeClass('active');
+      $('#label_'+sfield).addClass('active');
+      }          
+      sortTree(sfield);
+      $('.sfield_label').on('click', function() {
+      console.log('it is clicked :D')
+      $('.sfield_label').removeClass('active');
+      $(this).addClass('active');
+      var radio_id = $(this).attr('for');
+      console.log('radio_id',radio_id);
+      sortTree($('#'+radio_id).val());
+      });
+
+      });
 
       </script>      
        
@@ -151,10 +151,10 @@
       <input type="radio" class='radio_link' name="sfield" value="alpha" id="radio_button_alpha" />
       <label class ='sfield_label radio_link' id='label_alpha' for="radio_button_alpha">alphabetical</label>
 
-      <input type="radio" class='radio_link' name="sfield" value="created" id="radio_button_creation" />
+      <input type="radio" class='radio_link' name="sfield" value="creation" id="radio_button_creation" />
       <label class ='sfield_label radio_link' id='label_creation'  for="radio_button_creation">creation</label>
       
-      <input type="radio" class='radio_link' name="sfield" value="last_updated" id="radio_button_access" />
+      <input type="radio" class='radio_link' name="sfield" value="access" id="radio_button_access" />
       <label class ='sfield_label radio_link' id='label_access' for="radio_button_access">last updated</label>
       
     </p>
