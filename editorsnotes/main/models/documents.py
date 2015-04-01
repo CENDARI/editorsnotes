@@ -337,13 +337,16 @@ class Footnote(LastUpdateMetadata, Administered, URLAccessible,
         super(Footnote, self).delete(*args, **kwargs)
 reversion.register(Footnote)
 
+def scan_file_name(instance, filename):
+    return '/'.join(['scans', instance.document.project.slug, filename])
+
 class Scan(CreationMetadata, ProjectPermissionsMixin):
     u"""
     A scanned image of (part of) a dcument.
     """
     document = models.ForeignKey(Document, related_name='scans')
-    image = models.ImageField(storage=iipimage_storage, upload_to='scans/%Y/%m')
-    image_thumbnail = models.ImageField(upload_to='scans/%Y/%m', blank=True, null=True)
+    image = models.ImageField(storage=iipimage_storage, upload_to=scan_file_name)
+    image_thumbnail = models.ImageField(upload_to=scan_file_name, blank=True, null=True)
     ordering = models.IntegerField(blank=True, null=True)
     objects = OrderingManager()
 
