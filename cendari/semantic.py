@@ -466,7 +466,6 @@ def semantic_process_document(document,user=None):
             document.related_topics.create(creator=user, topic=topic)
             subject = t['rdfsubject']
             value = t['value']
-	    print (',,,,,,,,,,,,,,,,,,,,,, nb vlaue = '  + value)
             g.add( (subject, OWL.sameAs, rdftopic) )
             g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
             if topic.rdf is None and subject.startswith('http'):
@@ -529,13 +528,29 @@ def semantic_process_transcript(transcript,user=None):
             rdftopic = semantic_uri(topic)
             transcript.document.related_topics.create(creator=user, topic=topic)
             subject = t['rdfsubject']
+            value = t['value']
             g.add( (subject, OWL.sameAs, rdftopic) )
             g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
             if topic.rdf is None and subject.startswith('http'):
                 topic.rdf = unicode(subject)
                 topic.save()
+            elif t['type']=='EVT':
+         	if utils.parse_well_known_date(value):
+                	topic.date = utils.parse_well_known_date(value)
+                	logger.debug('Found a valid date: %s', topic.date)
+			topic.save()	
+ 		else:
+			results_reg = re.search('\[(.*?)\]', value)
+			if results_reg!=None:
+				results_reg = str(results_reg.group(0))
+				explicit_date = results_reg[1:len(results_reg)-1]
+				if utils.parse_well_known_date(explicit_date):
+                			topic.date = utils.parse_well_known_date(explicit_date)
+                			logger.debug('Found a valid date between []: %s', topic.date)
+					topic.save()	
     semantic.commit()  
     utils.update_delete_status(transcript.document.project)
+
 
 def semantic_process_topic(topic,user=None,doCommit=True):
     """Extract the semantic information from a topic."""
