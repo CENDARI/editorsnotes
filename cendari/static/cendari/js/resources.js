@@ -7,9 +7,8 @@ $(function() {
 	//persist: true,
 	onClick: function(node, event) {
 	    selected_node = node.data.key;
-	    value = '{project:' + selected_node + ', node:' + node.data.title + ',url:' + node.data.url + '}';
-	    //alert('node keypath= ' + node.data.key);
-	    trace.event("_user","select", "resources", value);	   
+	    //value = '{project:' + selected_node + ', node:' + node.data.title + ',url:' + node.data.url + '}';
+	    //trace.event("_user","select", "resources", value);//remove call for now, causes a bug	   
 	    level = node.getLevel();
             console.log('==============================>>>>>>>>>> Resources/onClick: selected node key, level = ' + selected_node + ' , ' + level);
 	    if(level==3){
