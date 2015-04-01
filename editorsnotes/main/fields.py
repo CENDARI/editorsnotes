@@ -12,7 +12,7 @@ from django.utils.encoding import force_unicode
 # cleaner = Cleaner(style=True)
 # Cendari code E.G. aviz
 from lxml.html.clean import Cleaner
-cleaner = Cleaner(style=True,safe_attrs_only=False) #[jdf] fix for RDFa
+cleaner = Cleaner(style=False,safe_attrs_only=False) #[jdf] fix for RDFa
 
 
 def update_attrs(attrs, extra_attrs):

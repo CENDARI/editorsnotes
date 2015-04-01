@@ -37,7 +37,7 @@
 {% block init %}
 	<meta name="document_id" id="document_id" content="{{ document.id }}" />
 	<meta name="document_name" id="document_name" content="{{ document.import_id }}" />
-	<script type="text/javascript" src="{% static "cendari/js/jquery.toc.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "cendari/js/toc.min.js" %}"></script>
 {% endblock init %}
 
 {% block model_fields %}
@@ -240,7 +240,7 @@
 			// 	  return $heading[0].tagName.toLowerCase();
 			// 	}
 			// });
-			$('#transcript_toc').toc({content: "#transcript_content", headings: "h1,h2,h3,h4,h5,h6"});
+			// $('#transcript_toc').toc({content: "#transcript_content", headings: "h1,h2,h3,h4,h5,h6"});
 			$('#document_toc').toc({content: "#document_content", headings: "h1,h2,h3,h4,h5,h6"});
 			$('.visibilityToc').on('click',function(e){
 				e.preventDefault();

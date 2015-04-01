@@ -39,7 +39,7 @@ function viewImage(id)
 
 $(document).ready(function() 
 {
-	$('#scan-list').delegate('a.scan','click',funcion(){
+	$('#scan-list').delegate( "a.scan", "click", function() {
     // $('a.scan').click(function(event) {
 		var scan_id = this.getAttribute('id');
 		value = '{project:' + cendari_js_project_slug + 'scan_id: ' + scan_id + '}';
