@@ -105,7 +105,22 @@ def _check_project_privs_or_deny(user, project_slug):
             if not projects:
                 print "project list empty!!"
                 raise PermissionDenied("insufficient priviledges for %s" % user.username)
-            project = projects[0]
+	    #(NB) handle superusers
+	    found_p = False
+	    count = -1
+	    if user.is_superuser:
+		for p in projects:
+			if(found_p == False):
+				p_role = p.get_role_for(user)
+				if p_role!=None:
+					count = count+1
+					found_p = True
+		if(count!=-1):	
+			project = projects[count]
+		else:
+			print "no project created for this superuser."
+	    else:
+	   	project = projects[0]
         else:
             project = get_object_or_404(Project, slug=project_slug)
         if not user.superuser_or_belongs_to(project):
@@ -414,7 +429,7 @@ def getResourcesData(request, project_slug, sfield):
 			    other_project = { 'title':str(p.name), 'key':str(p.slug), 'isFolder':'true', 'addClass':'',  'url':'', 'isLazy':'true', 'children' : [] }
 			    other_projects['children'].append(other_project)
 	    my_tree['children'].append(my_projects)
-	    my_tree['children'].append(other_projects)	
+	    my_tree['children'].append(other_projects)
     else:
 	    #copied from cendari.admin2
 	    owned_projects = projects
