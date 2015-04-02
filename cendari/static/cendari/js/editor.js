@@ -120,9 +120,9 @@ function  updatedEnitiesTab(prefix,related_topics){
 function createScanElement(image_url,thumbnail_url,id){
     var html = "";
     html +='<li class="scan-list-item btn">'+
-            '<a class="scan btn" id="1" href="http://'+window.location.pathname+image_url+'">'+
+            '<a class="scan" id="1" href="http://'+window.location.pathname+image_url+'">'+
             '<img id="ext-gen1206" src="'+thumbnail_url+'" alt="Thumbnail of scan 1" width="100"></a>'+
-            '<a href="/api/projects/project1/documents/'+cendari_js_object_id+'/scans/'+id+'/" class="delete" data-confirm="Are you sure to delete this item?"><img src="/static/cendari/img/fileclose.png"></a>'+
+            '<a href="'+cendari_root_url+'api/projects/'+cendari_js_project_slug+'/documents/'+cendari_js_object_id+'/scans/'+id+'/" class="delete" data-confirm="Are you sure to delete this item?"><img src="'+cendari_root_url+'static/cendari/img/fileclose.png"></a>'+
             '</li>';
     return html;
                     
@@ -388,10 +388,10 @@ function submitEntity(fc){
     
     formData = formData+"csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&";
     formData=formData+"id="+$('#model_id').val()+"&";
+    formData = formData + "summary="+$('#entity_description').val().trim()+"&";
     formData = formData + "rdf="+$('#rdf_id').val().trim()+"&";
     formData = formData + "preferred_name="+$('#preferred_name_id').text().trim()+"&";
     formData = formData+$("#saveButton").attr('name')+"="+$("#saveButton").val();
-
     $.ajax({
         url:fc.attr('action'),
         type: fc.attr('method'),
@@ -432,6 +432,7 @@ $(document).ready(function(){
         }
         if(cendari_js_object_type == 'document'){
             showInfoMessage(messages.document.beforeSend);
+            console.log("cendari_js_object_id ===>",cendari_js_object_id)
             if(cendari_js_object_id.length === 0){
                 submitDocument(fc);
             }

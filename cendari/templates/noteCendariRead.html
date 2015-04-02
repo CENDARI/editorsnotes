@@ -5,50 +5,44 @@
 {% block css %}
 	<link rel="stylesheet" type="text/css" media="all" href="{% static "iipmooviewer/css/iip.css" %}" />
 	<style type="text/css">
-		.toc {
-			background: #fefefe;
-			border: 1px solid #ddd;
-			color: #333;
-			width: 300px;
-		}
-
-		.toc a {
-			color: #333;
-		}
-
-		.toc .tocH2 {
-			margin-left: 10px
-		}
-		.toc .tocH3 {
-			margin-left: 20px
-		}
-
-		.toc .tocH4 {
-			margin-left: 30px
-		}
-
-		.toc .tocH5 {
-			margin-left: 40px
-		}
-
-		.toc .tocH6 {
-			margin-left: 50px
-		}
-
-		.toc-active {
+		.toc  a{
 			color: #000;
-			font-weight: bold;
+			text-decoration: underline;
+
 		}
-		.toc.right {
-			right: 0
+		.toc  li {
+		    list-style:decimal;}
+		.toc  ol li {
+			list-style-type:lower-roman;
 		}
+		.toc  ol ol li {
+			list-style-type:lower-latin;
+		}
+		.toc{
+			padding-left: 2em;
+		}
+		.toc ul, .toc ol{
+		    padding-left: 2em;
+		}
+
+		.toc  {
+	    	list-style-position:inside;
+	    	border: 1px solid black;
+	 	}  
+
+	 	u {
+		    text-decoration: none;
+		    border-bottom: 2px solid black;
+		}
+
 	</style>
 {% endblock %}
 
 {% block init %}
 	<meta name="note_id" id="note_id" content="{{ note.id }}" />
 	<meta name="note_name" id="note_name" content="{{ note.title }}" />
-	<script type="text/javascript" src="{% static "cendari/js/toc.min.js" %}"></script>
+	<script type="text/javascript" src="{% static "cendari/js/jquery.toc.min.js" %}"></script>
+	<!--<script type="text/javascript" src="{% static "cendari/js/toc.min.js" %}"></script>-->
 {% endblock init %}
 
 
@@ -76,7 +70,11 @@
 								{% else 						%} class = "form-entities"
 								{% endif %}
 								> 
-									{{ topic }} 
+									{% if  topic.rdf%} 
+										{{topic}} 
+									{%else%}
+										<u> {{topic}} </u>
+									{%endif%} 
 								</a>
 							{% endfor %}
 							{% if not note.get_all_related_topics|length > 0 %}
@@ -179,7 +177,13 @@
 		{% if note %}
 			<h1> {{note.title}} </h1>
 
-			<div id="note_toc" class='toc'></div>
+			<!-- <div id="note_toc" class='toc'></div> -->
+			<!-- <ul id="note_toc"></ul> -->
+			<div id='note_toc_wrapper'>
+				<p>Table of contents (<a class='visibilityToc' href="">hide</a>)</p>
+				<ol id="note_toc" class='toc'></ol>
+			</div>
+			
 			<div id="note_content"> 
 				{{note.content|as_html}}
 			</div>
@@ -224,27 +228,21 @@
 		{% endif %}
 
 
-		$(document).ready(function(){
-			
-			$('#note_toc').toc({
-				'container': '#note_content',
-				'selectors': 'h1,h2,h3,h4,h5,h6',
-				'smoothScrolling': true, //enable or disable smooth scrolling on click
-			    'prefix': 'toc', //prefix for anchor tags and class names
-			    'onHighlight': function(el) {}, //called when a new section is highlighted 
-			    'highlightOnScroll': true, //add class to heading that is currently in focus
-			    'highlightOffset': 100, //offset to trigger the next headline
-			    'anchorName': function(i, heading, prefix) { //custom function for anchor name
-			        return prefix+i;
-			    },
-			    'headerText': function(i, heading, $heading) { //custom function building the header-item text
-			        return $heading.text();
-			    },
-				'itemClass': function(i, heading, $heading, prefix) { // custom function for item class
-				  return $heading[0].tagName.toLowerCase();
+		$(document).ready(function(){	
+			$('#note_toc').toc({content: "#note_content", headings: "h1,h2,h3,h4,h5,h6"});
+			$('.visibilityToc').on('click',function(e){
+				e.preventDefault();
+				if($(this).text().indexOf('show')>-1){
+					$(this).text('hide');
+					$('#note_toc').show();
 				}
-			});
+				else{
+					$(this).text('show');
+					$('#note_toc').hide();
+				}
+			})
 		});
+		
 
 		Ext.onReady(function(){
 			$('#extraButtonId').text('Edit Mode');

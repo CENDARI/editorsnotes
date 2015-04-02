@@ -24,16 +24,32 @@
 
  <script type="text/javascript" src="https://dev.dariah.eu/jira/s/fa233ec786d6cfd2995f6f7fd7013a94-T/en_UK-3nf04g/6329/39/1.4.13/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector.js?locale=en-UK&collectorId=346f4388">
   </script>
-  <script type="text/javascript">window.ATL_JQ_PAGE_PROPS =  {
-    "triggerFunction": function(showCollectorDialog) {
-      //Requries that jQuery is available! 
-      if($('#issueCollector').length){
-        jQuery("#issueCollector").click(function(e) {
-          e.preventDefault();
-          showCollectorDialog();
-        });
+  <script type="text/javascript">
+    window.ATL_JQ_PAGE_PROPS =  {
+      "triggerFunction": function(showCollectorDialog) {
+        //Requries that jQuery is available! 
+        if($('#issueCollector').length){
+          jQuery("#issueCollector").click(function(e) {
+            e.preventDefault();
+            showCollectorDialog();
+          });
+        }
       }
-    }};
+    };
+
+    Ext.onReady(function(){
+      updateIframe('resourcesIframe');
+      updateIframe('smallvisIframe');
+
+      if(document.location.href.indexOf('note')===-1 && document.location.href.indexOf('document')===-1){
+        $('#extraButtonId').hide();
+        $('#deleteButtonId').hide();
+      }
+
+    })
+
+
+
   </script>
 
 

@@ -4,6 +4,13 @@
 
 {% block css %}
 	<link rel="stylesheet" type="text/css" media="all" href="{% static "iipmooviewer/css/iip.css" %}" />
+	<style type="text/css">
+		u {
+		    text-decoration: none;
+		    border-bottom: 2px solid black;
+		}
+		
+	</style>
 {% endblock %}
 
 {% block init %}
@@ -34,9 +41,13 @@
 								{% elif 	topic.topic_node.type == "PLA" %} class ="form-entities r_place"
 								{% elif 	topic.topic_node.type == "TAG" %} class ="form-entities r_thing"
 								{% else 						%} class = "form-entities"
-								{% endif %}
+								{% endif %} 
 								> 
-									{{ topic }} 
+									{% if  topic.rdf%} 
+										{{topic}} 
+									{%else%}
+										<u> {{topic}} </u>
+									{%endif%}
 								</a>
 							{% endfor %}
 							{% if not note.get_all_related_topics|length > 0 %}
@@ -161,7 +172,7 @@
 				<!-- <label for="note-title">Note's title</label> -->
 				<p>Note's title</p>
 				<input type="text" id="note_title" name="title" style="height:30px;" value="{%if note%}{{note.title}}{%endif%}">
-				<p>Notes's content</p>
+				<p>Note's content</p>
 				<div data-error-target="note-description"></div>
 				<textarea id="note-description" type="text"  class="mceEditor" name="content"  >
 				{% if note %} {{ note.content|as_html }} {% endif %}	
@@ -227,10 +238,31 @@
 					console.log("readModeUrl",readModeUrl);
 					window.location.replace(readModeUrl);
 				});
+				$('#deleteButtonId').on('click',function(e){
+					var url = '{% url "api:api-notes-detail" project_slug=project.slug  pk=note.id %}'
+					var choice = confirm('Are you sure you want to delete this document?')
+					if(choice){
+						var formData ="csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&_method=DELETE";
+						$.ajax({
+						// beforeSend: function (xhr) {xhr.setRequestHeader('X-CSRFToken', $('input[name="csrfmiddlewaretoken"]').val());},
+							url:url,
+							type: 'POST',
+							data: formData,
+							success: function(data){
+								window.location.href = 'http://'+window.location.host
+							},
+							error: function(XMLHttpRequest, textStatus, errorThrown) { 
+							console.log("Error with status "+textStatus+":",errorThrown);
+							showErrorMessage(messages.transcript.error);
+							} 
+						});
+					}
+				})
 			})
 		{% else %}
 			Ext.onReady(function(){
 				$('#extraButtonId').hide();
+				$('#deleteButtonId').hide();
 				
 			})
 		{% endif %}

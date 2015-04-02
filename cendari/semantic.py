@@ -61,6 +61,7 @@ DBPPROP  = Namespace("http://dbpedia.org/property/")
 GRS     = Namespace("http://www.georss.org/georss/")
 GEO     = Namespace("http://www.w3.org/2003/01/geo/wgs84_pos#")
 DBOWL   = Namespace("http://dbpedia.org/ontology/")
+FREEBASE = Namespace("http://rdf.freebase.com/ns/")
 
 INIT_NS = {
     'owl': OWL, 
@@ -69,7 +70,8 @@ INIT_NS = {
     'dbpprop': DBPPROP,
     'grs': GRS,
     'geo': GEO,
-    'dbpedia-own': DBOWL
+    'dbpedia-owl': DBOWL,
+    'ns': FREEBASE
 }
 
 WRONG_PREFIX = "http://dbpedia.org/page/"
@@ -96,9 +98,7 @@ class SemanticHandler(object):
                 pwd=settings.VIRTUOSO.get('dba_password','dba')
                 uid=settings.VIRTUOSO.get('dba_user','dba')
                 dsn=settings.VIRTUOSO.get('dsn','VOS')
-                host=settings.VIRTUOSO.get('HOST','localhost')
-                self.connection = ('Server=%s:DSN=%s;UID=%s;PWD=%s;WideAsUTF16=\
-Y' % (host, dsn, uid, pwd))
+                self.connection = ('DSN=%s;UID=%s;PWD=%s;WideAsUTF16=Y' % (dsn, uid, pwd))
                 self.store = 'Virtuoso'
             else:
                 raise ImproperlyConfigured("SEMANTIC_STORE invalid in the settings file'")
@@ -384,8 +384,8 @@ def semantic_process_note(note,user=None):
 
     #pdb.set_trace()
    
-    if fix_links(note.content):
-        note.save()
+#    if fix_links(note.content):
+#        note.save()
 
     xml = note.content
 
@@ -409,12 +409,22 @@ def semantic_process_note(note,user=None):
                  and value.startswith('http'):
                 topic.rdf = value
                 topic.save()
-            elif t['type']=='EVT'\
-                 and utils.parse_well_known_date(value):
-                topic.date = utils.parse_well_known_date(value)
-                logger.debug('Found a valid date: %s', topic.date)
-                topic.save()
+            elif t['type']=='EVT':
+         	if utils.parse_well_known_date(value):
+                	topic.date = utils.parse_well_known_date(value)
+                	logger.debug('Found a valid date: %s', topic.date)
+			topic.save()	
+ 		else:
+			results_reg = re.search('\[(.*?)\]', value)
+			if results_reg!=None:
+				results_reg = str(results_reg.group(0))
+				explicit_date = results_reg[1:len(results_reg)-1]
+				if utils.parse_well_known_date(explicit_date):
+                			topic.date = utils.parse_well_known_date(explicit_date)
+                			logger.debug('Found a valid date between []: %s', topic.date)
+					topic.save()	
     semantic.commit()
+    utils.update_delete_status(note.project)
 
 def semantic_process_document(document,user=None):
     """Extract the semantic information from a note,
@@ -425,8 +435,8 @@ def semantic_process_document(document,user=None):
 #    pdb.set_trace()
     if user is None:
         user = document.last_updater
-    if fix_links(document.description):
-        document.save()
+#    if fix_links(document.description):
+#        document.save()
     # Cleanup entities related to document
     uri = semantic_uri(document)
     g = Semantic.graph(uri)
@@ -453,12 +463,34 @@ def semantic_process_document(document,user=None):
             rdftopic = semantic_uri(topic)
             document.related_topics.create(creator=user, topic=topic)
             subject = t['rdfsubject']
+            value = t['value']
             g.add( (subject, OWL.sameAs, rdftopic) )
             g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
             if topic.rdf is None and subject.startswith('http'):
                 topic.rdf = unicode(subject)
                 topic.save()
-    semantic.commit()   
+            elif topic.rdf is None and t['type']=='PUB'\
+                 and value.startswith('http'):
+                topic.rdf = value
+                topic.save()
+            elif t['type']=='EVT':
+         	if utils.parse_well_known_date(value):
+                	topic.date = utils.parse_well_known_date(value)
+                	logger.debug('Found a valid date: %s', topic.date)
+			topic.save()	
+ 		else:
+			results_reg = re.search('\[(.*?)\]', value)
+			if results_reg!=None:
+				results_reg = str(results_reg.group(0))
+				explicit_date = results_reg[1:len(results_reg)-1]
+				if utils.parse_well_known_date(explicit_date):
+                			topic.date = utils.parse_well_known_date(explicit_date)
+                			logger.debug('Found a valid date between []: %s', topic.date)
+					topic.save()	
+    semantic.commit()
+    utils.update_delete_status(document.project)
+
+ 
 
 def semantic_process_transcript(transcript,user=None):
     """Extract the semantic information from a note,
@@ -494,12 +526,29 @@ def semantic_process_transcript(transcript,user=None):
             rdftopic = semantic_uri(topic)
             transcript.document.related_topics.create(creator=user, topic=topic)
             subject = t['rdfsubject']
+            value = t['value']
             g.add( (subject, OWL.sameAs, rdftopic) )
             g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
             if topic.rdf is None and subject.startswith('http'):
                 topic.rdf = unicode(subject)
                 topic.save()
+            elif t['type']=='EVT':
+         	if utils.parse_well_known_date(value):
+                	topic.date = utils.parse_well_known_date(value)
+                	logger.debug('Found a valid date: %s', topic.date)
+			topic.save()	
+ 		else:
+			results_reg = re.search('\[(.*?)\]', value)
+			if results_reg!=None:
+				results_reg = str(results_reg.group(0))
+				explicit_date = results_reg[1:len(results_reg)-1]
+				if utils.parse_well_known_date(explicit_date):
+                			topic.date = utils.parse_well_known_date(explicit_date)
+                			logger.debug('Found a valid date between []: %s', topic.date)
+					topic.save()	
     semantic.commit()  
+    utils.update_delete_status(transcript.document.project)
+
 
 def semantic_process_topic(topic,user=None,doCommit=True):
     """Extract the semantic information from a topic."""
@@ -560,7 +609,9 @@ imported_relations = set([
     DBPPROP['deathPlace'],
     # Event/battle
     DBOWL['date'], 
-    DBOWL['place']
+    DBOWL['place'],
+    FREEBASE['topic_server.geolocation_latitude'],
+    FREEBASE['topic_server.geolocation_longitude'],
 ])
 
 no_duplicates = set([
@@ -618,7 +669,7 @@ def semantic_resolve_topic(topic, force=False):
         if rdf_url.startswith('http://rdf.freebase') or rdf_url.startswith('https://rdf.freebase'):
             try:
                 rdf = urllib2.urlopen(rdf_url).read()
-                rdf = re.sub(r'\\x(..)', '\\u00\1', rdf)
+                rdf = re.sub(r'\\x(..)', r'\\u00\1', rdf)
                 loaded.parse(data=rdf, format="n3")
             except:
                 traceback.print_exc(file=sys.stdout)
@@ -671,6 +722,14 @@ def semantic_resolve_topic(topic, force=False):
             g.add( (uri, GRS['point'], Literal("%f %f" % (lat, lon))) )
             logger.info("Found in dbprop:latDeg/dbprop:lonDeg: %s", g.value(uri, GRS['point']))
             return
+
+        lat = g.value(uri, FREEBASE['topic_server.geolocation_latitude'])
+        lon = g.value(uri, FREEBASE['topic_server.geolocation_longitude'])
+        if lat and lon:
+            g.add( (uri, GRS['point'], Literal(lat+" "+lon)) )
+            logger.info("Found in ns:latitude/ns:longitude: %s", g.value(uri, GRS['point']))
+            return
+            
 
         logger.warning('No lat/long information in RDF for %s', unicode(uri))
         # chase in geonames later

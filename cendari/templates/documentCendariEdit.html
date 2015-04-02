@@ -4,7 +4,13 @@
 
 {% block css %}
 	<link rel="stylesheet" type="text/css" media="all" href="{% static "iipmooviewer/css/iip.css" %}" />
-	
+	<style type="text/css">
+		u {
+		    text-decoration: none;
+		    border-bottom: 2px solid black;
+		}
+		
+	</style>
 {% endblock %}
 
 
@@ -99,7 +105,13 @@
 									{% elif 	topic.topic_node.type == "TAG" %} class ="form-entities r_thing"
 									{% else 						%} class = "form-entities"
 									{% endif %}
-								> {{ topic }} </a>
+								> 
+									{% if  topic.rdf%} 
+										{{topic}} 
+									{%else%}
+										<u> {{topic}} </u>
+									{%endif%} 
+								</a>
 							{% endfor %}
 							{% if not document.get_all_related_topics|length > 0 %}
 								<div> No Entities. </div> 
@@ -367,10 +379,31 @@
 					var readModeUrl = '{% url "document_read" project_slug=project.slug  document_id=document.id %}';
 					window.location.replace(readModeUrl);
 				});
+				$('#deleteButtonId').on('click',function(e){
+					var url = '{% url "api:api-documents-detail" project_slug=project.slug  pk=document.id %}'
+					var choice = confirm('Are you sure you want to delete this document?')
+					if(choice){
+						var formData ="csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&_method=DELETE";
+						$.ajax({
+						// beforeSend: function (xhr) {xhr.setRequestHeader('X-CSRFToken', $('input[name="csrfmiddlewaretoken"]').val());},
+							url:url,
+							type: 'POST',
+							data: formData,
+							success: function(data){
+								window.location.href = 'http://'+window.location.host
+							},
+							error: function(XMLHttpRequest, textStatus, errorThrown) { 
+							console.log("Error with status "+textStatus+":",errorThrown);
+							showErrorMessage(messages.transcript.error);
+							} 
+						});
+					}
+				})
 			})
 		{% else %}
 			Ext.onReady(function(){
 				$('#extraButtonId').hide();
+				$('#deleteButtonId').hide();
 				
 			})
 		{% endif %}

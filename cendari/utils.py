@@ -199,3 +199,13 @@ def custom_exception_handler(exc):
     else:
         logger.debug('Received exception %s', type(exc))
     return response
+
+def update_delete_status(project):
+    topics = project.topics.all()
+    for topic in topics:
+        if len(topic.get_related_documents()) == len(topic.get_related_notes()) == 0:
+            topic.deleted = True
+            topic.save()
+        else:
+            topic.deleted = False
+            topic.save()

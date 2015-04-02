@@ -71,38 +71,38 @@ var uuid = function() {
 }
 
 var sendLogs_ = function(list) {
-    var httpRequest;
+    var httpsRequest;
     if (window.XDomainRequest)
     {
-        httpRequest=new XDomainRequest();
-        httpRequest.onload = function() { sendMoreOrAgain(true); };
+        httpsRequest=new XDomainRequest();
+        httpsRequest.onload = function() { sendMoreOrAgain(true); };
     }
-    else if (window.XMLHttpRequest)
-        httpRequest=new XMLHttpRequest();
+    else if (window.XMLHttpsRequest)
+        httpsRequest=new XMLHttpsRequest();
     else
-        httpRequest=new ActiveXObject("Microsoft.XMLHTTP");
-    httpRequest.onreadystatechange = function() {
+        httpsRequest=new ActiveXObject("Microsoft.XMLHTTP");
+    httpsRequest.onreadystatechange = function() {
 	if (debug) {
-	    windows.console && console.log("readyState =%d", httpRequest.readyState);
+	    windows.console && console.log("readyState =%d", httpsRequest.readyState);
 	}
-	if (httpRequest.readyState == this.DONE) {
+	if (httpsRequest.readyState == this.DONE) {
 	    if (debug) {
-		windows.console && console.log("status =%d", httpRequest.status);
+		windows.console && console.log("status =%d", httpsRequest.status);
 	    }
-	    sendMoreOrAgain(httpRequest.status < 300);
+	    sendMoreOrAgain(httpsRequest.status < 300);
 	}
     };
     var json = JSON.stringify(list);
-    httpRequest.open("POST", traceUrl, true);
+    httpsRequest.open("POST", traceUrl, true);
     if (window.XDomainRequest) {
 	// no request header?
     }
-    else if (window.XMLHttpRequest) {
-	httpRequest.setRequestHeader("Content-Type", "application/json");
-	httpRequest.setRequestHeader("Accept", "text/plain");
-	//    httpRequest.setRequestHeader("Content-Length", json.length);
+    else if (window.XMLHttpsRequest) {
+	httpsRequest.setRequestHeader("Content-Type", "application/json");
+	httpsRequest.setRequestHeader("Accept", "text/plain");
+	//    httpsRequest.setRequestHeader("Content-Length", json.length);
     }
-    httpRequest.send(json);
+    httpsRequest.send(json);
 }
 
 var sendLogs = function() {

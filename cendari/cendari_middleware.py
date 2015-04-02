@@ -17,6 +17,7 @@ class CendariUserMiddleware(RemoteUserMiddleware):
         super(CendariUserMiddleware, self).process_request(request)
         user = request.user
         logger.debug('Cendari Middelware called with user %s', user)
+        changed = False
 
         try:
             memberof = request.META['isMemberOf']
@@ -30,27 +31,52 @@ class CendariUserMiddleware(RemoteUserMiddleware):
                     is_admin = True
                     logger.debug("User is admin")
                     break
-                elif group in group_maps['editor_groups']:
+                elif group in group_maps['contributor_groups']:
                     logger.debug("User is editor")
                     is_editor = True
                     break
             if is_admin:
-                user.is_superuser = True
-                user.is_active = True
-                user.is_staff = True
+                if not user.is_superuser:
+                    changed = True
+                    user.is_superuser = True
+                if not user.is_active:
+                    changed = True
+                    user.is_active = True
+                if not user.is_staff:
+                    changed = True
+                    user.is_staff = True
             elif is_editor:
-                user.is_superuser = False
-                user.is_active = True
-                user.is_staff = True
+                if user.is_superuser:
+                    changed = True
+                    user.is_superuser = False
+                if not user.is_active:
+                    changed = True
+                    user.is_active = True
+                if not user.is_staff:
+                    changed = True
+                    user.is_staff = True
             else:
-                user.is_superuser = False
-                user.is_active = True
-                user.is_staff = False
+                if user.is_superuser:
+                    changed = True
+                    user.is_superuser = False
+                if not user.is_active:
+                    changed = True
+                    user.is_active = True
+                if user.is_staff:
+                    changed = True
+                    user.is_staff = False
         except KeyError:
             logger.debug('No isMemberOf information')
             pass
         except ValueError:
             raise ImproperlyConfigured("LDAP_GROUP_MAPS must be configured in the settings file'")
+        if changed:
+            logger.debug('Changing user status to %s,%s,%s',
+                         ('superuser' if user.is_superuser else 'not superuser'),
+                         
+                         ('active' if user.is_active else 'not active'),
+                         ('staff' if user.is_staff else 'not staff'))
+            user.save()
 
 
 def login_user_synchronize(sender, user, request, **kwargs):

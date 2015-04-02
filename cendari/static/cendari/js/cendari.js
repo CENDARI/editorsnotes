@@ -50,7 +50,8 @@ Ext.application({
 					dock : 'top',
 					id: 'toolbarId',
 					height:25,
-						items : [{
+					items : [
+						{
 							text : 'New',
 							id : 'tbarID',
 							menu : [{
@@ -63,7 +64,8 @@ Ext.application({
 								text : 'Project',
 								id : 'NewProjectId'
 							}]
-						}, {
+						}, 
+						{
 							text : 'Save',
 							//contentEl : 'submitButtonCendari',
 							id : 'saveNoteID'
@@ -81,23 +83,30 @@ Ext.application({
 							toggleHandler : function() {
 								cw.setVisible(!cw.isVisible());
 							},
-						}, '->', {
-							text : 'Import',
-							iconCls : 'options_icon',
-							id : 'optionsID',
-							menu : [{
-								text : 'From Jigsaw',
-								id : 'jigsawImport'
+						}, 
+						'->', //{
+						// 		text : 'Import',
+						// 		iconCls : 'options_icon',
+						// 		id : 'optionsID',
+						// 		menu : [{
+						// 			text : 'From Jigsaw',
+						// 			id : 'jigsawImport'
 
-							}, {
-								text : 'From ... '
-							}, {
-								text : 'From ...'
-							}]
-						}, {
-							text : 'Help'
-						}]
-					}],
+						// 			}, {
+						// 				text : 'From ... '
+						// 			}, {
+						// 				text : 'From ...'
+						// 			}]
+						// 	},
+							{
+								text:'Delete',
+								id: 'deleteButtonId'
+							}//, 
+							// {
+							// 	text : 'Help'
+							// }
+					]
+				}],
 
 				items : [{
 					region : 'center',
@@ -197,12 +206,13 @@ Ext.application({
 				theme : "advanced",
 			    force_br_newlines : false,
 			    force_p_newlines : false,
-			    forced_root_block : '',
+			    forced_root_block : 'p',
 				//elements : domID,
 				content:"Description",
 				toolbar:"description",
-				plugins : "style,table,noneditable,example,lists,advhr,advimage,advlink,iespell,inlinepopups,media,paste,directionality,noneditable,nonbreaking,wordcount,advlist,contextmenu,fullscreen,rdface",
-				theme_advanced_buttons1 : "undo,redo,cut,copy,paste,fontsizeselect,bold,italic,underline,strikethrough,bullist,numlist,forecolor,backcolor, code,rdfaceHelp,rdfaceRun,rdfaceFacts,rdfaceSetting",//,
+				// plugins : "style,table,noneditable,example,lists,advhr,advimage,advlink,iespell,inlinepopups,media,paste,directionality,noneditable,nonbreaking,wordcount,advlist,contextmenu,fullscreen,rdface",
+				plugins : "markcreativework,style,table,noneditable,example,lists,advhr,advimage,advlink,iespell,inlinepopups,media,paste,directionality,nonbreaking,wordcount,advlist,contextmenu,fullscreen,rdface,autolink,spellchecker,pagebreak,layer,save,emotions,insertdatetime,preview,searchreplace,print,fullscreen,visualchars,xhtmlxtras,template",
+				theme_advanced_buttons1 : "undo,redo,cut,copy,paste,fontsizeselect,bold,italic,underline,strikethrough,bullist,numlist,forecolor,backcolor, code,rdfaceHelp,rdfaceRun,rdfaceFacts,rdfaceSetting,markcreativework",//,
 				theme_advanced_buttons2 : "tablecontrols,|,link,unlink,anchor,|,justifyleft,justifycenter,justifyright,justifyfull,|,styleselect,formatselect,fontselect,fontsizeselect",
 				fullscreen_new_window : true,
 				width : "100%",
@@ -335,26 +345,26 @@ Ext.application({
 			console.log("New note called");
 			window.location.assign(cendari_root_url + "cendari/"+cendari_js_project_slug+"/notes/add/");
 		    value = '{project:' + cendari_js_project_slug + '}';
-		    trace.event("_user","NewNote", "centre", value);
+		    // trace.event("_user","NewNote", "centre", value);
 		});
 		Ext.getCmp('NewDocumentId').on('click', function() {
 			console.log("New document called");
 			window.location.assign(cendari_root_url + "cendari/"+cendari_js_project_slug+"/documents/add/");
 		    value = '{project:' + cendari_js_project_slug + '}';
-		    trace.event("_user","NewDocument", "centre", value);
+		    // trace.event("_user","NewDocument", "centre", value);
 		});
 		Ext.getCmp('NewProjectId').on('click', function() {
 			console.log("New project called");
 			window.location.assign(cendari_root_url + "cendari/projects/add/");
 		    value = '{project:' + cendari_js_project_slug + '}';
-		    trace.event("_user","NewProject", "centre", value);
+		    // trace.event("_user","NewProject", "centre", value);
 		});
-		Ext.getCmp('jigsawImport').on('click', function() {
-			console.log("Jigsaw");
-			window.open(cendari_root_url + "cendari/"+cendari_js_project_slug + "/importfromjigsaw/");
-		    value = '{project:' + cendari_js_project_slug + '}';
-		    trace.event("_user","jagsawImport", "centre", value);
-		});
+		// Ext.getCmp('jigsawImport').on('click', function() {
+		// 	console.log("Jigsaw");
+		// 	window.open(cendari_root_url + "cendari/"+cendari_js_project_slug + "/importfromjigsaw/");
+		//     value = '{project:' + cendari_js_project_slug + '}';
+		//     trace.event("_user","jagsawImport", "centre", value);
+		// });
 		cendari.init.map(function(fn) {
 			fn.call();
 		});
@@ -372,17 +382,17 @@ function switchtabs(noOfTabs, type)
 		case  "note":
 			height = $(".tab-content.note").height();
 		    value = '{project:' + cendari_js_project_slug + '}';
-		    trace.event("_system","switch to Note tab", "centre", value);
+		    // trace.event("_system","switch to Note tab", "centre", value);
 			break;
 		case "document":
 			height = $(".tab-content.document").height();
 		    value = '{project:' + cendari_js_project_slug + '}';
-		    trace.event("_system","switch to Document tab", "centre", value);
+		    // trace.event("_system","switch to Document tab", "centre", value);
 			break;
 		case "entity":
 			height = $(".tab-content.note").height();
 		    value = '{project:' + cendari_js_project_slug + '}';
-		    trace.event("_system","switch to Entity tab", "centre", value);
+		    // trace.event("_system","switch to Entity tab", "centre", value);
 			break;
 			
 	}
