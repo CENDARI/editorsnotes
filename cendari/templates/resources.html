@@ -72,10 +72,11 @@
 
       <script type="text/javascript"> 
         	//resources are ordered alphabetically by default
-		var sfield="alpha";
-	        if($.cookie('sfield')!==null){
+		      
+          var sfield="alpha";
+	        if($.cookie('sfield')!==null && $.cookie('sfield')!==undefined){
             		sfield = $.cookie('sfield');
-		}		
+		      }		
       </script>
 
       <script type="text/javascript" src="{% static "cendari/js/resources.js" %}"></script>
@@ -94,9 +95,8 @@
         }else{
           sfield = field;
         }
-        console.log('sfield',field);
-        $.cookie('sfield',field);
-
+        $.cookie('sfield',sfield);
+        console.log('sfield ===============>', sfield);
         $("#tree").dynatree("option", "initAjax", {
           data: {key:''},
           url: cendari_root_url+'cendari/'+cendari_js_project_slug+'/getResourcesData/sfield/'+ sfield,
@@ -107,27 +107,32 @@
       }
 
       $(document).ready(function(){
-      cendari_js_project_slug = '{{ project_slug }}';
-      // $("#tree").dynatree("option", "initAjax", {
-      //   data: {key:''},
-      //   url: cendari_root_url+'cendari/'+cendari_js_project_slug+'/getResourcesData/sfield/'+ sfield,
-      //   dataType: "jsonp",
-      // });
-      // $('#tree').dynatree("getTree").reload();
-      if($.cookie('sfield')!==null){
-      sfield = $.cookie('sfield');
-      $('.sfield_label').removeClass('active');
-      $('#label_'+sfield).addClass('active');
-      }          
-      sortTree(sfield);
-      $('.sfield_label').on('click', function() {
-      console.log('it is clicked :D')
-      $('.sfield_label').removeClass('active');
-      $(this).addClass('active');
-      var radio_id = $(this).attr('for');
-      console.log('radio_id',radio_id);
-      sortTree($('#'+radio_id).val());
-      });
+        cendari_js_project_slug = '{{ project_slug }}';
+        // $("#tree").dynatree("option", "initAjax", {
+        //   data: {key:''},
+        //   url: cendari_root_url+'cendari/'+cendari_js_project_slug+'/getResourcesData/sfield/'+ sfield,
+        //   dataType: "jsonp",
+        // });
+        // $('#tree').dynatree("getTree").reload();
+        
+        // sfield="alpha";
+        // console.log('resources are ready !!!',sfield);
+        // console.log('resources are ready2 !!!',$.cookie('sfield'));
+        if($.cookie('sfield')!==null && $.cookie('sfield')!==undefined){
+          sfield = $.cookie('sfield');
+        }          
+        var sfield_pruned = sfield.replace('-','');
+        $('.sfield_label').removeClass('active');
+        $('#label_'+sfield_pruned).addClass('active');
+
+        sortTree(sfield);
+        $('.sfield_label').on('click', function() {
+          console.log('it is clicked :D')
+          $('.sfield_label').removeClass('active');
+          $(this).addClass('active');
+          var radio_id = $(this).attr('for');
+          sortTree($('#'+radio_id).val());
+        });
 
       });
 
@@ -151,11 +156,11 @@
       <input type="radio" class='radio_link' name="sfield" value="alpha" id="radio_button_alpha" />
       <label class ='sfield_label radio_link' id='label_alpha' for="radio_button_alpha">alphabetical</label>
 
-      <input type="radio" class='radio_link' name="sfield" value="creation" id="radio_button_creation" />
-      <label class ='sfield_label radio_link' id='label_creation'  for="radio_button_creation">creation</label>
+      <input type="radio" class='radio_link' name="sfield" value="created" id="radio_button_created" />
+      <label class ='sfield_label radio_link' id='label_created'  for="radio_button_created">creation</label>
       
-      <input type="radio" class='radio_link' name="sfield" value="access" id="radio_button_access" />
-      <label class ='sfield_label radio_link' id='label_access' for="radio_button_access">last updated</label>
+      <input type="radio" class='radio_link' name="sfield" value="last_updated" id="radio_button_last_updated" />
+      <label class ='sfield_label radio_link' id='label_last_updated' for="radio_button_last_updated">last updated</label>
       
     </p>
 

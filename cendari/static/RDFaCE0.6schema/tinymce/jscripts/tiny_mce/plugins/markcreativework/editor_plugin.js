@@ -59,7 +59,7 @@
 					$this = $(this)
 
 					if($this.parent().prop('tagName') !== 'SPAN'){
-						$this.wrap('<span style="" class="r_entity r_creativework" typeof="schema:CreativeWork"></span>')
+						$this.wrap('<span style="" class="r_entity r_creativework" typeof="schema:CreativeWork"><span style="" class="r_prop r_name" property="schema:name"></span></span>')
 						console.log($this)
 						console.log($this.parent())
 					}
