@@ -383,10 +383,12 @@ function onVisClick(){
   var visDef = visDiv.datum();
   logHover(itemData, visDef);
 
-  //get entity id from itemData and load page
-  //ask if sure the user wants to load page, as they might loose data if not saved
-	alert('open itemdata= ' + itemData.url);
-  	window.open(itemData.url, "_parent");
+  if(parent.location.href.indexOf(itemData.url)==-1){
+	var r = confirm("Are you sure you want to leave this page? If you press 'OK', you might loose unsaved work.");
+  	if (r == true) {
+		window.open(itemData.url, "_parent");
+	}
+  } 
 }
 
 
