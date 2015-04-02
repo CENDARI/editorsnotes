@@ -338,7 +338,7 @@ class Footnote(LastUpdateMetadata, Administered, URLAccessible,
 reversion.register(Footnote)
 
 def scan_file_name(instance, filename):
-    return '/'.join(['scans', instance.document.project.slug, str(instance.document.pk), filename])
+    return os.path.join('scans', instance.document.project.slug, str(instance.document.pk), filename)
 
 class Scan(CreationMetadata, ProjectPermissionsMixin):
     u"""

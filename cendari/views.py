@@ -29,6 +29,7 @@ from editorsnotes.admin import forms
 from editorsnotes.main.templatetags.display import as_html
 from django.core.urlresolvers import reverse
 from forms import ImportFromJigsawForm
+from sendfile import sendfile
 from semantic import *
 import json
 
@@ -166,7 +167,14 @@ def scan(request, scan_id, project_slug):
         'scan.html',
         { 'scan':o,'project_slug': project_slug}, 
         context_instance=RequestContext(request))
-    
+
+@login_required
+def scan_image(request, scan_id, project_slug):
+    scan = get_object_or_404(main_models.Scan, id=scan_id)
+    if scan.document.project.slug != project_slug:
+        raise PermissionDenied("not authorized on %s project" % project_slug)
+    return sendfile(request, scan.image.path)
+
 class EditTopicAdminView(TopicAdminView):
     template_name = 'edittopic.html'
     def save_object(self, form, formsets):

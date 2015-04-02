@@ -150,6 +150,7 @@ cendaripatterns = patterns('cendari.views',
 
 	# Cendari Scans
     url(r'^cendari/(?P<project_slug>[-\w]+)/scan/(?P<scan_id>\d+)/$',                           'scan',                              name='scan_view'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/scan/(?P<scan_id>\d+)/image/$',                           'scan_image',                   name='scan_image'),
     
 	# Cendari Jigsaw
     url(r'^cendari/(?P<project_slug>[-\w]+)/importfromjigsaw/$',                                'import_from_jigsaw',                name='importfromjigsaw_view'),
