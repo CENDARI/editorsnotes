@@ -30,6 +30,10 @@
 	    	border: 1px solid black;
 	 	}  
 
+	 	u {
+		    text-decoration: none;
+		    border-bottom: 2px solid black;
+		}
 
 	</style>
 {% endblock %}
@@ -66,7 +70,11 @@
 								{% else 						%} class = "form-entities"
 								{% endif %}
 								> 
-									{{ topic }} 
+									{% if  topic.rdf%} 
+										{{topic}} 
+									{%else%}
+										<u> {{topic}} </u>
+									{%endif%} 
 								</a>
 							{% endfor %}
 							{% if not note.get_all_related_topics|length > 0 %}

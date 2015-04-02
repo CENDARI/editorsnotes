@@ -12,8 +12,11 @@ from django.utils.encoding import force_unicode
 # cleaner = Cleaner(style=True)
 # Cendari code E.G. aviz
 from lxml.html.clean import Cleaner
-cleaner = Cleaner(style=False,safe_attrs_only=False) #[jdf] fix for RDFa
-
+cleaner = Cleaner() #[jdf] fix for RDFa
+cleaner.style = False
+cleaner.safe_attrs_only = False
+cleaner.meta = False
+cleaner.links = False
 
 def update_attrs(attrs, extra_attrs):
     if attrs is None:
@@ -81,7 +84,7 @@ class XHTMLField(models.Field):
             fragment = html.fragment_fromstring(value, create_parent='div')
         #autolink(fragment)
         # Stop cleaning for now, the cleaner to is too aggressive for RDFa [jdf]
-        return fragment # cleaner.clean_html(fragment)
+        return cleaner.clean_html(fragment)
     def get_prep_value(self, value):
         if value is None:
             return None
