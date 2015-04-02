@@ -259,6 +259,9 @@ function buildMap(mapData, element, useCounts){
   // Display information on hover and hide on leave
   map.selectAll('.mark').on('mouseover', onVisHover);
   map.selectAll('.mark').on('mouseout', onVisLeave);
+
+  // (NB) Load entity form on mouse click
+  map.selectAll('.mark').on('click', onVisClick);
 }
 
 
@@ -358,6 +361,32 @@ function onVisLeave(){
                        document.location.origin);
   // cancel logging of the hover event
   cancelLogHover();
+}
+
+
+/**
+ * (NB) Trigger selections and page upload when a visualization is clicked.
+ */
+function onVisClick(){
+  var itemData = d3.select(this).datum();
+  console.log('NB................................ clicking on mark: ' + itemData);
+  // post a message to highlight in other panes
+  parent.postMessage({'messageType':'cendari_highlight',
+                      'targetWindowIds':'east',
+                      'entityIds':[itemData.id],
+                      'highlightMode':2},
+                       document.location.origin);
+
+  // log the hover event
+  var visDivRaw = getParentVisPanel(this);
+  var visDiv = d3.select(visDivRaw);
+  var visDef = visDiv.datum();
+  logHover(itemData, visDef);
+
+  //get entity id from itemData and load page
+  //ask if sure the user wants to load page, as they might loose data if not saved
+	alert('open itemdata= ' + itemData.url);
+  	window.open(itemData.url, "_parent");
 }
 
 

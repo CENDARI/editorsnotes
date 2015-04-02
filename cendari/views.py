@@ -379,7 +379,8 @@ def small_vis_data_lazy(request, project_slug):
             v = {'preferred_name':t.preferred_name, 
                  'type':t.topic_node.type, 
                  'date':timestamp,
-                 'id':t.pk}
+                 'id':t.pk,
+		 'url':t.get_absolute_url()} #(NB) 
             ll = semantic_query_latlong(t)
             if ll:
                 v['latlong'] = ', '.join(map(str, ll))
@@ -399,7 +400,8 @@ def small_vis_data_lazy(request, project_slug):
             v = {'preferred_name':t.preferred_name, 
                  'type':t.topic_node.type, 
                  'date':timestamp,
-                 'id':t.pk}
+                 'id':t.pk,
+		 'url':t.get_absolute_url()} #(NB) 
             ll = semantic_query_latlong(t)
             if ll:
                 v['latlong'] = ', '.join(map(str, ll))
