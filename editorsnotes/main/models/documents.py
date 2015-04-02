@@ -338,7 +338,7 @@ class Footnote(LastUpdateMetadata, Administered, URLAccessible,
 reversion.register(Footnote)
 
 def scan_file_name(instance, filename):
-    return os.path.join('scans', instance.document.project.slug, str(instance.document.pk), filename)
+    return os.path.join('projects', instance.document.project.slug, str(instance.document.pk), filename)
 
 class Scan(CreationMetadata, ProjectPermissionsMixin):
     u"""
@@ -375,6 +375,15 @@ class Scan(CreationMetadata, ProjectPermissionsMixin):
                                   ContentFile(thumbfile.read()),
                                   save=save)
         thumbfile.close()
+
+    def get_tiff_path(self):
+        return iipimage_storage.get_tiff_path(self.image.path)
+
+    def tiff_file_exists(self):
+        return iipimage_storage.file_exists(get_tiff_path())
+
+    def create_tiff_file(self):
+        iipimage_storage.create_tiff_file(self.image.path, get_tiff_path())
 
     def save(self, *args, **kwargs):
         if self.image and not self.pk:

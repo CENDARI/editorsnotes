@@ -190,6 +190,17 @@ def scan_image(request, scan_id, project_slug):
         raise PermissionDenied("not authorized on %s project" % project_slug)
     return sendfile(request, scan.image.path)
 
+@login_required
+def scan_tiffimage(request, scan_id, project_slug):
+    scan = get_object_or_404(main_models.Scan, id=scan_id)
+    if scan.document.project.slug != project_slug:
+        raise PermissionDenied("not authorized on %s project" % project_slug)
+    if not scan.tiff_file_exists():
+        scan.create_tiff_file()
+        raise PermissionDenied("Tiff file is being built, try again...")
+    return sendfile(request, scan.get_tiff_path())
+
+
 class EditTopicAdminView(TopicAdminView):
     template_name = 'edittopic.html'
     def save_object(self, form, formsets):
