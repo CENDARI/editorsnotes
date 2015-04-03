@@ -29,6 +29,7 @@ from editorsnotes.admin import forms
 from editorsnotes.main.templatetags.display import as_html
 from django.core.urlresolvers import reverse
 from forms import ImportFromJigsawForm
+from sendfile import sendfile
 from semantic import *
 import json
 
@@ -181,7 +182,25 @@ def scan(request, scan_id, project_slug):
         'scan.html',
         { 'scan':o,'project_slug': project_slug}, 
         context_instance=RequestContext(request))
-    
+
+@login_required
+def scan_image(request, scan_id, project_slug):
+    scan = get_object_or_404(main_models.Scan, id=scan_id)
+    if scan.document.project.slug != project_slug:
+        raise PermissionDenied("not authorized on %s project" % project_slug)
+    return sendfile(request, scan.image.path)
+
+@login_required
+def scan_tiffimage(request, scan_id, project_slug):
+    scan = get_object_or_404(main_models.Scan, id=scan_id)
+    if scan.document.project.slug != project_slug:
+        raise PermissionDenied("not authorized on %s project" % project_slug)
+    if not scan.tiff_file_exists():
+        scan.create_tiff_file()
+        raise PermissionDenied("Tiff file is being built, try again...")
+    return sendfile(request, scan.get_tiff_path())
+
+
 class EditTopicAdminView(TopicAdminView):
     template_name = 'edittopic.html'
     def save_object(self, form, formsets):
@@ -523,6 +542,10 @@ def getNoteResources(request, project_slug, sfield):
 @login_required
 def getDocumentResources(request, project_slug, sfield):
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
+    projects = request.user.get_authorized_projects()
+    for p in projects:
+	    if p.slug == project_slug:
+		    project_id = p.id
     max_count = 10000
     doc_list = []   
     if sfield == "created" or sfield == "-created" or sfield == "last_updated" or sfield == "-last_updated":
@@ -531,14 +554,15 @@ def getDocumentResources(request, project_slug, sfield):
 	#unsorted_query_set = main_models.Document.objects.filter(project__slug=project_slug)[:max_count]
 	#query_set =  sorted(unsorted_query_set, key = lambda doc: doc.description, reverse = True) 
 	#query_set =  sorted(unsorted_query_set, key = lambda x:'description', reverse = True)  
-    	sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document order by CAST(description AS text) DESC'
-    	query_set =  main_models.Document.objects.raw(sql_query) 
+    	#sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document order by CAST(description AS text) DESC'
+    	sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document where project_id = '+ str(project_id) +' order by CAST(description AS text) DESC'
+    	query_set =  main_models.Document.objects.raw(sql_query)
     else:
 	#unsorted_query_set = main_models.Document.objects.filter(project__slug=project_slug)[:max_count]
 	#query_set =  sorted(unsorted_query_set, key = lambda doc: doc.description, reverse = False) 
 	#query_set =  sorted(unsorted_query_set, key = lambda x:'description', reverse = False)
-    	sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document order by CAST(description AS text)'
-    	query_set =  main_models.Document.objects.raw(sql_query) 
+    	sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document where project_id ='+ str(project_id) +' order by CAST(description AS text)'
+    	query_set =  main_models.Document.objects.raw(sql_query)
 
     for e in query_set:
         doc = {'title':str(e), 'key':str(project_slug)+'.document.'+str(e.id), 'addClass':'', 'url':e.get_absolute_url(), 'children':[]}

@@ -18,8 +18,12 @@ LOGO = 'cendari/img/cendari_logo.tif'
 
 q = django_rq.get_queue("default")
 
-
 class IIPImageStorage(FileSystemStorage):
+    def get_tiff_path(self, name):
+        root,ext = os.path.splitext(name)
+#        if ext == ".tif":
+#            root = root + "_"
+        return root + ".tif"
 
     def _save(self, name, content):
         """
@@ -27,18 +31,20 @@ class IIPImageStorage(FileSystemStorage):
         """
 #        pdb.set_trace()
         name = super(IIPImageStorage, self)._save(name, content)
-        root,ext = os.path.splitext(name)
-        if ext == ".tif":
-            root = root + "_"
-        
-        nname = root + ".tif"
-        
-        copy_file(safe_join(settings.STATIC_ROOT, LOGO), \
-                  self.path(nname))
-        job = q.enqueue(convert_to_pyramid_tiff, \
-                        self.path(name), self.path(nname))
-        
-        return nname
+        nname = self.get_tiff_path(name)
+
+        self.create_tiff_file(self.path(name), self.path(nname))
+        return name
+
+    def file_exists(self, name):
+        return os.path.exists(name)
+
+    def create_tiff_file(self, name, nname):
+        if self.file_exists(nname):
+            return
+        # Show a logo until the image is copied
+        copy_file(safe_join(settings.STATIC_ROOT, LOGO), nname)
+        job = q.enqueue(convert_to_pyramid_tiff, name, nname)
 
 def convert_to_pyramid_tiff(path,npath):
     print "Converting %s into %s" % (path, npath)
