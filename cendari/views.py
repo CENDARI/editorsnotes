@@ -542,6 +542,10 @@ def getNoteResources(request, project_slug, sfield):
 @login_required
 def getDocumentResources(request, project_slug, sfield):
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
+    projects = request.user.get_authorized_projects()
+    for p in projects:
+	    if p.slug == project_slug:
+		    project_id = p.id
     max_count = 10000
     doc_list = []   
     if sfield == "created" or sfield == "-created" or sfield == "last_updated" or sfield == "-last_updated":
@@ -550,14 +554,15 @@ def getDocumentResources(request, project_slug, sfield):
 	#unsorted_query_set = main_models.Document.objects.filter(project__slug=project_slug)[:max_count]
 	#query_set =  sorted(unsorted_query_set, key = lambda doc: doc.description, reverse = True) 
 	#query_set =  sorted(unsorted_query_set, key = lambda x:'description', reverse = True)  
-    	sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document order by CAST(description AS text) DESC'
-    	query_set =  main_models.Document.objects.raw(sql_query) 
+    	#sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document order by CAST(description AS text) DESC'
+    	sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document where project_id = '+ str(project_id) +' order by CAST(description AS text) DESC'
+    	query_set =  main_models.Document.objects.raw(sql_query)
     else:
 	#unsorted_query_set = main_models.Document.objects.filter(project__slug=project_slug)[:max_count]
 	#query_set =  sorted(unsorted_query_set, key = lambda doc: doc.description, reverse = False) 
 	#query_set =  sorted(unsorted_query_set, key = lambda x:'description', reverse = False)
-    	sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document order by CAST(description AS text)'
-    	query_set =  main_models.Document.objects.raw(sql_query) 
+    	sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document where project_id ='+ str(project_id) +' order by CAST(description AS text)'
+    	query_set =  main_models.Document.objects.raw(sql_query)
 
     for e in query_set:
         doc = {'title':str(e), 'key':str(project_slug)+'.document.'+str(e.id), 'addClass':'', 'url':e.get_absolute_url(), 'children':[]}
