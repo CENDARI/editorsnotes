@@ -162,6 +162,8 @@ class ENIndex(ElasticSearchIndex):
 
     def search_model(self, model, query, **kwargs):
         self.open()
+        if doc_type is None:
+            return None
         doc_type = self.document_types.get(model)
         return self.es.search(query, index=self.name,
                               doc_type=doc_type.type_label, **kwargs)
