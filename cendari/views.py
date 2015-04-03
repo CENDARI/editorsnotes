@@ -107,19 +107,16 @@ def _check_project_privs_or_deny(user, project_slug):
                 print "project list empty!!"
                 raise PermissionDenied("insufficient priviledges for %s" % user.username)
 	    #(NB) handle superusers
-	    found_p = False
-	    count = -1
 	    if user.is_superuser:
+		count=-1
 		for p in projects:
-			if(found_p == False):
-				p_role = p.get_role_for(user)
-				if p_role!=None:
-					count = count+1
-					found_p = True
-		if(count!=-1):	
-			project = projects[count]
-		else:
-			print "no project created for this superuser."
+			count += 1
+			project_role = user._get_project_role(p)
+			if str(project_role)!='None':				
+				project = projects[count]
+				break
+			else:
+				print "superuser does not have own projects."
 	    else:
 	   	project = projects[0]
         else:

@@ -96,8 +96,19 @@ function updateIframe(iframe_id){
 
 
 
-function createEntityLink(absolute_url,type,name){
-    var html = '<a  href="'+absolute_url+'" class="'+type_class_mapping[type]+'"> '+name+' </a>';
+function createEntityLink(absolute_url,type,name,rdf){
+    var html = '';
+    var innerHtml = name;
+    console.log('rdf',rdf);
+    if(rdf !==null && rdf!==undefined){
+        if(!rdf.length){
+            innerHtml = '<u>'+innerHtml+'</u>';
+        }
+    }
+    else{
+        innerHtml = '<u>'+innerHtml+'</u>';
+    }
+    html='<a  href="'+absolute_url+'" class="'+type_class_mapping[type]+'"> '+innerHtml+' </a>';
 
     return html;
 }
@@ -105,8 +116,9 @@ function createEntityLink(absolute_url,type,name){
 function  updatedEnitiesTab(prefix,related_topics){
     var entities_html = "";
     var related_topics_jq = $('#'+prefix+'-related-topics');
+    console.log('related_topics: ',related_topics)
     for(var i=0;i<related_topics.length;i++){
-        entities_html += createEntityLink(related_topics[i].absolute_url,related_topics[i].type,related_topics[i].preferred_name);
+        entities_html += createEntityLink(related_topics[i].absolute_url,related_topics[i].type,related_topics[i].preferred_name,related_topics[i].rdf);
     }
 
     related_topics_jq.empty();
