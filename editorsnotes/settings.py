@@ -161,7 +161,8 @@ INSTALLED_APPS = (
     'editorsnotes.api',
     'editorsnotes.search',
     'editorsnotes_app',
-    
+    'cendari',
+    'cendari.search',
     #CENDARI ADD
     'django.contrib.admin',
     'django.contrib.admindocs',

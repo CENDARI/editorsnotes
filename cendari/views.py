@@ -204,8 +204,15 @@ class EditTopicAdminView(TopicAdminView):
         print "Save_object on topic"
         user = self.request.user
         obj, action = super(EditTopicAdminView, self).save_object(form, formsets)
-        #semantic_process_topic(obj, user)
-        semantic_resolve_topic(obj)
+        loc = semantic_resolve_topic(obj)
+        if obj.topic_node.type=='PLA' and loc:
+            location = obj.location
+            if location is None:
+                location = PlaceTopicModel(topic=obj, lat=loc[0], lon=loc[1])
+            else:
+                location.lat = loc[0]
+                location.log = loc[1]
+            location.save()
         return obj, action
 
 def edit_topic_node(request, topic_node_id):
@@ -930,7 +937,7 @@ def rdfa_view_note(request, project_slug, note_id):
         raise PermissionDenied("Note %d does not belong to project %s"%(note_id,project_slug))
     if not user.superuser_or_belongs_to(project):
         raise PermissionDenied("not authorized on %s project" % project.slug)
-    return HttpResponse(semantic_rdfa(note))
+    return HttpResponse(semantic_rdfa(note, note.content))
     
 def rdfa_view_document(request, project_slug, document_id):
     user = request.user
@@ -942,5 +949,5 @@ def rdfa_view_document(request, project_slug, document_id):
         raise PermissionDenied("Document %d does not belong to project %s"%(document_id,project_slug))
     if not user.superuser_or_belongs_to(project):
         raise PermissionDenied("not authorized on %s project" % project.slug)
-    return HttpResponse(semantic_rdfa(document))
+    return HttpResponse(semantic_rdfa(document, document.description))
     

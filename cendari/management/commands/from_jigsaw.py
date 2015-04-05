@@ -2,7 +2,7 @@ from django.core.management.base import LabelCommand, CommandError
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from cendari.utils import import_from_jigsaw_root
+from cendari.utils import get_or_create_topic
 
 from optparse import make_option
 import sys
@@ -15,7 +15,6 @@ import guess_language as gl
 from lxml import etree
 from pytz import timezone, utc
 from django.conf import settings
-from django.utils.encoding import smart_text
 from editorsnotes.main.models import Document, Transcript, Topic, TopicAssignment, Project
 from django.utils.text import slugify
 
@@ -74,3 +73,65 @@ def import_from_jigsaw(filename, user, project):
     root = doc.getroot()
     with transaction.commit_on_success():
         return import_from_jigsaw_root(root, user, project)
+
+def import_from_jigsaw_root(root, user, project):
+    order = 1
+    for node in root:
+        id = node.findtext("docID")
+        text = node.findtext("docText")
+        #text.tag = 'div'
+        docs = list(Document.objects.filter(import_id=id))
+        if len(docs)==0:
+            d = Document(creator=user, last_updater=user, import_id=id, description=id, ordering=order, project=project)
+            d.save()
+            t = Transcript(creator=user, last_updater=user, document=d, content=text)
+            t.save()
+        else:
+            d = docs[0]
+            d.last_updater = user
+            d.description = id
+            d.order = order
+        d.language = gl.guessLanguageName(text)
+        order += 1
+        d.save()
+
+        date = node.find("docDate")
+        if date is not None and date.text:
+            try:
+#                pdb.set_trace()
+                dt = datetime.strptime(date.text, "%m/%d/%Y")
+                res = list(Topic.objects.filter(date=dt))
+                cnt = len(res)
+                if cnt==0:
+                    normalized = "Date: %d/%d/%d" % (dt.year, dt.month, dt.day)
+                    t=get_or_create_topic(user, normalized, 'EVT', project, dt)
+                    t.date = dt
+                    #t=Topic(creator=user, last_updater=user, preferred_name=normalized, date=dt, type='EVT',project=project)
+                    t.save()
+                else:
+                    t=res[0]
+                d.related_topics.create(creator=user, topic=t)
+            except ValueError as e:
+                pass
+        for p in node.findall("concept"):
+            name=p.text
+            t=get_or_create_topic(user, name, 'TAG',project)
+            if t:
+        	d.related_topics.create(creator=user, topic=t)
+            else:
+                print "Cannot create topic(%s,type=%s)" % (t,'TAG')
+            
+        for p in node.findall("person"):
+            name=p.text
+            t=get_or_create_topic(user, name, 'PER',project)
+            if t:
+                d.related_topics.create(creator=user, topic=t)
+            else:
+                print "Cannot create topic(%s,type=%s)" % (t,'PER')
+        for p in node.findall("location"):
+            name=p.text
+            t=get_or_create_topic(user, name, 'PLA',project)
+            if t:
+                d.related_topics.create(creator=user, topic=t)
+            else:
+                print "Cannot create topic(%s,type=%s)" % (t,'PLA')

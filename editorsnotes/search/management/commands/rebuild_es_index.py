@@ -1,9 +1,9 @@
 from django.core.management.base import BaseCommand
 
-from ... import en_index
+from ... import search
 
 class Command(BaseCommand):
-    help = 'Rebuild elasticsearch index'
+    help = 'Rebuild elasticsearch cendari index'
     def handle(self, *args, **kwargs):
         en_index.delete()
         en_index.create()

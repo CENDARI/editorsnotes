@@ -117,6 +117,17 @@ class User(AbstractUser, URLAccessible):
             setattr(self, role_attr, project.get_role_for(self))
         return getattr(self, role_attr)
 
+    def _has_project_perms(user):
+        return 
+
+    def is_project_creator(self):
+        return is_staff and \
+          self.has_perm('main.add_project') and \
+          self.has_perm('main.change_project') and \
+          self.has_perm('main.delete_project') and \
+          self.has_perm('main.view_project')
+
+
 PURPOSE_CHOICES = (
     (1, 'Feedback'),
     (2, 'Bug report'),

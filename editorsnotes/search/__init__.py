@@ -10,6 +10,7 @@ from .types import DocumentTypeAdapter
 
 __all__ = ['en_index', 'activity_index', 'ElasticSearchIndex']
 
+
 class DocumentAdapter(DocumentTypeAdapter):
     display_field = 'serialized.description'
     highlight_fields = ('serialized.description',)
@@ -40,6 +41,8 @@ def register_models(en_index):
                                         'serialized.rdf',
                                         'serialized.date'))
     en_index.register(main_models.Document, adapter=DocumentAdapter)
+
+print "Creating the EditorsNotes index" 
 
 en_index = ENIndex(onOpen=register_models)
 

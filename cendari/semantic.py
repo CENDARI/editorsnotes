@@ -1,8 +1,8 @@
 import logging
 
-from editorsnotes.main.models import Note, Document, Transcript, Topic, TopicAssignment
 from editorsnotes.main.utils import xhtml_to_text
 from editorsnotes.main.templatetags.display import as_html
+from editorsnotes.main.models.topics import get_or_create_topic
 
 from django.conf import settings
 from django.utils import six
@@ -38,7 +38,6 @@ __all__ = [
     'GEO',
     'DBOWL',
     'semantic',
-    'semantic_query_latlong',
     'semantic_process_note',
     'semantic_process_document',
     'semantic_process_transcript',
@@ -393,7 +392,7 @@ def semantic_process_note(note,user=None):
     done=set()
     note.related_topics.all().delete()
     for t in topics:
-        topic=utils.get_or_create_topic(user, t['value'], t['type'],note.project)
+        topic=get_or_create_topic(user, t['value'], t['type'],note.project)
         if topic not in done:
             done.add(topic)
             note.related_topics.create(creator=user, topic=topic)
@@ -457,7 +456,7 @@ def semantic_process_document(document,user=None):
     done=set()
     document.related_topics.all().delete()
     for t in topics:
-        topic=utils.get_or_create_topic(user, t['value'], t['type'], document.project)
+        topic=get_or_create_topic(user, t['value'], t['type'], document.project)
         if topic not in done:
             done.add(topic)
             rdftopic = semantic_uri(topic)
@@ -520,7 +519,7 @@ def semantic_process_transcript(transcript,user=None):
     done=set()
     transcript.document.related_topics.all().delete()
     for t in topics:
-        topic=utils.get_or_create_topic(user, t['value'], t['type'], transcript.document.project)
+        topic=get_or_create_topic(user, t['value'], t['type'], transcript.document.project)
         if topic not in done:
             done.add(topic)
             rdftopic = semantic_uri(topic)
@@ -697,19 +696,23 @@ def semantic_resolve_topic(topic, force=False):
                 logger.info("Adding %s %s %s", s, p, o)
                 g.add( (s, p, o) )
 
-    if topic.topic_node.type == 'PLA' and not g.value(uri, GRS['point']):
+    if topic.topic_node.type != 'PLA': return
+    loc = g.value(uri, GRS['point'])
+    while not loc:
         logger.info("No grs:point in RDF, chasing for lat/long")
         o = g.value(uri, GEO['geometry'])
         if o and unicode(o).startswith('POINT('):
-            g.add( (uri, GRS['point'], Literal(unicode(o)[6:-1].split(' '))) )
+            loc = unicode(o)[6:-1]
+            g.add( (uri, GRS['point'], Literal(loc)) )
             logger.info("Found in geo:geometry")
-            return
+            break
         lat = g.value(uri, GEO['lat'])
         lon = g.value(uri, GEO['long'])
         if lat and lon:
-            g.add( (uri, GRS['point'], Literal(lat+" "+lon)) )
+            loc = lat+" "+lon
+            g.add( (uri, GRS['point'], Literal(loc)) )
             logger.info("Found in geo:lat/geo:long: %s", g.value(uri, GRS['point']))
-            return
+            break
 
         lat = g.value(uri, DBPPROP['latDeg'])
         latmin = g.value(uri, DBPPROP['latMin'])
@@ -719,21 +722,24 @@ def semantic_resolve_topic(topic, force=False):
             # Degrees + minutes/60 
             lat = float(lat) + float(latmin)/60.0
             lon = float(lon) + float(lonmin)/60.0
-            g.add( (uri, GRS['point'], Literal("%f %f" % (lat, lon))) )
+            loc = "%f %f" % (lat, lon)
+            g.add( (uri, GRS['point'], Literal(loc)) )
             logger.info("Found in dbprop:latDeg/dbprop:lonDeg: %s", g.value(uri, GRS['point']))
-            return
+            break
 
         lat = g.value(uri, FREEBASE['topic_server.geolocation_latitude'])
         lon = g.value(uri, FREEBASE['topic_server.geolocation_longitude'])
         if lat and lon:
-            g.add( (uri, GRS['point'], Literal(lat+" "+lon)) )
+            loc = lat+" "+lon
+            g.add( (uri, GRS['point'], Literal(loc)) )
             logger.info("Found in ns:latitude/ns:longitude: %s", g.value(uri, GRS['point']))
-            return
-            
+            break
 
         logger.warning('No lat/long information in RDF for %s', unicode(uri))
+        break
         # chase in geonames later
-    semantic.commit()        
+    semantic.commit()
+    return loc
 
 def semantic_refresh_topic(topic):
     if topic.rdf is None or topic.topic_node.type == 'DAT':
@@ -742,16 +748,9 @@ def semantic_refresh_topic(topic):
     if uri:
         semantic_resolve_topic(topic, uri)
 
-def semantic_rdfa(obj):
+def semantic_rdfa(obj, xml):
     uri = semantic_uri(obj)
     g = Semantic.graph(uri)
-    xml = None
-    if isinstance(obj, Note):
-        xml = obj.content
-    elif isinstance(obj, Document):
-        xml = obj.description
-    else:
-        return None
     
     head = E.HEAD()
     for s,p,o in g.triples( (URIRef(uri), None, None) ):
@@ -759,6 +758,3 @@ def semantic_rdfa(obj):
     document = E.HTML(head, E.BODY(xml, about=uri), version="XHTML+RDFa 1.0")
     return etree.tostring(document, encoding='utf8', pretty_print=True)
 
-__test__ = {  
-    "fix_links": fix_links
-}  
