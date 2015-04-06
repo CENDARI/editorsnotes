@@ -4,6 +4,8 @@ from editorsnotes.main.utils import xhtml_to_text
 from editorsnotes.main.templatetags.display import as_html
 from editorsnotes.main.models.topics import get_or_create_topic
 
+from models import PlaceTopicModel
+
 from django.conf import settings
 from django.utils import six
 from django.core import signals
@@ -215,13 +217,19 @@ def semantic_query_geo():
     return semantic_query(get_query_geo())
 
 def semantic_query_latlong(topic):
-    if topic.topic_node.type != 'PLA' or topic.rdf is None:
+    if topic.topic_node.type != 'PLA':
+        return None
+    if hasattr(topic, 'location'):
+        return topic.location.latlong
+    if topic.rdf is None:
         return None
     url = topic.rdf
     g = Semantic.graph(url)
     o = g.value(g.identifier, GRS['point'])
     if o:
-        return map(float, unicode(o).split(' '))
+        latlong = map(float, unicode(o).split(' '))
+        location = PlaceTopicModel(topic, lat=latlong[0], lon=latlong[1])
+        return latlong
     return None
 
 schema_topic = {
@@ -739,6 +747,13 @@ def semantic_resolve_topic(topic, force=False):
         break
         # chase in geonames later
     semantic.commit()
+    if loc:
+        latlong = map(float, loc.split(' '))
+        location = None
+        if hasattr(topic, 'location'):
+            location = topic.location
+        else:
+            location = PlaceTopicModel(topic, lat=latlong[0], lon=latlong[1])
     return loc
 
 def semantic_refresh_topic(topic):

@@ -1,6 +1,7 @@
 import os
 import re
 import calendar
+import traceback
 from django.conf import settings
 from django.contrib import auth
 from django.contrib import messages
@@ -241,7 +242,7 @@ class EditTranscriptAdminView(TranscriptAdminView):
 @login_required
 @reversion.create_revision()
 def cendari_project_add(request):
-    print request
+    #print request
     o = {}
     user = request.user
     project = user.get_authorized_projects()[0]
@@ -263,7 +264,7 @@ def cendari_project_add(request):
             o['form'] = form
     else:
         o['form'] = forms.ProjectCreationForm(user=request.user)
-        print "fin creation projet", request.method
+        #print "fin creation projet", request.method
     o['project']=project
     return render_to_response(
         'editproject.html',o, context_instance=RequestContext(request))
@@ -303,7 +304,7 @@ def cendari_project_change(request, project_id):
         'editproject.html', o, context_instance=RequestContext(request))
     
 def editnote(request, note_id):
-    print "editnote called with note_id = %s" % note_id
+    #print "editnote called with note_id = %s" % note_id
     if request.method == 'POST':
         form = NoteForm(request.POST)
         if form.is_valid():
@@ -343,7 +344,7 @@ def editnote(request, note_id):
 @login_required
 @transaction.commit_on_success
 def import_from_jigsaw(request, project_slug):
-    print "view: import_from_jigsaw"
+    #print "view: import_from_jigsaw"
     project =  _check_project_privs_or_deny(request.user, project_slug)
     if request.method == 'POST':
         form = ImportFromJigsawForm(request.POST, request.FILES)
@@ -381,8 +382,8 @@ def small_vis_data(request, project_slug):
              #'count':it.related_docs_count}
         try:
             ll = semantic_query_latlong(t)
-        except Exception as es:
-            print 'Exception'
+        except Exceptions as e:
+            traceback.print_exc(e)
         if ll:
             v['latlong'] = ', '.join(map(str, ll))
         topics_list.append(v)
@@ -442,29 +443,74 @@ def small_vis_data_lazy(request, project_slug):
 
 @login_required
 def getResourcesData(request, project_slug, sfield):  
-    my_tree = { 'title':'My resources:', 'key':'root', 'isFolder':'true', 'addClass': '', 'url':'', 'children': [] }
-    my_projects = { 'title':'My projects', 'key':'my_projects', 'isFolder':'true', 'addClass':'',  'url':'', 'children' : [] }
-    other_projects = { 'title':'Other projects', 'key':'other_projects', 'isFolder':'true', 'addClass':'',  'url':'', 'children' : [] }    
+    my_tree = {
+        'title':'My resources:',
+        'key':'root',
+        'isFolder':'true',
+        'addClass': '',
+        'url':'',
+        'children': []
+    }
+    my_projects = {
+        'title':'My projects',
+        'key':'my_projects',
+        'isFolder':'true',
+        'addClass':'',
+        'url':'',
+        'children' : []
+    }
+    other_projects = {
+        'title':'Other projects',
+        'key':'other_projects',
+        'isFolder':'true',
+        'addClass':'',
+        'url':'',
+        'children' : []
+    }
     projects = request.user.get_authorized_projects().order_by('name')
 
     if request.user.is_superuser:
-	    for p in projects:
-		    p_role = p.get_role_for(request.user)
-		    if p_role != None:
-			    my_project = { 'title':str(p.name), 'key':str(p.slug), 'isFolder':'true', 'addClass':'',  'url':'', 'isLazy':'true', 'children' : [] }
-			    my_projects['children'].append(my_project)
-		    else:
-			    other_project = { 'title':str(p.name), 'key':str(p.slug), 'isFolder':'true', 'addClass':'',  'url':'', 'isLazy':'true', 'children' : [] }
-			    other_projects['children'].append(other_project)
+        for p in projects:
+            p_role = p.get_role_for(request.user)
+            if p_role != None:
+                my_project = {
+                    'title': p.name,
+                    'key': p.slug,
+                    'isFolder':'true',
+                    'addClass': '',
+                    'url':'',
+                    'isLazy':'true',
+                    'children' : []
+                }
+                my_projects['children'].append(my_project)
+            else:
+                other_project = {
+                    'title': p.name,
+                    'key': p.slug,
+                    'isFolder': 'true',
+                    'addClass': '',
+                    'url':'',
+                    'isLazy':'true',
+                    'children' : []
+                }
+                other_projects['children'].append(other_project)
 	    my_tree['children'].append(my_projects)
 	    my_tree['children'].append(other_projects)
     else:
-	    #copied from cendari.admin2
-	    owned_projects = projects
-	    for p in owned_projects:
-		    my_project = { 'title':str(p.name), 'key':str(p.slug), 'isFolder':'true', 'addClass':'',  'url':'', 'isLazy':'true', 'children' : [] }
-		    my_projects['children'].append(my_project)
-	    my_tree['children'].append(my_projects)
+        #copied from cendari.admin2
+        owned_projects = projects
+        for p in owned_projects:
+            my_project = {
+                'title': p.name,
+                'key': p.slug,
+                'isFolder':'true',
+                'addClass':'',
+                'url':'',
+                'isLazy':'true',
+                'children' : []
+            }
+            my_projects['children'].append(my_project)
+        my_tree['children'].append(my_projects)
     res = json.dumps(my_tree, encoding="utf-8")
     response_dict = request.GET['callback'] + "(" + res + ")"
     return HttpResponse(response_dict, mimetype='application/json')
@@ -474,27 +520,48 @@ def getLazyProjectData(request, project_slug, sfield):
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     projects = request.user.get_authorized_projects()
     for p in projects:
-	    if p.slug == project_slug:
-		    result_list = []
-		    max_count = 10000
-		    for model in [main_models.Note, main_models.Document, main_models.Topic]:
-			    model_name = model._meta.module_name  
-			    if model_name == 'topic':
-				    node_title = 'Entities' +  ' (' + str(len(main_models.topics.TYPE_CHOICES)) + ')'
-				    topic_list = getTopicResources(request, p.slug, sfield)
-				    result_list.append({'title':node_title, 'key':str(p.slug)+'.topics', 'isFolder':'true', 'addClass': '', 'url':'', 'children' : topic_list })
-			    elif model_name == 'note':
-				    query_set = model.objects.filter(project__slug=p.slug).order_by('-last_updated')[:max_count]
-				    set_count = query_set.count()
-				    node_title = (model_name + 's').title() + ' (' + str(set_count)  + ')'
-				    note_list = getNoteResources(request, p.slug, sfield); 
-				    result_list.append( {'title':node_title, 'key':str(p.slug)+'.'+str(model_name)+'s', 'isFolder':'false', 'addClass':'','url':'', 'children':note_list } )
-			    elif model_name == 'document':
-				    query_set = model.objects.filter(project__slug=p.slug).order_by('-last_updated')[:max_count]
-				    set_count = query_set.count()
-				    node_title = (model_name + 's').title() + ' (' + str(set_count)  + ')'
-				    document_list = getDocumentResources(request, p.slug, sfield)
-				    result_list.append( {'title':node_title, 'key':str(p.slug)+'.'+str(model_name)+'s', 'isFolder':'false', 'addClass':'','url':'', 'children':document_list } )
+        if p.slug == project_slug:
+            result_list = []
+            max_count = 10000
+            for model in [main_models.Note, main_models.Document, main_models.Topic]:
+                model_name = model._meta.module_name  
+                if model_name == 'topic':
+                    node_title = 'Entities(%d)' % len(main_models.topics.TYPE_CHOICES)
+                    topic_list = getTopicResources(request, p.slug, sfield)
+                    result_list.append({
+                        'title':node_title,
+                        'key': p.slug+'.topics',
+                        'isFolder':'true',
+                        'addClass': '',
+                        'url':'',
+                        'children': topic_list
+                    })
+                elif model_name == 'note':
+                    query_set = model.objects.filter(project__slug=p.slug).order_by('-last_updated')[:max_count]
+                    set_count = query_set.count()
+                    node_title = (model_name + 's').title() + ' (' + str(set_count)  + ')'
+                    note_list = getNoteResources(request, p.slug, sfield); 
+                    result_list.append({
+                        'title':node_title,
+                        'key': p.slug+'.'+str(model_name)+'s',
+                        'isFolder':'false',
+                        'addClass':'',
+                        'url':'',
+                        'children':note_list
+                    })
+                elif model_name == 'document':
+                    query_set = model.objects.filter(project__slug=p.slug).order_by('-last_updated')[:max_count]
+                    set_count = query_set.count()
+                    node_title = (model_name + 's').title() + ' (' + str(set_count)  + ')'
+                    document_list = getDocumentResources(request, p.slug, sfield)
+                    result_list.append({
+                        'title':node_title,
+                        'key': p.slug+'.'+str(model_name)+'s',
+                        'isFolder':'false',
+                        'addClass':'',
+                        'url':'',
+                        'children':document_list
+                    })
     res = json.dumps(result_list, encoding="utf-8")
     response_dict = request.GET['callback'] + "(" + res + ")"
     return HttpResponse(response_dict, mimetype='application/json')
@@ -508,24 +575,41 @@ def getTopicResources(request, project_slug, sfield):
     topic_types = main_models.topics.TYPE_CHOICES
     sorted_topic_types =  sorted(topic_types, key = lambda x: (x[0], x[1]))
     for (topic_type, topic_name) in sorted_topic_types:
-        my_list = []	
+        my_list = []
     	if sfield == "created" or sfield == "-created" or sfield == "last_updated" or sfield == "-last_updated":
-        	query_set = main_models.Topic.objects.filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False).order_by(sfield)[:max_count]   
+            query_set = main_models.Topic.objects\
+              .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)\
+              .order_by(sfield)[:max_count]   
 	elif sfield == "-alpha":
-        	query_set = main_models.Topic.objects.filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False).order_by('-preferred_name')[:max_count]       
+            query_set = main_models.Topic.objects\
+              .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)\
+              .order_by('-preferred_name')[:max_count]       
 	else:
-	        query_set = main_models.Topic.objects.filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False).order_by('preferred_name')[:max_count]          
+            query_set = main_models.Topic.objects\
+              .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)\
+              .order_by('preferred_name')[:max_count]          
         set_count = query_set.count()
         topic_count += 1
 	for e in query_set:
-		#to make sure both url and node key have the same topic_id (when a topic exists in multiple probjects)
-		#my_list.append({'title':str(e), 'key':str(project_slug)+'.topic.'+str(e.id), 'url':e.get_absolute_url()})
-		url_parts = e.get_absolute_url().split('/')
-		topic_id_index = len(url_parts) - 2
-		topic_id = url_parts[topic_id_index];
-		my_list.append({'title':str(e), 'key':str(project_slug)+'.topic.'+str(topic_id), 'url':e.get_absolute_url()})
+            #to make sure both url and node key have the same topic_id (when a topic exists in multiple probjects)
+            #my_list.append({'title':str(e), 'key':str(project_slug)+'.topic.'+str(e.id), 'url':e.get_absolute_url()})
+            url_parts = e.get_absolute_url().split('/')
+            topic_id_index = len(url_parts) - 2
+            topic_id = url_parts[topic_id_index];
+            my_list.append({
+                'title': unicode(e),
+                'key': str(project_slug)+'.topic.'+str(topic_id),
+                'url':e.get_absolute_url()
+            })
         node_title = topic_name + ' (' + str(set_count)  + ')'
-        topic_list.append( {'title':node_title, 'key':str(project_slug)+'.topic.'+str(topic_type), 'isFolder':'true', 'addClass':'', 'url':'', 'children':my_list } )       
+        topic_list.append({
+            'title': node_title,
+            'key' :str(project_slug)+'.topic.'+str(topic_type),
+            'isFolder':'true',
+            'addClass':'',
+            'url':'',
+            'children':my_list
+        })
     return topic_list
 
 @login_required
@@ -551,8 +635,8 @@ def getDocumentResources(request, project_slug, sfield):
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     projects = request.user.get_authorized_projects()
     for p in projects:
-	    if p.slug == project_slug:
-		    project_id = p.id
+        if p.slug == project_slug:
+            project_id = p.id
     max_count = 10000
     doc_list = []   
     if sfield == "created" or sfield == "-created" or sfield == "last_updated" or sfield == "-last_updated":
@@ -572,7 +656,13 @@ def getDocumentResources(request, project_slug, sfield):
     	query_set =  main_models.Document.objects.raw(sql_query)
 
     for e in query_set:
-        doc = {'title':str(e), 'key':str(project_slug)+'.document.'+str(e.id), 'addClass':'', 'url':e.get_absolute_url(), 'children':[]}
+        doc = {
+            'title':str(e),
+            'key':str(project_slug)+'.document.'+str(e.id),
+            'addClass':'',
+            'url':e.get_absolute_url(),
+            'children':[]
+        }
         doc_list.append(doc)        
     return doc_list
 
@@ -584,8 +674,8 @@ def getProjectID(request, project_slug, new_slug):
     projects = request.user.get_authorized_projects()
     project_id = ''
     for p in projects:
-	    if p.slug == new_slug:
-		    project_id = p.id
+        if p.slug == new_slug:
+            project_id = p.id
     res = {'project_id':project_id}
     ret = json.dumps(res, encoding="utf-8")
     return HttpResponse(ret, mimetype='application/json') 
@@ -728,7 +818,6 @@ class DocumentCendari(DocumentAdminView):
 
 class EntityCendari(TopicAdminView):
     template_name = 'entityCendari.html'
-   
 
     
 def editNoteCendari(request, note_id, project_slug):
@@ -886,7 +975,7 @@ def editEntityCendari(request, project_slug, topic_node_id):
     o['object_type'] = 'topic'
     o['object_id'] = topic_node_id
     o['topic_type'] = topic.topic_node.type
-    print "...................... topic.summary = " + str(topic.summary)
+    #print 20*'.'+ 'topic.summary = " + str(topic.summary)
     o['breadcrumb'] = (
         (topic.project.name, topic.project.get_absolute_url()),
         ('Topics', reverse('all_topics_view', kwargs={'project_slug': topic.project.slug})),(topic.preferred_name, None)

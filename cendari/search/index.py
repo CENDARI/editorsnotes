@@ -9,7 +9,9 @@ from pyelasticsearch.exceptions import InvalidJsonResponseError
 
 from editorsnotes.main.models import Note, Document, Topic
 from editorsnotes.main.utils import xhtml_to_text
+from editorsnotes.search.utils import clean_query_string
 from cendari.semantic import semantic_uri, semantic_query_latlong
+
 
 logger = logging.getLogger('cendari.search.index')
 
@@ -155,6 +157,7 @@ class CendariIndex(object):
             text.append(xhtml_to_text(doc.transcript.content))
         document = {
             'uri': id,
+            'artifact': 'document',
             'application': 'nte',
             'contributor': [
                 {"name": c.username, "email": c.email} for c in contributors
@@ -188,6 +191,7 @@ class CendariIndex(object):
         document = {
             'uri': id,
             'application': 'nte',
+            'artifact': 'note',
             'contributor': [
                 {"name": c.username, "email": c.email} for c in contributors
             ],
@@ -211,6 +215,23 @@ class CendariIndex(object):
 #            self.es.index(self.name, 'document', document, id, refresh=True)
         return document
 
+    def topic_to_cendari(self, topic):
+        id=semantic_uri(topic)
+        document = {
+            'uri': id,
+            'application': 'nte',
+            'label': topic.preferred_name,
+            'creator': {
+                "name": topic.creator.username,
+                "email": topic.creator.email
+            },
+            'groups_allowed': topic.project.slug,
+        }
+        if topic.summary: document['abstract'] = xhtml_to_text(topic.summary)
+        loc = semantic_query_latlong(topic)
+        if loc: document['location'] = loc
+        return document
+
     def object_changed(self, obj):
         if type(obj) not in self.document_types: return
         id = semantic_uri(obj)
@@ -220,7 +241,7 @@ class CendariIndex(object):
         if isinstance(obj, Topic) and obj.topic_node.type=='PLA':
             # touch all notes and documents so their places get updated
             # either location is added or removed, who knows?
-            for t in topic.get_related_objects():
+            for t in obj.topic_node.related_objects():
                 if isinstance(t, Note) or isinstance(t, Document):
                     self.object_changed(t)
 
@@ -259,3 +280,43 @@ class CendariIndex(object):
         if len(self.update_list):
             self.open().bulk(self.index_ops(), index=self.name)
             self.update_list = set()
+
+    def search_model(self, model, query, **kwargs):
+        return self.open().search(query,
+                                  index=self.name, doc_type='document',
+                                  **kwargs)
+
+
+    def search(self, query, highlight=False, **kwargs):
+        self.open()
+        if isinstance(query, basestring):
+            prepared_query = {
+                'query': {
+                    'query_string': { 'query': clean_query_string(query) }
+                }
+            }
+
+        else:
+            prepared_query = query
+
+        if 'project' in kwargs:
+            project = kwargs['project']
+            del kwargs['project']
+            prepared_query['filter'] = {
+                "term": { 'groups_allowed': project }
+            }
+
+        if highlight:
+            prepared_query['highlight'] = {
+                'fields': {},
+                'pre_tags': ['<span class="highlighted">'],
+                'post_tags': ['</span>']
+            }
+            highlight_fields = chain(
+                *[doc_type.highlight_fields
+                for doc_type in self.document_types.values()])
+            for field_name in highlight_fields:
+                prepared_query['highlight']['fields'][field_name] = {}
+
+        pprint.pprint(prepared_query)
+        return self.open().search(prepared_query, index=self.name, **kwargs)

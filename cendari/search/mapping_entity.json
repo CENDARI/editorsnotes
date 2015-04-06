@@ -1,13 +1,33 @@
 {
     "entity" : {
 	"_id" : {
-            "path" : "url"
+            "path" : "uri"
         },
         "properties" : {
 	    "uri" : {
 		"type" : "string",
 		"index" : "not_analyzed"
 	    },
+	    "application": {
+                "type" : "string",
+                "index" : "not_analyzed"
+	    },
+            "creator" : {
+                "properties" : {
+                    "email" : {
+                        "type" : "string",
+                        "index" : "not_analyzed"
+                    },
+                    "name" : {
+                        "type" : "string",
+                        "index" : "not_analyzed"
+                    }
+                }
+            },
+            "language" : {
+                "type" : "string",
+                "index" : "not_analyzed"
+            },
             "label" : {
 		"type" : "string"
 	    },
@@ -25,7 +45,17 @@
 		    "format" : "compressed",
 		    "precision" : "3m"
 		}
-	    }
+	    },
+            "date" : {
+                "type" : "date",
+                "format" : "dateOptionalTime"
+            },
+            "groups_allowed" : {
+                "type" : "string"
+            },
+            "users_allowed" : {
+                "type" : "string"
+            }
         }
     }
 }
