@@ -6,8 +6,6 @@ from editorsnotes.main import models as main_models
 
 from .index import CendariIndex
 
-print "Creating the Cendari Index"
-
 cendari_index = CendariIndex()
 
 @receiver(post_save)
@@ -19,5 +17,5 @@ def delete_elastic_cendari_handler(sender, instance, **kwargs):
     cendari_index.object_deleted(instance)
 
 @receiver(request_finished)
-def update_elastic_cendari_operations(sender, instance, **kwargs):
+def update_elastic_cendari_operations(**kwargs):
     cendari_index.process_update_list()

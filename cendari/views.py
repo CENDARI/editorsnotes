@@ -379,7 +379,10 @@ def small_vis_data(request, project_slug):
              'date':timestamp,
              'id':t.id,}
              #'count':it.related_docs_count}
-        ll = semantic_query_latlong(t)
+        try:
+            ll = semantic_query_latlong(t)
+        except Exception as es:
+            print 'Exception'
         if ll:
             v['latlong'] = ', '.join(map(str, ll))
         topics_list.append(v)

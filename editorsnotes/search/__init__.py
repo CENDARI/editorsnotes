@@ -42,8 +42,6 @@ def register_models(en_index):
                                         'serialized.date'))
     en_index.register(main_models.Document, adapter=DocumentAdapter)
 
-print "Creating the EditorsNotes index" 
-
 en_index = ENIndex(onOpen=register_models)
 
 activity_index = ActivityIndex()

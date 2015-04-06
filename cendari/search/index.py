@@ -7,7 +7,7 @@ import logging
 from pyelasticsearch import ElasticSearch, IndexAlreadyExistsError
 from pyelasticsearch.exceptions import InvalidJsonResponseError
 
-import editorsnotes.main.models
+from editorsnotes.main.models import Note, Document, Topic
 from editorsnotes.main.utils import xhtml_to_text
 from cendari.semantic import semantic_uri, semantic_query_latlong
 
@@ -28,11 +28,7 @@ class OrderedResponseElasticSearch(ElasticSearch):
         return json_response
 
 class CendariIndex(object):
-    document_types = [
-        editorsnotes.main.models.Note,
-        editorsnotes.main.models.Document,
-        editorsnotes.main.models.Topic
-    ]
+    document_types = [ Note, Document, Topic ]
 
     def __init__(self):
         if not hasattr(self, 'get_name'):
@@ -221,6 +217,12 @@ class CendariIndex(object):
         if id in self.delete_list: # was removed, just update now
             self.delete_list.remove(id)
         self.update_list.add(obj)
+        if isinstance(obj, Topic) and obj.topic_node.type=='PLA':
+            # touch all notes and documents so their places get updated
+            # either location is added or removed, who knows?
+            for t in topic.get_related_objects():
+                if isinstance(t, Note) or isinstance(t, Document):
+                    self.object_changed(t)
 
     def object_deleted(self, obj):
         if type(obj) not in self.document_types: return
@@ -236,13 +238,13 @@ class CendariIndex(object):
 
     def index_ops(self):
         for obj in self.update_list:
-            if isinstance(obj, editorsnotes.main.models.Note):
+            if isinstance(obj, Note):
                 doc = self.note_to_cendari(obj)
                 doc_type = 'document'
-            elif isinstance(obj, editorsnotes.main.models.Document):
+            elif isinstance(obj, Document):
                 doc = self.document_to_cendari(obj)
                 doc_type = 'document'
-            elif isinstance(obj, editorsnotes.main.models.Topic):
+            elif isinstance(obj, Topic):
                 doc = self.topic_to_cendari(obj)
                 doc_type = 'entity'
             else:
@@ -254,7 +256,6 @@ class CendariIndex(object):
         if len(self.delete_list):
             self.open().bulk(self.delete_ops(), index=self.name)
             self.delete_list = set()
-
         if len(self.update_list):
             self.open().bulk(self.index_ops(), index=self.name)
             self.update_list = set()
