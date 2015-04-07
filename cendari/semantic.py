@@ -709,15 +709,18 @@ def semantic_resolve_topic(topic, force=False):
     while not loc:
         logger.info("No grs:point in RDF, chasing for lat/long")
         o = g.value(uri, GEO['geometry'])
-        if o and unicode(o).startswith('POINT('):
-            loc = unicode(o)[6:-1]
+
+        match = []
+        if o and \
+          (match.append(re.match(r"POINT\(([^ ]+) ([^ ]+)\)", unicode(o))) or any(match)):
+            loc = match.pop().group(2)+' '+match.pop().group(1)
             g.add( (uri, GRS['point'], Literal(loc)) )
             logger.info("Found in geo:geometry")
             break
         lat = g.value(uri, GEO['lat'])
         lon = g.value(uri, GEO['long'])
         if lat and lon:
-            loc = lat+" "+lon
+            loc = str(lat)+" "+str(lon)
             g.add( (uri, GRS['point'], Literal(loc)) )
             logger.info("Found in geo:lat/geo:long: %s", g.value(uri, GRS['point']))
             break
@@ -738,7 +741,7 @@ def semantic_resolve_topic(topic, force=False):
         lat = g.value(uri, FREEBASE['topic_server.geolocation_latitude'])
         lon = g.value(uri, FREEBASE['topic_server.geolocation_longitude'])
         if lat and lon:
-            loc = lat+" "+lon
+            loc = str(lat)+" "+str(lon)
             g.add( (uri, GRS['point'], Literal(loc)) )
             logger.info("Found in ns:latitude/ns:longitude: %s", g.value(uri, GRS['point']))
             break
