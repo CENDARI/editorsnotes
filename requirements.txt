@@ -8,7 +8,7 @@ django-reversion==1.7
 django-licensing==0.2.4
 djangorestframework==2.3.13
 
-pyelasticsearch==1.2
+pyelasticsearch==0.6
 BeautifulSoup<4.0
 lxml==3.4.2
 cssselect==0.8
@@ -47,5 +47,3 @@ uricore==0.1.2
 
 #bsddb3==6.1.0
 # for mac run also export BERKELEYDB_DIR=$(brew --cellar)/berkeley-db/5.3.28;
-
-
