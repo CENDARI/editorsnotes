@@ -132,3 +132,64 @@ RQ_QUEUES = {
     }
 }
 
+# for use with django development server only. DO NOT USE IN PRODUCTION
+SENDFILE_BACKEND = 'sendfile.backends.development'
+#
+# "simple" backend that uses Django file objects to attempt to stream files
+# from disk (note middleware may cause files to be loaded fully into memory)
+#
+#SENDFILE_BACKEND = 'sendfile.backends.simple'
+#
+# sets X-Sendfile header (as used by mod_xsendfile/apache and lighthttpd)
+#SENDFILE_BACKEND = 'sendfile.backends.xsendfile'
+#
+# sets Location with 200 code to trigger internal redirect (daemon
+# mode mod_wsgi only - see below)
+#SENDFILE_BACKEND = 'sendfile.backends.mod_wsgi'
+#
+#  sets X-Accel-Redirect header to trigger internal redirect to file
+#SENDFILE_BACKEND = 'sendfile.backends.nginx'
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'console':{
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'propagate': True,
+            'level': 'INFO',
+        },
+        'editorsnotes': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+        'cendari': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+        'cendari.semantic': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+        'cendari.utils': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        }
+    }
+}

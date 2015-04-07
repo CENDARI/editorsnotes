@@ -1,0 +1,118 @@
+{
+    "document" : {
+        "_id" : { "path" : "uri" },
+        "properties" : {
+            "application" : {
+                "type" : "string",
+                "index" : "not_analyzed"
+            },
+            "artifact" : {
+                "type" : "string",
+                "index" : "not_analyzed"
+            },
+            "contributor" : {
+                "properties" : {
+                    "email" : {
+                        "type" : "string",
+                        "index" : "not_analyzed"
+                    },
+                    "name" : {
+                        "type" : "string",
+                        "index" : "not_analyzed"
+                    }
+                }
+            },
+            "creator" : {
+                "properties" : {
+                    "email" : {
+                        "type" : "string",
+                        "index" : "not_analyzed"
+                    },
+                    "name" : {
+                        "type" : "string",
+                        "index" : "not_analyzed"
+                    }
+                }
+            },
+            "date" : {
+                "type" : "date",
+                "format" : "dateOptionalTime"
+            },
+            "event" : {
+                "type" : "string",
+                "index" : "not_analyzed"
+            },
+            "format" : {
+                "type" : "string",
+                "index" : "not_analyzed"
+            },
+            "language" : {
+                "type" : "string",
+                "index" : "not_analyzed"
+            },
+            "length" : {
+                "type" : "long"
+            },
+            "org" : {
+                "type" : "string",
+                "index" : "not_analyzed"
+            },
+            "person" : {
+                "properties" : {
+                    "email" : {
+                        "type" : "string",
+                        "index" : "not_analyzed"
+                    },
+                    "name" : {
+                        "type" : "string",
+                        "index" : "not_analyzed"
+                    }
+                }
+            },
+            "place" : {
+                "properties" : {
+                    "location" : {
+                        "type" : "geo_point",
+                        "geohash" : true,
+                        "fielddata" : {
+                            "format" : "compressed",
+                            "precision" : "3m"
+                        }
+                    },
+                    "name" : {
+                        "type" : "string",
+                        "index" : "not_analyzed"
+                    }
+                }
+            },
+            "publisher" : {
+                "type" : "string",
+                "index" : "not_analyzed"
+            },
+            "ref" : {
+                "type" : "string",
+                "index" : "not_analyzed"
+            },
+            "tag" : {
+                "type" : "string",
+                "index" : "not_analyzed"
+            },
+            "text" : {
+                "type" : "string"
+            },
+            "title" : {
+                "type" : "string"
+            },
+            "uri" : {
+                "type" : "string",
+                "index" : "not_analyzed"
+            },
+            "groups_allowed" : {
+                "type" : "string"
+            },
+            "users_allowed" : {
+                "type" : "string"
+            }
+        }
+    }
+}

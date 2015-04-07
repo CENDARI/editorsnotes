@@ -154,7 +154,7 @@ cendaripatterns = patterns('cendari.views',
     url(r'^cendari/(?P<project_slug>[-\w]+)/scan/(?P<scan_id>\d+)/tiff/$',                           'scan_tiffimage',                   name='scan_tiffimage'),
     
 	# Cendari Jigsaw
-    url(r'^cendari/(?P<project_slug>[-\w]+)/importfromjigsaw/$',                                'import_from_jigsaw',                name='importfromjigsaw_view'),
+#    url(r'^cendari/(?P<project_slug>[-\w]+)/importfromjigsaw/$',                                'import_from_jigsaw',                name='importfromjigsaw_view'),
 
 	# Cendari Visualizations
 	url(r'^cendari/(?P<project_slug>[-\w]+)/smallvis/$',                                        'small_vis',                         name='smallvis_view'),

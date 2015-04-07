@@ -112,7 +112,7 @@ class UserChangeForm(ModelForm):
             fields = ("username","first_name","last_name","email","groups","is_superuser","is_staff","is_project_creator","is_active")
     def __init__(self, *args, **kwargs):
         super(UserChangeForm, self).__init__(*args, **kwargs)
-        self.fields["is_project_creator"].initial = True if cendari.utils.is_project_creator(self.instance) else False
+        self.fields['is_project_creator'].initial =  self.instance.is_project_creator()
         f = self.fields.get('user_permissions', None)
         if f is not None:
             f.queryset = f.queryset.select_related('content_type')

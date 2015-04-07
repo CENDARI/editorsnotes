@@ -10,6 +10,7 @@ from .types import DocumentTypeAdapter
 
 __all__ = ['en_index', 'activity_index', 'ElasticSearchIndex']
 
+
 class DocumentAdapter(DocumentTypeAdapter):
     display_field = 'serialized.description'
     highlight_fields = ('serialized.description',)

@@ -286,6 +286,31 @@ class Topic(LastUpdateMetadata, URLAccessible, ProjectPermissionsMixin,
 
 reversion.register(Topic)
 
+def get_or_create_topic(user, name, type, project, date=None):
+    res = list(Topic.objects.filter(preferred_name=name,project=project))
+    cnt = len(res)
+    if cnt==0:
+        #print "Creating topic '%s' of type '%s'" % (name.encode("utf-8"), type)
+        topic_node, c = TopicNode.objects.get_or_create(_preferred_name=name,
+                                                        type=type,
+                                                        defaults={'creator': user,
+                                                                 'last_updater': user})
+        t=Topic(creator=user, last_updater=user, preferred_name=name, topic_node=topic_node, project=project)
+        
+        if type=='EVT':
+            t.date = date
+            #if (t.date):
+            #    print "Parsed %s into a proper date %s" % (name,t.date.isoformat())
+        t.save()
+#        t.topic_node.type=type
+        if not c: t.topic_node.save()
+    elif res[0].topic_node.type==type:
+        t=res[0]
+    else:
+        return None
+    return t
+
+
 class AlternateName(CreationMetadata, ProjectPermissionsMixin):
     topic = models.ForeignKey(Topic, related_name='alternate_names')
     name = models.CharField(max_length=200)

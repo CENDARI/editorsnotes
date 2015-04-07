@@ -8,7 +8,7 @@ import logging
 
 from django.conf import settings
 
-from pyelasticsearch import ElasticSearch
+from pyelasticsearch import ElasticSearch, IndexAlreadyExistsError
 from pyelasticsearch.exceptions import InvalidJsonResponseError
 from reversion.models import VERSION_ADD, VERSION_CHANGE, VERSION_DELETE
 
@@ -46,11 +46,12 @@ class ElasticSearchIndex(object):
         logger.info('opening ElasticSearch')
         self.es = OrderedResponseElasticSearch(settings.ELASTICSEARCH_URLS)
         self.is_open = True
-        if not self.exists():
+        #if not self.exists():
+        try:
             logger.info('Creating ElasticSearch index')
             self.create()
             self.created = True
-        else:
+        except IndexAlreadyExistsError as ex:
             self.created = False
         self._open()
         return self.es
@@ -67,7 +68,7 @@ class ElasticSearchIndex(object):
         #resp = self.es.session.head(server_url + '/' + self.name)
         #return resp.status_code == 200
         try:
-            self.open().send_request('HEAD', [self.name])
+            self.open().send_request('HEAD', [self.name], query_params={})
         except InvalidJsonResponseError as exc:
             if exc.response.status_code == 200:
                 return True
@@ -80,7 +81,6 @@ class ElasticSearchIndex(object):
         return created
 
     def delete(self):
-        self.open()
         return self.open().delete_index(self.name)
 
 
