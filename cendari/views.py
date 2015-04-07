@@ -472,7 +472,7 @@ def getResourcesData(request, project_slug, sfield):
     if request.user.is_superuser:
         for p in projects:
             p_role = p.get_role_for(request.user)
-            if p_role != None:
+            if p_role!=None:
                 my_project = {
                     'title': p.name,
                     'key': p.slug,
@@ -494,8 +494,8 @@ def getResourcesData(request, project_slug, sfield):
                     'children' : []
                 }
                 other_projects['children'].append(other_project)
-	    my_tree['children'].append(my_projects)
-	    my_tree['children'].append(other_projects)
+	my_tree['children'].append(my_projects)
+	my_tree['children'].append(other_projects)
     else:
         #copied from cendari.admin2
         owned_projects = projects
@@ -518,7 +518,7 @@ def getResourcesData(request, project_slug, sfield):
 @login_required
 def getLazyProjectData(request, project_slug, sfield):
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
-    projects = request.user.get_authorized_projects()
+    projects = request.user.get_authorized_projects()    
     for p in projects:
         if p.slug == project_slug:
             result_list = []
