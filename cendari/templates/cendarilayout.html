@@ -113,24 +113,6 @@
                   <li><a {% if browserid_authenticated %}class="browserid-logout" {% endif %}href="{% url "user_logout_view" %}">Log out</a></li>
                 </ul>
               </li>
-
-              <li>
-                <div class="btn-group">
-                  <a href="#" class="btn dropdown-toggle" data-toggle="dropdown">
-                    <i class="icon-pencil"></i>
-                    <b class="caret"></b>
-                  </a>
-                  <ul class="dropdown-menu" style="right: 0; left: auto;">
-                    {% block extra_edit_actions %}{% endblock %}
-                    {% for project in user.get_authorized_projects %}
-                      {% if not forloop.last %}<li class="divider"></li>{% endif %}
-                      <li><a href="{% url "admin:main_note_add" project_slug=project.slug %}">Add note</a></li>
-                      <li><a href="{% url "admin:main_topic_add" project_slug=project.slug %}">Add topic</a></li>
-                      <li><a href="{% url "admin:main_document_add" project_slug=project.slug %}">Add document</a></li>
-                    {% endfor %}
-                  </ul>
-                </div> 
-              </li>
           </ul>
           {% else %}
             <ul class="nav pull-right">
