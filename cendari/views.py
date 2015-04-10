@@ -372,6 +372,7 @@ def small_vis_data(request, project_slug):
     #indexed_topics = SearchQuerySet().models(main_models.Topic)
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     indexed_topics = main_models.Topic.objects.filter(project__slug=project_slug)
+    print "::::::::::::::::::::::: (NB)/small_vis_data indexed_topics for this project: " + str(project_slug) + ", are= " + str(indexed_topics)
     topics_list = []
     for t in indexed_topics:
         timestamp = calendar.timegm(t.date.timetuple()) * 1000 if t.date else ''
@@ -439,6 +440,7 @@ def small_vis_data_lazy(request, project_slug):
                 topics_dict[t.pk] = v
             dict_match['count'] = dict_match.get('count', 0) + 1
             dict_match['note_count'] = dict_match.get('note_count', 0) + 1
+    print "::::::::::::::::::::::: (NB)/small_vis_data_lazy indexed_topics for this project: " + str(project_slug) + ", are= " + str(topics_dict)
     return HttpResponse(json.dumps(topics_dict.values()), mimetype='application/json')
 
 @login_required
