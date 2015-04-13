@@ -407,7 +407,7 @@ def small_vis_data_lazy(request, project_slug):
             v = {'preferred_name':t.preferred_name, 
                  'type':t.topic_node.type, 
                  'date':timestamp,
-                 'id':t.pk,
+                 'id':t.topic_node.id, #(NB) was t.pk
 		 'url':t.get_absolute_url()} #(NB) 
             ll = semantic_query_latlong(t)
             if ll:
@@ -428,7 +428,7 @@ def small_vis_data_lazy(request, project_slug):
             v = {'preferred_name':t.preferred_name, 
                  'type':t.topic_node.type, 
                  'date':timestamp,
-                 'id':t.pk,
+                 'id':t.topic_node.id, #(NB) was t.pk
 		 'url':t.get_absolute_url()} #(NB) 
             ll = semantic_query_latlong(t)
             if ll:
@@ -440,7 +440,7 @@ def small_vis_data_lazy(request, project_slug):
                 topics_dict[t.pk] = v
             dict_match['count'] = dict_match.get('count', 0) + 1
             dict_match['note_count'] = dict_match.get('note_count', 0) + 1
-    print "::::::::::::::::::::::: (NB)/small_vis_data_lazy indexed_topics for this project: " + str(project_slug) + ", are= " + str(topics_dict)
+    #print "::::::::::::::::::::::: (NB)/small_vis_data_lazy indexed_topics for this project: " + str(project_slug) + ", are= " + str(topics_dict)
     return HttpResponse(json.dumps(topics_dict.values()), mimetype='application/json')
 
 @login_required
