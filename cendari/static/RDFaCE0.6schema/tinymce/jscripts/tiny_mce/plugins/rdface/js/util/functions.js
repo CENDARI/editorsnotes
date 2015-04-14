@@ -195,6 +195,10 @@ function remove_annotations(editor,only_automatic){
 //Insert RDFa/Microdata attributes to HTML DOM tree
 function insert_entity(editor,entity_type,b,has_rel){
 	activateAjaxIndicator(b);
+
+	// Cendari code E.G. aviz
+	var maxWordsAllowed = 50;
+
 	var selectedContent = editor.selection.getContent();
 	//console.log(selectedContent);
 	if(!selectedContent){
@@ -245,7 +249,9 @@ function insert_entity(editor,entity_type,b,has_rel){
 				temp=temp+' property="schema:'+has_rel+'"';
 			}
 			var annotatedContent;
-			if(countWords(selectedContent)<6){
+
+			// Cendari code E.G. aviz
+			if(countWords(selectedContent)<maxWordsAllowed){
 				annotatedContent = "<span" + temp + "><span class='r_prop r_name' property='schema:name'>" + selectedContent
 				+ "</span></span>";
 			}else{
