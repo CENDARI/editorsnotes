@@ -27,7 +27,8 @@ var messages = {
         'id' : 'entityStatusMsg',
         'beforeSend':'resolving entity please do not refresh',
         'success' :'entity resolved',
-        'error': 'entity did not resolved correctly'
+        'error': 'entity did not resolved correctly',
+        'warning_latlong': 'entinty was resolved but coordinates couldn\'t be found '
     },
     'none':{
         'id' : 'noneStatusMsg',
@@ -65,9 +66,7 @@ var toastr_options = {
 }
 
 function showToastrMessage(type,message){
-    console.log('clearing messages.....');
     toastr.clear();
-    console.log('adding new message ......');
     toastr[type](message);
 }
 
@@ -81,6 +80,13 @@ function showSuccessMessage(message){
     toastr.options.timeOut="500";
     toastr.options.extendedTimeOut="1000";
     showToastrMessage('success',message);
+}
+
+
+function showWarningMessage(message){
+    toastr.options.timeOut="5000";
+    toastr.options.extendedTimeOut="10000";
+    showToastrMessage('warning',message);
 }
 
 function showInfoMessage(message){
@@ -409,7 +415,21 @@ function submitEntity(fc){
         type: fc.attr('method'),
         data: formData,
         success: function(data){
-            showSuccessMessage(messages.entity.success);
+
+            // console.log('type')
+            // console.log('latlong')
+            if(data.type==='PLA'){
+                if(data.latlong === null || data.latlong=== undefined){
+                    showWarningMessage(messages.entity.warning_latlong);    
+                }
+                else{
+                    showSuccessMessage(messages.entity.success);
+                }
+            }
+            else{
+                showSuccessMessage(messages.entity.success);
+            }
+
             updatedEnitiesTab(cendari_js_object_type,data.related_topics);           
             replaceWindowUrl(data.id);
             

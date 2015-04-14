@@ -10,7 +10,7 @@ from .base import (RelatedTopicSerializerMixin, ProjectSpecificItemMixin,
                    ProjectSlugField, URLField)
 from .documents import CitationSerializer
  # Cendari code E.G. aviz
-from cendari.semantic import semantic_resolve_topic
+from cendari.semantic import semantic_resolve_topic, semantic_query_latlong
 
 class TopicNodeSerializer(serializers.ModelSerializer):
     name = Field(source='_preferred_name')
@@ -57,12 +57,15 @@ class TopicSerializer(RelatedTopicSerializerMixin, ProjectSpecificItemMixin,
     url = URLField(lookup_arg_attrs=('project.slug', 'topic_node_id'))
     project = ProjectSlugField()
     citations = CitationSerializer(source='summary_cites', many=True, read_only=True)
+
+    # Cendari code E.G. aviz
+    latlong = serializers.SerializerMethodField('get_lat_long')
     class Meta:
         model = Topic
         # Cendari code E.G. aviz -- added rdf to fields
         fields = ('id', 'topic_node_id', 'preferred_name', 'type', 'url',
                   'alternate_names', 'related_topics', 'project',
-                  'last_updated', 'summary', 'citations','rdf', 'date')
+                  'last_updated', 'summary', 'citations','rdf', 'date','latlong')
     def save_object(self, obj, **kwargs):
         if not obj.id:
             topic_node_id = self.context.get('topic_node_id', None)
@@ -99,3 +102,9 @@ class TopicSerializer(RelatedTopicSerializerMixin, ProjectSpecificItemMixin,
         user = self.context['request'].user
         for name in to_create:
             obj.alternate_names.create(name=name, creator_id=user.id)
+
+
+    # Cendari code E.G. aviz
+    def get_lat_long(self,topic):
+        return semantic_query_latlong(topic)
+
