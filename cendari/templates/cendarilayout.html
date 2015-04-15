@@ -38,8 +38,8 @@
     };
 
     Ext.onReady(function(){
-      updateIframe('resourcesIframe');
-      updateIframe('smallvisIframe');
+      // updateIframe('resourcesIframe');
+      // updateIframe('smallvisIframe');
       current_url = document.location.href.replace(document.location.host,'').replace(cendari_root_url,'')
       if(current_url.indexOf('note')===-1 && current_url.indexOf('document')===-1){
         $('#extraButtonId').hide();
@@ -112,24 +112,6 @@
                   <li><a href="{{ user.get_absolute_url }}">My profile</a></li>
                   <li><a {% if browserid_authenticated %}class="browserid-logout" {% endif %}href="{% url "user_logout_view" %}">Log out</a></li>
                 </ul>
-              </li>
-
-              <li>
-                <div class="btn-group">
-                  <a href="#" class="btn dropdown-toggle" data-toggle="dropdown">
-                    <i class="icon-pencil"></i>
-                    <b class="caret"></b>
-                  </a>
-                  <ul class="dropdown-menu" style="right: 0; left: auto;">
-                    {% block extra_edit_actions %}{% endblock %}
-                    {% for project in user.get_authorized_projects %}
-                      {% if not forloop.last %}<li class="divider"></li>{% endif %}
-                      <li><a href="{% url "admin:main_note_add" project_slug=project.slug %}">Add note</a></li>
-                      <li><a href="{% url "admin:main_topic_add" project_slug=project.slug %}">Add topic</a></li>
-                      <li><a href="{% url "admin:main_document_add" project_slug=project.slug %}">Add document</a></li>
-                    {% endfor %}
-                  </ul>
-                </div> 
               </li>
           </ul>
           {% else %}

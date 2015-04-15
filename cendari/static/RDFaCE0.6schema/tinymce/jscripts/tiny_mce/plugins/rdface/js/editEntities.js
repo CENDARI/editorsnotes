@@ -144,7 +144,7 @@ var EditEntities = {
 		tinyMCEPopup.editor.setContent(tinyMCEPopup.editor.getContent());
 		tinyMCEPopup.close();
 	},
-	changeType : function(type) {
+	changeType : function(type) { // Cendari code E.G. aviz
 	    value = '{project:' + window.parent.cendari_js_project_slug + '}';
 	    //trace.event("_user","change_type_entity.update", "centre.rdface", value);
 		var pointer=tinyMCEPopup.getWindowArg('pointer');
@@ -158,12 +158,18 @@ var EditEntities = {
 			var selected_txt=pointer.html();
 			//remove and insert
 			remove_annotation(pointer,annotationF);
-			pointer.attr('class','r_entity r_'+type.toLowerCase());
+			pointer.attr('class','r_entity r_'+type.toLowerCase());	
 			
 			if(annotationF=="RDFa"){
 				pointer.attr('typeof','schema:'+type);
-				if(pointer.children().length==1)
-					pointer.children().attr("property",'schema:name').attr('class','r_prop r_name');
+				
+				if(pointer.children().length==1){
+					pointer.children().attr("property",'schema:name').attr('class','r_prop r_name');	
+				}
+				// else{
+				// 	temp = pointer[0].innerHTML;
+				// 	pointer[0].innerHTML = '<span style="" class="r_prop r_name" property="schema:name">'+temp+'</span>';
+				// }
 			}else{
 				pointer.attr('itemtype','http://schema.org/'+type);
 				if(pointer.children().length==1)
@@ -173,6 +179,7 @@ var EditEntities = {
 			pointer.css("background-color","");
 			pointer.find('.tooltip').remove();
 			tinyMCEPopup.editor.nodeChanged();
+			
 			tinyMCEPopup.editor.setContent(tinyMCEPopup.editor.getContent());
 			tinyMCEPopup.close();
 		} else {

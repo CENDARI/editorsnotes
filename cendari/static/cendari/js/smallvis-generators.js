@@ -369,7 +369,7 @@ function onVisLeave(){
  */
 function onVisClick(){
   var itemData = d3.select(this).datum();
-  console.log('NB................................ clicking on mark: ' + itemData);
+  //console.log('NB................................ clicking on mark: ' + itemData);
   // post a message to highlight in other panes
   parent.postMessage({'messageType':'cendari_highlight',
                       'targetWindowIds':'east',
@@ -449,6 +449,7 @@ function cancelLogHover(){
  */
 var highlights = {}
 function highlightVis(entityIds,level){
+  //console.log("::::::::::::::::::::::::::: highlightVis called with entityIds,level=" +entityIds + "," + level);
   level = level || 1;
   if(level % 1 === 0 && level > 0 && Array.isArray(entityIds)){
     highlights[level] = entityIds;
