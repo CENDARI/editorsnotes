@@ -192,6 +192,15 @@ function remove_annotations(editor,only_automatic){
 			editor.setContent(ns.innerHTML);
 		}
 }
+
+// Cendari code E.G. aviz
+function clean_string(html){
+   var tmp = document.createElement("DIV");
+   tmp.innerHTML = html;
+   return tmp.textContent || tmp.innerText || "";
+}
+
+
 //Insert RDFa/Microdata attributes to HTML DOM tree
 function insert_entity(editor,entity_type,b,has_rel){
 	activateAjaxIndicator(b);
@@ -217,6 +226,8 @@ function insert_entity(editor,entity_type,b,has_rel){
 	//var uri=suggestURI(proxy_url,"api="+getCookie("uriSuggestor")+"&query="+selectedContent,true);
 	// Annotation methods
 	// if there is no need to add new tag
+
+
 	if(getCookie("annotationF")=="RDFa"){
 		/*if ((selectedContent == nodeContent) || (selectedContentText==$(selectedContent).html())) {
 					//alert("if!!!");
@@ -251,23 +262,37 @@ function insert_entity(editor,entity_type,b,has_rel){
 			var annotatedContent;
 
 			// Cendari code E.G. aviz
+
+			console.log('selectedContent : ',selectedContent);
+			console.log('countWords(selectedContent) : ',countWords(selectedContent));
+
 			if(countWords(selectedContent)<maxWordsAllowed){
+				console.log('adding name.....')
 				annotatedContent = "<span" + temp + "><span class='r_prop r_name' property='schema:name'>" + selectedContent
 				+ "</span></span>";
 			}else{
 				annotatedContent = "<span" + temp + ">" + selectedContent
 				+ "</span>";
 			}
+			console.log('before annotatedContent',annotatedContent)
+			console.log('startContainer',editor.selection.getRng().startContainer.data)
+			console.log('endContainer',editor.selection.getRng().endContainer.data)
+			console.log('commonAncestorContainer',editor.selection.getRng().commonAncestorContainer.nodeName)
+
+			console.log('condition',(editor.selection.getRng().startContainer.data != editor.selection.getRng().endContainer.data) || editor.selection.getRng().commonAncestorContainer.nodeName == "BODY")
+
 			if ((editor.selection.getRng().startContainer.data != editor.selection
 					.getRng().endContainer.data)
 					|| editor.selection.getRng().commonAncestorContainer.nodeName == "BODY") {
-				annotatedContent = "<div" + temp + ">" + selectedContent
-				+ "</div>";
+				annotatedContent = "<span" + temp + ">" + selectedContent
+				+ '<meta property="schema:name" content="'+clean_string(selectedContent)+'" />' + "</span>";
 			}
 			// editor.selection.setContent(annotatedContent);
 			
 			annotatedContent+="&nbsp;&nbsp;";
-			editor.execCommand('mceInsertRawHTML', false,annotatedContent);
+			console.log('after annotatedContent',annotatedContent)
+			k = editor.execCommand('mceInsertRawHTML', false,annotatedContent);
+			console.log('mceInsertRawHTML returns : ', k);
 		//}
 		// add namespaces 
 		var ns =editor.dom.get('namespaces');
