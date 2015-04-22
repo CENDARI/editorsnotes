@@ -34,7 +34,6 @@ class CendariUserMiddleware(RemoteUserMiddleware):
                 elif group in group_maps['contributor_groups']:
                     logger.debug("User is editor")
                     is_editor = True
-                    break
             if is_admin:
                 if not user.is_superuser:
                     changed = True
