@@ -247,6 +247,24 @@ class Document(LastUpdateMetadata, Administered, URLAccessible,
     
 reversion.register(Document)
 
+# Cendari code E.G. aviz
+def get_or_create_document(user,project,description):
+
+    documents = Document.objects.all()
+    for document in documents:
+        print document.as_text()
+        print description
+        print document.as_text() == description
+        print '___________________________________'
+        if document.as_text() == description:
+            return document
+
+    document=Document(creator=user, last_updater=user, description=description, project=project)
+    document.save()
+
+    return document
+
+
 class TranscriptManager(models.Manager):
     # Include related document in default query.
     def get_query_set(self):

@@ -245,10 +245,12 @@ def cendari_project_add(request):
     #print request
     o = {}
     user = request.user
+    o['user']= request.user
     project = user.get_authorized_projects()[0]
-    if not (user.is_superuser or utils.is_project_creator(user)):
-        return HttpResponseForbidden(
-            content='You do not have permission to create a new project.')
+    o['user_has_perm'] = user.is_superuser or utils.is_project_creator(user)
+    # if not (user.is_superuser or utils.is_project_creator(user)):
+    #     return HttpResponseForbidden(
+    #         content='You do not have permission to create a new project.')
 
     if request.method == 'POST':
         form = forms.ProjectCreationForm(request.POST, request.FILES, user=request.user)
@@ -266,6 +268,10 @@ def cendari_project_add(request):
         o['form'] = forms.ProjectCreationForm(user=request.user)
         #print "fin creation projet", request.method
     o['project']=project
+
+    users = list(main_models.User.objects.all())
+    users.remove(request.user)
+
     return render_to_response(
         'editproject.html',o, context_instance=RequestContext(request))
 
@@ -281,9 +287,13 @@ def cendari_project_change(request, project_id):
     project = _check_privs(request.user, get_object_or_404(Project, id=project_id))
     
     user = request.user
-    if not user.has_project_perm(project, 'main.change_project') and not project.is_owned_by(user):
-        return HttpResponseForbidden(
-            content='You do not have permission to edit the details of %s' % project.name)
+    o['user']= request.user
+    o['user_has_perm'] = user.has_project_perm(project, 'main.change_project') and not project.is_owned_by(user)
+    
+    
+    # if not user.has_project_perm(project, 'main.change_project') and not project.is_owned_by(user):
+    #     return HttpResponseForbidden(
+    #         content='You do not have permission to edit the details of %s' % project.name)
 
     if request.method == 'POST':
         form = forms.ProjectForm(request.POST, request.FILES, instance=project)
@@ -300,6 +310,11 @@ def cendari_project_change(request, project_id):
     else:
         o['form'] = forms.ProjectForm(instance=project)
     o['project']=project
+
+    users = list(main_models.User.objects.all())
+    users.remove(request.user)
+    o['users'] = users
+
     return render_to_response(
         'editproject.html', o, context_instance=RequestContext(request))
     
@@ -443,6 +458,8 @@ def small_vis_data_lazy(request, project_slug):
     #print "::::::::::::::::::::::: (NB)/small_vis_data_lazy indexed_topics for this project: " + str(project_slug) + ", are= " + str(topics_dict)
     return HttpResponse(json.dumps(topics_dict.values()), mimetype='application/json')
 
+#project =  _check_project_privs_or_deny(request.user, project_slug)
+
 @login_required
 def getResourcesData(request, project_slug, sfield):  
     my_tree = {
@@ -470,7 +487,8 @@ def getResourcesData(request, project_slug, sfield):
         'children' : []
     }
     projects = request.user.get_authorized_projects().order_by('name')
-
+    main_project =  _check_project_privs_or_deny(request.user, project_slug)
+    utils.get_image_placeholder_document(request.user,main_project)
     if request.user.is_superuser:
         for p in projects:
             p_role = p.get_role_for(request.user)

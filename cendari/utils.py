@@ -15,6 +15,9 @@ import logging
 
 from rest_framework.views import exception_handler
 
+from editorsnotes.main.models.documents import get_or_create_document
+
+
 logger = logging.getLogger('cendari.utils')
 
 WELL_KNOWN_DATE_FORMATS=[
@@ -54,3 +57,8 @@ def update_delete_status(project):
         else:
             topic.deleted = False
             topic.save()
+
+
+def get_image_placeholder_document(user,project):
+    description= 'IMAGE PLACEHOLDER DO NOT DELETE !!!!'
+    return get_or_create_document(user,project,description)
