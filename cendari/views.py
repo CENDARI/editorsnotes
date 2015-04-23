@@ -578,21 +578,29 @@ def getTopicResources(request, project_slug, sfield):
     sorted_topic_types =  sorted(topic_types, key = lambda x: (x[0], x[1]))
     for (topic_type, topic_name) in sorted_topic_types:
         my_list = []
-    	if sfield == "created" or sfield == "-created" or sfield == "last_updated" or sfield == "-last_updated":
+    	if sfield == "created" or sfield == "last_updated":
             query_set = main_models.Topic.objects\
-              .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)\
-              .order_by(sfield)[:max_count]   
+              .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)[:max_count] 
+	    o_query_set = sorted(query_set, key=operator.attrgetter(sfield))  
+    	elif sfield == "-created" or sfield == "-last_updated":
+            query_set = main_models.Topic.objects\
+              .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)[:max_count] 
+	    o_query_set = sorted(query_set, key=operator.attrgetter(sfield[1:]), reverse=True) 
 	elif sfield == "-alpha":
-            query_set = main_models.Topic.objects\
-              .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)\
-              .order_by('-preferred_name')[:max_count]       
+	    o_query_set = main_models.Topic.objects.filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)\
+		.extra(select={'lower_sfield': 'lower(preferred_name)'}).order_by('-lower_sfield')[:max_count]  
+            #query_set = main_models.Topic.objects\
+            #  .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)[:max_count]   
+	    #o_query_set = sorted(query_set, key=operator.attrgetter('preferred_name'), reverse=True)
 	else:
-            query_set = main_models.Topic.objects\
-              .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)\
-              .order_by('preferred_name')[:max_count]          
-        set_count = query_set.count()
+	    o_query_set = main_models.Topic.objects.filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)\
+		.extra(select={'lower_sfield': 'lower(preferred_name)'}).order_by('lower_sfield')[:max_count]  
+            #query_set = main_models.Topic.objects\
+            #  .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)[:max_count]  
+	    #o_query_set = sorted(query_set, key=operator.attrgetter('preferred_name'))              
+        set_count = o_query_set.count()
         topic_count += 1
-	for e in query_set:
+	for e in o_query_set:
             #to make sure both url and node key have the same topic_id (when a topic exists in multiple probjects)
             #my_list.append({'title':str(e), 'key':str(project_slug)+'.topic.'+str(e.id), 'url':e.get_absolute_url()})
             url_parts = e.get_absolute_url().split('/')
