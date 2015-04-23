@@ -648,13 +648,15 @@ def getDocumentResources(request, project_slug, sfield):
 	#query_set =  sorted(unsorted_query_set, key = lambda doc: doc.description, reverse = True) 
 	#query_set =  sorted(unsorted_query_set, key = lambda x:'description', reverse = True)  
     	#sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document order by CAST(description AS text) DESC'
-    	sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document where project_id = '+ str(project_id) +' order by CAST(description AS text) DESC'
+    	#sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document where project_id = '+ str(project_id) +' order by CAST(description AS text) DESC'
+    	sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document where project_id = '+ str(project_id) +' order by ordering DESC'
     	query_set =  main_models.Document.objects.raw(sql_query)
     else:
 	#unsorted_query_set = main_models.Document.objects.filter(project__slug=project_slug)[:max_count]
 	#query_set =  sorted(unsorted_query_set, key = lambda doc: doc.description, reverse = False) 
 	#query_set =  sorted(unsorted_query_set, key = lambda x:'description', reverse = False)
-    	sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document where project_id ='+ str(project_id) +' order by CAST(description AS text)'
+    	#sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document where project_id ='+ str(project_id) +' order by CAST(description AS text)'
+    	sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document where project_id ='+ str(project_id) +' order by ordering'
     	query_set =  main_models.Document.objects.raw(sql_query)
 
     for e in query_set:
