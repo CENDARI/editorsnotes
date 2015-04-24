@@ -288,7 +288,7 @@ def cendari_project_change(request, project_id):
     
     user = request.user
     o['user']= request.user
-    o['user_has_perm'] = user.has_project_perm(project, 'main.change_project') and not project.is_owned_by(user)
+    o['user_has_perm'] =  user.has_project_perm(project, 'main.change_project') or  project.is_owned_by(user)
     
     
     # if not user.has_project_perm(project, 'main.change_project') and not project.is_owned_by(user):
@@ -296,6 +296,24 @@ def cendari_project_change(request, project_id):
     #         content='You do not have permission to edit the details of %s' % project.name)
 
     if request.method == 'POST':
+        # print '-------------'
+        # print 'POST is ::'
+        # print request.POST
+        # print 'iEditor' in request.POST
+        # print len(request.POST.getlist('iEditor'))
+        # for user in request.POST.getlist('iEditor'):
+        #     print user
+        # print '--------------'
+        # new_members= [request.user]
+        # if 'iEditor' in request.POST:
+        #     for username in request.POST.getlist('iEditor'):
+        #         curr_user = User.objects.filter(username=username)[0]
+        #         if curr_user:
+        #             new_members.append(curr_user)
+
+        # project.members.all().delete();
+
+
         form = forms.ProjectForm(request.POST, request.FILES, instance=project)
         if form.is_valid():
             form.save()
@@ -488,7 +506,7 @@ def getResourcesData(request, project_slug, sfield):
     }
     projects = request.user.get_authorized_projects().order_by('name')
     main_project =  _check_project_privs_or_deny(request.user, project_slug)
-    utils.get_image_placeholder_document(request.user,main_project)
+    # utils.get_image_placeholder_document(request.user,main_project)
     if request.user.is_superuser:
         for p in projects:
             p_role = p.get_role_for(request.user)
