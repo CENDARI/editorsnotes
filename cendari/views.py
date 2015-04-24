@@ -245,10 +245,12 @@ def cendari_project_add(request):
     #print request
     o = {}
     user = request.user
+    o['user']= request.user
     project = user.get_authorized_projects()[0]
-    if not (user.is_superuser or utils.is_project_creator(user)):
-        return HttpResponseForbidden(
-            content='You do not have permission to create a new project.')
+    o['user_has_perm'] = user.is_superuser or utils.is_project_creator(user)
+    # if not (user.is_superuser or utils.is_project_creator(user)):
+    #     return HttpResponseForbidden(
+    #         content='You do not have permission to create a new project.')
 
     if request.method == 'POST':
         form = forms.ProjectCreationForm(request.POST, request.FILES, user=request.user)
@@ -266,6 +268,10 @@ def cendari_project_add(request):
         o['form'] = forms.ProjectCreationForm(user=request.user)
         #print "fin creation projet", request.method
     o['project']=project
+
+    users = list(main_models.User.objects.all())
+    users.remove(request.user)
+
     return render_to_response(
         'editproject.html',o, context_instance=RequestContext(request))
 
@@ -281,11 +287,33 @@ def cendari_project_change(request, project_id):
     project = _check_privs(request.user, get_object_or_404(Project, id=project_id))
     
     user = request.user
-    if not user.has_project_perm(project, 'main.change_project') and not project.is_owned_by(user):
-        return HttpResponseForbidden(
-            content='You do not have permission to edit the details of %s' % project.name)
+    o['user']= request.user
+    o['user_has_perm'] =  user.has_project_perm(project, 'main.change_project') or  project.is_owned_by(user)
+    
+    
+    # if not user.has_project_perm(project, 'main.change_project') and not project.is_owned_by(user):
+    #     return HttpResponseForbidden(
+    #         content='You do not have permission to edit the details of %s' % project.name)
 
     if request.method == 'POST':
+        # print '-------------'
+        # print 'POST is ::'
+        # print request.POST
+        # print 'iEditor' in request.POST
+        # print len(request.POST.getlist('iEditor'))
+        # for user in request.POST.getlist('iEditor'):
+        #     print user
+        # print '--------------'
+        # new_members= [request.user]
+        # if 'iEditor' in request.POST:
+        #     for username in request.POST.getlist('iEditor'):
+        #         curr_user = User.objects.filter(username=username)[0]
+        #         if curr_user:
+        #             new_members.append(curr_user)
+
+        # project.members.all().delete();
+
+
         form = forms.ProjectForm(request.POST, request.FILES, instance=project)
         if form.is_valid():
             form.save()
@@ -300,6 +328,11 @@ def cendari_project_change(request, project_id):
     else:
         o['form'] = forms.ProjectForm(instance=project)
     o['project']=project
+
+    users = list(main_models.User.objects.all())
+    users.remove(request.user)
+    o['users'] = users
+
     return render_to_response(
         'editproject.html', o, context_instance=RequestContext(request))
     
@@ -443,6 +476,8 @@ def small_vis_data_lazy(request, project_slug):
     #print "::::::::::::::::::::::: (NB)/small_vis_data_lazy indexed_topics for this project: " + str(project_slug) + ", are= " + str(topics_dict)
     return HttpResponse(json.dumps(topics_dict.values()), mimetype='application/json')
 
+#project =  _check_project_privs_or_deny(request.user, project_slug)
+
 @login_required
 def getResourcesData(request, project_slug, sfield):  
     my_tree = {
@@ -470,7 +505,8 @@ def getResourcesData(request, project_slug, sfield):
         'children' : []
     }
     projects = request.user.get_authorized_projects().order_by('name')
-
+    main_project =  _check_project_privs_or_deny(request.user, project_slug)
+    # utils.get_image_placeholder_document(request.user,main_project)
     if request.user.is_superuser:
         for p in projects:
             p_role = p.get_role_for(request.user)
@@ -578,21 +614,29 @@ def getTopicResources(request, project_slug, sfield):
     sorted_topic_types =  sorted(topic_types, key = lambda x: (x[0], x[1]))
     for (topic_type, topic_name) in sorted_topic_types:
         my_list = []
-    	if sfield == "created" or sfield == "-created" or sfield == "last_updated" or sfield == "-last_updated":
+    	if sfield == "created" or sfield == "last_updated":
             query_set = main_models.Topic.objects\
-              .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)\
-              .order_by(sfield)[:max_count]   
+              .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)[:max_count] 
+	    o_query_set = sorted(query_set, key=operator.attrgetter(sfield))  
+    	elif sfield == "-created" or sfield == "-last_updated":
+            query_set = main_models.Topic.objects\
+              .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)[:max_count] 
+	    o_query_set = sorted(query_set, key=operator.attrgetter(sfield[1:]), reverse=True) 
 	elif sfield == "-alpha":
-            query_set = main_models.Topic.objects\
-              .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)\
-              .order_by('-preferred_name')[:max_count]       
+	    o_query_set = main_models.Topic.objects.filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)\
+		.extra(select={'lower_sfield': 'lower(preferred_name)'}).order_by('-lower_sfield')[:max_count]  
+            #query_set = main_models.Topic.objects\
+            #  .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)[:max_count]   
+	    #o_query_set = sorted(query_set, key=operator.attrgetter('preferred_name'), reverse=True)
 	else:
-            query_set = main_models.Topic.objects\
-              .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)\
-              .order_by('preferred_name')[:max_count]          
-        set_count = query_set.count()
+	    o_query_set = main_models.Topic.objects.filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)\
+		.extra(select={'lower_sfield': 'lower(preferred_name)'}).order_by('lower_sfield')[:max_count]  
+            #query_set = main_models.Topic.objects\
+            #  .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)[:max_count]  
+	    #o_query_set = sorted(query_set, key=operator.attrgetter('preferred_name'))              
+        set_count = o_query_set.count()
         topic_count += 1
-	for e in query_set:
+	for e in o_query_set:
             #to make sure both url and node key have the same topic_id (when a topic exists in multiple probjects)
             #my_list.append({'title':str(e), 'key':str(project_slug)+'.topic.'+str(e.id), 'url':e.get_absolute_url()})
             url_parts = e.get_absolute_url().split('/')
@@ -648,13 +692,15 @@ def getDocumentResources(request, project_slug, sfield):
 	#query_set =  sorted(unsorted_query_set, key = lambda doc: doc.description, reverse = True) 
 	#query_set =  sorted(unsorted_query_set, key = lambda x:'description', reverse = True)  
     	#sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document order by CAST(description AS text) DESC'
-    	sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document where project_id = '+ str(project_id) +' order by CAST(description AS text) DESC'
+    	#sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document where project_id = '+ str(project_id) +' order by CAST(description AS text) DESC'
+    	sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document where project_id = '+ str(project_id) +' order by ordering DESC'
     	query_set =  main_models.Document.objects.raw(sql_query)
     else:
 	#unsorted_query_set = main_models.Document.objects.filter(project__slug=project_slug)[:max_count]
 	#query_set =  sorted(unsorted_query_set, key = lambda doc: doc.description, reverse = False) 
 	#query_set =  sorted(unsorted_query_set, key = lambda x:'description', reverse = False)
-    	sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document where project_id ='+ str(project_id) +' order by CAST(description AS text)'
+    	#sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document where project_id ='+ str(project_id) +' order by CAST(description AS text)'
+    	sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document where project_id ='+ str(project_id) +' order by ordering'
     	query_set =  main_models.Document.objects.raw(sql_query)
 
     for e in query_set:

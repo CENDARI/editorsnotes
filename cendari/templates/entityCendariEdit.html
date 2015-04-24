@@ -121,7 +121,8 @@
 					<input  type="text" id="entity_description" name="entity_description" value="{%if topic.rdf%}{{ topic.summary|as_text }}{%endif%}"/>
 				</section>
 
-				<label class="editorlabel bold"> Resolve: </label> (e.g. to resolve the entity place 'Berlin' use the URL: http://dbpedia.org/resource/Berlin )
+				<label class="editorlabel bold"> Resolve: </label> {% if topic.topic_node.type == 'PLA' %} (e.g. to resolve the entity place 'Berlin' use the URL: http://dbpedia.org/resource/Berlin ) {% elif topic.topic_node.type == 'EVT' %} (specify a date in one of these formats: "m/d/Y","Y/m/d","d.m.Y","Y-m-d") {% else %} {%endif%}
+
 				<section data-error-target="content">
 					<input  type="text" id="rdf_id" name="rdf" value="{%if topic.rdf%}{{ topic.rdf }}{%endif%}"/>
 				</section>
