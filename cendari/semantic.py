@@ -546,6 +546,7 @@ def semantic_process_transcript(transcript,user=None):
             elif t['type']=='EVT':
          	if utils.parse_well_known_date(value):
                 	topic.date = utils.parse_well_known_date(value)
+			topic.rdf = value
                 	logger.debug('Found a valid date: %s', topic.date)
 			topic.save()	
  		else:
@@ -662,16 +663,6 @@ def semantic_resolve_topic(topic, force=False):
     if topic.rdf is None:
         semantic.commit()
         return
-
-    #NB
-    if topic.topic_node.type == 'EVT':
-      	if utils.parse_well_known_date(topic.rdf):
-         	topic.date = utils.parse_well_known_date(topic.rdf)
-               	logger.debug('Found a valid date: %s', topic.date)
-		topic.save()	
-		return
-	else:
-               	logger.debug('Did not find a valid date: %s', topic.date) #issue a warning!
 
     rdf_url = topic.rdf
     logger.debug(u'Trying to resolve topic %s from url %s', unicode(topic), unicode(rdf_url))
