@@ -104,6 +104,10 @@ def login_user_synchronize(sender, user, request, **kwargs):
         logger.debug('No mail in META')
         return
     mail = request.META['mail']
+    if (';' in mail):
+        i = mail.index(';')
+        if i > 0:
+            mail = mail[0:i]
     if 'cn' not in request.META:
         logger.debug('No cn in META')
         return
