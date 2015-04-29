@@ -93,6 +93,8 @@ def login_user_synchronize(sender, user, request, **kwargs):
         project.save() # default roles are created at save time
     role = project.roles.get(role='Editor')
     role.users.add(user)
+    role=project.roles.get_or_create_by_name('Owner', is_super_role=True)
+    role.users.add(user)
 
     if 'eppn' not in request.META: 
         logger.debug('No eppn in META')
