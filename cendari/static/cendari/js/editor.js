@@ -263,7 +263,8 @@ function submitTranscript(document_id,fc_document){
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) { 
             console.log("Error with status "+textStatus+":",errorThrown);
-            showErrorMessage(messages.transcript.error);
+            // showErrorMessage(messages.transcript.error);
+            showErrorMessage(errorThrown);
             submitDocument(fc_document);
         } 
     });
@@ -281,7 +282,8 @@ function submitScan(document_id,fc_document){
                 },
                  error: function(XMLHttpRequest, textStatus, errorThrown) { 
                     console.log("Error with status "+textStatus+":",errorThrown);
-                    showErrorMessage(messages.scan.error);
+                    // showErrorMessage(messages.scan.error);
+                    showErrorMessage(errorThrown);
                     submitDocument(fc_document)
                 }
                 
@@ -363,7 +365,8 @@ function submitDocument(fc){
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) { 
             console.log("Error with status "+textStatus+":",errorThrown);
-            showErrorMessage(messages.document.error);
+            // showErrorMessage(messages.document.error);
+            showErrorMessage(errorThrown);
         } 
     });
 }
@@ -395,8 +398,8 @@ function submitNote(fc){
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) { 
             console.log("Error with status "+textStatus+":",errorThrown);
-            showErrorMessage(messages.note.error);
-
+            // showErrorMessage(messages.note.error);
+            showErrorMessage(errorThrown);
         } 
     });
 }
@@ -436,7 +439,8 @@ function submitEntity(fc){
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) { 
             console.log("Error with status "+textStatus+":",errorThrown);
-            showErrorMessage(messages.entity.error);
+            // showErrorMessage(messages.entity.error);
+            showErrorMessage(errorThrown);
 
         } 
     });

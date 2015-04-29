@@ -30,7 +30,7 @@ class Note(LastUpdateMetadata, Administered, URLAccessible,
     enables.
     """
     title = models.CharField(max_length='80', unique=True)
-    content = fields.XHTMLField()
+    content = fields.XHTMLField(null=True,blank=True,default='')
     project = models.ForeignKey('Project', related_name='notes')
     assigned_users = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, null=True)
     status = models.CharField(choices=NOTE_STATUS_CHOICES, max_length=1, default='1')

@@ -259,19 +259,25 @@
 			// 	}
 			// });
 			// $('#transcript_toc').toc({content: "#transcript_content", headings: "h1,h2,h3,h4,h5,h6"});
+			
 			$('#document_toc').toc({content: "#document_content", headings: "h1,h2,h3,h4,h5,h6"});
-			$('.visibilityToc').on('click',function(e){
-				e.preventDefault();
-				id = $(this).parent().parent().find('.toc').attr('id')
-				if($(this).text().indexOf('show')>-1){
-					$(this).text('hide');
-					$('#'+id).show();
-				}
-				else{
-					$(this).text('show');
-					$('#'+id).hide();
-				}
-			})
+			if($('#document_toc li').length >0){
+				$('.visibilityToc').on('click',function(e){
+					e.preventDefault();
+					id = $(this).parent().parent().find('.toc').attr('id')
+					if($(this).text().indexOf('show')>-1){
+						$(this).text('hide');
+						$('#'+id).show();
+					}
+					else{
+						$(this).text('show');
+						$('#'+id).hide();
+					}
+				})
+			}
+			else{
+				$('#document_toc_wrapper').hide()
+			}
 		});
 
 		Ext.onReady(function(){
