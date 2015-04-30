@@ -234,19 +234,24 @@
 		{% endif %}
 
 
-		$(document).ready(function(){	
+		$(document).ready(function(){
 			$('#note_toc').toc({content: "#note_content", headings: "h1,h2,h3,h4,h5,h6"});
-			$('.visibilityToc').on('click',function(e){
-				e.preventDefault();
-				if($(this).text().indexOf('show')>-1){
-					$(this).text('hide');
-					$('#note_toc').show();
-				}
-				else{
-					$(this).text('show');
-					$('#note_toc').hide();
-				}
-			})
+			if( $('#note_toc li').length >0)	{
+				$('.visibilityToc').on('click',function(e){
+					e.preventDefault();
+					if($(this).text().indexOf('show')>-1){
+						$(this).text('hide');
+						$('#note_toc').show();
+					}
+					else{
+						$(this).text('show');
+						$('#note_toc').hide();
+					}
+				})
+			}
+			else{
+				$('#note_toc_wrapper').hide()
+			}
 		});
 		
 

@@ -32,6 +32,9 @@ class Migration(SchemaMigration):
         # Changing field 'User.zotero_uid'
         db.alter_column(u'main_user', 'zotero_uid', self.gf('django.db.models.fields.CharField')(max_length='10', null=True))
 
+        # Changing field 'Note.content'
+        db.alter_column(u'main_note', 'content', self.gf('editorsnotes.main.fields.XHTMLField')(null=True))
+
     def backwards(self, orm):
         # Deleting model 'UserFeedback'
         db.delete_table(u'main_userfeedback')
@@ -45,6 +48,9 @@ class Migration(SchemaMigration):
 
         # Changing field 'User.zotero_uid'
         db.alter_column(u'main_user', 'zotero_uid', self.gf('django.db.models.fields.CharField')(max_length='6', null=True))
+
+        # Changing field 'Note.content'
+        db.alter_column(u'main_note', 'content', self.gf('editorsnotes.main.fields.XHTMLField')(default='content empty'))
 
     models = {
         u'auth.group': {
@@ -186,7 +192,7 @@ class Migration(SchemaMigration):
         'main.note': {
             'Meta': {'ordering': "['-last_updated']", 'object_name': 'Note'},
             'assigned_users': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'to': "orm['main.User']", 'null': 'True', 'blank': 'True'}),
-            'content': ('editorsnotes.main.fields.XHTMLField', [], {}),
+            'content': ('editorsnotes.main.fields.XHTMLField', [], {'default': "''", 'null': 'True', 'blank': 'True'}),
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'creator': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'created_note_set'", 'to': "orm['main.User']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),

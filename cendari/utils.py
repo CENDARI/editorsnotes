@@ -48,17 +48,6 @@ def custom_exception_handler(exc):
         logger.debug('Received exception %s', type(exc))
     return response
 
-def update_delete_status(project):
-    topics = project.topics.all()
-    for topic in topics:
-        if len(topic.get_related_documents()) == len(topic.get_related_notes()) == 0:
-            topic.deleted = True
-            topic.save()
-        else:
-            topic.deleted = False
-            topic.save()
-
-
 def get_image_placeholder_document(user,project):
     description= 'IMAGE PLACEHOLDER DO NOT DELETE !!!!'
     return get_or_create_document(user,project,description)

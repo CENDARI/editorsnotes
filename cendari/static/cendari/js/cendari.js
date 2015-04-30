@@ -192,7 +192,7 @@ Ext.application({
 		cendari.addTab = null;
 		cendari.addWidgetToActiveTab = null;
 		csspath = document.getElementById("static_url").getAttribute("content") + "cendari/css/rdfaceCSS/";
-
+		console.log ('==================> fucking csss is  at :',csspath);
 		var editors = [];
 
 		function Editor(height, domID, isReadOnly, editButtonID, labeltitle) {

@@ -15,7 +15,9 @@ from documents import Document
 from notes import Note
 # Cendari code E.G. aviz
 from cendari.fields import RDFField
-
+import shutil
+from django.db.models.signals import pre_delete,post_save 
+from django.dispatch import receiver
 
 __all__ = ['Topic', 'TopicNode', 'TopicAssignment', 'AlternateName',
            'LegacyTopic']
@@ -348,6 +350,26 @@ class TopicAssignment(CreationMetadata, ProjectPermissionsMixin):
             self.content_object)
     def get_affiliation(self):
         return self.topic.project
+
+    def get_topic_relations_number(self):
+        return len(self.topic.get_related_documents()) + len(self.topic.get_related_notes())
+
+    @receiver(pre_delete)
+    def delete_topic_assigment(sender, instance, **kwargs):
+        if type(instance) is TopicAssignment:
+            if (len(instance.topic.get_related_documents()) + len(instance.topic.get_related_notes())) == 1:
+                instance.topic.deleted = True
+                instance.topic.save()
+
+
+    @receiver(post_save)
+    def save_topic_assigment(sender,instance,**kwargs):
+         if type(instance) is TopicAssignment:           
+            if (len(instance.topic.get_related_documents()) + len(instance.topic.get_related_notes())) > 0:
+                instance.topic.deleted = False
+                instance.topic.save()
+
+
 reversion.register(TopicAssignment)
 
 

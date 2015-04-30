@@ -254,6 +254,7 @@
 									{% endfor %}
 								{% endif %}
 							</ul>
+							<iframe width="100%" allowfullscreen="true" id="scan-viewer" ></iframe>
 						</div>
 
 						<br/>
@@ -335,43 +336,7 @@
 		// 	})
 		// });
 
-		$(document).ready(function(){
-			$('#scan-list').sortable({
-				helper: function(e, elt) {
-					return elt.clone(true);
-				}
-			});
-			$( "body" ).delegate('.delete','click',function(event){
-				event.preventDefault();
-				var choice = confirm(this.getAttribute('data-confirm'));
-				if (choice) {
-					
-
-					var li_jq = $($(this).parent());
-
-					var formData ="csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&_method=DELETE";
-					$.ajax({
-					// beforeSend: function (xhr) {xhr.setRequestHeader('X-CSRFToken', $('input[name="csrfmiddlewaretoken"]').val());},
-						url:this.getAttribute('href'),
-						type: 'POST',
-						data: formData,
-						success: function(data){
-							li_jq.remove();
-							$('#scansTab').text('Scans ('+$('#scan-list').find('li').size()+')')
-						},
-						error: function(XMLHttpRequest, textStatus, errorThrown) { 
-						console.log("Error with status "+textStatus+":",errorThrown);
-						showErrorMessage(messages.transcript.error);
-						} 
-					});
-				}
-					
-			})
-			
-		});
-
-
-
+	
 		{% if document %}
 			Ext.onReady(function(){
 				$('#extraButtonId').text('Read Mode');
