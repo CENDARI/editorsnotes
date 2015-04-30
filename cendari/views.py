@@ -504,7 +504,7 @@ def getResourcesData(request, project_slug, sfield):
         'url':'',
         'children' : []
     }
-    projects = request.user.get_authorized_projects().order_by('name')
+    projects = request.user.get_authorized_projects().order_by('name').distinct('name')
     main_project =  _check_project_privs_or_deny(request.user, project_slug)
     # utils.get_image_placeholder_document(request.user,main_project)
     if request.user.is_superuser:
