@@ -1,5 +1,10 @@
 $(function() {
     $("#tree").dynatree({
+     checkbox: true,
+      // Override class name for checkbox icon:
+      classNames: {checkbox: "dynatree-radio"},
+
+
 	minExpandLevel:2,
 	selectMode:1,//single selection
 	clickFolderMode: 3,
@@ -67,6 +72,9 @@ $(function() {
 			    });
 			}
 	    }
+	},
+	onDblClick: function(node, event){
+		console.log('dynatree node.data is : ',node.data);
 	},
 	onPostInit: function(isReloading, isError){
 	  	//console.log('==============================>>>>>>>>>> Resources/onPostInit: cendari_js_project_slug = ' + cendari_js_project_slug);
@@ -145,6 +153,31 @@ $(function() {
 	                       document.location.origin);
 			});
 	}, 
+	onRender: function(node, nodeSpan) {
+    	// $(nodeSpan).find("a.dynatree-title").css("color", "red");
+    	// console.log('Node is ',node);
+    	console.log($(nodeSpan).find('.dynatree-radio'));
+    	// console.log('is it a folder ? ', node);
+    	// console.log(node.isFolder);
+    	// radio_button = 
+    	radio = $(nodeSpan).find('.dynatree-radio')[0]
+    	if(node.data.isFolder && (node.data.project_id !== undefined)){
+    		// console.log('yes it is a folder');
+    		// project_path  = cendari_root_url+'cendari/projects/'+node.data.project_id;
+    		// console.log($(nodeSpan).next().attr('class'))
+    		// if($(nodeSpan).next().attr('class') !== 'edit_button_span'){
+    		//     $img= $('<img>').attr('src',cendari_js_edit_image_path).attr('alt','Edit');
+    		//     $a = $('<a>').addClass('edit_button').attr('href',project_path).attr('target','_blank').append($img);
+	    	// 	$span = $('<span>').addClass('edit_button_span').addClass('dynatree-radio')//.append($a)
+	    	// 	// $(nodeSpan).after('<span><a class="edit_button" href="'+project_path+'" >  <img src="'++'" alt="Edit" >  </a></span>')
+	    	// 	// $(nodeSpan).after($span);
+    		// }
+    		$(radio).attr('pid',node.data.project_id);
+    	}
+    	else{
+    		$(radio).hide();
+    	}
+	},
 	onLazyRead: function(node){
 	    burl = '';
 	    title = node.data.title;

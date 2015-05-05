@@ -15,6 +15,51 @@
           display: none;
         }
 
+        span.dynatree-radio {
+          /*background-image: url('http://127.0.0.1:8000/static/cendari/img/pencil_small.png');*/
+          width: 16px;
+          height: 16px;
+        /*  display: -moz-inline-box; /* @ FF 1+2 removed for issue 221 */
+        /*  -moz-box-align: start; /* issue 221 */
+          display: inline-block; /* Required to make a span sizeable */
+          vertical-align: top;
+          background-repeat: no-repeat;
+          background-position: left;
+          background-image: url('http://127.0.0.1:8000/static/cendari/img/pencil_small.png');
+          background-position: 0 0;
+        }
+
+       span.dynatree-radio
+      {
+        /*margin-left: 3px;*/
+       background-position: left;
+      }
+      span.dynatree-radio:hover
+      {
+        cursor: pointer; cursor: hand;
+        background-position: left;
+      }
+
+      .dynatree-partsel span.dynatree-radio
+      {
+        background-position: left;
+      }
+      .dynatree-partsel span.dynatree-radio:hover
+      {
+        cursor: pointer; cursor: hand;
+        background-position: left;
+      }
+
+      .dynatree-selected span.dynatree-radio
+      {
+        background-position: left;
+      }
+      .dynatree-selected span.dynatree-radio:hover
+      {
+        cursor: pointer; cursor: hand;
+        background-position: left;
+      }
+
         label.radio_link {
           /*display: block;
           float: left;*/
@@ -36,6 +81,12 @@
           /*border: 1px solid blue;
           color: blue;*/
         }
+
+
+        li .edit_button_span .edit_button{
+          z-index: 1;
+        }
+
       </style>
     {% endcompress %}
 
@@ -49,6 +100,7 @@
 
       cendari_root_url = "{%url 'index_view' %}";
       cendari_js_project_slug = '{{ project_slug }}';
+      cendari_js_edit_image_path = '{% static "cendari/img/pencil_small.png" %}';
 
       cendari_js_object_type = getParameterByName('object_type'); 
       cendari_js_object_id = getParameterByName('object_id');
@@ -132,6 +184,15 @@
           $(this).addClass('active');
           var radio_id = $(this).attr('for');
           sortTree($('#'+radio_id).val());
+        });
+
+
+        // $('li .edit_button_span .edit_button').on('click',function(e){
+        $('body').delegate('.dynatree-radio','click',function(e){
+        // $('.dynatree-radio').on('click',function(e){
+          e.preventDefault()
+          // alert('input '+$(this).attr('pid'));
+           parent.location.href =  cendari_root_url+'cendari/projects/'+$(this).attr('pid');
         });
 
       });
