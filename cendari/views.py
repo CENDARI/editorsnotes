@@ -122,16 +122,16 @@ def _check_project_privs_or_deny(user, project_slug):
 	   	project = projects[0]
         else:
             project = get_object_or_404(Project, slug=project_slug)
-        if not user.superuser_or_belongs_to(project):
+        if not user.superuser_or_belongs_to(project) and not project.is_owned_by(user):
             print "not superuser_or_belongs_to"
             raise PermissionDenied("not authorized on %s project" % project_slug)
         return project
 
 def _check_privs(user, obj):
     project = obj.get_affiliation()
-    if not user.superuser_or_belongs_to(project):
+    if not user.superuser_or_belongs_to(project) and not project.is_owned_by(user):
         print "not superuser_or_belongs_to"
-        raise PermissionDenied("not authorized on %s project" % project_slug)
+        raise PermissionDenied("not authorized on %s project" % obj.slug)
     return obj
 
 @login_required
@@ -518,6 +518,7 @@ def getResourcesData(request, project_slug, sfield):
                     'addClass': '',
                     'url':'',
                     'isLazy':'true',
+                    'project_id': p.id,
                     'children' : []
                 }
                 my_projects['children'].append(my_project)
@@ -529,6 +530,7 @@ def getResourcesData(request, project_slug, sfield):
                     'addClass': '',
                     'url':'',
                     'isLazy':'true',
+                    'project_id':p.id,
                     'children' : []
                 }
                 other_projects['children'].append(other_project)
@@ -545,6 +547,7 @@ def getResourcesData(request, project_slug, sfield):
                 'addClass':'',
                 'url':'',
                 'isLazy':'true',
+                'project_id':p.id,
                 'children' : []
             }
             my_projects['children'].append(my_project)
