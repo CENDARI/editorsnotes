@@ -247,7 +247,7 @@ def cendari_project_add(request):
     user = request.user
     o['user']= request.user
     project = user.get_authorized_projects()[0]
-    o['user_has_perm'] = user.is_superuser or utils.is_project_creator(user)
+    o['user_has_perm'] = user.is_superuser #or utils.is_project_creator(user)
     # if not (user.is_superuser or utils.is_project_creator(user)):
     #     return HttpResponseForbidden(
     #         content='You do not have permission to create a new project.')
@@ -878,7 +878,8 @@ def editNoteCendari(request, note_id, project_slug):
     if note.is_private:
          can_view = (request.user.is_authenticated() and request.user.has_project_perm(note.project, 'main.view_private_note'))
          if not can_view:
-             raise PermissionDenied()
+            print 'USER CANNOT VIEW NOTE'
+            raise PermissionDenied()
     o['project'] = note.project
     o['breadcrumb'] = (
         (note.project.name, note.project.get_absolute_url()),

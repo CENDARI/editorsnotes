@@ -197,6 +197,9 @@ class ProjectForm(ModelForm):
         self.fields["editors"].initial =  current_members
     def save(self, commit=True):
         project = super(ProjectForm, self).save(commit=False)
+
+        owners = [user for  role in project.roles.filter(role='Owner') for user in role.group.user_set.all()]
+
         previous_members = [u.username for u in project.members]
         current_members = self.cleaned_data["editors"]
         to_remove = [e for e in previous_members if e not in current_members]
@@ -205,7 +208,8 @@ class ProjectForm(ModelForm):
         for user in User.objects.filter(username__in=to_add):
             role.users.add(user)
         for user in User.objects.filter(username__in=to_remove):
-            role.users.remove(user)
+            if not user in owners:
+                role.users.remove(user)
         return project
 # Cendari code E.G. aviz
 class ProjectCreationForm(ModelForm):
@@ -218,6 +222,7 @@ class ProjectCreationForm(ModelForm):
         user = kwargs['user']
         del kwargs['user']
         super(ProjectCreationForm, self).__init__(*args, **kwargs)
+        self.user = user
         project = self.instance
         owners = [user for  role in project.roles.filter(role='Owner') for user in role.group.user_set.all()]
         users = [(u.username, "{} {}".format(u.first_name,u.last_name) if u.last_name else u.username) for u in User.objects.all() if u not in owners]
@@ -226,7 +231,11 @@ class ProjectCreationForm(ModelForm):
         self.fields["editors"].initial =  current_members
     def save(self, commit=True):
         project = super(ProjectCreationForm, self).save()
-        previous_members = [u.username for u in project.members]
+
+        owners = [user for  role in project.roles.filter(role='Owner') for user in role.group.user_set.all()]
+
+        owners = [user for  role in project.roles.filter(role='Owner') for user in role.group.user_set.all()]
+        previous_members = [u.username for u in project.members if u not in owners ]
         current_members = self.cleaned_data["editors"]
         to_remove = [e for e in previous_members if e not in current_members]
         to_add = [e for e in current_members if e not in previous_members]
@@ -234,8 +243,8 @@ class ProjectCreationForm(ModelForm):
         for user in User.objects.filter(username__in=to_add):
             role.users.add(user)
         for user in User.objects.filter(username__in=to_remove):
-            role.users.remove(user)
-
+            if not user in owners:
+                role.users.remove(user)
         return project
 
 # original
