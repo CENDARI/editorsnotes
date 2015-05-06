@@ -50,12 +50,13 @@ __all__ = [
     'semantic_rdfa'
 ]
 
-
-
-
 logger = logging.getLogger('cendari.semantic')
 
-CENDARI = Namespace("http://resources.cendari.dariah.eu/notes/")
+if hasattr(settings,'SEMANTIC_NAMESPACE'):
+    CENDARI = Namespace(settings.SEMANTIC_NAMESPACE)
+else:
+    CENDARI = Namespace("http://localhost:8000/")
+
 #CENDARI = Namespace("http://pro2.cendari.dariah.eu/enotes/")
 SCHEMA  = Namespace("http://schema.org/")
 DBPPROP  = Namespace("http://dbpedia.org/property/")
