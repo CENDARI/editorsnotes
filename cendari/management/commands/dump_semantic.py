@@ -14,7 +14,7 @@ class Command(LabelCommand):
                     '--format',
                     action='store',
                     default='n3',
-                    type='choice', choices=['nt', 'n3', 'xml', 'turtle', 'prettyy-xml', 'trix'],
+                    type='choice', choices=['nt', 'n3', 'xml', 'turtle', 'pretty-xml', 'trix'],
 
                     help='RDF serialization format: nt, n3, xml, turtle, pretty-xml, trix [default: n3]'),
     )
