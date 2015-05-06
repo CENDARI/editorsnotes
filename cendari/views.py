@@ -645,8 +645,15 @@ def getTopicResources(request, project_slug, sfield):
             url_parts = e.get_absolute_url().split('/')
             topic_id_index = len(url_parts) - 2
             topic_id = url_parts[topic_id_index];
+	    if e.rdf!=None:#TO BE CHANGED: check if the dbpedia entry is stored in the tuple store rather than rdf field
+		if e.rdf.strip() != '':			
+			toresolve_flag = ''
+		else:
+			toresolve_flag = '*'
+	    else:
+	    	toresolve_flag = '*'
             my_list.append({
-                'title': unicode(e),
+                'title': unicode(e)+toresolve_flag,
                 'key': str(project_slug)+'.topic.'+str(topic_id),
                 'url':e.get_absolute_url()
             })
