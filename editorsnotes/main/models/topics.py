@@ -297,12 +297,13 @@ def get_or_create_topic(user, name, type, project, date=None):
                                                         type=type,
                                                         defaults={'creator': user,
                                                                  'last_updater': user})
-        t=Topic(creator=user, last_updater=user, preferred_name=name, topic_node=topic_node, project=project)
+        t, created=Topic.objects.get_or_create(creator=user, last_updater=user, preferred_name=name, topic_node=topic_node, project=project)
         
         if type=='EVT':
             t.date = date
             #if (t.date):
             #    print "Parsed %s into a proper date %s" % (name,t.date.isoformat())
+        
         t.save()
 #        t.topic_node.type=type
         if not c: t.topic_node.save()
