@@ -395,11 +395,11 @@ def semantic_process_note(note,user=None):
 #        note.save()
 
     xml = note.content
-    print '---------------------------'
-    print as_html(note.content)
+#    print '---------------------------'
+#    print as_html(note.content)
     topics = xml_to_topics(xml, uri) 
-    print topics
-    print '---------------------------'
+#    print topics
+#    print '---------------------------'
     done=set()
     note.related_topics.all().delete()
     for t in topics:
