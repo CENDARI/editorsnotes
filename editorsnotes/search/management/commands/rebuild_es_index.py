@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from ... import search
+from editorsnotes.search import en_index
 
 class Command(BaseCommand):
     help = 'Rebuild elasticsearch cendari index'
