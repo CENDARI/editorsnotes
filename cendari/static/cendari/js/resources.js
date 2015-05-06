@@ -177,6 +177,7 @@ $(function() {
     	else{
     		$(radio).hide();
     	}
+
 	},
 	onLazyRead: function(node){
 	    burl = '';
