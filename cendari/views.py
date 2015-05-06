@@ -567,7 +567,7 @@ def getLazyProjectData(request, project_slug, sfield):
             for model in [main_models.Note, main_models.Document, main_models.Topic]:
                 model_name = model._meta.module_name  
                 if model_name == 'topic':
-                    node_title = 'Entities(%d)' % len(main_models.topics.TYPE_CHOICES)
+                    node_title = 'Entities (%d)' % len(main_models.topics.TYPE_CHOICES)
                     topic_list = getTopicResources(request, p.slug, sfield)
                     result_list.append({
                         'title':node_title,
@@ -651,10 +651,13 @@ def getTopicResources(request, project_slug, sfield):
                 'url':e.get_absolute_url()
             })
         node_title = topic_name + ' (' + str(set_count)  + ')'
+	css_class = '<span class="dynatree-topicfolder u' + topic_name + '">'
         topic_list.append({
-            'title': node_title,
+            'title': css_class + topic_name+'</span>'+ ' (' + str(set_count)  + ')',
             'key' :str(project_slug)+'.topic.'+str(topic_type),
             'isFolder':'true',
+	    'isTopicFolder':'true',
+	    'topicType':topic_type,
             'addClass':'',
             'url':'',
             'children':my_list
