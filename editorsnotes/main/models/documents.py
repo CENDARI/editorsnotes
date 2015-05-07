@@ -241,7 +241,7 @@ class Document(LastUpdateMetadata, Administered, URLAccessible,
         return kwargs
     def get_all_related_topics(self):
         topics = []
-        topics += [ta.topic for ta in self.related_topics.all() if ta is not  None]
+        topics += [ta.topic for ta in self.related_topics.all() if ta.topic is not  None]
         return set(topics) 
 
     
