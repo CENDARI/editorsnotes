@@ -58,11 +58,11 @@ class Note(LastUpdateMetadata, Administered, URLAccessible,
     # Cendari code E.G. aviz
     def get_all_related_topics(self):
         topics = []
-        topics += [ta.topic for ta in self.related_topics.all()]
+        topics += [ta.topic for ta in self.related_topics.all() if ta is not  None]
         return set(topics) 
     def get_all_related_topics_ids(self):
         topics = []
-        topics += [ta.topic.pk for ta in self.related_topics.all()]
+        topics += [ta.topic.pk for ta in self.related_topics.all() if ta is not  None]
         return topics
 
 class NoteSectionManager(InheritanceManagerMixin, OrderingManager):
