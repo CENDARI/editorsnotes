@@ -291,20 +291,27 @@ reversion.register(Topic)
 def get_or_create_topic(user, name, type, project, date=None):
     res = list(Topic.objects.filter(preferred_name=name,project=project))
     cnt = len(res)
+    created = False
+    t = None
     if cnt==0:
         #print "Creating topic '%s' of type '%s'" % (name.encode("utf-8"), type)
         topic_node, c = TopicNode.objects.get_or_create(_preferred_name=name,
                                                         type=type,
                                                         defaults={'creator': user,
                                                                  'last_updater': user})
-        t, created=Topic.objects.get_or_create(creator=user, last_updater=user, preferred_name=name, topic_node=topic_node, project=project)
         
+        query_topic = Topic.objects.filter(project_id=project.id,topic_node_id=topic_node.id)
+        if len(query_topic) == 0:
+            t, created=Topic.objects.get_or_create(creator=user, last_updater=user, preferred_name=name, topic_node=topic_node, project=project)
+        else:
+            t = query_topic[0]
+
         if type=='EVT':
             t.date = date
             #if (t.date):
             #    print "Parsed %s into a proper date %s" % (name,t.date.isoformat())
         
-        t.save()
+        if not created : t.save()
 #        t.topic_node.type=type
         if not c: t.topic_node.save()
     elif res[0].topic_node.type==type:
@@ -355,9 +362,15 @@ class TopicAssignment(CreationMetadata, ProjectPermissionsMixin):
     def get_topic_relations_number(self):
         return len(self.topic.get_related_documents()) + len(self.topic.get_related_notes())
 
+
+
+    # Cendari code E.G. aviz
+
     @receiver(pre_delete)
     def delete_topic_assigment(sender, instance, **kwargs):
         if type(instance) is TopicAssignment:
+            if instance.topic is None :
+                pass
             if (len(instance.topic.get_related_documents()) + len(instance.topic.get_related_notes())) == 1:
                 instance.topic.deleted = True
                 instance.topic.save()
@@ -365,7 +378,9 @@ class TopicAssignment(CreationMetadata, ProjectPermissionsMixin):
 
     @receiver(post_save)
     def save_topic_assigment(sender,instance,**kwargs):
-         if type(instance) is TopicAssignment:           
+         if type(instance) is TopicAssignment: 
+            if instance.topic is None :
+                pass          
             if (len(instance.topic.get_related_documents()) + len(instance.topic.get_related_notes())) > 0:
                 instance.topic.deleted = False
                 instance.topic.save()
