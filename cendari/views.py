@@ -620,51 +620,48 @@ def getTopicResources(request, project_slug, sfield):
     	if sfield == "created" or sfield == "last_updated":
             query_set = main_models.Topic.objects\
               .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)[:max_count] 
-	    o_query_set = sorted(query_set, key=operator.attrgetter(sfield))  
+            o_query_set = sorted(query_set, key=operator.attrgetter(sfield))  
     	elif sfield == "-created" or sfield == "-last_updated":
             query_set = main_models.Topic.objects\
               .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)[:max_count] 
-	    o_query_set = sorted(query_set, key=operator.attrgetter(sfield[1:]), reverse=True) 
-	elif sfield == "-alpha":
-	    o_query_set = main_models.Topic.objects.filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)\
-		.extra(select={'lower_sfield': 'lower(preferred_name)'}).order_by('-lower_sfield')[:max_count]  
-            #query_set = main_models.Topic.objects\
-            #  .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)[:max_count]   
-	    #o_query_set = sorted(query_set, key=operator.attrgetter('preferred_name'), reverse=True)
-	else:
-	    o_query_set = main_models.Topic.objects.filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)\
-		.extra(select={'lower_sfield': 'lower(preferred_name)'}).order_by('lower_sfield')[:max_count]  
-            #query_set = main_models.Topic.objects\
-            #  .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)[:max_count]  
+            o_query_set = sorted(query_set, key=operator.attrgetter(sfield[1:]), reverse=True) 
+    	elif sfield == "-alpha":
+            o_query_set = main_models.Topic.objects.filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)\
+            .extra(select={'lower_sfield': 'lower(preferred_name)'}).order_by('-lower_sfield')[:max_count]  
+                #query_set = main_models.Topic.objects\
+                #  .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)[:max_count]   
+    	    #o_query_set = sorted(query_set, key=operator.attrgetter('preferred_name'), reverse=True)
+    	else:
+            o_query_set = main_models.Topic.objects.filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)\
+            .extra(select={'lower_sfield': 'lower(preferred_name)'}).order_by('lower_sfield')[:max_count]  
+                #query_set = main_models.Topic.objects\
+                #  .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)[:max_count]  
 	    #o_query_set = sorted(query_set, key=operator.attrgetter('preferred_name'))              
         set_count = o_query_set.count()
         topic_count += 1
-	for e in o_query_set:
+        for e in o_query_set:
             #to make sure both url and node key have the same topic_id (when a topic exists in multiple probjects)
             #my_list.append({'title':str(e), 'key':str(project_slug)+'.topic.'+str(e.id), 'url':e.get_absolute_url()})
             url_parts = e.get_absolute_url().split('/')
             topic_id_index = len(url_parts) - 2
             topic_id = url_parts[topic_id_index];
-	    if e.rdf!=None:#TO BE CHANGED: check if the dbpedia entry is stored in the tuple store rather than rdf field
-		if e.rdf.strip() != '':			
-			toresolve_flag = ''
-		else:
-			toresolve_flag = '*'
-	    else:
-	    	toresolve_flag = '*'
+            if (e.topic_node.type != "EVT" and e.rdf!=None and e.rdf.strip() != '') or (e.topic_node.type == "EVT" and e.date!=None) :#TO BE CHANGED: check if the dbpedia entry is stored in the tuple store rather than rdf field
+                toresolve_flag = ''
+            else:
+                toresolve_flag = '*'
             my_list.append({
                 'title': unicode(e)+toresolve_flag,
                 'key': str(project_slug)+'.topic.'+str(topic_id),
                 'url':e.get_absolute_url()
             })
-        node_title = topic_name + ' (' + str(set_count)  + ')'
-	css_class = '<span class="dynatree-topicfolder u' + topic_name + '">'
+            node_title = topic_name + ' (' + str(set_count)  + ')'
+    	css_class = '<span class="dynatree-topicfolder u' + topic_name + '">'
         topic_list.append({
             'title': css_class + topic_name+'</span>'+ ' (' + str(set_count)  + ')',
             'key' :str(project_slug)+'.topic.'+str(topic_type),
             'isFolder':'true',
-	    'isTopicFolder':'true',
-	    'topicType':topic_type,
+            'isTopicFolder':'true',
+            'topicType':topic_type,
             'addClass':'',
             'url':'',
             'children':my_list

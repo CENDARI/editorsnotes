@@ -406,15 +406,14 @@ function submitNote(fc){
 
 function submitEntity(fc){
     var formData = "";
-    
     formData = formData +"csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&";
     formData = formData + "id="+$('#model_id').val()+"&";
     formData = formData + "summary="+$('#entity_description').val().trim()+"&";
     formData = formData + "rdf="+$('#rdf_id').val().trim()+"&";
     formData = formData + "preferred_name="+$('#preferred_name_id').text().trim()+"&";
-    // if($('#date_id').length){
-    //     formData = formData + 'date='+$('#date_id').val()+"&";
-    // }
+    if($('#date_id').length){
+        formData = formData + 'date='+$('#date_id').val()+"&";
+    }
     formData = formData + $("#saveButton").attr('name')+"="+$("#saveButton").val();
     
 
