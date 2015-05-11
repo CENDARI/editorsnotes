@@ -405,6 +405,8 @@ def semantic_process_note(note,user=None):
     note.related_topics.all().delete()
     for t in topics:
         topic=get_or_create_topic(user, t['value'], t['type'],note.project)
+        if topic is None:
+            continue
         if topic not in done:
             done.add(topic)
             note.related_topics.create(creator=user, topic=topic)
@@ -472,6 +474,8 @@ def semantic_process_document(document,user=None):
     document.related_topics.all().delete()
     for t in topics:
         topic=get_or_create_topic(user, t['value'], t['type'], document.project)
+        if topic is None:
+            continue
         if topic not in done:
             done.add(topic)
             rdftopic = semantic_uri(topic)
@@ -536,6 +540,8 @@ def semantic_process_transcript(transcript,user=None):
     transcript.document.related_topics.all().delete()
     for t in topics:
         topic=get_or_create_topic(user, t['value'], t['type'], transcript.document.project)
+        if topic is None:
+            continue
         if topic not in done:
             done.add(topic)
             rdftopic = semantic_uri(topic)
