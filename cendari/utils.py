@@ -24,7 +24,7 @@ WELL_KNOWN_DATE_FORMATS=[
     "%m/%d/%Y",
     "%Y/%m/%d",
     "%d.%m.%Y",
-    "%Y-%m-%d"
+    "%Y-%m-%d",
 ]
 
 def parse_well_known_date(str):

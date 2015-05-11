@@ -11,12 +11,15 @@ from .base import (RelatedTopicSerializerMixin, ProjectSpecificItemMixin,
 from .documents import CitationSerializer
  # Cendari code E.G. aviz
 from cendari.semantic import semantic_resolve_topic, semantic_query_latlong
+from cendari.utils import WELL_KNOWN_DATE_FORMATS
 
 class TopicNodeSerializer(serializers.ModelSerializer):
     name = Field(source='_preferred_name')
     url = URLField('api:api-topic-nodes-detail', ('id',))
     alternate_forms = serializers.SerializerMethodField('get_alternate_forms')
     project_topics = serializers.SerializerMethodField('get_project_value')
+    date = serializers.DateTimeField(required=False,input_formats=WELL_KNOWN_DATE_FORMATS,)
+    
     class Meta:
         model = TopicNode
         fields = ('id', 'name', 'url', 'alternate_forms', 'type',
@@ -57,7 +60,8 @@ class TopicSerializer(RelatedTopicSerializerMixin, ProjectSpecificItemMixin,
     url = URLField(lookup_arg_attrs=('project.slug', 'topic_node_id'))
     project = ProjectSlugField()
     citations = CitationSerializer(source='summary_cites', many=True, read_only=True)
-
+    date = serializers.DateTimeField(required=False,input_formats=WELL_KNOWN_DATE_FORMATS,)
+   
     # Cendari code E.G. aviz
     latlong = serializers.SerializerMethodField('get_lat_long')
     class Meta:
