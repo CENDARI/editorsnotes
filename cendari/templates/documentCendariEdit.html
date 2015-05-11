@@ -7,7 +7,10 @@
 	<style type="text/css">
 		u {
 		    text-decoration: none;
-		    border-bottom: 2px solid black;
+		    /*border-bottom: 2px solid black;*/
+		}
+		u::after{
+			content: "*";
 		}
 		
 	</style>
@@ -106,11 +109,19 @@
 									{% else 						%} class = "form-entities"
 									{% endif %}
 								> 
-									{% if  topic.rdf%} 
-										{{topic}} 
-									{%else%}
-										<u> {{topic}} </u>
-									{%endif%} 
+									{% if topic.topic_node.type == "EVT" %}
+										{% if  topic.date%} 
+											{{topic}} 
+										{%else%}
+											<u> {{topic}} </u>
+										{%endif%}
+									{% else %}
+										{% if  topic.rdf%} 
+											{{topic}} 
+										{%else%}
+											<u> {{topic}} </u>
+										{%endif%}
+									{% endif %} 
 								</a>
 							{% endfor %}
 							{% if not document.get_all_related_topics|length > 0 %}
