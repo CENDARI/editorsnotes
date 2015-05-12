@@ -648,7 +648,7 @@ def getTopicResources(request, project_slug, sfield):
             if (e.topic_node.type != "EVT" and e.rdf!=None and e.rdf.strip() != '') or (e.topic_node.type == "EVT" and e.date!=None) :#TO BE CHANGED: check if the dbpedia entry is stored in the tuple store rather than rdf field
                 toresolve_flag = ''
             else:
-                toresolve_flag = '*'
+                toresolve_flag = ' *'
             my_list.append({
                 'title': unicode(e)+toresolve_flag,
                 'key': str(project_slug)+'.topic.'+str(topic_id),
