@@ -5,7 +5,7 @@ from reversion.models import Version
 
 from editorsnotes.main.models.base import Administered
 
-from ... import activity_index
+from editorsnotes.search import activity_index
 
 class Command(BaseCommand):
     help = 'Rebuild elasticsearch activity index'

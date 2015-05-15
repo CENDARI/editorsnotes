@@ -19,6 +19,8 @@ from django.utils.functional import lazy
 
 from editorsnotes.main import models as main_models
 from editorsnotes.search import en_index
+from cendari.search import cendari_index
+from cendari.search.facets import cendari_filter, cendari_aggregations
 from cendari import utils
 from cendari.image import  ProjectAdminView, scan_to_dict
 from editorsnotes.admin.views.topics import TopicAdminView
@@ -100,12 +102,12 @@ def _sort_citations(instance):
 
 def _check_project_privs_or_deny(user, project_slug):
         if not user.is_authenticated():
-            print "user not auth!!"
+            #print "user not auth!!"
             raise PermissionDenied("anonymous access not allowed")
         if project_slug is None:
             projects = user.get_authorized_projects()
             if not projects:
-                print "project list empty!!"
+                #print "project list empty!!"
                 raise PermissionDenied("insufficient priviledges for %s" % user.username)
 	    #(NB) handle superusers
 	    if user.is_superuser:
@@ -123,14 +125,14 @@ def _check_project_privs_or_deny(user, project_slug):
         else:
             project = get_object_or_404(Project, slug=project_slug)
         if not user.superuser_or_belongs_to(project) and not project.is_owned_by(user):
-            print "not superuser_or_belongs_to"
+            #print "not superuser_or_belongs_to"
             raise PermissionDenied("not authorized on %s project" % project_slug)
         return project
 
 def _check_privs(user, obj):
     project = obj.get_affiliation()
     if not user.superuser_or_belongs_to(project) and not project.is_owned_by(user):
-        print "not superuser_or_belongs_to"
+        #print "not superuser_or_belongs_to"
         raise PermissionDenied("not authorized on %s project" % obj.slug)
     return obj
 
@@ -150,7 +152,7 @@ def index(request,project_slug=None):
 class EditNoteAdminView(NoteAdminView):
     template_name = 'editnote.html'
     def save_object(self, form, formsets):
-        print "Save_object on note"
+        #print "Save_object on note"
         user = self.request.user
         obj, action = super(EditNoteAdminView, self).save_object(form, formsets)
         semantic_process_note(obj, user)
@@ -159,7 +161,7 @@ class EditNoteAdminView(NoteAdminView):
 class EditDocumentAdminView(DocumentAdminView):
     template_name = 'editdocument.html'
     def save_object(self, form, formsets):
-        print "Save_object on document"
+        #print "Save_object on document"
         user = self.request.user
         obj, action = super(EditDocumentAdminView, self).save_object(form, formsets)
         semantic_process_document(obj, user)
@@ -167,7 +169,7 @@ class EditDocumentAdminView(DocumentAdminView):
 
 @login_required
 def scan(request, scan_id, project_slug):
-    print "scan view"
+    #print "scan view"
     o = {}
     scan = get_object_or_404(main_models.Scan, id=scan_id)
     o['scan'] = scan
@@ -202,7 +204,7 @@ def scan_tiffimage(request, scan_id, project_slug):
 class EditTopicAdminView(TopicAdminView):
     template_name = 'edittopic.html'
     def save_object(self, form, formsets):
-        print "Save_object on topic"
+        #print "Save_object on topic"
         user = self.request.user
         obj, action = super(EditTopicAdminView, self).save_object(form, formsets)
         loc = semantic_resolve_topic(obj)
@@ -233,7 +235,7 @@ class EditTranscriptAdminView(TranscriptAdminView):
             main_models.Document, id=document_id, project_id=self.project.id)
         return self.document.transcript if self.document.has_transcript() else None
     def save_object(self, form, formsets):
-        print "Save_object on transcript"
+        #print "Save_object on transcript"
         user = self.request.user
         obj, action = super(EditTranscriptAdminView, self).save_object(form, formsets)
         semantic_process_transcript(obj, user)
@@ -405,7 +407,7 @@ def small_vis_data(request, project_slug):
     #indexed_topics = SearchQuerySet().models(main_models.Topic)
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     indexed_topics = main_models.Topic.objects.filter(project__slug=project_slug)
-    print "::::::::::::::::::::::: (NB)/small_vis_data indexed_topics for this project: " + str(project_slug) + ", are= " + str(indexed_topics)
+    #print "::::::::::::::::::::::: (NB)/small_vis_data indexed_topics for this project: " + str(project_slug) + ", are= " + str(indexed_topics)
     topics_list = []
     for t in indexed_topics:
         timestamp = calendar.timegm(t.date.timetuple()) * 1000 if t.date else ''
@@ -431,10 +433,10 @@ def small_vis_data_lazy(request, project_slug):
     topics_dict = {}
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     documents = main_models.Document.objects.filter(project__slug=project_slug)#[:100] #For debugging 
-    print 'docs: %d' % (len(documents))
+    #print 'docs: %d' % (len(documents))
     for document in documents:
         topics = document.get_all_related_topics()
-        print 'len of topics: %d ' % len(topics)
+        #print 'len of topics: %d ' % len(topics)
         for t in topics:
             timestamp = calendar.timegm(t.date.timetuple()) * 1000 if t.date else ''
             v = {'preferred_name':t.preferred_name, 
@@ -453,7 +455,7 @@ def small_vis_data_lazy(request, project_slug):
             dict_match['doc_count'] = dict_match.get('doc_count', 0) + 1
 
     notes = main_models.Note.objects.filter(project__slug=project_slug)
-    print 'notes: %d' % (len(notes))
+    #print 'notes: %d' % (len(notes))
     for note in notes:
         for t in note.related_topics.all():
             t = t.topic
@@ -776,7 +778,7 @@ def proxyRDFaCE(request):
     return HttpResponse(response, mimetype='application/json') 
 
 def resources(request, project_slug):
-    print "=====> project slug is :"+str(project_slug)
+    #print "=====> project slug is :"+str(project_slug)
 
     return render_to_response('resources.html',dict(project_slug=project_slug))
 
@@ -795,6 +797,44 @@ def change_project(request, project_id):
     o = {}
     project = _check_privs(request.user, get_object_or_404(Project, id=project_id))
     return editorsnotes.admin.views.projects.change_project(request, project.slug)
+
+def faceted_search(request,project_slug=None):
+    #q = request.GET.get('q', {'query': {'match_all': {}}})
+    q = request.GET.get('q', None)
+    if q is not None:
+        q = {'query': {'match': {'_all': q} } }
+    else:
+        q={'query': {'match_all': {}}}
+    q['fields'] = ['uri']
+    size = request.GET.get('size', 50)
+    q['size'] = size
+    frm = request.GET.get('from', 0)
+    q['from'] = frm
+    q['aggregations'] = cendari_aggregations()
+    if project_slug:
+        q['filter'] = cendari_filter(requer.user,[project_slug])
+#    else:
+#        q['filter'] = cendari_filter(request.user)
+    results = cendari_index.search(q, highlight=True, size=50)
+    print results
+    res = []
+    for h in results['hits']['hits']:
+        highlight = []
+        for field, values in h['highlight'].items():
+            highlight += values
+        info = { 'uri': h['fields']['uri'][0], 
+                 'highlight': highlight }
+        res.append(info)
+    o = {
+#        'project': project,
+        'facets': results['aggregations'],
+        'terms': {},
+        'results': res,
+        'query': q if isinstance(q, basestring) else None
+    }
+
+    return render_to_response(
+        'cendarisearch.html', o, context_instance=RequestContext(request))
 
 @login_required
 def search(request,project_slug=None):
@@ -842,7 +882,7 @@ def iframe_view(request,type):
 class NoteCendari(NoteAdminView):
     template_name = 'noteCendariEdit.html'
     def save_object(self, form, formsets):
-         print "Save_object on note"
+         #print "Save_object on note"
          user = self.request.user
         # obj, action = super(EditNoteAdminView, self).save_object(form, formsets)
 #         semantic_process_note(obj, user)
@@ -885,7 +925,7 @@ def editNoteCendari(request, note_id, project_slug):
     if note.is_private:
          can_view = (request.user.is_authenticated() and request.user.has_project_perm(note.project, 'main.view_private_note'))
          if not can_view:
-            print 'USER CANNOT VIEW NOTE'
+            #print 'USER CANNOT VIEW NOTE'
             raise PermissionDenied()
     o['project'] = note.project
     o['breadcrumb'] = (
@@ -1025,9 +1065,9 @@ def readDocumentCendari(request, project_slug, document_id):
 
 def editEntityCendari(request, project_slug, topic_node_id):
     o = {}
-    print "getting topic_qs"
+    #print "getting topic_qs"
     topic_qs = main_models.Topic.objects.select_related('topic_node', 'creator', 'last_updater', 'project').prefetch_related('related_topics__topic')
-    print "getting topic object"
+    #print "getting topic object"
     o['topic'] = topic = get_object_or_404(topic_qs,topic_node_id=topic_node_id,project__slug=project_slug)
     o['project'] = topic.project
     o['project_slug'] = project_slug
@@ -1041,13 +1081,13 @@ def editEntityCendari(request, project_slug, topic_node_id):
     )
     topic_query = {'query': {'term': {'serialized.related_topics.id': topic.id }}}
     topic_query['size'] = 1000
-    print "searching for models"
+    #print "searching for models"
     model_searches = ( en_index.search_model(model, topic_query) for model in
                        (main_models.Document, main_models.Note, main_models.Topic) )
     documents, notes, topics = (
         [ result['_source']['serialized'] for result in search['hits']['hits'] ]
         for search in model_searches)
-    print "filtering documents"
+    #print "filtering documents"
     # o['documents'] = main_models.Document.objects.filter(id__in=[d['id'] for d in documents])
     o['related_topics'] = main_models.Topic.objects.filter(id__in=[t['id'] for t in topics])
     note_objects = main_models.Note.objects.in_bulk([n['id'] for n in notes])

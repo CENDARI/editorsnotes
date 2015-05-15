@@ -308,15 +308,13 @@ class CendariIndex(object):
 
         if highlight:
             prepared_query['highlight'] = {
-                'fields': {},
+                'number_of_fragments': 3,
+                'fragment_size': 150,
+                'no_match_size': 150,
+                'fields': {'text': {}, 'label': {}, 'abstract': {}},
                 'pre_tags': ['<span class="highlighted">'],
                 'post_tags': ['</span>']
             }
-            highlight_fields = chain(
-                *[doc_type.highlight_fields
-                for doc_type in self.document_types.values()])
-            for field_name in highlight_fields:
-                prepared_query['highlight']['fields'][field_name] = {}
 
-        pprint.pprint(prepared_query)
+        #pprint.pprint(prepared_query)
         return self.open().search(prepared_query, index=self.name, **kwargs)

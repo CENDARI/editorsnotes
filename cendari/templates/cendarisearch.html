@@ -1,0 +1,164 @@
+{% extends 'emptylayout.html' %}
+
+{% load staticfiles display sort %}
+
+{% block css_nocompress %}
+<link rel="stylesheet" href="{% static "bootstrap/css/bootstrap.min.css" %}">
+<link rel="stylesheet" href="{% static "jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css" %}">
+<link rel="stylesheet" href="{% static "cendari/css/facetview.css" %}">
+<style type="text/css">
+  .container {
+      height: 1%;
+  }
+
+  dd {
+      font-size: small;
+  }
+
+  .leftpanel {
+      float: left;
+      padding: 5px;
+      width: 200px;
+      border: 1px solid black;
+  }
+  .mainpanel {
+      padding: 5px;
+      margin-left: 210px;
+  }
+  .highlighted {
+    background: #faa732;
+    padding: 2px;
+  }
+  .searchresult > a * {
+    display: inline;
+  }
+  .searchresult {
+    margin-bottom: .75em;
+  }
+</style>
+{% endblock css_nocompress %}
+
+{% block js_nocompress %}
+<script type="text/javascript" src="{% static "function/jquery/jquery-1.8.2.min.js" %}"></script>
+<script type="text/javascript" src="{% static "bootstrap/js/bootstrap.js" %}"></script>
+<script type="text/javascript" src="{% static "jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js" %}"></script>
+<!--<script type="text/javascript" src="{% static "xmlfacets/main/js/jquery.facetview.js" %}"></script> -->
+
+<script type="text/javascript">
+    var showfiltervals = function(event) {
+	event.preventDefault();
+	if ( $(this).hasClass('facetview_open') ) {
+	    $(this).children('i').removeClass('icon-minus');
+	    $(this).children('i').addClass('icon-plus');
+	    $(this).removeClass('facetview_open');
+	    $('[id="facetview_' + $(this).attr('rel') +'"]').children().find('.facetview_filtervalue').hide();
+	    $(this).siblings('.facetview_filteroptions').hide();
+	} else {
+	    $(this).children('i').removeClass('icon-plus');
+	    $(this).children('i').addClass('icon-minus');
+	    $(this).addClass('facetview_open');
+	    $('[id="facetview_' + $(this).attr('rel') +'"]').children().find('.facetview_filtervalue').show();
+	    $(this).siblings('.facetview_filteroptions').show();
+	}
+    };
+
+  function facet_add_value(href, val) {
+      return href + (href.indexOf('?')==-1?"?q=":"")+ "&" + val;
+  }
+
+  function facet_del_value(href, val) {
+      return href.replace("&"+val,"");
+  }
+
+{% autoescape off %}  
+  function facet_add(event) {
+      event.preventDefault();
+      var url = facet_add_value("{{ request.get_full_path }}",
+				$(this).attr("href"));
+      document.location.assign(url);
+    {{ body }}
+  }
+
+  function facet_del(event) {
+      event.preventDefault();
+      var url = facet_del_value("{{ request.get_full_path }}",
+				$(this).attr("href"));
+      document.location.assign(url);
+  }
+{% endautoescape %}
+</script>
+
+{% endblock js_nocompress %}
+
+{% block nolayout_content %}
+<form method="get" action=".">
+  <p>
+    <input type="text" name="q" value="{{ query }}">
+    <input type="submit" value="Search">
+  </p>
+
+<!-- Begin faceting. -->
+<div style="clear:both;" class="btn-toolbar" id="facetview_selectedfilters">
+</div>
+<div class="leftpanel facetpane">
+  <h2>Facets (<a href="?q=">reset</a>)</h2>
+  <hr>
+  {% for facet, values in facets|sortiter %}
+  <table id="facetview_{{facet}}" class="facetview_filters table table-bordered table-condensed table-striped" >
+    <tr><td>
+    {% if values %}
+      {% if facet in selected_facets %}
+     <a class="facetview_filtershow" title="filter by {{ facet}}" rel="{{facet }}" style="color:#999; font-weight:bold;" href=""><i class="icon-plus"></i> {{ facet|capfirst }} ({{ values.buckets|length }})</a>
+      {% else %}
+     <a class="facetview_filtershow" title="filter by {{ facet}}" rel="{{facet }}" style="color:#333; font-weight:bold;" href=""><i class="icon-plus"></i> {{ facet|capfirst }} ({{ values.buckets|length }})</a>
+      {% endif %}
+    {% else %}
+     <a class="facetview_filtershow facetview_novalues" title="filter by {{ facet}}" rel="{{facet }}" style="color:#999; font-weight:bold;" href=""><i class="icon-plus"></i> {{ facet|capfirst }}</a>
+    {% endif %}
+        <div class="btn-group facetview_filteroptions" style="display:none; margin-top:5px;">
+          <a class="btn btn-small facetview_learnmore" title="click to view search help information" href="#"><b>?</b></a> 
+          <a class="btn btn-small facetview_morefacetvals" title="filter list size" rel="{{facet}}" href="{{facet}}">100</a>
+          <a class="btn btn-small facetview_sort {{facet}}" title="filter value order" href="{{facet}}">Sort</a>
+          <a class="btn btn-small facetview_or" title="select another option from this filter" rel="AND" href="{{ facet }}" style="color:#aaa;">OR</a>
+	</div>
+    </td></tr>
+    {% for value in values.buckets %}
+    {% if facet in selected_facets and value.key in selected_facets.facet %}
+    <tr class="facetview_filtervalue" style="display:none;">
+      <td><a class="facetview_filterchoice facetview_del" rel="{{ facet }}" href="selected_facets={{ facet }}:{{ value.key }}">{{ value.key }} ({{ value.doc_count }})</a></td>
+    </tr>
+    {% else %}
+    <tr class="facetview_filtervalue" style="display:none;">
+      <td><a class="facetview_filterchoice facetview_add" rel="{{ facet }}" href="selected_facets={{ facet }}:{{ value.key }}">{{ value.key }} ({{ value.doc_count }})</a></td>
+    </tr>
+    {% endif %}    
+    {% endfor %}
+  </table>
+  {% endfor %}
+</div>
+
+<script type="text/javascript">
+    $('.facetview_filtershow').click(showfiltervals);
+  $('.facetview_add').click(facet_add);
+  $('.facetview_del').click(facet_del);
+</script>
+    <!-- End faceting -->
+
+<div class="mainpanel">
+  <h2>Results</h2>
+  <dl>
+    {% for document in results %}
+    <dt><a href="{{ document.uri }}">{{ document.uri }}</a></dt>
+    <dd>
+{% autoescape off %}  
+      {% for h in document.highlight %}
+      {{ h }}<br>
+      {% endfor %}
+{% endautoescape %}
+    </dd>
+    {% endfor %}
+  </ol>
+</form>
+</div>
+
+{% endblock nolayout_content %}
