@@ -815,7 +815,7 @@ def faceted_search(request,project_slug=None):
         query_terms.append({'match': {'_all': query} })
     if 'selected_facets' in request.GET \
       and request.GET['selected_facets']:
-        facets=request.GET.getlist('selected_facets');
+        facets=request.GET.getlist('selected_facets')
         for facet in facets:
             (facet,value) =facet.split(':')
             if facet in terms:
@@ -823,6 +823,15 @@ def faceted_search(request,project_slug=None):
             else:
                 terms[facet] = [value]
         filter_terms += [{"terms": {key: val}} for (key, val) in terms.items()]
+
+    buckets = {}
+    if 'show_facets' in request.GET \
+      and request.GET['show_facets']:
+      facets_shown = request.GET.getlist('show_facets')
+      for facet in facets_shown:
+          (facet,value) = facet.split(':')
+          buckets[facet] = int(value)
+
     if len(query_terms)==1:
         q['query'] = query_terms[0]
     elif len(query_terms)>1:
@@ -840,7 +849,7 @@ def faceted_search(request,project_slug=None):
     q['size'] = size
     frm = request.GET.get('from', 0)
     q['from'] = frm
-    q['aggregations'] = cendari_aggregations()
+    q['aggregations'] = cendari_aggregations(size=buckets)
     pprint.pprint(q)
     results = cendari_index.search(q, highlight=True, size=50)
     pprint.pprint(results)

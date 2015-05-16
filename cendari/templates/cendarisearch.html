@@ -45,7 +45,7 @@
 <!--<script type="text/javascript" src="{% static "xmlfacets/main/js/jquery.facetview.js" %}"></script> -->
 
 <script type="text/javascript">
-    var showfiltervals = function(event) {
+    function showfiltervals(event) {
 	event.preventDefault();
 	if ( $(this).hasClass('facetview_open') ) {
 	    $(this).children('i').removeClass('icon-minus');
@@ -60,7 +60,15 @@
 	    $('[id="facetview_' + $(this).attr('rel') +'"]').children().find('.facetview_filtervalue').show();
 	    $(this).siblings('.facetview_filteroptions').show();
 	}
-    };
+    }
+
+  function morefacetvals(event) {
+      event.preventDefault();
+
+      var url = facet_add_value("{{ request.get_full_path }}",
+				 $(this).attr("href"));
+      document.location.assign(url);
+  }
 
   function facet_add_value(href, val) {
       return href + (href.indexOf('?')==-1?"?q=":"")+ "&" + val;
@@ -117,9 +125,8 @@
     {% endif %}
         <div class="btn-group facetview_filteroptions" style="display:none; margin-top:5px;">
           <a class="btn btn-small facetview_learnmore" title="click to view search help information" href="#"><b>?</b></a> 
-          <a class="btn btn-small facetview_morefacetvals" title="filter list size" rel="{{facet}}" href="{{facet}}">100</a>
+          <a class="btn btn-small facetview_morefacetvals" title="filter list size" rel="{{facet}}" href="show_facets={{facet}}:100">100</a>
           <a class="btn btn-small facetview_sort {{facet}}" title="filter value order" href="{{facet}}">Sort</a>
-          <a class="btn btn-small facetview_or" title="select another option from this filter" rel="AND" href="{{ facet }}" style="color:#aaa;">OR</a>
 	</div>
     </td></tr>
     {% for value in values.buckets %}
@@ -138,10 +145,10 @@
 </div>
 
 <script type="text/javascript">
-    $('.facetview_filtershow').click(showfiltervals);
+  $('.facetview_filtershow').click(showfiltervals);
   $('.facetview_add').click(facet_add);
   $('.facetview_del').click(facet_del);
-</script>
+  $('.facetview_morefacetvals').click(morefacetvals);</script>
     <!-- End faceting -->
 
 <div class="mainpanel">
