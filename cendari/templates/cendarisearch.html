@@ -84,15 +84,30 @@
       var url = facet_add_value("{{ request.get_full_path }}",
 				$(this).attr("href"));
       document.location.assign(url);
-    {{ body }}
   }
 
   function facet_del(event) {
       event.preventDefault();
       var url = facet_del_value("{{ request.get_full_path }}",
 				$(this).attr("href"));
+  }
+
+  function next_page(event) {
+      event.preventDefault();
+      var url = "{{ request.get_full_path }}";
+      url = url.replace(/[&]from=[^&]*/, "");
+      url = url + '&from='+Math.min({{sizes.total}}-{{sizes.size}}+1,{{sizes.from}}+{{sizes.size}});
       document.location.assign(url);
   }
+
+  function prev_page(event) {
+      event.preventDefault();
+      var url = "{{ request.get_full_path }}";
+      url = url.replace(/[&]from=[^&]*/, "");
+      url = url + '&from='+Math.max(0,{{sizes.from}}-{{sizes.size}});
+      document.location.assign(url);
+  }
+
 {% endautoescape %}
 </script>
 
@@ -144,15 +159,16 @@
   {% endfor %}
 </div>
 
-<script type="text/javascript">
-  $('.facetview_filtershow').click(showfiltervals);
-  $('.facetview_add').click(facet_add);
-  $('.facetview_del').click(facet_del);
-  $('.facetview_morefacetvals').click(morefacetvals);</script>
-    <!-- End faceting -->
+<!-- End faceting -->
 
 <div class="mainpanel">
-  <h2>Results</h2>
+  <h2>{{sizes.total}} Results
+    {% if sizes.size < sizes.total %}
+    ({{sizes.page}}/{{sizes.pages}})
+    <a class="btn btn-small prev_page" title="Previous Page" href="prev">Prev</a>
+    <a class="btn btn-small next_page" title="Next Page" href="prev">Next</a>
+    {% endif %}
+</h2>
   <dl>
     {% for document in results %}
     <dt><a href="{{ document.uri }}">{{ document.uri }}</a></dt>
@@ -165,7 +181,21 @@
     </dd>
     {% endfor %}
   </ol>
-</form>
+{% if sizes.size < sizes.total %}
+  <h2>
+    <a class="btn btn-small prev_page" title="Previous Page" href="prev">Prev</a>
+    <a class="btn btn-small next_page" title="Next Page" href="prev">Next</a>
+  </h2>
+{% endif %}
 </div>
+
+<script type="text/javascript">
+  $('.facetview_filtershow').click(showfiltervals);
+  $('.facetview_add').click(facet_add);
+  $('.facetview_del').click(facet_del);
+  $('.facetview_morefacetvals').click(morefacetvals);
+  $('.next_page').click(next_page);
+  $('.prev_page').click(prev_page);
+</script>
 
 {% endblock nolayout_content %}

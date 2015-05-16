@@ -845,15 +845,24 @@ def faceted_search(request,project_slug=None):
     # and ignore the filter alone
     q = {'query': { 'filtered': q } }
     q['fields'] = ['uri']
-    size = request.GET.get('size', 50)
+    size = int(request.GET.get('size', 50))
     q['size'] = size
-    frm = request.GET.get('from', 0)
+    frm = int(request.GET.get('from', 0))
     q['from'] = frm
     q['aggregations'] = cendari_aggregations(size=buckets)
     pprint.pprint(q)
     results = cendari_index.search(q, highlight=True, size=50)
     pprint.pprint(results)
     res = []
+    total = int(results['hits']['total'])
+    sizes = {
+        'total': total,
+        'size': size,
+        'from': frm,
+        'last': frm+size,
+        'pages': total / size,
+        'page': int(frm / size),
+    }
     for h in results['hits']['hits']:
         highlight = []
         if 'highlight' in h:
@@ -865,7 +874,7 @@ def faceted_search(request,project_slug=None):
     o = {
 #        'project': project,
         'facets': results['aggregations'],
-        'terms': {},
+        'sizes': sizes,
         'results': res,
         'query': query if isinstance(query, basestring) else ''
     }
