@@ -169,7 +169,9 @@ class CendariIndex(object):
             'format': 'application/xhtml+xml', # nothing better eg. xhtml+rdfa
             'text': text,
             'groups_allowed': doc.project.slug,
-            'users_allowed': []
+             # FIXME when I know how to test public projects
+            'users_allowed': [ doc.creator.username ]
+            
         }
         if topics['EVT']: document['date'] = topics['EVT']
         if topics['ORG']: document['org'] = topics['ORG']
@@ -202,7 +204,8 @@ class CendariIndex(object):
             'format': 'application/xhtml+xml', # nothing better eg. xhtml+rdfa
             'text': text,
             'groups_allowed': note.project.slug,
-            'users_allowed': []
+             # FIXME when I know how to test public projects
+            'users_allowed': [ note.creator.username ]
         }
         if topics['EVT']: document['date'] = topics['EVT']
         if topics['ORG']: document['org'] = topics['ORG']

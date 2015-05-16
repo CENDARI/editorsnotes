@@ -1,7 +1,6 @@
 import os
 import re
 import calendar
-import traceback
 from django.conf import settings
 from django.contrib import auth
 from django.contrib import messages
@@ -38,7 +37,11 @@ import json
 
 from editorsnotes.admin import forms
 import reversion
+
 import pdb
+import traceback
+import pprint
+
 from itertools import chain
 
 import StringIO
@@ -799,9 +802,23 @@ def change_project(request, project_id):
     return editorsnotes.admin.views.projects.change_project(request, project.slug)
 
 def faceted_search(request,project_slug=None):
-    #q = request.GET.get('q', {'query': {'match_all': {}}})
+    terms = {}
+    if project_slug:
+        and_terms = cendari_filter(requer.user,[project_slug])
+    else:
+        and_terms = cendari_filter(request.user)
+    if 'selected_facets' in request.GET \
+      and request.GET['selected_facets']:
+        facets=request.GET.getlist('selected_facets');
+        for facet in facets:
+            (facet,value) =facet.split(':')
+            if facet in terms:
+                terms[facet].append(value)
+            else:
+                terms[facet] = [value]
+        and_terms += [{"terms": {key: val}} for (key, val) in terms.items()]
     q = request.GET.get('q', None)
-    if q is not None:
+    if q is not None and len(q)!=0:
         q = {'query': {'match': {'_all': q} } }
     else:
         q={'query': {'match_all': {}}}
@@ -811,20 +828,19 @@ def faceted_search(request,project_slug=None):
     frm = request.GET.get('from', 0)
     q['from'] = frm
     q['aggregations'] = cendari_aggregations()
-    if project_slug:
-        q['filter'] = cendari_filter(requer.user,[project_slug])
-#    else:
-#        q['filter'] = cendari_filter(request.user)
+    q['filter'] = { 'and': and_terms }
+    pprint.pprint(q)
     results = cendari_index.search(q, highlight=True, size=50)
-    print results
+    pprint.pprint(results)
     res = []
     for h in results['hits']['hits']:
         highlight = []
-        for field, values in h['highlight'].items():
-            highlight += values
-        info = { 'uri': h['fields']['uri'][0], 
-                 'highlight': highlight }
-        res.append(info)
+        if 'highlight' in h:
+            for field, values in h['highlight'].items():
+                highlight += values
+            info = { 'uri': h['fields']['uri'][0], 
+                     'highlight': highlight }
+            res.append(info)
     o = {
 #        'project': project,
         'facets': results['aggregations'],
