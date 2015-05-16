@@ -803,10 +803,16 @@ def change_project(request, project_id):
 
 def faceted_search(request,project_slug=None):
     terms = {}
+    q = {}
+    filter_terms = []
+    query_terms = []
     if project_slug:
-        and_terms = cendari_filter(requer.user,[project_slug])
+        filter_terms = cendari_filter(requer.user,[project_slug])
     else:
-        and_terms = cendari_filter(request.user)
+        filter_terms = cendari_filter(request.user)
+    query = request.GET.get('q', None)
+    if query is not None and len(query)!=0:
+        query_terms.append({'match': {'_all': query} })
     if 'selected_facets' in request.GET \
       and request.GET['selected_facets']:
         facets=request.GET.getlist('selected_facets');
@@ -816,19 +822,25 @@ def faceted_search(request,project_slug=None):
                 terms[facet].append(value)
             else:
                 terms[facet] = [value]
-        and_terms += [{"terms": {key: val}} for (key, val) in terms.items()]
-    q = request.GET.get('q', None)
-    if q is not None and len(q)!=0:
-        q = {'query': {'match': {'_all': q} } }
-    else:
-        q={'query': {'match_all': {}}}
+        filter_terms += [{"terms": {key: val}} for (key, val) in terms.items()]
+    if len(query_terms)==1:
+        q['query'] = query_terms[0]
+    elif len(query_terms)>1:
+        q['query'] = { 'and': query_terms }
+    if len(filter_terms)==1:
+        q['filter'] = filter_terms[0]
+    elif len(filter_terms)>1:
+        q['filter'] = { 'and': filter_terms }
+    # craft a filtered query out of the query
+    # because aggregation use the result of the query
+    # and ignore the filter alone
+    q = {'query': { 'filtered': q } }
     q['fields'] = ['uri']
     size = request.GET.get('size', 50)
     q['size'] = size
     frm = request.GET.get('from', 0)
     q['from'] = frm
     q['aggregations'] = cendari_aggregations()
-    q['filter'] = { 'and': and_terms }
     pprint.pprint(q)
     results = cendari_index.search(q, highlight=True, size=50)
     pprint.pprint(results)
@@ -846,7 +858,7 @@ def faceted_search(request,project_slug=None):
         'facets': results['aggregations'],
         'terms': {},
         'results': res,
-        'query': q if isinstance(q, basestring) else None
+        'query': query if isinstance(query, basestring) else ''
     }
 
     return render_to_response(
