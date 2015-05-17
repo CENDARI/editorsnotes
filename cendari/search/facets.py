@@ -57,5 +57,13 @@ def cendari_aggregations(size={},default_size=10):
             "cardinality": {
                 "field": facet
             }
-       }
+        }
+        aggs['date'] = {
+            "date_histogram" : {
+                "field" : "date",
+                "interval" : "year",
+                "format" : "yyyy"
+            }
+        }
+        
     return aggs

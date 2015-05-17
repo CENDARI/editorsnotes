@@ -879,7 +879,16 @@ def faceted_search(request,project_slug=None):
         if key.endswith('_cardinality'):
             cardinalities.append(key)
             continue
-        details['doc_count'] = facets[key+'_cardinality']['value']
+        if key+'_cardinality' in facets:
+            details['value_count'] = facets[key+'_cardinality']['value']
+        else:
+            details['value_count'] = len(details['buckets'])
+            # copy key_as_string in key for dates since
+            # we don't care about the integer values
+            for b in details['buckets']:
+                if 'key_as_string' in b:
+                    b['key'] = b['key_as_string']
+                    del b['key_as_string']
 
     for c in cardinalities:
         del facets[c]

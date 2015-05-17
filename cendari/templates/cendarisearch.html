@@ -131,9 +131,9 @@
     <tr><td>
     {% if values %}
       {% if facet in selected_facets %}
-     <a class="facetview_filtershow" title="filter by {{ facet}}" rel="{{facet }}" style="color:#999; font-weight:bold;" href=""><i class="icon-plus"></i> {{ facet|capfirst }} ({{ values.doc_count }})</a>
+     <a class="facetview_filtershow" title="filter by {{ facet}}" rel="{{facet }}" style="color:#999; font-weight:bold;" href=""><i class="icon-plus"></i> {{ facet|capfirst }} ({{ values.value_count }})</a>
       {% else %}
-     <a class="facetview_filtershow" title="filter by {{ facet}}" rel="{{facet }}" style="color:#333; font-weight:bold;" href=""><i class="icon-plus"></i> {{ facet|capfirst }} ({{ values.doc_count }})</a>
+     <a class="facetview_filtershow" title="filter by {{ facet}}" rel="{{facet }}" style="color:#333; font-weight:bold;" href=""><i class="icon-plus"></i> {{ facet|capfirst }} ({{ values.value_count }})</a>
       {% endif %}
     {% else %}
      <a class="facetview_filtershow facetview_novalues" title="filter by {{ facet}}" rel="{{facet }}" style="color:#999; font-weight:bold;" href=""><i class="icon-plus"></i> {{ facet|capfirst }}</a>
@@ -197,5 +197,5 @@
   $('.next_page').click(next_page);
   $('.prev_page').click(prev_page);
 </script>
-
+</form>
 {% endblock nolayout_content %}
