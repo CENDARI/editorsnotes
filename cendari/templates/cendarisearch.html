@@ -131,9 +131,9 @@
     <tr><td>
     {% if values %}
       {% if facet in selected_facets %}
-     <a class="facetview_filtershow" title="filter by {{ facet}}" rel="{{facet }}" style="color:#999; font-weight:bold;" href=""><i class="icon-plus"></i> {{ facet|capfirst }} ({{ values.buckets|length }})</a>
+     <a class="facetview_filtershow" title="filter by {{ facet}}" rel="{{facet }}" style="color:#999; font-weight:bold;" href=""><i class="icon-plus"></i> {{ facet|capfirst }} ({{ values.doc_count }})</a>
       {% else %}
-     <a class="facetview_filtershow" title="filter by {{ facet}}" rel="{{facet }}" style="color:#333; font-weight:bold;" href=""><i class="icon-plus"></i> {{ facet|capfirst }} ({{ values.buckets|length }})</a>
+     <a class="facetview_filtershow" title="filter by {{ facet}}" rel="{{facet }}" style="color:#333; font-weight:bold;" href=""><i class="icon-plus"></i> {{ facet|capfirst }} ({{ values.doc_count }})</a>
       {% endif %}
     {% else %}
      <a class="facetview_filtershow facetview_novalues" title="filter by {{ facet}}" rel="{{facet }}" style="color:#999; font-weight:bold;" href=""><i class="icon-plus"></i> {{ facet|capfirst }}</a>

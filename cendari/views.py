@@ -852,7 +852,8 @@ def faceted_search(request,project_slug=None):
     q['aggregations'] = cendari_aggregations(size=buckets)
     #pprint.pprint(q)
     results = cendari_index.search(q, highlight=True, size=size)
-    #pprint.pprint(results)
+    #with open('res.log', 'a+') as out:
+    #    pprint.pprint(results, stream=out)
     res = []
     total = int(results['hits']['total'])
     sizes = {
@@ -871,9 +872,21 @@ def faceted_search(request,project_slug=None):
             info = { 'uri': h['fields']['uri'][0], 
                      'highlight': highlight }
             res.append(info)
+
+    facets = results['aggregations']
+    cardinalities = []
+    for key,details in facets.iteritems():
+        if key.endswith('_cardinality'):
+            cardinalities.append(key)
+            continue
+        details['doc_count'] = facets[key+'_cardinality']['value']
+
+    for c in cardinalities:
+        del facets[c]
+
     o = {
 #        'project': project,
-        'facets': results['aggregations'],
+        'facets': facets,
         'sizes': sizes,
         'results': res,
         'query': query if isinstance(query, basestring) else ''

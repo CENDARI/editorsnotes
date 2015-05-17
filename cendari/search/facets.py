@@ -53,4 +53,9 @@ def cendari_aggregations(size={},default_size=10):
                 "size": s
             }
         }
+        aggs[facet+'_cardinality'] = { 
+            "cardinality": {
+                "field": facet
+            }
+       }
     return aggs
