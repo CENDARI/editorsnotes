@@ -10,12 +10,20 @@ from pyelasticsearch.exceptions import InvalidJsonResponseError
 from editorsnotes.main.models import Note, Document, Topic
 from editorsnotes.main.utils import xhtml_to_text
 from editorsnotes.search.utils import clean_query_string
-from cendari.semantic import semantic_uri, semantic_query_latlong
+from cendari.semantic import semantic_uri, semantic_query_latlong, schema_topic, topic_schema
 
 
 logger = logging.getLogger('cendari.search.index')
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
+
+topic_field = {
+    'EVT': 'event',
+    'ORG': 'org',
+    'PER': 'person',
+    'PUB': 'ref',
+    'PLA': 'place'
+}
 
 # Copy from editorsnotes.search.index
 # For some reason, I cannot import it??
@@ -176,7 +184,10 @@ class CendariIndex(object):
         if topics['EVT']: document['date'] = topics['EVT']
         if topics['ORG']: document['org'] = topics['ORG']
         if topics['PER']: document['person'] = topics['PER']
-        if topics['PLA']: document['place'] = topics['PLA']
+        if topics['PLA']:
+            pla = topics['PLA']
+            document['place'] = map(lambda p: p['name'], pla)
+            document['location'] = [ l['location'] for l in pla if 'location' in l ]
         # 'publisher': publishers,
         if topics['PUB']: document['ref'] = topics['PUB']
         if topics['TAG']: document['tag'] = topics['TAG']
@@ -210,7 +221,10 @@ class CendariIndex(object):
         if topics['EVT']: document['date'] = topics['EVT']
         if topics['ORG']: document['org'] = topics['ORG']
         if topics['PER']: document['person'] = topics['PER']
-        if topics['PLA']: document['place'] = topics['PLA']
+        if topics['PLA']:
+            pla = topics['PLA']
+            document['place'] = map(lambda p: p['name'], pla)
+            document['location'] = [ l['location'] for l in pla if 'location' in l]
         # 'publisher': publishers,
         if topics['PUB']: document['ref'] = topics['PUB']
         if topics['TAG']: document['tag'] = topics['TAG']
@@ -220,19 +234,23 @@ class CendariIndex(object):
 
     def topic_to_cendari(self, topic):
         id=semantic_uri(topic)
+        type = topic.topic_node.type
         document = {
             'uri': id,
             'application': 'nte',
-            'label': topic.preferred_name,
-            'creator': {
-                "name": topic.creator.username,
-                "email": topic.creator.email
-            },
+            'title': topic.preferred_name,
+            'creator': topic.creator.username,
             'groups_allowed': topic.project.slug,
         }
-        if topic.summary: document['abstract'] = xhtml_to_text(topic.summary)
+        if topic.summary: document['text'] = xhtml_to_text(topic.summary)
         loc = semantic_query_latlong(topic)
         if loc: document['location'] = loc
+        if type in topic_schema:
+            document['class'] = topic_schema[type]
+        if type in topic_field:
+            document[topic_field[type]] = topic.preferred_name
+        if topic.date:
+            document['date'] = topic.date
         return document
 
     def object_changed(self, obj):

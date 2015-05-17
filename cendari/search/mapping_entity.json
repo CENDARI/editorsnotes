@@ -13,49 +13,52 @@
                 "index" : "not_analyzed"
 	    },
             "creator" : {
-                "properties" : {
-                    "email" : {
-                        "type" : "string",
-                        "index" : "not_analyzed"
-                    },
-                    "name" : {
-                        "type" : "string",
-                        "index" : "not_analyzed"
-                    }
+                "type" : "string",
+                "index" : "not_analyzed"
+            },
+            "event" : {
+                "type" : "string",
+                "index" : "not_analyzed"
+            },
+            "org" : {
+                "type" : "string",
+                "index" : "not_analyzed"
+            },
+            "person" : {
+                "type" : "string",
+                "index" : "not_analyzed"
+            },
+            "location" : {
+                "type" : "geo_point",
+                "geohash" : true,
+                "fielddata" : {
+                    "format" : "compressed",
+                    "precision" : "3m"
                 }
+            },
+            "place" : {
+                "type" : "string",
+                "index" : "not_analyzed"
+            },
+            "ref" : {
+                "type" : "string",
+                "index" : "not_analyzed"
             },
             "language" : {
                 "type" : "string",
                 "index" : "not_analyzed"
             },
-            "label" : {
+            "title" : {
 		"type" : "string"
 	    },
-	    "abstract" : {
+	    "text" : {
 		"type" : "string"
 	    },
 	    "fetched" : {"type" : "date"},
 	    "class" : {
-		"type" : "string"
-	    },
-	    "location" : {
-		"type" : "geo_point",
-		"geohash" : true,
-		"fielddata" : {
-		    "format" : "compressed",
-		    "precision" : "3m"
-		}
-	    },
-            "date" : {
-                "type" : "date",
-                "format" : "dateOptionalTime"
-            },
-            "groups_allowed" : {
-                "type" : "string"
-            },
-            "users_allowed" : {
-                "type" : "string"
-            }
+		"type" : "string",
+                "index" : "not_analyzed"
+	    }
         }
     }
 }

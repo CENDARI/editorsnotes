@@ -851,7 +851,7 @@ def faceted_search(request,project_slug=None):
     q['from'] = frm
     q['aggregations'] = cendari_aggregations(size=buckets)
     #pprint.pprint(q)
-    results = cendari_index.search(q, highlight=True, size=50)
+    results = cendari_index.search(q, highlight=True, size=size)
     #pprint.pprint(results)
     res = []
     total = int(results['hits']['total'])
