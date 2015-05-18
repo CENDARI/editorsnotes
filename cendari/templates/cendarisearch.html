@@ -1,6 +1,6 @@
 {% extends 'emptylayout.html' %}
 
-{% load staticfiles display sort %}
+{% load staticfiles display sort jsondumps %}
 
 {% block css_nocompress %}
 <link rel="stylesheet" href="{% static "bootstrap/css/bootstrap.min.css" %}">
@@ -42,11 +42,11 @@
 
 {% block js_nocompress %}
 <script type="text/javascript" src="{% static "function/jquery/jquery-1.8.2.min.js" %}"></script>
+<script src='{% static 'function/d3/d3.v3.min.js' %}'></script>
 <script type="text/javascript" src="{% static "bootstrap/js/bootstrap.js" %}"></script>
 <script type="text/javascript" src="{% static "jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js" %}"></script>
 <script type="text/javascript" src="{% static "cendari/js/latlon-geohash.js" %}"></script>
 <script src='//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js'></script>
-<script src='{% static 'cendari/js/smallvis-generators.js' %}'></script>
 
 <script type="text/javascript">
     function showfiltervals(event) {
@@ -65,6 +65,57 @@
 	    $(this).siblings('.facetview_filteroptions').show();
 	}
     }
+
+/**
+ * Constructs a map visualization.
+ **/
+  function buildMap(mapData, element) {
+      var map = element.classed('map', true).attr('id','leafletmap');
+      var height = parseInt(element.style('height'));
+      var width = parseInt(element.style('width'));
+      
+      var maxZoom = 10, minZoom = 1, defaultZoom = 1;
+      var minPointSize = 2, maxPointSize = 10;
+      
+      if(mapData.length < 1) return;
+      
+      //process location string into lat/lon values
+      for(var i = 0; i < mapData.length; i++){
+	  var item = mapData[i];
+	  var latlon = Geohash.decode(item.key);
+	  var lat = latlon.lat;
+	  var lon = latlon.lon;
+	  if(lat == 0 && lon == 0) continue;
+	  item._lat = lat;
+	  item._lon = lon;
+      }
+      
+      
+      var latExtent = d3.extent(mapData, function(d){return d._lat;});
+      var lonExtent = d3.extent(mapData, function(d){return d._lon;});
+      var latScale = d3.scale.linear()
+	  .domain(latExtent)
+	  .range([height - maxPointSize/2, maxPointSize/2]);
+      var lonScale = d3.scale.linear()
+	  .domain(lonExtent)
+	  .range([maxPointSize/2, width - maxPointSize/2]);
+      var sizeScale = d3.scale.linear()
+	  .domain(d3.extent(mapData, function(d){return d.doc_count;}))
+	  .range([minPointSize/2, maxPointSize/2]);
+      
+      //Using Leaflet (instead of D3) for basemap
+      var leafletMap = L.map('leafletmap',{attributionControl:false, minZoom:minZoom, maxZoom:maxZoom})
+	  .fitBounds([[latExtent[0], lonExtent[0]], [latExtent[1], lonExtent[1]]]);
+	  //.setView([(latExtent[0]+latExtent[1])/2,(lonExtent[0]+lonExtent[1])/2], defaultZoom);
+      L.tileLayer(document.location.protocol + '//{s}.tiles.mapbox.com/v4/wjwillett.i9o7e0g1/{z}/{x}/{y}.png?access_token=pk.eyJ1Ijoid2p3aWxsZXR0IiwiYSI6IlJtUlFYVkEifQ.Qk10zoCrd2pTN6t2rcyifQ').addTo(leafletMap);
+      for(var i=0; i < mapData.length; i++){
+	  var d = mapData[i];
+	  var mark = L.circleMarker([d._lat,d._lon],{'className':'mark', opacity:1.0, weight:0.4, fillOpacity: 1.0})
+	      .setRadius(sizeScale(d.doc_count)).addTo(leafletMap); 
+	  //associate a data tuple with the mark (to mimic D3)
+	  mark._path.__data__ = d;   
+      }
+  }
 
   function morefacetvals(event) {
       event.preventDefault();
@@ -143,7 +194,15 @@
      <a class="facetview_filtershow facetview_novalues" title="filter by {{ facet}}" rel="{{facet }}" style="color:#999; font-weight:bold;" href=""><i class="icon-plus"></i> {{ facet|capfirst }}</a>
     {% endif %}
     {% if facet == "location" %}
-
+<div class="panelVis map" style="min-height: 30px; min-width: 150px; width: 150px; position: relative;">
+</div>
+{% autoescape off %}
+<script>
+var map_data = {{values.buckets|json}}, 
+  map = d3.select('.panelVis');
+buildMap(map_data, map);
+</script>
+{% endautoescape %}
     {% else %}
         <div class="btn-group facetview_filteroptions" style="display:none; margin-top:5px;">
           <a class="btn btn-small facetview_learnmore" title="click to view search help information" href="#"><b>?</b></a> 
