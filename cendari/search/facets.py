@@ -44,7 +44,27 @@ def cendari_filter(user=None,project_slugs=None):
     return filter
 
 def cendari_aggregations(size={},default_size=10):
-    aggs = {}
+    aggs = {
+        'date': {
+            "date_histogram" : {
+                "field" : "date",
+                "interval" : "year",
+                "format" : "yyyy"
+            }
+        },
+        'location': {
+            "geohash_grid" : {
+                "field" : "location",
+                "precision" : 3
+            }
+        },
+        "viewport_": {
+            "geo_bounds" : {
+                "field" : "location", 
+                "wrap_longitude" : True
+            }
+        }
+    }
     for facet in CENDARI_FACETS:
         s =  size[facet] if facet in size else default_size
         aggs[facet] = {
@@ -58,12 +78,4 @@ def cendari_aggregations(size={},default_size=10):
                 "field": facet
             }
         }
-        aggs['date'] = {
-            "date_histogram" : {
-                "field" : "date",
-                "interval" : "year",
-                "format" : "yyyy"
-            }
-        }
-        
     return aggs

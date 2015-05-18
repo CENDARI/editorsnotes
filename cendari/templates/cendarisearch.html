@@ -6,6 +6,8 @@
 <link rel="stylesheet" href="{% static "bootstrap/css/bootstrap.min.css" %}">
 <link rel="stylesheet" href="{% static "jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css" %}">
 <link rel="stylesheet" href="{% static "cendari/css/facetview.css" %}">
+<link href='{% static 'cendari/css/smallvis.css' %}' rel='stylesheet' type='text/css'/>
+<link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css' />
 <style type="text/css">
   .container {
       height: 1%;
@@ -42,7 +44,9 @@
 <script type="text/javascript" src="{% static "function/jquery/jquery-1.8.2.min.js" %}"></script>
 <script type="text/javascript" src="{% static "bootstrap/js/bootstrap.js" %}"></script>
 <script type="text/javascript" src="{% static "jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js" %}"></script>
-<!--<script type="text/javascript" src="{% static "xmlfacets/main/js/jquery.facetview.js" %}"></script> -->
+<script type="text/javascript" src="{% static "cendari/js/latlon-geohash.js" %}"></script>
+<script src='//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js'></script>
+<script src='{% static 'cendari/js/smallvis-generators.js' %}'></script>
 
 <script type="text/javascript">
     function showfiltervals(event) {
@@ -138,6 +142,9 @@
     {% else %}
      <a class="facetview_filtershow facetview_novalues" title="filter by {{ facet}}" rel="{{facet }}" style="color:#999; font-weight:bold;" href=""><i class="icon-plus"></i> {{ facet|capfirst }}</a>
     {% endif %}
+    {% if facet == "location" %}
+
+    {% else %}
         <div class="btn-group facetview_filteroptions" style="display:none; margin-top:5px;">
           <a class="btn btn-small facetview_learnmore" title="click to view search help information" href="#"><b>?</b></a> 
           <a class="btn btn-small facetview_morefacetvals" title="filter list size" rel="{{facet}}" href="show_facets={{facet}}:100">100</a>
@@ -153,8 +160,9 @@
     <tr class="facetview_filtervalue" style="display:none;">
       <td><a class="facetview_filterchoice facetview_add" rel="{{ facet }}" href="selected_facets={{ facet }}:{{ value.key }}">{{ value.key }} ({{ value.doc_count }})</a></td>
     </tr>
-    {% endif %}    
+    {% endif %}
     {% endfor %}
+    {% endif %}
   </table>
   {% endfor %}
 </div>

@@ -852,8 +852,8 @@ def faceted_search(request,project_slug=None):
     q['aggregations'] = cendari_aggregations(size=buckets)
     #pprint.pprint(q)
     results = cendari_index.search(q, highlight=True, size=size)
-    #with open('res.log', 'a+') as out:
-    #    pprint.pprint(results, stream=out)
+    # with open('res.log', 'w') as out:
+    #     pprint.pprint(results, stream=out)
     res = []
     total = int(results['hits']['total'])
     sizes = {
@@ -879,8 +879,14 @@ def faceted_search(request,project_slug=None):
         if key.endswith('_cardinality'):
             cardinalities.append(key)
             continue
+        elif '_' in key: # non_facet names contain a _
+            continue
         if key+'_cardinality' in facets:
             details['value_count'] = facets[key+'_cardinality']['value']
+        elif key=='location':
+            details['bounds'] = facets['viewport_']['bounds']
+            details['value_count'] = len(details['buckets'])
+            cardinalities.append('viewport_')
         else:
             details['value_count'] = len(details['buckets'])
             # copy key_as_string in key for dates since

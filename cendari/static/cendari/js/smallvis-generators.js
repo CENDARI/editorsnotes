@@ -42,7 +42,7 @@ function buildVisualizations(dataObjects, visDefinitions, target){
 
       //For each panel include a div containing all of 
       // the titles specified in the vis definition
-      var output = "<div class='panelText'>"
+      var output = "<div class='panelText'>";
       if(!d.filteredItems || d.filteredItems.length < 1){
         output += '<span class="value">Add some ' +
                   (d.entityTypeClass ? ' <strong>' + d.entityTypeClass + '</strong> ': '') + 
@@ -148,7 +148,7 @@ function buildHistogram(histogramData, element, maxBars, barWidth) {
   // Build the histogram
   var chart = histogram.append('svg').attr('height', height).attr('width', width);
   var yScale = d3.scale.linear().domain([0, d3.max(histogramData, function(d) {
-    return d._value
+    return d._value;
   })]).range([2, height]);
   var barsEnter = chart.selectAll('.mark').data(histogramData).enter().append('g').attr('class', 'mark')
     .attr('x', function(d, i) {
@@ -171,7 +171,7 @@ function buildHistogram(histogramData, element, maxBars, barWidth) {
     chart.select('.mark:nth-child(' + cutPoint + ')').remove();
     chart.select('.mark:nth-child(' + cutPoint + ')').remove();
     chart.append('text').text('...').attr('y', height - 1).attr('x', function(d, i) {
-      return (cutPoint - 0.8) * barWidth - 1
+      return (cutPoint - 0.8) * barWidth - 1;
     });
   }
 
@@ -198,7 +198,7 @@ function buildTimeline(timelineData, element) {
   var xAxis = d3.svg.axis().scale(xTimeScale).orient('bottom').ticks(Math.floor(width/60));
 
   chart.selectAll('.mark').data(timelineData).enter().append('rect').attr('class', 'mark')
-                    .attr('x', function(d){ return xLinearScale(d._value)}).attr('y', 0)
+                    .attr('x', function(d){ return xLinearScale(d._value);}).attr('y', 0)
                     .attr('width', 1).attr('height', height-10);
   chart.append('g').attr('class', 'x axis')
         .attr('transform', 'translate(0,' + (height - 10) + ')')
@@ -447,7 +447,7 @@ function cancelLogHover(){
  * is specified, all matching marks will be styled using the first level of highlighting. 
  * If an item is highlighted with multiple levels, the higher overrides.
  */
-var highlights = {}
+var highlights = {};
 function highlightVis(entityIds,level){
   //console.log("::::::::::::::::::::::::::: highlightVis called with entityIds,level=" +entityIds + "," + level);
   level = level || 1;
