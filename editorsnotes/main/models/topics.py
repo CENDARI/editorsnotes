@@ -401,7 +401,6 @@ class TopicAssignment(CreationMetadata, ProjectPermissionsMixin):
 
 reversion.register(TopicAssignment)
 
-
 ##############################################################
 # Legacy topic models (will be removed after data migration) #
 ##############################################################
