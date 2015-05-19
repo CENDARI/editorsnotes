@@ -135,7 +135,7 @@
 	  .range([pointSize/2, width - pointSize/2]);
       var colorScale = d3.scale.linear()
 	  .domain(d3.extent(mapData, function(d){return d.doc_count;}))
-	  .range(["yellow", "red"]);
+	  .range(["lightblue", "red"]);
       
       //Using Leaflet (instead of D3) for basemap
       var leafletMap = L.map('leafletmap',{attributionControl:false, minZoom:minZoom, maxZoom:maxZoom})
@@ -147,7 +147,7 @@
 	  var mark = L.circleMarker([d._lat,d._lon],
 				    {'className':'mark',
 				     stroke: false,
-				     fillOpacity: 0.8,
+				     fillOpacity: 0.7,
 				     radius: pointSize/2,
 				     fillColor: colorScale(d.doc_count)})
 	      .addTo(leafletMap); 
