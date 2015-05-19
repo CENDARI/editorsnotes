@@ -362,28 +362,41 @@ class TopicAssignment(CreationMetadata, ProjectPermissionsMixin):
     def get_topic_relations_number(self):
         return len(self.topic.get_related_documents()) + len(self.topic.get_related_notes())
 
-
-
     # Cendari code E.G. aviz
-
     @receiver(pre_delete)
     def delete_topic_assigment(sender, instance, **kwargs):
-        if type(instance) is TopicAssignment:
-            if instance.topic is None :
-                pass
-            if (len(instance.topic.get_related_documents()) + len(instance.topic.get_related_notes())) == 1:
-                instance.topic.deleted = True
-                instance.topic.save()
-
+        try:
+            if type(instance) is TopicAssignment:
+                if instance.topic is not None :
+                    if (len(instance.topic.get_related_documents()) + len(instance.topic.get_related_notes())) == 1:
+                        instance.topic.deleted = True
+                        instance.topic.save()
+        except Exception, e:
+            print type(instance)
+            print dir(instance)
+            print instance.topic  == None
+        else:
+            pass
+        finally:
+            pass
 
     @receiver(post_save)
     def save_topic_assigment(sender,instance,**kwargs):
-         if type(instance) is TopicAssignment: 
-            if instance.topic is None :
-                pass          
-            if (len(instance.topic.get_related_documents()) + len(instance.topic.get_related_notes())) > 0:
-                instance.topic.deleted = False
-                instance.topic.save()
+        try:
+            if type(instance) is TopicAssignment: 
+                if instance.topic is not None :
+                    if (len(instance.topic.get_related_documents()) + len(instance.topic.get_related_notes())) > 0:
+                        instance.topic.deleted = False
+                        instance.topic.save()
+        except Exception, e:
+            print type(instance)
+            print dir(instance)
+            print instance.topic  == None
+        else:
+            pass
+        finally:
+            pass
+         
 
 
 reversion.register(TopicAssignment)
