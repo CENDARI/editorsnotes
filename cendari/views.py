@@ -813,6 +813,8 @@ def faceted_search(request,project_slug=None):
     query = request.GET.get('q', None)
     if query is not None and len(query)!=0:
         query_terms.append({'match': {'_all': query} })
+    else:
+        query = ''
     if 'selected_facets' in request.GET \
       and request.GET['selected_facets']:
         facets=request.GET.getlist('selected_facets')
@@ -849,7 +851,7 @@ def faceted_search(request,project_slug=None):
     q['size'] = size
     frm = int(request.GET.get('from', 0))
     q['from'] = frm
-    q['aggregations'] = cendari_aggregations(size=buckets)
+    q['aggregations'] = cendari_aggregations(size=buckets, precision=(2 if query=='' else 3))
     #pprint.pprint(q)
     results = cendari_index.search(q, highlight=True, size=size)
     # with open('res.log', 'w') as out:
