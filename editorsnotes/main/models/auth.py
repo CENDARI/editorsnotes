@@ -47,7 +47,7 @@ class User(AbstractUser, URLAccessible):
     def belongs_to(self, project):
         return project.get_role_for(self) is not None
     def get_affiliated_projects(self):
-        return Project.objects.filter(roles__group__user=self)
+        return Project.objects.filter(roles__group__user=self).distinct('slug')
     def get_affiliated_projects_with_roles(self):
         roles = ProjectRole.objects.filter(group__user=self)
         return [(role.project, role) for role in roles]
