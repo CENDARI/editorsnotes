@@ -6,7 +6,6 @@
 <link rel="stylesheet" href="{% static "bootstrap/css/bootstrap.min.css" %}">
 <link rel="stylesheet" href="{% static "jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css" %}">
 <link rel="stylesheet" href="{% static "cendari/css/facetview.css" %}">
-<link href='{% static 'cendari/css/smallvis.css' %}' rel='stylesheet' type='text/css'/>
 <link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css' />
 <style type="text/css">
   .container {
@@ -37,6 +36,41 @@
   .searchresult {
     margin-bottom: .75em;
   }
+
+.panel {
+  font-size: 10pt;
+  line-height: 15pt;
+  padding: 5px 0px;
+  margin: 5px 10px;
+  border-top: 1px solid steelblue;
+  display: inline-block;
+  position: relative;
+  text-align: left;
+  font-family: corbel,verdana,sans-serif;
+  min-width: 300px;
+  min-height: 50px;
+  width: 100%;
+}
+
+.panel .panelVis{
+  display: inline-block;
+}
+
+.map{
+  height:200px;
+}
+
+.map .mark{
+  stroke: none;
+  fillOpacity: 1;
+  fill: true;
+}
+
+
+
+.leaflet-container {
+    background: #fff;
+}
 </style>
 {% endblock css_nocompress %}
 
@@ -75,7 +109,7 @@
       var width = parseInt(element.style('width'));
       
       var maxZoom = 10, minZoom = 1, defaultZoom = 1;
-      var minPointSize = 2, maxPointSize = 10;
+      var pointSize = 5;
       
       if(mapData.length < 1) return;
       
@@ -95,13 +129,13 @@
       var lonExtent = d3.extent(mapData, function(d){return d._lon;});
       var latScale = d3.scale.linear()
 	  .domain(latExtent)
-	  .range([height - maxPointSize/2, maxPointSize/2]);
+	  .range([height - pointSize/2, pointSize/2]);
       var lonScale = d3.scale.linear()
 	  .domain(lonExtent)
-	  .range([maxPointSize/2, width - maxPointSize/2]);
-      var sizeScale = d3.scale.linear()
+	  .range([pointSize/2, width - pointSize/2]);
+      var colorScale = d3.scale.linear()
 	  .domain(d3.extent(mapData, function(d){return d.doc_count;}))
-	  .range([minPointSize/2, maxPointSize/2]);
+	  .range(["yellow", "red"]);
       
       //Using Leaflet (instead of D3) for basemap
       var leafletMap = L.map('leafletmap',{attributionControl:false, minZoom:minZoom, maxZoom:maxZoom})
@@ -110,8 +144,13 @@
       L.tileLayer(document.location.protocol + '//{s}.tiles.mapbox.com/v4/wjwillett.i9o7e0g1/{z}/{x}/{y}.png?access_token=pk.eyJ1Ijoid2p3aWxsZXR0IiwiYSI6IlJtUlFYVkEifQ.Qk10zoCrd2pTN6t2rcyifQ').addTo(leafletMap);
       for(var i=0; i < mapData.length; i++){
 	  var d = mapData[i];
-	  var mark = L.circleMarker([d._lat,d._lon],{'className':'mark', opacity:1.0, weight:0.4, fillOpacity: 1.0})
-	      .setRadius(sizeScale(d.doc_count)).addTo(leafletMap); 
+	  var mark = L.circleMarker([d._lat,d._lon],
+				    {'className':'mark',
+				     stroke: false,
+				     fillOpacity: 0.8,
+				     radius: pointSize/2,
+				     fillColor: colorScale(d.doc_count)})
+	      .addTo(leafletMap); 
 	  //associate a data tuple with the mark (to mimic D3)
 	  mark._path.__data__ = d;   
       }

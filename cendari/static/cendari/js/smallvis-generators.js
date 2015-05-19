@@ -312,9 +312,7 @@ function aggregateForVis(items, visDefinitions) {
       var sum = 0;
       for (var ri in visDef.values)
       sum += visDef.values[ri];
-      visDef.values.sort(function(a, b) {
-        return a - b
-      });
+      visDef.values.sort(function(a, b) { return a - b; });
       visDef.min = visDef.values[0];
       visDef.minItem = visDef.itemsByValueIndex[visDef.min][0];
       visDef.max = visDef.values[visDef.values.length - 1];

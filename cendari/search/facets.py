@@ -57,12 +57,6 @@ def cendari_aggregations(size={},default_size=10):
                 "field" : "location",
                 "precision" : 3
             }
-        },
-        "viewport_": {
-            "geo_bounds" : {
-                "field" : "location", 
-                "wrap_longitude" : True
-            }
         }
     }
     for facet in CENDARI_FACETS:

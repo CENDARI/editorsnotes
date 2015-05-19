@@ -884,9 +884,7 @@ def faceted_search(request,project_slug=None):
         if key+'_cardinality' in facets:
             details['value_count'] = facets[key+'_cardinality']['value']
         elif key=='location':
-            details['bounds'] = facets['viewport_']['bounds']
             details['value_count'] = len(details['buckets'])
-            cardinalities.append('viewport_')
         else:
             details['value_count'] = len(details['buckets'])
             # copy key_as_string in key for dates since
