@@ -25,6 +25,9 @@ topic_field = {
     'PLA': 'place'
 }
 
+def format_location(loc):
+    return "%f, %d" % (loc[0], loc[1])
+
 # Copy from editorsnotes.search.index
 # For some reason, I cannot import it??
 class OrderedResponseElasticSearch(ElasticSearch):
@@ -149,7 +152,7 @@ class CendariIndex(object):
             elif topic.topic_node.type=='PLA':
                 place = { 'name': topic.preferred_name }
                 loc = semantic_query_latlong(topic)
-                if loc: place['location'] = loc
+                if loc: place['location'] = format_location(loc)
                 topics[topic.topic_node.type].append(place)
             else:
                 topics[topic.topic_node.type].append(topic.preferred_name)
@@ -187,7 +190,7 @@ class CendariIndex(object):
         if topics['PLA']:
             pla = topics['PLA']
             document['place'] = map(lambda p: p['name'], pla)
-            document['location'] = [ l['location'] for l in pla if 'location' in l ]
+            document['location'] = [ format_location(l['location']) for l in pla if 'location' in l ]
         # 'publisher': publishers,
         if topics['PUB']: document['ref'] = topics['PUB']
         if topics['TAG']: document['tag'] = topics['TAG']
