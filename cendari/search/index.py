@@ -26,7 +26,7 @@ topic_field = {
 }
 
 def format_location(loc):
-    return "%f, %d" % (loc[0], loc[1])
+    return ', '.join(map(str, loc))
 
 # Copy from editorsnotes.search.index
 # For some reason, I cannot import it??
@@ -248,7 +248,7 @@ class CendariIndex(object):
         }
         if topic.summary: document['text'] = xhtml_to_text(topic.summary)
         loc = semantic_query_latlong(topic)
-        if loc: document['location'] = loc
+        if loc: document['location'] = format_location(loc)
         if type in topic_schema:
             document['class'] = topic_schema[type]
         if type in topic_field:

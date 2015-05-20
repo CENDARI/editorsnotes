@@ -824,6 +824,7 @@ def faceted_search(request,project_slug=None):
                 terms[facet].append(value)
             else:
                 terms[facet] = [value]
+        #TODO use date and location filters when appropriate
         filter_terms += [{"terms": {key: val}} for (key, val) in terms.items()]
 
     buckets = {}
@@ -851,7 +852,7 @@ def faceted_search(request,project_slug=None):
     q['size'] = size
     frm = int(request.GET.get('from', 0))
     q['from'] = frm
-    q['aggregations'] = cendari_aggregations(size=buckets, precision=(2 if query=='' else 3))
+    q['aggregations'] = cendari_aggregations(size=buckets)#, precision=(2 if query=='' else 3))
     #pprint.pprint(q)
     results = cendari_index.search(q, highlight=True, size=size)
     # with open('res.log', 'w') as out:

@@ -55,7 +55,8 @@ def cendari_aggregations(size={},default_size=10,precision=3):
         'location': {
             "geohash_grid" : {
                 "field" : "location",
-                "precision" : precision
+                "precision" : precision,
+                "size": 5000
             }
         }
     }
