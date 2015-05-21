@@ -291,6 +291,7 @@ reversion.register(Topic)
 def get_or_create_topic(user, name, type, project, date=None):
     res = list(Topic.objects.filter(preferred_name=name,project=project))
     cnt = len(res)
+    name = name.strip()
     created = False
     t = None
     if cnt==0:

@@ -35,6 +35,10 @@ def parse_well_known_date(str):
             pass
     return None
 
+def change_to_well_known_format(d):
+    return d.strftime(WELL_KNOWN_DATE_FORMATS[0])
+
+
 def custom_exception_handler(exc):
     # Call REST framework's default exception handler first,
     # to get the standard error response.
@@ -47,6 +51,7 @@ def custom_exception_handler(exc):
     else:
         logger.debug('Received exception %s', type(exc))
     return response
+
 
 def get_image_placeholder_document(user,project):
     description= 'IMAGE PLACEHOLDER DO NOT DELETE !!!!'
