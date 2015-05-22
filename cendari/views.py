@@ -838,11 +838,11 @@ def faceted_search(request,project_slug=None):
     if len(query_terms)==1:
         q['query'] = query_terms[0]
     elif len(query_terms)>1:
-        q['query'] = { 'and': query_terms }
+        q['query'] = { "bool" : { "must" : query_terms } }
     if len(filter_terms)==1:
         q['filter'] = filter_terms[0]
     elif len(filter_terms)>1:
-        q['filter'] = { 'and': filter_terms }
+        q['filter'] = {"bool" : { "must" : filter_terms } }
     # craft a filtered query out of the query
     # because aggregation use the result of the query
     # and ignore the filter alone
