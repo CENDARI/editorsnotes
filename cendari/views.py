@@ -807,7 +807,7 @@ def faceted_search(request,project_slug=None):
     filter_terms = []
     query_terms = []
     if project_slug:
-        filter_terms = cendari_filter(requer.user,[project_slug])
+        filter_terms = cendari_filter(request.user,[project_slug])
     else:
         filter_terms = cendari_filter(request.user)
     query = request.GET.get('q', None)
