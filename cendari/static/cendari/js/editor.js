@@ -412,7 +412,7 @@ function submitEntity(fc){
     formData = formData + "rdf="+$('#rdf_id').val().trim()+"&";
     formData = formData + "preferred_name="+$('#preferred_name_id').text().trim()+"&";
     if($('#date_id').length){
-        formData = formData + 'date='+$('#date_id').val()+"&";
+        formData = formData + 'date_custom='+$('#date_id').val()+"&";
     }
     formData = formData + $("#saveButton").attr('name')+"="+$("#saveButton").val();
     

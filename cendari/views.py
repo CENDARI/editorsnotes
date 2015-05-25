@@ -813,6 +813,8 @@ def faceted_search(request,project_slug=None):
     query = request.GET.get('q', None)
     if query is not None and len(query)!=0:
         query_terms.append({'match': {'_all': query} })
+    else:
+        query = ''
     if 'selected_facets' in request.GET \
       and request.GET['selected_facets']:
         facets=request.GET.getlist('selected_facets')
@@ -822,6 +824,7 @@ def faceted_search(request,project_slug=None):
                 terms[facet].append(value)
             else:
                 terms[facet] = [value]
+        #TODO use date and location filters when appropriate
         filter_terms += [{"terms": {key: val}} for (key, val) in terms.items()]
 
     buckets = {}
@@ -835,11 +838,11 @@ def faceted_search(request,project_slug=None):
     if len(query_terms)==1:
         q['query'] = query_terms[0]
     elif len(query_terms)>1:
-        q['query'] = { 'and': query_terms }
+        q['query'] = { "bool" : { "must" : query_terms } }
     if len(filter_terms)==1:
         q['filter'] = filter_terms[0]
     elif len(filter_terms)>1:
-        q['filter'] = { 'and': filter_terms }
+        q['filter'] = {"bool" : { "must" : filter_terms } }
     # craft a filtered query out of the query
     # because aggregation use the result of the query
     # and ignore the filter alone
@@ -849,7 +852,7 @@ def faceted_search(request,project_slug=None):
     q['size'] = size
     frm = int(request.GET.get('from', 0))
     q['from'] = frm
-    q['aggregations'] = cendari_aggregations(size=buckets)
+    q['aggregations'] = cendari_aggregations(size=buckets)#, precision=(2 if query=='' else 3))
     #pprint.pprint(q)
     results = cendari_index.search(q, highlight=True, size=size)
     # with open('res.log', 'w') as out:
@@ -1146,6 +1149,8 @@ def editEntityCendari(request, project_slug, topic_node_id):
     o['object_type'] = 'topic'
     o['object_id'] = topic_node_id
     o['topic_type'] = topic.topic_node.type
+    o['topic'].date = utils.change_to_well_known_format(o['topic'].date)
+
     #print 20*'.'+ 'topic.summary = " + str(topic.summary)
     o['breadcrumb'] = (
         (topic.project.name, topic.project.get_absolute_url()),

@@ -11,7 +11,7 @@ from .base import (RelatedTopicSerializerMixin, ProjectSpecificItemMixin,
 from .documents import CitationSerializer
  # Cendari code E.G. aviz
 from cendari.semantic import semantic_resolve_topic, semantic_query_latlong
-from cendari.utils import WELL_KNOWN_DATE_FORMATS
+from cendari.utils import WELL_KNOWN_DATE_FORMATS, parse_well_known_date
 
 class TopicNodeSerializer(serializers.ModelSerializer):
     name = Field(source='_preferred_name')
@@ -83,10 +83,16 @@ class TopicSerializer(RelatedTopicSerializerMixin, ProjectSpecificItemMixin,
                     last_updater_id=obj.creator_id)
                 topic_node_id = topic_node.id
             obj.topic_node_id = topic_node_id
+
         alternate_names = obj._related_data.pop('alternate_names')
         super(TopicSerializer, self).save_object(obj, **kwargs)
         self.save_alternate_names(obj, alternate_names)
-         # Cendari code E.G. aviz
+        # Cendari code E.G. aviz
+        if self.context['request']:
+            if 'date_custom' in self.context['request'].DATA :
+                date_tbs = parse_well_known_date(self.context['request'].DATA['date_custom'])   
+                if date_tbs != None:
+                    obj.date = date_tbs         
         semantic_resolve_topic(obj)
     def save_alternate_names(self, obj, alternate_names):
         to_create = set(alternate_names)

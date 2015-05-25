@@ -150,10 +150,10 @@ def login_user_synchronize(sender, user, request, **kwargs):
                     role = project.roles.get(role='Editor') # TODO get privileges from API
                     role.users.add(user)
         for p in user.get_authorized_projects():
-            pname = "nte_"+cendari_clean_name(p.name)
+            pname = cendari_clean_name(p.name)
             if pname not in dprojects:
                 logger.debug('creating remote project: %s', pname)
-                api.create_dataspace(pname,title=p.name)
+                api.create_dataspace('nte_'+pname,title=p.name)
     except CendariDataAPIException as e:
         logger.error('Problem synchonizing projects with DATA Api: %s', e)
     except:

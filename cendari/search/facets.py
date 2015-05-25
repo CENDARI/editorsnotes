@@ -43,7 +43,7 @@ def cendari_filter(user=None,project_slugs=None):
         ]
     return filter
 
-def cendari_aggregations(size={},default_size=10):
+def cendari_aggregations(size={},default_size=10,precision=3):
     aggs = {
         'date': {
             "date_histogram" : {
@@ -55,7 +55,8 @@ def cendari_aggregations(size={},default_size=10):
         'location': {
             "geohash_grid" : {
                 "field" : "location",
-                "precision" : 3
+                "precision" : precision,
+                "size": 5000
             }
         }
     }
