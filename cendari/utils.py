@@ -36,7 +36,9 @@ def parse_well_known_date(str):
     return None
 
 def change_to_well_known_format(d):
-    return d.strftime(WELL_KNOWN_DATE_FORMATS[0])
+    if d:
+    	return d.strftime(WELL_KNOWN_DATE_FORMATS[0])
+    return None
 
 
 def custom_exception_handler(exc):
