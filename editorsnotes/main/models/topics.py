@@ -165,8 +165,8 @@ class Topic(LastUpdateMetadata, URLAccessible, ProjectPermissionsMixin,
     objects = TopicManager()
 
     # Cendari code E.G. aviz
-    date         = models.DateTimeField(editable=True, db_index=True, null=True,blank=True)
-    rdf          = RDFField(null=True,blank=True)
+    date    = models.DateTimeField(editable=True, db_index=True, null=True,blank=True)
+    rdf     = RDFField(null=True,blank=True)
 
     class Meta:
         app_label = 'main'
@@ -289,9 +289,9 @@ class Topic(LastUpdateMetadata, URLAccessible, ProjectPermissionsMixin,
 reversion.register(Topic)
 
 def get_or_create_topic(user, name, type, project, date=None):
+    name = name.strip()
     res = list(Topic.objects.filter(preferred_name=name,project=project))
     cnt = len(res)
-    name = name.strip()
     created = False
     t = None
     if cnt==0:
