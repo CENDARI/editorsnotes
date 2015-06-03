@@ -829,6 +829,16 @@ def faceted_search(request,project_slug=None):
         #TODO use date and location filters when appropriate
         filter_terms += [{"terms": {key: val}} for (key, val) in terms.items()]
 
+    if 'bounds' in request.GET:
+        bounds=map(float, request.GET['bounds'].split(','))
+        filter_terms += [{"geo_bounding_box" :
+                          {"location": {
+                              "top_left": ', '.join(map(str, bounds[:2])),
+                              "bottom_right": ', '.join(map(str, bounds[2:5]))
+                              }
+                          }
+                        }]
+
     buckets = {}
     if 'show_facets' in request.GET \
       and request.GET['show_facets']:

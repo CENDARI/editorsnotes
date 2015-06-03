@@ -86,6 +86,7 @@ function parse_doc_params() {
 
 var doc_facets = {};
 var facets_prefix = 'selected_facets';
+var bounds = '';
 function parse_facets() {
     doc_facets = {};
     for (var i = 0; i < doc_params.length; i++) {
@@ -100,6 +101,9 @@ function parse_facets() {
 	    else {
 		doc_facets[facets_vals[0]] = d3.set(facets_vals.slice(1));
 	    }
+	}
+	else if (p[0] == 'bounds') {
+	    bounds = p[1].split(',').map(Number);
 	}
     }
 }
@@ -118,13 +122,22 @@ function url_facets() {
 	var facet =doc_facets[d].values();
 	if (facet.length == 0)
 	    continue;
-	if (! first)
+	if (! first) {
 	    ret += '&';
+	    first = false;
+	}
 	ret += 'selected_facets='+d;
 	for (var f in facet) {
 	    ret += ':';
 	    ret += facet[f];
 	}
+    }
+    if (bounds) {
+	if (! first) {
+	    ret += '&';
+	    first = false;
+	}
+	ret += 'bounds='+bounds;
     }
     return ret;
 }
@@ -144,9 +157,18 @@ function facet_toggle_value(val) {
     return url_facets();
 }
 
+function facet_del_facet(facet) {
+    delete doc_facets[facet];
+
+    var url = url_facets();
+}
+
 function filter_location(event) {
     event.preventDefault();
-    var bounds = leafletMap.getBounds();
+    var b = leafletMap.getBounds();
+    bounds = b.getNorth()+","+b.getWest()+","+b.getSouth()+","+b.getEast();
+    var url = url_facets();
+    document.location.assign(url);
 }
 
 function adapt_resolution(event) {
@@ -157,7 +179,23 @@ function reset_location(event) {
     event.preventDefault();
 }
 
+function morefacetvals(event) {
+    event.preventDefault();
+    
+    var url = facet_toggle_value($(this).attr("href"));
+    document.location.assign(url);
+}
+
+function facet_toggle(event) {
+    event.preventDefault();
+    var url = facet_toggle_value($(this).attr("href"));
+    document.location.assign(url);
+}
+
+
 function bind_faceted_widgets() {
+    $('.facetview_morefacetvals').click(morefacetvals);
+    $('.facetview_toggle').click(facet_toggle);
     $('.facetview_filtershow').click(showfiltervals);
     $('.facetview_filterlocation').click(filter_location);
     $('.facetview_adaptresolution').click(adapt_resolution);

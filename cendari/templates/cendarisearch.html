@@ -84,22 +84,9 @@
 
 <script type="text/javascript">
 {% autoescape off %}  
-  function morefacetvals(event) {
-      event.preventDefault();
-      
-      var url = facet_toggle_value($(this).attr("href"));
-      document.location.assign(url);
-  }
-
-  function facet_add(event) {
-      event.preventDefault();
-      var url = facet_toggle_value($(this).attr("href"));
-      document.location.assign(url);
-  }
-
   function next_page(event) {
       event.preventDefault();
-      var url = "{{ request.get_full_path }}";
+      var url = document.location.href;
       url = url.replace(/[&]from=[^&]*/, "");
       url = url + '&from='+Math.min({{sizes.total}}-{{sizes.size}}+1,{{sizes.from}}+{{sizes.size}});
       document.location.assign(url);
@@ -107,7 +94,7 @@
 
   function prev_page(event) {
       event.preventDefault();
-      var url = "{{ request.get_full_path }}";
+      var url = document.location.href;
       url = url.replace(/[&]from=[^&]*/, "");
       url = url + '&from='+Math.max(0,{{sizes.from}}-{{sizes.size}});
       document.location.assign(url);
@@ -168,7 +155,7 @@
     </td></tr>
     {% for value in values.buckets %}
     <tr class="facetview_filtervalue" style="display:none;">
-      <td><a class="facetview_filterchoice facetview_add" rel="{{ facet }}" href="selected_facets={{ facet }}:{{ value.key }}">{{ value.key }} {{value.doc_count|notzero}}</a></td>
+      <td><a class="facetview_filterchoice facetview_toggle" rel="{{ facet }}" href="selected_facets={{ facet }}:{{ value.key }}">{{ value.key }} {{value.doc_count|notzero}}</a></td>
     </tr>
     {% endfor %}
     {% endif %}
@@ -208,8 +195,6 @@
 
 <script type="text/javascript">
     bind_faceted_widgets();
-  $('.facetview_morefacetvals').click(morefacetvals);
-  $('.facetview_add').click(facet_add);
   $('.next_page').click(next_page);
   $('.prev_page').click(prev_page);
 </script>
