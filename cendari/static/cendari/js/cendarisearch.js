@@ -62,9 +62,13 @@ function buildMap(mapData, element) {
     var lonScale = d3.scale.linear()
             .domain(lonExtent)
             .range([pointSize/2, width - pointSize/2]);
-    var colorScale = d3.scale.linear()
-            .domain(d3.extent(mapData, function(d){return d.doc_count;}))
-            .range(["lightblue", "red"]);
+    var docCountExtent = d3.extent(mapData, function(d){return d.doc_count;}),
+	colorScale = d3.scale.linear()
+            .domain(docCountExtent);
+    if (docCountExtent[0] == docCountExtent[1])
+	colorScale.range(["red", "red"]);
+    else
+	colorScale.range(["lightblue", "red"]);
     var radius = 10000;
 
     
