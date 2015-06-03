@@ -819,11 +819,13 @@ def faceted_search(request,project_slug=None):
       and request.GET['selected_facets']:
         facets=request.GET.getlist('selected_facets')
         for facet in facets:
-            (facet,value) =facet.split(':')
+            values =facet.split(':')
+            facet = values[0]
+            values = values[1:]
             if facet in terms:
-                terms[facet].append(value)
+                terms[facet] += values
             else:
-                terms[facet] = [value]
+                terms[facet] = values
         #TODO use date and location filters when appropriate
         filter_terms += [{"terms": {key: val}} for (key, val) in terms.items()]
 
@@ -847,7 +849,7 @@ def faceted_search(request,project_slug=None):
     # because aggregation use the result of the query
     # and ignore the filter alone
     q = {'query': { 'filtered': q } }
-    q['fields'] = ['uri']
+    q['fields'] = ['uri', 'title']
     size = int(request.GET.get('size', 50))
     q['size'] = size
     frm = int(request.GET.get('from', 0))
@@ -855,8 +857,8 @@ def faceted_search(request,project_slug=None):
     q['aggregations'] = cendari_aggregations(size=buckets)#, precision=(2 if query=='' else 3))
     #pprint.pprint(q)
     results = cendari_index.search(q, highlight=True, size=size)
-    # with open('res.log', 'w') as out:
-    #     pprint.pprint(results, stream=out)
+    with open('res.log', 'w') as out:
+        pprint.pprint(results, stream=out)
     res = []
     total = int(results['hits']['total'])
     sizes = {
@@ -875,6 +877,13 @@ def faceted_search(request,project_slug=None):
             info = { 'uri': h['fields']['uri'][0], 
                      'highlight': highlight }
             res.append(info)
+        elif 'title' in h['fields']:
+            info = { 'uri': h['fields']['uri'][0], 
+                     'highlight': h['fields']['title'] }
+            res.append(info)
+        else:
+            info = { 'uri': h['fields']['uri'][0], 
+                     'highlight': '' }
 
     facets = results['aggregations']
     cardinalities = []

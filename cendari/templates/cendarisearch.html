@@ -1,6 +1,6 @@
 {% extends 'emptylayout.html' %}
 
-{% load staticfiles display sort jsondumps %}
+{% load staticfiles display sort jsondumps notzero %}
 
 {% block css_nocompress %}
 <link rel="stylesheet" href="{% static "bootstrap/css/bootstrap.min.css" %}">
@@ -66,8 +66,6 @@
   fill: true;
 }
 
-
-
 .leaflet-container {
     background: #fff;
 }
@@ -75,116 +73,28 @@
 {% endblock css_nocompress %}
 
 {% block js_nocompress %}
+<script src='//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js'></script>
 <script type="text/javascript" src="{% static "function/jquery/jquery-1.8.2.min.js" %}"></script>
 <script src='{% static 'function/d3/d3.v3.min.js' %}'></script>
 <script type="text/javascript" src="{% static "bootstrap/js/bootstrap.js" %}"></script>
 <script type="text/javascript" src="{% static "jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js" %}"></script>
 <script type="text/javascript" src="{% static "cendari/js/latlon-geohash.js" %}"></script>
-<script src='//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js'></script>
+<script type="text/javascript" src="{% static "cendari/js/cendarisearch.js" %}"></script>
+
 
 <script type="text/javascript">
-    function showfiltervals(event) {
-	event.preventDefault();
-	if ( $(this).hasClass('facetview_open') ) {
-	    $(this).children('i').removeClass('icon-minus');
-	    $(this).children('i').addClass('icon-plus');
-	    $(this).removeClass('facetview_open');
-	    $('[id="facetview_' + $(this).attr('rel') +'"]').children().find('.facetview_filtervalue').hide();
-	    $(this).siblings('.facetview_filteroptions').hide();
-	} else {
-	    $(this).children('i').removeClass('icon-plus');
-	    $(this).children('i').addClass('icon-minus');
-	    $(this).addClass('facetview_open');
-	    $('[id="facetview_' + $(this).attr('rel') +'"]').children().find('.facetview_filtervalue').show();
-	    $(this).siblings('.facetview_filteroptions').show();
-	}
-    }
-
-/**
- * Constructs a map visualization.
- **/
-  function buildMap(mapData, element) {
-      var map = element.classed('map', true).attr('id','leafletmap');
-      var height = parseInt(element.style('height'));
-      var width = parseInt(element.style('width'));
-      
-      var maxZoom = 10, minZoom = 1, defaultZoom = 1;
-      var pointSize = 5;
-      
-      if(mapData.length < 1) return;
-      
-      //process location string into lat/lon values
-      for(var i = 0; i < mapData.length; i++){
-	  var item = mapData[i];
-	  var latlon = Geohash.decode(item.key);
-	  var lat = latlon.lat;
-	  var lon = latlon.lon;
-	  if(lat == 0 && lon == 0) continue;
-	  item._lat = lat;
-	  item._lon = lon;
-      }
-      
-      
-      var latExtent = d3.extent(mapData, function(d){return d._lat;});
-      var lonExtent = d3.extent(mapData, function(d){return d._lon;});
-      var latScale = d3.scale.linear()
-	  .domain(latExtent)
-	  .range([height - pointSize/2, pointSize/2]);
-      var lonScale = d3.scale.linear()
-	  .domain(lonExtent)
-	  .range([pointSize/2, width - pointSize/2]);
-      var colorScale = d3.scale.linear()
-	  .domain(d3.extent(mapData, function(d){return d.doc_count;}))
-	  .range(["lightblue", "red"]);
-      
-      //Using Leaflet (instead of D3) for basemap
-      var leafletMap = L.map('leafletmap',{attributionControl:false, minZoom:minZoom, maxZoom:maxZoom})
-	  .fitWorld()
-	  //.fitBounds([[latExtent[0], lonExtent[0]], [latExtent[1], lonExtent[1]]]);
-	  //.setView([(latExtent[0]+latExtent[1])/2,(lonExtent[0]+lonExtent[1])/2], defaultZoom);
-      L.tileLayer(document.location.protocol + '//{s}.tiles.mapbox.com/v4/wjwillett.i9o7e0g1/{z}/{x}/{y}.png?access_token=pk.eyJ1Ijoid2p3aWxsZXR0IiwiYSI6IlJtUlFYVkEifQ.Qk10zoCrd2pTN6t2rcyifQ').addTo(leafletMap);
-      for(var i=0; i < mapData.length; i++){
-	  var d = mapData[i];
-	  var mark = L.circleMarker([d._lat,d._lon],
-				    {'className':'mark',
-				     stroke: false,
-				     fillOpacity: 0.7,
-				     radius: pointSize/2,
-				     fillColor: colorScale(d.doc_count)})
-	      .addTo(leafletMap); 
-	  //associate a data tuple with the mark (to mimic D3)
-	  mark._path.__data__ = d;   
-      }
-  }
-
+{% autoescape off %}  
   function morefacetvals(event) {
       event.preventDefault();
-
-      var url = facet_add_value("{{ request.get_full_path }}",
-				 $(this).attr("href"));
+      
+      var url = facet_toggle_value($(this).attr("href"));
       document.location.assign(url);
   }
 
-  function facet_add_value(href, val) {
-      return href + (href.indexOf('?')==-1?"?q=":"")+ "&" + val;
-  }
-
-  function facet_del_value(href, val) {
-      return href.replace("&"+val,"");
-  }
-
-{% autoescape off %}  
   function facet_add(event) {
       event.preventDefault();
-      var url = facet_add_value("{{ request.get_full_path }}",
-				$(this).attr("href"));
+      var url = facet_toggle_value($(this).attr("href"));
       document.location.assign(url);
-  }
-
-  function facet_del(event) {
-      event.preventDefault();
-      var url = facet_del_value("{{ request.get_full_path }}",
-				$(this).attr("href"));
   }
 
   function next_page(event) {
@@ -202,7 +112,6 @@
       url = url + '&from='+Math.max(0,{{sizes.from}}-{{sizes.size}});
       document.location.assign(url);
   }
-
 {% endautoescape %}
 </script>
 
@@ -234,15 +143,22 @@
      <a class="facetview_filtershow facetview_novalues" title="filter by {{ facet}}" rel="{{facet }}" style="color:#999; font-weight:bold;" href=""><i class="icon-plus"></i> {{ facet|capfirst }}</a>
     {% endif %}
     {% if facet == "location" %}
-<div class="panelVis map" style="min-height: 30px; min-width: 150px; width: 150px; position: relative;">
-</div>
-{% autoescape off %}
-<script>
-var map_data = {{values.buckets|json}}, 
-  map = d3.select('.panelVis');
-buildMap(map_data, map);
-</script>
-{% endautoescape %}
+        <div class="btn-group facetview_locationfilteroptions" style="margin-top:5px;">
+          <a class="btn btn-small facetview_learnmore" title="click to view search help information" href="#"><b>?</b></a> 
+          <a class="btn btn-small facetview_filterlocation" title="filter location" rel="{{facet}}" href="filter_location">Filter</a>
+          <a class="btn btn-small facetview_adaptresolution" title="adapt viewport" rel="{{facet}}" href="adapt_to_viewport">Adapt</a>
+          <a class="btn btn-small facetview_resetlocation" title="reset location filter" href="no_location_filter">Reset</a>
+	<div class="panelVis map" style="min-height: 30px; min-width: 150px; width: 150px; position: relative;">
+	</div>
+	{% autoescape off %}
+	<script>
+    	  var map_data = {{values.buckets|json}}, 
+	  map = d3.select('.panelVis');
+	  buildMap(map_data, map);
+	</script>
+	{% endautoescape %}
+	</div>
+    </td></tr>
     {% else %}
         <div class="btn-group facetview_filteroptions" style="display:none; margin-top:5px;">
           <a class="btn btn-small facetview_learnmore" title="click to view search help information" href="#"><b>?</b></a> 
@@ -251,15 +167,9 @@ buildMap(map_data, map);
 	</div>
     </td></tr>
     {% for value in values.buckets %}
-    {% if facet in selected_facets and value.key in selected_facets.facet %}
     <tr class="facetview_filtervalue" style="display:none;">
-      <td><a class="facetview_filterchoice facetview_del" rel="{{ facet }}" href="selected_facets={{ facet }}:{{ value.key }}">{{ value.key }} ({{ value.doc_count }})</a></td>
+      <td><a class="facetview_filterchoice facetview_add" rel="{{ facet }}" href="selected_facets={{ facet }}:{{ value.key }}">{{ value.key }} {{value.doc_count|notzero}}</a></td>
     </tr>
-    {% else %}
-    <tr class="facetview_filtervalue" style="display:none;">
-      <td><a class="facetview_filterchoice facetview_add" rel="{{ facet }}" href="selected_facets={{ facet }}:{{ value.key }}">{{ value.key }} ({{ value.doc_count }})</a></td>
-    </tr>
-    {% endif %}
     {% endfor %}
     {% endif %}
   </table>
@@ -297,10 +207,9 @@ buildMap(map_data, map);
 </div>
 
 <script type="text/javascript">
-  $('.facetview_filtershow').click(showfiltervals);
-  $('.facetview_add').click(facet_add);
-  $('.facetview_del').click(facet_del);
+    bind_faceted_widgets();
   $('.facetview_morefacetvals').click(morefacetvals);
+  $('.facetview_add').click(facet_add);
   $('.next_page').click(next_page);
   $('.prev_page').click(prev_page);
 </script>
