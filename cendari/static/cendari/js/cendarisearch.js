@@ -1,19 +1,32 @@
 function showfiltervals(event) {
     event.preventDefault();
     if ( $(this).hasClass('facetview_open') ) {
-	$(this).children('i').removeClass('icon-minus');
-	$(this).children('i').addClass('icon-plus');
-	$(this).removeClass('facetview_open');
-	$('[id="facetview_' + $(this).attr('rel') +'"]').children().find('.facetview_filtervalue').hide();
-	$(this).siblings('.facetview_filteroptions').hide();
+        $(this).children('i').removeClass('icon-minus');
+        $(this).children('i').addClass('icon-plus');
+        $(this).removeClass('facetview_open');
+        $('[id="facetview_' + $(this).attr('rel') +'"]').children().find('.facetview_filtervalue').hide();
+        $(this).siblings('.facetview_filteroptions').hide();
     } else {
-	$(this).children('i').removeClass('icon-plus');
-	$(this).children('i').addClass('icon-minus');
-	$(this).addClass('facetview_open');
-	$('[id="facetview_' + $(this).attr('rel') +'"]').children().find('.facetview_filtervalue').show();
-	$(this).siblings('.facetview_filteroptions').show();
+        $(this).children('i').removeClass('icon-plus');
+        $(this).children('i').addClass('icon-minus');
+        $(this).addClass('facetview_open');
+        $('[id="facetview_' + $(this).attr('rel') +'"]').children().find('.facetview_filtervalue').show();
+        $(this).siblings('.facetview_filteroptions').show();
     }
 }
+var geohash_distances = [
+    5003530,
+    625441,
+    123264,
+    19545,
+    3803,
+    610,
+    118,
+    19,
+    3.71,
+    0.6
+];
+
 
 var leafletMap;
 /**
@@ -31,42 +44,59 @@ function buildMap(mapData, element) {
     
     //process location string into lat/lon values
     for(i = 0; i < mapData.length; i++){
-	var item = mapData[i];
-	var latlon = Geohash.decode(item.key);
-	var lat = latlon.lat;
-	var lon = latlon.lon;
-	if(lat == 0 && lon == 0) continue;
-	item._lat = lat;
-	item._lon = lon;
+        var item = mapData[i];
+        var latlon = Geohash.decode(item.key);
+        var lat = latlon.lat;
+        var lon = latlon.lon;
+        if(lat == 0 && lon == 0) continue;
+        item._lat = lat;
+        item._lon = lon;
     }
     
     
     var latExtent = d3.extent(mapData, function(d){return d._lat;});
     var lonExtent = d3.extent(mapData, function(d){return d._lon;});
     var latScale = d3.scale.linear()
-	    .domain(latExtent)
-	    .range([height - pointSize/2, pointSize/2]);
+            .domain(latExtent)
+            .range([height - pointSize/2, pointSize/2]);
     var lonScale = d3.scale.linear()
-	    .domain(lonExtent)
-	    .range([pointSize/2, width - pointSize/2]);
+            .domain(lonExtent)
+            .range([pointSize/2, width - pointSize/2]);
     var colorScale = d3.scale.linear()
-	    .domain(d3.extent(mapData, function(d){return d.doc_count;}))
-	    .range(["lightblue", "red"]);
+            .domain(d3.extent(mapData, function(d){return d.doc_count;}))
+            .range(["lightblue", "red"]);
+    var radius = 10000;
+
     
     //Using Leaflet (instead of D3) for basemap
-    leafletMap = L.map('leafletmap',{attributionControl:false, minZoom:minZoom, maxZoom:maxZoom})
-	    .fitWorld();
+    leafletMap = L.map('leafletmap',{attributionControl:false, minZoom:minZoom, maxZoom:maxZoom});
+    if (bounds) {
+        var b = bounds.split(',').map(Number),
+            top_left = b.splice(0, 2),
+            bottom_right = b.splice(0, 2),
+            view = L.latLngBounds(L.latLng(top_left[0], bottom_right[1]),
+				  L.latLng(bottom_right[0], top_left[1]));
+	if (view.isValid())
+	    leafletMap.fitBounds(view);
+	else
+	    leafletMap.fitWorld();
+        if (b.length > 0) { // precision
+            radius = geohash_distances[b[0]+1]/6;
+        }
+    }
+    else
+        leafletMap.fitWorld();
     L.tileLayer(document.location.protocol + '//{s}.tiles.mapbox.com/v4/wjwillett.i9o7e0g1/{z}/{x}/{y}.png?access_token=pk.eyJ1Ijoid2p3aWxsZXR0IiwiYSI6IlJtUlFYVkEifQ.Qk10zoCrd2pTN6t2rcyifQ').addTo(leafletMap);
     for(i=0; i < mapData.length; i++){
-	var d = mapData[i];
-	var mark = L.circle([d._lat,d._lon], 100000,
-			    {'className':'mark',
-			     stroke: false,
-			     fillOpacity: 0.7,
-			     fillColor: colorScale(d.doc_count)})
-		.addTo(leafletMap); 
-	//associate a data tuple with the mark (to mimic D3)
-	mark._path.__data__ = d;   
+        var d = mapData[i];
+        var mark = L.circle([d._lat,d._lon], radius,
+                            {'className':'mark',
+                             stroke: false,
+                             fillOpacity: 0.7,
+                             fillColor: colorScale(d.doc_count)})
+                .addTo(leafletMap); 
+        //associate a data tuple with the mark (to mimic D3)
+        mark._path.__data__ = d;   
     }
 }
 
@@ -76,35 +106,35 @@ function parse_doc_params() {
     var params = document.location.search.substring(1);
     var varvals = params.split('&');
     for (var i = 0; i < varvals.length; i++) {
-	var p = varvals[i].split('=');
-	if (p.length == 2) {
-	    doc_params.push(p);
-	    doc_args[p[0]] = p[1];
-	}
+        var p = varvals[i].split('=');
+        if (p.length == 2) {
+            doc_params.push(p);
+            doc_args[p[0]] = p[1];
+        }
     }
 }
 
 var doc_facets = {};
 var facets_prefix = 'selected_facets';
-var bounds = '';
+var bounds = 0;
 function parse_facets() {
     doc_facets = {};
     for (var i = 0; i < doc_params.length; i++) {
-	var p = doc_params[i];
-	if (p[0] == facets_prefix) {
-	    var facets_vals = p[1].split(':');
-	    if (doc_facets[facets_vals[0]]) {
-		for (var j = 1; j < facets_vals.length; j++) {
-		    doc_facets[facets_vals[0]].add(facets_vals[j]);
-		}
-	    }
-	    else {
-		doc_facets[facets_vals[0]] = d3.set(facets_vals.slice(1));
-	    }
-	}
-	else if (p[0] == 'bounds') {
-	    bounds = p[1].split(',').map(Number);
-	}
+        var p = doc_params[i];
+        if (p[0] == facets_prefix) {
+            var facets_vals = p[1].split(':');
+            if (doc_facets[facets_vals[0]]) {
+                for (var j = 1; j < facets_vals.length; j++) {
+                    doc_facets[facets_vals[0]].add(facets_vals[j]);
+                }
+            }
+            else {
+                doc_facets[facets_vals[0]] = d3.set(facets_vals.slice(1));
+            }
+        }
+        else if (p[0] == 'bounds') {
+            bounds = p[1];
+        }
     }
 }
 
@@ -113,31 +143,31 @@ parse_facets();
 
 function url_facets() {
     var ret = location.origin+location.pathname+"?",
-	first = true;
+        first = true;
     if ('q' in doc_args) {
-	ret += 'q='+doc_args['q'];
-	first = false;
+        ret += 'q='+doc_args['q'];
+        first = false;
     }
     for (var d in doc_facets) {
-	var facet =doc_facets[d].values();
-	if (facet.length == 0)
-	    continue;
-	if (! first) {
-	    ret += '&';
-	    first = false;
-	}
-	ret += 'selected_facets='+d;
-	for (var f in facet) {
-	    ret += ':';
-	    ret += facet[f];
-	}
+        var facet =doc_facets[d].values();
+        if (facet.length == 0)
+            continue;
+        if (! first) {
+            ret += '&';
+            first = false;
+        }
+        ret += 'selected_facets='+d;
+        for (var f in facet) {
+            ret += ':';
+            ret += facet[f];
+        }
     }
     if (bounds) {
-	if (! first) {
-	    ret += '&';
-	    first = false;
-	}
-	ret += 'bounds='+bounds;
+        if (! first) {
+            ret += '&';
+            first = false;
+        }
+        ret += 'bounds='+bounds;
     }
     return ret;
 }
@@ -145,14 +175,14 @@ function url_facets() {
 function facet_toggle_value(val) {
     //return href + (href.indexOf('?')==-1?"?q=":"")+ "&" + val;
     var varval = val.split('='),
-	facets = varval[1].split(':'),
-	facet = doc_facets[facets[0]];
+        facets = varval[1].split(':'),
+        facet = doc_facets[facets[0]];
     if (! facet)
-	doc_facets[facets[0]] = d3.set([facets[1]]);
+        doc_facets[facets[0]] = d3.set([facets[1]]);
     else if (doc_facets[facets[0]].has(facets[1]))
-	doc_facets[facets[0]].remove(facets[1]);
+        doc_facets[facets[0]].remove(facets[1]);
     else
-	doc_facets[facets[0]].add(facets[1]);
+        doc_facets[facets[0]].add(facets[1]);
 
     return url_facets();
 }
@@ -163,20 +193,55 @@ function facet_del_facet(facet) {
     var url = url_facets();
 }
 
+
 function filter_location(event) {
     event.preventDefault();
-    var b = leafletMap.getBounds();
-    bounds = b.getNorth()+","+b.getWest()+","+b.getSouth()+","+b.getEast();
+    var b = leafletMap.getBounds(),
+        width = b.getNorthEast().distanceTo(b.getNorthWest()),
+        height = b.getNorthEast().distanceTo(b.getSouthEast()),
+        area = width*height,
+        prec, d;
+    for (prec = 0; prec < geohash_distances.length; prec++) {
+        d = geohash_distances[prec] * geohash_distances[prec];
+
+        if ((area / d) > 5000)
+            break;
+    }
+    
+    bounds = b.getNorth()+","+b.getWest()+","+b.getSouth()+","+b.getEast()+","+prec;
     var url = url_facets();
     document.location.assign(url);
 }
 
 function adapt_resolution(event) {
     event.preventDefault();
+    var b = leafletMap.getBounds(),
+        width = b.getNorthEast().distanceTo(b.getNorthWest()),
+        height = b.getNorthEast().distanceTo(b.getSouthEast()),
+        area = width*height,
+        prec, d;
+    for (prec = 0; prec < geohash_distances.length; prec++) {
+        d = geohash_distances[prec] * geohash_distances[prec];
+
+        if ((area / d) > 5000)
+            break;
+    }
+    
+    if (bounds) {
+	var i = bounds.lastIndexOf(',');
+	bounds = bounds.substring(0, i+1)+prec;
+    }
+    else
+	bounds = b.getNorth()+","+b.getWest()+","+b.getSouth()+","+b.getEast()+","+prec;
+    var url = url_facets();
+    document.location.assign(url);
 }
 
 function reset_location(event) {
     event.preventDefault();
+    bounds = '';
+    var url = url_facets();
+    document.location.assign(url);
 }
 
 function morefacetvals(event) {

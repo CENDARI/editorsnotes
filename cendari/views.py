@@ -829,12 +829,15 @@ def faceted_search(request,project_slug=None):
         #TODO use date and location filters when appropriate
         filter_terms += [{"terms": {key: val}} for (key, val) in terms.items()]
 
+    precision = 2
     if 'bounds' in request.GET:
         bounds=map(float, request.GET['bounds'].split(','))
+        if len(bounds)>4:
+            precision = bounds[4]
         filter_terms += [{"geo_bounding_box" :
                           {"location": {
                               "top_left": ', '.join(map(str, bounds[:2])),
-                              "bottom_right": ', '.join(map(str, bounds[2:5]))
+                                  "bottom_right": ', '.join(map(str, bounds[2:4]))
                               }
                           }
                         }]
@@ -864,7 +867,7 @@ def faceted_search(request,project_slug=None):
     q['size'] = size
     frm = int(request.GET.get('from', 0))
     q['from'] = frm
-    q['aggregations'] = cendari_aggregations(size=buckets)#, precision=(2 if query=='' else 3))
+    q['aggregations'] = cendari_aggregations(size=buckets, precision=precision)
     #pprint.pprint(q)
     results = cendari_index.search(q, highlight=True, size=size)
     with open('res.log', 'w') as out:
