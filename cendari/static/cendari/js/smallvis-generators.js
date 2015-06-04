@@ -191,8 +191,8 @@ function buildTimeline(timelineData, element) {
   
   // Build the timeline
   var chart = timeline.append('svg').attr('height', height).attr('width', width);
-  var unixTimeExtent = d3.extent(timelineData, function(d) { return Number(d._value)});
-  var dateTimeExtent = [new Date(Number(unixTimeExtent[0])),new Date(Number(unixTimeExtent[1]))];
+  var unixTimeExtent = d3.extent(timelineData, function(d) { return Number(d._value);});
+  var dateTimeExtent = [new Date(unixTimeExtent[0]),new Date(unixTimeExtent[1])];
   var xLinearScale = d3.scale.linear().domain(unixTimeExtent).range([0, width]);
   var xTimeScale = d3.time.scale().domain(dateTimeExtent).range([0, width]).nice();
   var xAxis = d3.svg.axis().scale(xTimeScale).orient('bottom').ticks(Math.floor(width/60));

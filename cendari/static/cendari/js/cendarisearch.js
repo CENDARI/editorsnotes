@@ -63,12 +63,12 @@ function buildMap(mapData, element) {
             .domain(lonExtent)
             .range([pointSize/2, width - pointSize/2]);
     var docCountExtent = d3.extent(mapData, function(d){return d.doc_count;}),
-	colorScale = d3.scale.linear()
+        colorScale = d3.scale.linear()
             .domain(docCountExtent);
     if (docCountExtent[0] == docCountExtent[1])
-	colorScale.range(["red", "red"]);
+        colorScale.range(["red", "red"]);
     else
-	colorScale.range(["lightblue", "red"]);
+        colorScale.range(["lightblue", "red"]);
     var radius = 10000;
 
     
@@ -79,11 +79,11 @@ function buildMap(mapData, element) {
             top_left = b.splice(0, 2),
             bottom_right = b.splice(0, 2),
             view = L.latLngBounds(L.latLng(top_left[0], bottom_right[1]),
-				  L.latLng(bottom_right[0], top_left[1]));
-	if (view.isValid())
-	    leafletMap.fitBounds(view);
-	else
-	    leafletMap.fitWorld();
+                                  L.latLng(bottom_right[0], top_left[1]));
+        if (view.isValid())
+            leafletMap.fitBounds(view);
+        else
+            leafletMap.fitWorld();
         if (b.length > 0) { // precision
             radius = geohash_distances[b[0]+1]/6;
         }
@@ -103,6 +103,70 @@ function buildMap(mapData, element) {
         mark._path.__data__ = d;   
     }
 }
+
+/**
+ * Constructs a timeline visualization.
+ **/
+function buildTimeline(timelineData, element) {
+    var timeline = element.classed('timeline', true);
+    var height = parseInt(element.style('height'))-50;
+    var width = parseInt(element.style('width'));
+
+    for (var i = 0; i < timelineData.length; i++) {
+        var td = timelineData[i];
+        td.date = new Date(td.key); // converts key to a proper date
+	td.value = Math.log10(td.doc_count);
+    }
+    
+    var dateExtent = d3.extent(timelineData.map(function(d) { return d.date; })),
+        maxCount = d3.max(timelineData.map(function(d) { return d.value; }));
+
+    var x = d3.time.scale()
+            .range([0, width])
+            .domain(dateExtent),
+        y = d3.scale.linear()
+            .range([height, 0])
+            .domain([0, maxCount]);
+    
+    var xAxis = d3.svg.axis().scale(x).orient('bottom'),
+        yAxis = d3.svg.axis().scale(y).orient('left');
+
+    var area = d3.svg.area()
+            .interpolate('monotone')
+            .x(function(d) { return x(d.date); })
+            .y0(height)
+            .y1(function(d) { return y(d.value); });
+
+    // Build the timeline
+    var chart = timeline.append('svg')
+            .attr('height', height+50)
+            .attr('width', width);
+
+    // chart.append("defs").append("clipPath")
+    //    .attr("id", "clip")
+    //  .append("rect")
+    //    .attr("width", width)
+    //    .attr("height", height);
+
+    var focus = chart.append("g")
+            .attr("class", "focus")
+	    .attr("transform", "translate(" + 20 + "," + "0" + ")");
+
+    focus.append("path")
+        .datum(timelineData)
+        .attr("class", "area")
+        .attr("d", area);
+
+    focus.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+
+    focus.append("g")
+        .attr("class", "y axis")
+        .call(yAxis);
+}
+
 
 var doc_params = [],
     doc_args = {};
@@ -232,11 +296,11 @@ function adapt_resolution(event) {
     }
     
     if (bounds) {
-	var i = bounds.lastIndexOf(',');
-	bounds = bounds.substring(0, i+1)+prec;
+        var i = bounds.lastIndexOf(',');
+        bounds = bounds.substring(0, i+1)+prec;
     }
     else
-	bounds = b.getNorth()+","+b.getWest()+","+b.getSouth()+","+b.getEast()+","+prec;
+        bounds = b.getNorth()+","+b.getWest()+","+b.getSouth()+","+b.getEast()+","+prec;
     var url = url_facets();
     document.location.assign(url);
 }

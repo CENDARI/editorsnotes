@@ -60,7 +60,7 @@
   height:200px;
 }
 
-.map .mark{
+.map .mark .timeline{
   stroke: none;
   fillOpacity: 1;
   fill: true;
@@ -68,6 +68,26 @@
 
 .leaflet-container {
     background: #fff;
+}
+
+.timeline{
+  height:200px;
+}
+
+.timeline > svg {
+  font: 6px sans-serif;
+}
+
+.area {
+  fill: steelblue;
+  clip-path: url(#clip);
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
 }
 </style>
 {% endblock css_nocompress %}
@@ -135,16 +155,32 @@
           <a class="btn btn-small facetview_filterlocation" title="filter location" rel="{{facet}}" href="filter_location">Filter</a>
           <a class="btn btn-small facetview_adaptresolution" title="adapt viewport" rel="{{facet}}" href="adapt_to_viewport">Adapt</a>
           <a class="btn btn-small facetview_resetlocation" title="reset location filter" href="no_location_filter">Reset</a>
+	</div>
 	<div class="panelVis map" style="min-height: 30px; min-width: 150px; width: 150px; position: relative;">
 	</div>
 	{% autoescape off %}
 	<script>
     	  var map_data = {{values.buckets|json}}, 
-	  map = d3.select('.panelVis');
+	  map = d3.select('.map');
 	  buildMap(map_data, map);
 	</script>
 	{% endautoescape %}
+    </td></tr>
+    {% elif facet == "date" %}
+        <div class="btn-group facetview_datefilteroptions" style="margin-top:5px;">
+          <a class="btn btn-small facetview_learnmore" title="click to view search help information" href="#"><b>?</b></a> 
+          <a class="btn btn-small facetview_filterdate" title="filter date" rel="{{facet}}" href="filter_date">Filter</a>
+          <a class="btn btn-small facetview_resetdate" title="reset date filter" href="no_location_filter">Reset</a>
 	</div>
+	<div class="panelVis timeline" style="min-height: 30px; min-width: 150px; width: 150px; position: relative;">
+	</div>
+	{% autoescape off %}
+	<script>
+    	  var date_data = {{values.buckets|json}}, 
+	      timeline = d3.select('.timeline');
+	  buildTimeline(date_data, timeline);
+	</script>
+	{% endautoescape %}
     </td></tr>
     {% else %}
         <div class="btn-group facetview_filteroptions" style="display:none; margin-top:5px;">

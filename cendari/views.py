@@ -870,8 +870,8 @@ def faceted_search(request,project_slug=None):
     q['aggregations'] = cendari_aggregations(size=buckets, precision=precision)
     #pprint.pprint(q)
     results = cendari_index.search(q, highlight=True, size=size)
-    # with open('res.log', 'w') as out:
-    #     pprint.pprint(results, stream=out)
+    with open('res.log', 'w') as out:
+        pprint.pprint(results, stream=out)
     res = []
     total = int(results['hits']['total'])
     sizes = {
@@ -912,12 +912,6 @@ def faceted_search(request,project_slug=None):
             details['value_count'] = len(details['buckets'])
         else:
             details['value_count'] = len(details['buckets'])
-            # copy key_as_string in key for dates since
-            # we don't care about the integer values
-            for b in details['buckets']:
-                if 'key_as_string' in b:
-                    b['key'] = b['key_as_string']
-                    del b['key_as_string']
 
     for c in cardinalities:
         del facets[c]
