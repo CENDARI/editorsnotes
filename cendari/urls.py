@@ -168,6 +168,10 @@ cendaripatterns = patterns('cendari.views',
     url(r'^cendari/(?P<project_slug>[-\w]+)/search/$',                                          'search',                            name='cendari_search_view'),
     url(r'^cendari/faceted/$', 'faceted_search', name='cendari_faceted_search_view'),
     url(r'^cendari/(?P<project_slug>[-\w]+)/faceted/$', 'faceted_search', name='cendari_faceted_search_view'),
+
+   # Cendari chat
+   url(r'^chat/', include('djangoChat.urls')),
+
 )
 
 urlpatterns += cendaripatterns
