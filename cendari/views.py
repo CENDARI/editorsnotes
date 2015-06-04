@@ -880,8 +880,8 @@ def faceted_search(request,project_slug=None):
     q['aggregations'] = cendari_aggregations(size=buckets, precision=precision)
     #pprint.pprint(q)
     results = cendari_index.search(q, highlight=True, size=size)
-    with open('res.log', 'w') as out:
-        pprint.pprint(results, stream=out)
+    # with open('res.log', 'w') as out:
+    #     pprint.pprint(results, stream=out)
     res = []
     total = int(results['hits']['total'])
     sizes = {
