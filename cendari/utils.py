@@ -54,6 +54,15 @@ def custom_exception_handler(exc):
         logger.debug('Received exception %s', type(exc))
     return response
 
+def get_all_active_topics_for_project(project):
+    topics = set()
+
+    for note in project.notes.all():
+        topics.update(note.get_all_related_topics())
+    for document in project.documents.all():
+        topics.update(document.get_all_related_topics())
+
+    return list(topics)
 
 def get_image_placeholder_document(user,project):
     description= 'IMAGE PLACEHOLDER DO NOT DELETE !!!!'
