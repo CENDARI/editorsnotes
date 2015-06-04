@@ -615,6 +615,9 @@ def getLazyProjectData(request, project_slug, sfield):
 @login_required
 def getTopicResources(request, project_slug, sfield):
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
+
+    project = Project.objects.filter(slug=project_slug)[0]
+
     max_count = 10000
     topic_count = 0
     topic_list = []
@@ -644,9 +647,16 @@ def getTopicResources(request, project_slug, sfield):
 	    #o_query_set = sorted(query_set, key=operator.attrgetter('preferred_name'))              
         set_count = o_query_set.count()
         topic_count += 1
+        active_topics = utils.get_all_active_topics_for_project(project)
+
         for e in o_query_set:
             #to make sure both url and node key have the same topic_id (when a topic exists in multiple probjects)
             #my_list.append({'title':str(e), 'key':str(project_slug)+'.topic.'+str(e.id), 'url':e.get_absolute_url()})
+
+            if not e in active_topics:
+                set_count -=1
+                continue
+
             url_parts = e.get_absolute_url().split('/')
             topic_id_index = len(url_parts) - 2
             topic_id = url_parts[topic_id_index];
@@ -1011,6 +1021,7 @@ class EntityCendari(TopicAdminView):
     
 def editNoteCendari(request, note_id, project_slug):
     o = {}
+    user = request.user
     qs = main_models.Note.objects.select_related('license', 'project__default_license').prefetch_related('related_topics')
     note = get_object_or_404(qs, id=note_id, project__slug=project_slug)
     if note.is_private:
@@ -1192,8 +1203,26 @@ def editEntityCendari(request, project_slug, topic_node_id):
                                    if topic['url'] != request.path))
             note_objects[note['id']] = (note_objects[note['id']], related_topics,)
     # o['notes'] = note_objects.values()
-    o['documents'] = topic.get_related_documents()
-    o['notes'] = topic.get_related_notes()
+    
+
+
+    o['documents']  = []
+    o['notes']      = []
+
+
+
+    for d in topic.get_related_documents():
+        if d.project in request.user.get_affiliated_projects():
+            o['documents'].append(d)
+
+    for n in topic.get_related_notes():
+        if n.project in request.user.get_affiliated_projects():
+            o['notes'].append(n)
+
+    # o['documents']  = topic.get_related_documents()
+    # o['notes']      = topic.get_related_notes()
+
+
     return render_to_response(
         'entityCendariEdit.html', o, context_instance=RequestContext(request))
 
