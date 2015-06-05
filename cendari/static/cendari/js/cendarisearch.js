@@ -104,67 +104,128 @@ function buildMap(mapData, element) {
     }
 }
 
+function rebin(range, m, data) {
+    var bins = [],
+        values = data.map(function(d) { return d.key;}),
+        weights = data.map(function(d) { return d.value;}),
+        dx = (range[1]-range[0])/m,
+        bin, index,
+        i = -1,
+        n = values.length,
+        x;
+
+    if (dx == 0) {
+        dx = 1;
+        m = 1;
+    }
+
+    // Initialize the bins.
+    while (++i < m) {
+        bin = bins[i] = [];
+        bin.x = range[0]+i*dx;
+        bin.dx = dx;
+        bin.y = 0;
+    }
+
+    // Fill the bins, ignoring values outside the range.
+    if (m > 0) {
+        i = -1; while(++i < n) {
+            x = values[i];
+            index = Math.floor((x - range[0])/dx);
+	    if (index < 0)
+		index = 0;
+	    else if (index >= m)
+		index = m-1;
+            bin = bins[index];
+            bin.y += weights[i];
+            bin.push(data[i]);
+        }
+    }
+
+    return bins;
+}
+
 /**
  * Constructs a timeline visualization.
  **/
 function buildTimeline(timelineData, element) {
-    var timeline = element.classed('timeline', true);
-    var height = parseInt(element.style('height'))-50;
-    var width = parseInt(element.style('width'));
-
     for (var i = 0; i < timelineData.length; i++) {
         var td = timelineData[i];
+	if (td.doc_count == 0) {
+	    timelineData.splice(i, 1);
+	    continue;
+	}
         td.date = new Date(td.key); // converts key to a proper date
-	td.value = Math.log10(td.doc_count);
+        td.value = Math.log10(1+td.doc_count);
     }
+    if (timelineData.length == 0) return;
     
-    var dateExtent = d3.extent(timelineData.map(function(d) { return d.date; })),
-        maxCount = d3.max(timelineData.map(function(d) { return d.value; }));
+    var timeline = element.classed('timeline', true);
+    var total_height = parseInt(element.style('height'));
+    var total_width = parseInt(element.style('width'));
+
+    // Formatters for counts and times (converting numbers to Dates).
+    var formatCount = d3.format(",.0f"),
+        formatTime1 = d3.time.format("%Y-%m-%d"),
+        formatTime = function(d) { return formatTime1(new Date(d)); };
+
+    var margin = {top: 2, right: 2, bottom: 2, left: 2},
+        width = total_width - margin.left - margin.right,
+        height = total_height - margin.top - margin.bottom;
+
+    var dateExtent = d3.extent(timelineData.map(function(d) { return d.key; }));
 
     var x = d3.time.scale()
-            .range([0, width])
-            .domain(dateExtent),
-        y = d3.scale.linear()
-            .range([height, 0])
-            .domain([0, maxCount]);
-    
-    var xAxis = d3.svg.axis().scale(x).orient('bottom'),
-        yAxis = d3.svg.axis().scale(y).orient('left');
+            .domain(dateExtent)
+            .range([0, width]);
 
-    var area = d3.svg.area()
-            .interpolate('monotone')
-            .x(function(d) { return x(d.date); })
-            .y0(height)
-            .y1(function(d) { return y(d.value); });
+    // Generate a histogram using twenty uniformly-spaced bins.
+    var data = rebin(dateExtent, 20, timelineData);
+    var y = d3.scale.linear()
+            .domain([0, d3.max(data, function(d) { return d.y; })])
+            .range([height, 0]);
+    
+    var xAxis = d3.svg.axis()
+            .scale(x)
+            .orient('bottom')
+            .tickFormat(formatTime),
+        yAxis = d3.svg.axis().scale(y).orient('left');
 
     // Build the timeline
     var chart = timeline.append('svg')
-            .attr('height', height+50)
-            .attr('width', width);
+              .attr('height', total_height)
+              .attr('width', total_width)
+            .append("g")
+              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    // chart.append("defs").append("clipPath")
-    //    .attr("id", "clip")
-    //  .append("rect")
-    //    .attr("width", width)
-    //    .attr("height", height);
+    var bar = chart.selectAll(".bar")
+              .data(data)
+            .enter().append("g")
+             .attr("class", "bar")
+             .attr("transform", function(d) { return "translate(" + x(d.x) + "," + y(d.y) + ")"; });
+    bar.append("rect")
+        .attr("x", 1)
+        .attr("width", width/data.length)
+        .attr("height", function(d) { return Math.ceil(height - y(d.y)); })
+      .append("title")
+        .text(function(d) { return formatTime(d.x)+": "+formatCount(d.y); });
 
-    var focus = chart.append("g")
-            .attr("class", "focus")
-	    .attr("transform", "translate(" + 20 + "," + "0" + ")");
+    // bar.append("text")
+    //     .attr("dy", ".75em")
+    //     .attr("y", 6)
+    //     .attr("x", width/(data.length*2))
+    //     .attr("text-anchor", "middle")
+    //     .text(function(d) { return formatCount(d.y); });
 
-    focus.append("path")
-        .datum(timelineData)
-        .attr("class", "area")
-        .attr("d", area);
-
-    focus.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(xAxis);
-
-    focus.append("g")
-        .attr("class", "y axis")
-        .call(yAxis);
+    // chart.append("g")
+    //     .attr("class", "x axis")
+    //     .attr("transform", "translate(0," + height + ")")
+    //     .call(xAxis)
+    //   .selectAll("text")
+    //     .style("text-anchor", "end")
+    //     .attr("dx", "-.8em")
+    //     .attr("dy", "-.55em")
+    //     .attr("transform", "rotate(-90)" );
 }
 
 

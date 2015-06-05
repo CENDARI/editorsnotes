@@ -71,20 +71,28 @@
 }
 
 .timeline{
-  height:200px;
+  height:100px;
 }
 
 .timeline > svg {
   font: 6px sans-serif;
 }
 
-.area {
+.bar rect {
   fill: steelblue;
-  clip-path: url(#clip);
+  shape-rendering: crispEdges;
 }
 
-.axis path,
-.axis line {
+.bg {
+  fill: grey;
+}
+
+
+.bar text {
+  fill: #fff;
+}
+
+.axis path, .axis line {
   fill: none;
   stroke: #000;
   shape-rendering: crispEdges;
