@@ -131,14 +131,14 @@ function rebin(range, m, data) {
     if (m > 0) {
         i = -1; while(++i < n) {
             x = values[i];
-            index = Math.floor((x - range[0])/dx);
-	    if (index < 0)
-		index = 0;
-	    else if (index >= m)
+	    if (x == range[1])
 		index = m-1;
-            bin = bins[index];
-            bin.y += weights[i];
-            bin.push(data[i]);
+            else index = Math.floor((x - range[0])/dx);
+	    if (index >= 0 && index < m) {
+		bin = bins[index];
+		bin.y += weights[i];
+		bin.push(data[i]);
+	    }
         }
     }
 
@@ -197,6 +197,16 @@ function buildTimeline(timelineData, element) {
               .attr('width', total_width)
             .append("g")
               .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    var bg = chart.selectAll(".bg")
+              .data(data)
+           .enter().append("rect")
+            .attr("class", "bg")
+            .attr("x", function(d) { return x(d.x); })
+            .attr("width", width/data.length)
+            .attr("height", height)
+	   .append("title")
+            .text(function(d) { return formatTime(d.x)+": "+formatCount(d.y); });
 
     var bar = chart.selectAll(".bar")
               .data(data)
