@@ -35,18 +35,17 @@ Ext.application({
 					    animate:true
 					},
 					items: [{
-					    //html: Ext.example.shortBogusMarkup,
-					    title:'Projects',
+					    title:'Navigation',
 					    autoScroll:true,
 					    border:false,
 					    iconCls:'nav',
 					    contentEl : 'west'
 					},{
 					    title:'Chat',
-					    //html: chatExt.example.shortBogusMarkup,
 					    border:false,
 					    autoScroll:true,
-					    iconCls:'settings'
+					    iconCls:'chat',
+					    //contentEl : 'southWest'
 					}]	
 
 				}, 
