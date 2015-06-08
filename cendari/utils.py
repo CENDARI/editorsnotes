@@ -37,7 +37,7 @@ def parse_well_known_date(str):
 
 def change_to_well_known_format(d):
     if d:
-    	return d.strftime(WELL_KNOWN_DATE_FORMATS[0])
+    	return d.strftime(WELL_KNOWN_DATE_FORMATS[3])
     return None
 
 
