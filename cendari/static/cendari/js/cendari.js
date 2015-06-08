@@ -20,21 +20,36 @@ Ext.application({
 			defaults : {
 				split : false
 			},
-			items : [{
-				region : 'west',
-				collapsible : true,
-				title : 'Resources',
-				split : true,
-				width : '22%',
-				layout : 'fit',
-				contentEl : 'west',
-				stateId : 'navigation-panel',
-				id : 'west-panel', // see Ext.getCmp() below
-				minWidth : 175,
-				autoScroll : true,
-				animCollapse : true,
-				margins : '0 0 0 2'
-			}, 
+			items : [
+				{
+					region:'west',
+					id:'west-panel',
+					title:'Resources',
+					split:true,
+					width: '22%',
+					minWidth : 175,					
+					collapsible: true,
+					margins : '0 0 0 2',
+					layout:'accordion',
+					layoutConfig:{
+					    animate:true
+					},
+					items: [{
+					    //html: Ext.example.shortBogusMarkup,
+					    title:'Projects',
+					    autoScroll:true,
+					    border:false,
+					    iconCls:'nav',
+					    contentEl : 'west'
+					},{
+					    title:'Chat',
+					    //html: chatExt.example.shortBogusMarkup,
+					    border:false,
+					    autoScroll:true,
+					    iconCls:'settings'
+					}]	
+
+				}, 
 			{
 				region : 'center',
 				layout : 'border',
