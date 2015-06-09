@@ -45,7 +45,7 @@ Ext.application({
 					    border:false,
 					    autoScroll:true,
 					    iconCls:'chat',
-					    //contentEl : 'southWest'
+					    contentEl : 'southWest'
 					}]	
 
 				}, 

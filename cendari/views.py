@@ -1264,3 +1264,10 @@ def rdfa_view_document(request, project_slug, document_id):
         raise PermissionDenied("not authorized on %s project" % project.slug)
     return HttpResponse(semantic_rdfa(document, document.description))
     
+
+
+
+def cendari_chat(request, project_slug):
+    return render_to_response('cendari_chat.html',dict(project_slug=project_slug))
+
+
