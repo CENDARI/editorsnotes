@@ -566,6 +566,7 @@ def getLazyProjectData(request, project_slug, sfield):
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     projects = request.user.get_authorized_projects()    
     for p in projects:
+        image_place_holder   = utils.get_image_placeholder_document(request.user,p)
         if p.slug == project_slug:
             result_list = []
             max_count = 10000
@@ -1043,6 +1044,7 @@ def editNoteCendari(request, note_id, project_slug):
     o['license'] = note.license or note.project.default_license
     o['history'] = reversion.get_unique_for_object(note)
     o['topics'] = [ta.topic for ta in o['note'].related_topics.all()]
+    o['image_place_holder'] =  utils.get_image_placeholder_document(request.user,note.project)
     o['sections'] = note.sections\
             .order_by('ordering', 'note_section_id')\
             .all()\
@@ -1103,6 +1105,8 @@ def editDocumentCendari(request, project_slug, document_id):
     o['object_type'] = 'document'
     o['object_id'] = document_id
     o['topic_type'] = 'NA'
+    o['image_place_holder'] =  utils.get_image_placeholder_document(request.user,o['document'].project)
+
     o['topics'] = (
         [ ta.topic for ta in o['document'].related_topics.all() ] +
         [ c.content_object for c in o['document'].citations.filter(content_type=ContentType.objects.get_for_model(main_models.Topic)) ])

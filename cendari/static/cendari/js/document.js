@@ -43,8 +43,6 @@ function viewImage(id)
 
 $(document).ready(function() 
 {
-	console.log('initializing scans :D ');
-
 	$('body').delegate( "a.scan", "click", function(event) {
     // $('a.scan').click(function(event) {
     	event.preventDefault();
@@ -60,7 +58,9 @@ $(document).ready(function()
 
 		$('a.btn-info').removeClass('btn-info');
 		$(this).addClass('btn-info');
-		viewImage(scan_id);
+		// viewImage(scan_id);
+
+		$('#scan-viewer').attr('src', this.getAttribute('href'));
     });
 
 
@@ -88,7 +88,7 @@ $(document).ready(function()
 				},
 				error: function(XMLHttpRequest, textStatus, errorThrown) { 
 					console.log("Error with status "+textStatus+":",errorThrown);
-					showErrorMessage(messages.transcript.error);
+					showErrorMessage(messages.scan.error);
 				} 
 			});
 		}
@@ -97,3 +97,6 @@ $(document).ready(function()
 
 });
 
+
+
+///cendari/emmanouil/scan/27/

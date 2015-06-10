@@ -172,6 +172,9 @@ cendaripatterns = patterns('cendari.views',
    url(r'^chat/', include('djangoChat.urls')),
    url(r'^cendari/(?P<project_slug>[-\w]+)/chat/$',                                       'cendari_chat',                         name='cendari_chat_view'),
 
+   #Cendari image browser
+   url(r'^cendari/(?P<project_slug>[-\w]+)/documents/(?P<document_id>\d+)/image_browse/$', 'image_browse',name='image_browse'),
+
 )
 
 urlpatterns += cendaripatterns
