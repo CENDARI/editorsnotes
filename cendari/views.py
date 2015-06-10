@@ -1269,7 +1269,27 @@ def rdfa_view_document(request, project_slug, document_id):
     return HttpResponse(semantic_rdfa(document, document.description))
     
 
+def image_browse(request,project_slug,document_id):
+    o = {}
+    user = request.user
+    if not user.is_authenticated():
+        raise PermissionDenied("anonymous access not allowed")
+    document = get_object_or_404(main_models.Document, id=document_id)
+    project = document.project
+    if project.slug!=project_slug:
+        raise PermissionDenied("Document %d does not belong to project %s"%(document_id,project_slug))
+    if not user.superuser_or_belongs_to(project):
+        raise PermissionDenied("not authorized on %s project" % project.slug)
 
+    o['document']       = document
+    o['project']        = document.project
+    o['object_type']    = 'document'
+    o['object_id']      = document_id
+    o['topic_type']     = 'NA'
+    o['scans']          = o['document'].scans.all()
+    o['project_slug']   = document.project.slug
+    return render_to_response(
+        'image_browser.html', o, context_instance=RequestContext(request))
 
 def cendari_chat(request, project_slug):
     return render_to_response('cendari_chat.html',dict(project_slug=project_slug))
