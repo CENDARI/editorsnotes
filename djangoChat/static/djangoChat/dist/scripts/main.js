@@ -4781,7 +4781,7 @@
         };
         return t
     }), define("text!templates/message.tmpl", [], function() {
-        return '<div class="signature" >\n		</div>\n	<div class="username"><%=user%></div>\n	<p class="clear-both"></p>\n</div>\n<div class="messages">\n	<div class="msg">\n		<%=msg%>\n	</div>\n</div>\n<p class="clear-both"></p>'
+        return '<div class="signature" >\n		</div>\n	<div class="username"><font color="#B8B8B8"><%=user%></font></div>\n	<p class="clear-both"></p>\n</div>\n<div class="messages">\n	<div class="msg">\n		<%=msg%>\n	</div>\n</div>\n<p class="clear-both"></p>'
     }), define("views/message", ["backbone", "underscore", "text!templates/message.tmpl"], function(e, t, n) {
         return e.View.extend({
             tagName: "div",
