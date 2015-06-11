@@ -27,7 +27,7 @@ function myFileBrowser (field_name, url, type, win) {
 		// (PHP session ID is now included if there is one at all)
 		cmsURL = cmsURL + "&type=" + type;
 	}
-	cmsURL = '/cendari/emmanouil/documents/'+image_place_holder_id+'/image_browse/';
+	cmsURL = '/cendari/'+cendari_js_project_slug+'/documents/'+image_place_holder_id+'/image_browse/';
 	console.log('cmsURL: ',cmsURL);
 	k = tinyMCE.activeEditor.windowManager.open({
 			file : cmsURL,

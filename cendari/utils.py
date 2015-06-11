@@ -57,6 +57,11 @@ def custom_exception_handler(exc):
 def get_all_active_topics_for_project(project):
     topics = set()
 
+    # for t in project.topics.all():
+
+    #     if len(t.get_related_notes())+ len(t.get_related_documents()) >0:
+    #         topics.append(t)
+
     for note in project.notes.all():
         topics.update(note.get_all_related_topics())
     for document in project.documents.all():

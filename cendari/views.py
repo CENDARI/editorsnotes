@@ -1272,10 +1272,19 @@ def rdfa_view_document(request, project_slug, document_id):
 def image_browse(request,project_slug,document_id):
     o = {}
     user = request.user
+
+
     if not user.is_authenticated():
         raise PermissionDenied("anonymous access not allowed")
     document = get_object_or_404(main_models.Document, id=document_id)
     project = document.project
+
+
+    print document
+    print document.project
+    print document.creator
+    print project.slug
+    print project_slug
     if project.slug!=project_slug:
         raise PermissionDenied("Document %d does not belong to project %s"%(document_id,project_slug))
     if not user.superuser_or_belongs_to(project):
