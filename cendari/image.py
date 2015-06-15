@@ -20,7 +20,7 @@ def scan_to_dict(scan):
     tile_length = 256
 
     return { 'document': scan.document_id,
-             'path': scan.image.name,
+             'path': scan.get_tiff_name(),
              'url': scan.image.url,
              'tiles': {"w": tile_width, "h": tile_length},
              'resolutions': res.count('] TIFF '),

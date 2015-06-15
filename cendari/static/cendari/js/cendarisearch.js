@@ -153,10 +153,11 @@ function buildTimeline(timelineData, element) {
         var td = timelineData[i];
 	if (td.doc_count == 0) {
 	    timelineData.splice(i, 1);
+	    i--;
 	    continue;
 	}
         td.date = new Date(td.key); // converts key to a proper date
-        td.value = Math.log10(1+td.doc_count);
+        td.value = Math.log(1+td.doc_count)/Math.LN10;
     }
     if (timelineData.length == 0) return;
     
