@@ -80,6 +80,7 @@ function create_form(schema,property,container){
 	console.log("schema = " + schema);
 	var tmp='';
 	var selected=all_schemas.types[schema];
+	console.log("NB, selected = " + selected);
 	var id;
 	// if it is the main schema
 	if(property==''){
