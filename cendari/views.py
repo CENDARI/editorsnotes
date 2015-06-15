@@ -1303,6 +1303,7 @@ def image_browse(request,project_slug,document_id):
     return render_to_response(
         'image_browser.html', o, context_instance=RequestContext(request))
 
+@login_required
 def cendari_chat(request, project_slug):
     return render_to_response('cendari_chat.html',dict(project_slug=project_slug))
 

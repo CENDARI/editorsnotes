@@ -397,7 +397,7 @@ class Scan(CreationMetadata, ProjectPermissionsMixin):
         return iipimage_storage.file_exists(self.get_tiff_path())
 
     def create_tiff_file(self):
-        iipimage_storage.create_tiff_file(self.image.path, get_tiff_path())
+        iipimage_storage.create_tiff_file(self.image.path, self.get_tiff_path())
 
     def save(self, *args, **kwargs):
         if self.image and not self.pk:
