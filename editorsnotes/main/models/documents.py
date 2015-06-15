@@ -394,7 +394,7 @@ class Scan(CreationMetadata, ProjectPermissionsMixin):
         return iipimage_storage.get_tiff_path(self.image.path)
 
     def tiff_file_exists(self):
-        return iipimage_storage.file_exists(get_tiff_path())
+        return iipimage_storage.file_exists(self.get_tiff_path())
 
     def create_tiff_file(self):
         iipimage_storage.create_tiff_file(self.image.path, get_tiff_path())
