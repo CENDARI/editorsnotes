@@ -42,9 +42,9 @@
   <script type="text/javascript">
 {% autoescape off %}
     new IIPMooViewer( "viewer", {
-	server: '{{ scan.server }}',
-	image: '{{ scan.image }}',
-	credit: '{{ scan.credit }}',
+	server: "{{ scan.server }}",
+	image: "{{ scan.image }}",
+	credit: "{{ scan.credit }}",
 	load: {{ scan.options }},
         prefix: '{% static "iipmooviewer/images/" %}',
         showNavWindow: false,

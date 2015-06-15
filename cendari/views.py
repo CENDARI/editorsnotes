@@ -173,6 +173,9 @@ class EditDocumentAdminView(DocumentAdminView):
 @login_required
 def scan(request, scan_id, project_slug):
     #print "scan view"
+     if not scan.tiff_file_exists():
+        scan.create_tiff_file()
+        raise PermissionDenied("Tiff file is being built, try again...")
     o = {}
     scan = get_object_or_404(main_models.Scan, id=scan_id)
     o['scan'] = scan
