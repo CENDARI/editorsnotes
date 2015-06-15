@@ -7,6 +7,50 @@ cendari.addInit = function(fn) {
 	cendari.init.push(fn);
 };
 
+
+function myFileBrowser (field_name, url, type, win) {
+
+	// alert("Field_Name: " + field_name + "nURL: " + url + "nType: " + type + "nWin: " + win); // debug/testing
+
+	/* If you work with sessions in PHP and your client doesn't accept cookies you might need to carry
+	the session name and session ID in the request string (can look like this: "?PHPSESSID=88p0n70s9dsknra96qhuk6etm5").
+	These lines of code extract the necessary parameters and add them back to the filebrowser URL again. */
+
+	var cmsURL = window.location.toString();    // script URL - use an absolute path!
+	if (cmsURL.indexOf("?") < 0) {
+		//add the type as the only query parameter
+		cmsURL = cmsURL + "?type=" + type;
+	}
+
+	else {
+		//add the type as an additional query parameter
+		// (PHP session ID is now included if there is one at all)
+		cmsURL = cmsURL + "&type=" + type;
+	}
+	cmsURL = '/cendari/'+cendari_js_project_slug+'/documents/'+image_place_holder_id+'/image_browse/';
+	console.log('cmsURL: ',cmsURL);
+	k = tinyMCE.activeEditor.windowManager.open({
+			file : cmsURL,
+			title : 'My File Browser',
+			width : 420,  // Your dimensions may differ - toy around with them!
+			height : 400,
+			resizable : "yes",
+			inline : "yes",  // This parameter only has an effect if you use the inlinepopups plugin!
+			close_previous : "no"
+		}, 
+		{
+			window : win,
+			input : field_name
+	});
+	console.log('response: ',k);
+	var win     = tinyMCEPopup.getWindowArg("window");
+	var input   = tinyMCEPopup.getWindowArg("input");
+	var res     = tinyMCEPopup.getWindowArg("resizable");
+	var inline  = tinyMCEPopup.getWindowArg("inline");
+
+	return false;
+}
+
 Ext.application({
 	name : 'CendariExt',
 	launch : function() {
@@ -20,21 +64,35 @@ Ext.application({
 			defaults : {
 				split : false
 			},
-			items : [{
-				region : 'west',
-				collapsible : true,
-				title : 'Resources',
-				split : true,
-				width : '22%',
-				layout : 'fit',
-				contentEl : 'west',
-				stateId : 'navigation-panel',
-				id : 'west-panel', // see Ext.getCmp() below
-				minWidth : 175,
-				autoScroll : true,
-				animCollapse : true,
-				margins : '0 0 0 2'
-			}, 
+			items : [
+				{
+					region:'west',
+					id:'west-panel',
+					title:'Resources',
+					split:true,
+					width: '22%',
+					minWidth : 175,					
+					collapsible: true,
+					margins : '0 0 0 2',
+					layout:'accordion',
+					layoutConfig:{
+					    animate:true
+					},
+					items: [{
+					    title:'Navigation',
+					    autoScroll:true,
+					    border:false,
+					    iconCls:'nav',
+					    contentEl : 'west'
+					},{
+					    title:'Chat',
+					    border:false,
+					    autoScroll:true,
+					    iconCls:'chat',
+					    contentEl : 'southWest'
+					}]	
+
+				}, 
 			{
 				region : 'center',
 				layout : 'border',
@@ -212,7 +270,7 @@ Ext.application({
 				// plugins : "style,table,noneditable,example,lists,advhr,advimage,advlink,iespell,inlinepopups,media,paste,directionality,noneditable,nonbreaking,wordcount,advlist,contextmenu,fullscreen,rdface",
 				plugins : "markcreativework,style,table,noneditable,example,lists,advhr,advimage,advlink,iespell,inlinepopups,media,paste,directionality,nonbreaking,wordcount,advlist,contextmenu,fullscreen,rdface,autolink,spellchecker,pagebreak,layer,save,emotions,insertdatetime,preview,searchreplace,print,fullscreen,visualchars,xhtmlxtras,template",
 				theme_advanced_buttons1 : "undo,redo,cut,copy,paste,fontsizeselect,bold,italic,underline,strikethrough,bullist,numlist,forecolor,backcolor, code,rdfaceHelp,rdfaceRun,rdfaceFacts,rdfaceSetting,markcreativework",//,
-				theme_advanced_buttons2 : "tablecontrols,|,link,unlink,anchor,|,justifyleft,justifycenter,justifyright,justifyfull,|,styleselect,formatselect,fontselect,fontsizeselect",
+				theme_advanced_buttons2 : "image,|,tablecontrols,|,link,unlink,anchor,|,justifyleft,justifycenter,justifyright,justifyfull,|,styleselect,formatselect,fontselect,fontsizeselect",
 				fullscreen_new_window : true,
 				width : "100%",
 				content_css : csspath + "content.css ," + csspath + "rdface.css, " + csspath + "schema_colors.css" ,
@@ -226,6 +284,9 @@ Ext.application({
 				//resize : true,
 				readonly : isReadOnly,
 				valid_elements : "*[*]",
+
+			    file_browser_callback : 'myFileBrowser',
+
 				setup: function (ed) {
 	                // Add a custom button
 	                ed.addButton('description', {
@@ -244,6 +305,9 @@ Ext.application({
 		
 	
 		}
+
+
+
 
 		function createEditor(height, domID, isReadOnly, editButtonID, labeltitle) {
 			var new_extension = 'can_edit';

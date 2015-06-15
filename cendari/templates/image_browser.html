@@ -1,0 +1,252 @@
+{% load static %}
+<head>
+
+    <style>
+        ul {
+            list-style-type: none;
+            padding: 0px;
+            margin: 0px;
+        }
+    </style>
+
+    <script type="text/javascript" src="{% static "RDFaCE0.6schema/tinymce/jscripts/tiny_mce/tiny_mce_popup.js" %}"></script>
+    <script type="text/javascript" src="{% static "function/jquery/jquery-1.8.2.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "cendari/js/toastr.min.js" %}"></script>
+
+    <!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
+    <script src="{% static "cendari/js/jquery_upload/js/vendor/jquery.ui.widget.js" %}"></script>
+    <!-- The Load Image plugin is included for the preview images and image resizing functionality -->
+    <script src="{% static "cendari/js/jquery_upload/js/load-image.all.min.js" %}"></script>
+
+    <!-- The Canvas to Blob plugin is included for image resizing functionality -->
+    <!--<script src="http://blueimp.github.io/JavaScript-Canvas-to-Blob/js/canvas-to-blob.min.js"></script> -->
+    <!-- Bootstrap JS is not required, but included for the responsive demo navigation -->
+    <!--<script src="http://netdna.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script> -->
+    <!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
+    <script src="{% static "cendari/js/jquery_upload/js/jquery.iframe-transport.js" %}"></script>
+    <!-- The basic File Upload plugin -->
+    <script src="{% static "cendari/js/jquery_upload/js/jquery.fileupload.js" %}"></script>
+    <!-- The File Upload processing plugin -->
+    <script src="{% static "cendari/js/jquery_upload/js/jquery.fileupload-process.js" %}"></script>
+    <!-- The File Upload image preview & resize plugin -->
+    <script src="{% static "cendari/js/jquery_upload/js/jquery.fileupload-image.js" %}"></script>
+    <!-- The File Upload audio preview plugin -->
+    <script src="{% static "cendari/js/jquery_upload/js/jquery.fileupload-audio.js" %}"></script>
+    <!-- The File Upload video preview plugin -->
+    <script src="{% static "cendari/js/jquery_upload/js/jquery.fileupload-video.js" %}"></script>
+    <!-- The File Upload validation plugin -->
+    <script src="{% static "cendari/js/jquery_upload/js/jquery.fileupload-validate.js" %}"></script>
+
+
+
+    <script type="text/javascript">
+        cendari_js_project_slug = '{{ project.slug }}'||'{{project_slug}}';
+        cendari_js_object_type = '{{object_type}}';
+        cendari_js_object_id = '{{object_id}}' || '';
+        cendari_js_topic_type = '{{topic_type}}' || '';
+        cendari_root_url = "{%url 'index_view' %}";
+    </script>
+
+    {% if document.id %}
+        <script>
+            $(function () {
+                'use strict';
+                // Change this to the location of your server-side upload handler:
+
+                function showToastrMessage(type,message){
+                    toastr.clear();
+                    toastr[type](message);
+                }
+
+                function showErrorMessage(message){
+                    toastr.options.timeOut="500";
+                    toastr.options.extendedTimeOut="1000";
+                    showToastrMessage('error',message);
+                }
+
+                function showSuccessMessage(message){
+                    toastr.options.timeOut="500";
+                    toastr.options.extendedTimeOut="1000";
+                    showToastrMessage('success',message);
+                }
+
+
+                function showWarningMessage(message){
+                    toastr.options.timeOut="5000";
+                    toastr.options.extendedTimeOut="10000";
+                    showToastrMessage('warning',message);
+                }
+
+                function showInfoMessage(message){
+                    toastr.options.timeOut="5000000000000000";
+                    toastr.options.extendedTimeOut="5000000000000000";
+                    showToastrMessage('info',message)
+                }
+
+
+                function createScanElement(image_url,thumbnail_url,id){
+                    var html = "";
+                    html += '<li class="scan-list-item btn">'+
+                            '<a class="scan" id="1" href="'+image_url+'">'+
+                            '<img id="ext-gen1206" class = "img" src="'+thumbnail_url+'" alt="Thumbnail of scan 1" width="100"></a>'+
+                            '<a href="'+cendari_root_url+'api/projects/'+cendari_js_project_slug+'/documents/'+cendari_js_object_id+'/scans/'+id+'/" class="delete" data-confirm="Are you sure to delete this item?"><img src="'+cendari_root_url+'static/cendari/img/fileclose.png"></a>'+
+                            '</li>';
+                    return html;
+                    
+
+                }
+
+                var url ="{% url "api:api-scans-list" project_slug=project.slug  document_id=document.id %}"
+                $('#id_image').fileupload({
+                    url: url,
+                    dataType: 'json',
+                    autoUpload: false,
+                    acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
+                    maxFileSize: 5000000, // 5 MB
+                    disableImageResize: /Android(?!.*Chrome)|Opera/
+                    .test(window.navigator.userAgent),
+                    previewMaxWidth: 100,
+                    previewMaxHeight: 100,
+                    previewCrop: true,
+                    submit: function(e,data){
+                        showInfoMessage('uploading images ...');
+                    },
+                    done: function (e, data) {
+                        showSuccessMessage('images were uploaded');
+                        var scan_el = createScanElement(data.result.image_url,data.result.image_thumbnail_url,data.result.id);
+                        $('#scan-list').append(scan_el);
+                        $('#scansTab').text('Scans ('+$('#scan-list li').size()+')');
+                    },
+                    fail: function(e,data){
+                        showErrorMessage('an error occured ....')
+                    }
+                }).on('fileuploadadd', function (e, data) {
+                    data.context = $('<div/>').prepend('#files');
+                    $.each(data.files, function (index, file) {
+                        data.submit()
+                    });
+
+                })
+            });
+        </script>
+    {% endif %}
+    <!-- more scripts here... -->
+    <script type="text/javascript">
+        myInitFunction = function () {
+            // ensure window title in inlinepopups
+            var obj; 
+            var inlinepopups = false; 
+            for (obj in tinyMCE.selectedInstance.plugins){
+                if (tinyMCE.selectedInstance.plugins[obj] == "inlinepopups"){
+                    inlinepopups = true;
+                }
+            }
+
+            if (inlinepopups){
+                tinyMCE.setWindowTitle(window, document.getElementsByTagName("title")[0].innerHTML);
+            }
+        }
+
+        $( document ).ready(function() {
+
+            var toastr_options = {
+                "closeButton": true,
+                "debug": false,
+                "newestOnTop": true,
+                "progressBar": false,
+                "positionClass": "toast-top-center",
+                "preventDuplicates": true,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "5000000000000000",
+                "extendedTimeOut": "5000000000000000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            }
+            toastr.options = toastr_options;
+
+            $('.scan').click(function(e){
+                var selectedImage = $(this).attr('src');
+                var win = tinyMCEPopup.getWindowArg("window");
+                var dialogueBoxObject = win.document.getElementById(tinyMCEPopup.getWindowArg("input")).value = selectedImage;
+            });
+
+            $('body').delegate( "a.scan", "click", function(event) {
+                event.preventDefault();
+                var selectedImage =  $(this).attr('href');
+                var win = tinyMCEPopup.getWindowArg("window");
+                var dialogueBoxObject = win.document.getElementById(tinyMCEPopup.getWindowArg("input")).value = selectedImage;
+
+                console.log('selectedImage: ',selectedImage);
+                // close popup window
+                tinyMCEPopup.close();
+            });
+
+            $( "body" ).delegate('.delete','click',function(event){
+                event.preventDefault();
+                var choice = confirm(this.getAttribute('data-confirm'));
+                if (choice) {
+                    var li_jq = $($(this).parent());
+
+                    var formData ="csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[0].value+"&_method=DELETE";
+                    $.ajax({
+                        // beforeSend: function (xhr) {xhr.setRequestHeader('X-CSRFToken', $('input[name="csrfmiddlewaretoken"]').val());},
+                        url:this.getAttribute('href'),
+                        type: 'POST',
+                        data: formData,
+                        success: function(data){
+                            li_jq.remove();
+                            $('#scansTab').text('Scans ('+$('#scan-list').find('li').size()+')')
+                        },
+                        error: function(XMLHttpRequest, textStatus, errorThrown) { 
+                            console.log("Error with status "+textStatus+":",errorThrown);
+                            showErrorMessage(messages.transcript.error);
+                        } 
+                    });
+                }
+
+            })
+
+        });
+
+    </script>
+</head>
+<body onload="tinyMCEPopup.executeOnLoad('myInitFunction();');">
+    <!-- your template's HTML body here -->
+
+    <form  action="{% url "api:api-scans-list" project_slug=project.slug  document_id=document.id %}" method="POST" enctype="multipart/form-data" id="scanCendari">
+        <fieldset>
+            {% csrf_token %}
+            <input id="id_image" name="image" type="file" multiple/>
+            <div class="control-group ">
+                <label for="ordering"  style="visibility: hidden;" class="control-label">ordering:</label>
+                <div class="controls">
+                    <input name="ordering" type="hidden" value="0" />
+                </div>
+            </div>
+        </fieldset>
+    </form>
+    <div id="scanlist-container">
+        <ul id="scan-list">
+            {% if scans %}
+                {% for scan in scans %}
+                <li class='scan-list-item btn'>
+
+                    <a class="scan" id="{{scan.id}}" href="{{ scan.image.url }}">
+                        <img src="{{scan.image_thumbnail.url}}" width=100 alt="Thumbnail of scan {{scan.id}}">
+                    <!-- {{ forloop.counter }} -->
+                     
+                    </a>
+                    <a href="{% url "api:api-scans-detail" project_slug=project.slug  document_id=document.id scan_id=scan.id  %}" class="delete" data-confirm="Are you sure to delete this scan?"><img src="{% static "cendari/img/fileclose.png" %}"></a>
+
+                </li>
+                {% endfor %}
+            {% endif %}
+        </ul>
+    </div>
+    
+</body>

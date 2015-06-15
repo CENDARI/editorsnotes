@@ -57,7 +57,10 @@
 			// console.log("NB cendaribase.html*********** cendari_js_object_id is "+cendari_js_object_id);
 			// console.log("NB cendaribase.html*********** cendari_js_topic_type is "+cendari_js_topic_type);
 		    cendari_root_url = "{%url 'index_view' %}";
-
+		    image_place_holder_id = -1;
+		    {% if  image_place_holder %}
+		    	image_place_holder_id = {{image_place_holder.id}} 
+		    {% endif %}  
 		    editors_crc32 = {}
 </script>
 
@@ -98,6 +101,7 @@
 	<script type="text/javascript" src="{% static "RDFaCE0.6schema/tinymce/jscripts/tiny_mce/plugins/rdface/js/util/functions.js" %}"></script>
 	<script type="text/javascript" src="{% static "RDFaCE0.6schema/tinymce/jscripts/tiny_mce/tiny_mce.js" %}"></script>
 	<script type="text/javascript" src="{% static "RDFaCE0.6schema/tinymce/jscripts/tiny_mce/tiny_mce_gzip.js" %}"></script>
+
 
 <!-- tracing library -->
 	<!-- script type="text/javascript" src="{% static "tracing/trace_test_130529.js" %}"></script-->			

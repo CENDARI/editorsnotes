@@ -250,12 +250,8 @@ reversion.register(Document)
 # Cendari code E.G. aviz
 def get_or_create_document(user,project,description):
 
-    documents = Document.objects.all()
+    documents = Document.objects.filter(project=project)
     for document in documents:
-        print document.as_text()
-        print description
-        print document.as_text() == description
-        print '___________________________________'
         if document.as_text() == description:
             return document
 

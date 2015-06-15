@@ -28,7 +28,6 @@ urlpatterns = patterns('',
 
 # Auth patterns
 urlpatterns += patterns('',
-    url(r'^accounts/login/$', 'django.contrib.auth.views.login', { 'redirect_field_name': 'return_to' },name='user_login_view'),
     url(r'^accounts/logout/$', 'editorsnotes.main.views.auth.user_logout', name='user_logout_view'),
     url(r'^accounts/profile/$', 'editorsnotes.main.views.auth.user'),
     url(r'^accounts/profile/feedback/$', 'editorsnotes.main.views.auth.user_feedback', name='user_feedback_view'),
@@ -168,6 +167,14 @@ cendaripatterns = patterns('cendari.views',
     url(r'^cendari/(?P<project_slug>[-\w]+)/search/$',                                          'search',                            name='cendari_search_view'),
     url(r'^cendari/faceted/$', 'faceted_search', name='cendari_faceted_search_view'),
     url(r'^cendari/(?P<project_slug>[-\w]+)/faceted/$', 'faceted_search', name='cendari_faceted_search_view'),
+
+   # Cendari chat
+   url(r'^chat/', include('djangoChat.urls')),
+   url(r'^cendari/(?P<project_slug>[-\w]+)/chat/$',                                       'cendari_chat',                         name='cendari_chat_view'),
+
+   #Cendari image browser
+   url(r'^cendari/(?P<project_slug>[-\w]+)/documents/(?P<document_id>\d+)/image_browse/$', 'image_browse',name='image_browse'),
+
 )
 
 urlpatterns += cendaripatterns

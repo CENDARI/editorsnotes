@@ -117,14 +117,17 @@
 
 				<label class="editorlabel bold">  Description: 	</label> 
 
-				<section data-error-target="content">
-					<input  type="text" id="entity_description" name="entity_description" value="{%if topic.id%}{{ topic.summary|as_text }}{%endif%}"/>
+				<section data-error-target="content">					
+					<textarea name="entity_description" id="entity_description" cols="40" rows="5">{%if topic.id%}{{ topic.summary|as_text }}{%endif%}</textarea>
 				</section>
 
 				{% if topic.topic_node.type == 'EVT' %}
+
 				<label class="editorlabel bold"> Date:</label> 
+				
+				
 				<section data-error-target="content">
-					<input  type="date" id="date_id" name="date" value="{%if topic.date%}{{ topic.date }}{%endif%}"/>
+					<input  type="date" id="date_id" name="date" value="{%if topic.id%}{{ topic.date }}{%endif%}"/>
 				</section>
 				{%endif%}
 

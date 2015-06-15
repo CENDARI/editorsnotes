@@ -173,6 +173,9 @@ class EditDocumentAdminView(DocumentAdminView):
 @login_required
 def scan(request, scan_id, project_slug):
     #print "scan view"
+     if not scan.tiff_file_exists():
+        scan.create_tiff_file()
+        raise PermissionDenied("Tiff file is being built, try again...")
     o = {}
     scan = get_object_or_404(main_models.Scan, id=scan_id)
     o['scan'] = scan
@@ -566,6 +569,7 @@ def getLazyProjectData(request, project_slug, sfield):
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     projects = request.user.get_authorized_projects()    
     for p in projects:
+        image_place_holder   = utils.get_image_placeholder_document(request.user,p)
         if p.slug == project_slug:
             result_list = []
             max_count = 10000
@@ -615,6 +619,9 @@ def getLazyProjectData(request, project_slug, sfield):
 @login_required
 def getTopicResources(request, project_slug, sfield):
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
+
+    project = Project.objects.filter(slug=project_slug)[0]
+
     max_count = 10000
     topic_count = 0
     topic_list = []
@@ -644,9 +651,16 @@ def getTopicResources(request, project_slug, sfield):
 	    #o_query_set = sorted(query_set, key=operator.attrgetter('preferred_name'))              
         set_count = o_query_set.count()
         topic_count += 1
+        active_topics = utils.get_all_active_topics_for_project(project)
+
         for e in o_query_set:
             #to make sure both url and node key have the same topic_id (when a topic exists in multiple probjects)
             #my_list.append({'title':str(e), 'key':str(project_slug)+'.topic.'+str(e.id), 'url':e.get_absolute_url()})
+
+            if not e in active_topics:
+                set_count -=1
+                continue
+
             url_parts = e.get_absolute_url().split('/')
             topic_id_index = len(url_parts) - 2
             topic_id = url_parts[topic_id_index];
@@ -819,13 +833,28 @@ def faceted_search(request,project_slug=None):
       and request.GET['selected_facets']:
         facets=request.GET.getlist('selected_facets')
         for facet in facets:
-            (facet,value) =facet.split(':')
+            values =facet.split(':')
+            facet = values[0]
+            values = values[1:]
             if facet in terms:
-                terms[facet].append(value)
+                terms[facet] += values
             else:
-                terms[facet] = [value]
+                terms[facet] = values
         #TODO use date and location filters when appropriate
         filter_terms += [{"terms": {key: val}} for (key, val) in terms.items()]
+
+    precision = 2
+    if 'bounds' in request.GET:
+        bounds=map(float, request.GET['bounds'].split(','))
+        if len(bounds)>4:
+            precision = bounds[4]
+        filter_terms += [{"geo_bounding_box" :
+                          {"location": {
+                              "top_left": ', '.join(map(str, bounds[:2])),
+                                  "bottom_right": ', '.join(map(str, bounds[2:4]))
+                              }
+                          }
+                        }]
 
     buckets = {}
     if 'show_facets' in request.GET \
@@ -847,12 +876,12 @@ def faceted_search(request,project_slug=None):
     # because aggregation use the result of the query
     # and ignore the filter alone
     q = {'query': { 'filtered': q } }
-    q['fields'] = ['uri']
+    q['fields'] = ['uri', 'title']
     size = int(request.GET.get('size', 50))
     q['size'] = size
     frm = int(request.GET.get('from', 0))
     q['from'] = frm
-    q['aggregations'] = cendari_aggregations(size=buckets)#, precision=(2 if query=='' else 3))
+    q['aggregations'] = cendari_aggregations(size=buckets, precision=precision)
     #pprint.pprint(q)
     results = cendari_index.search(q, highlight=True, size=size)
     # with open('res.log', 'w') as out:
@@ -875,6 +904,13 @@ def faceted_search(request,project_slug=None):
             info = { 'uri': h['fields']['uri'][0], 
                      'highlight': highlight }
             res.append(info)
+        elif 'title' in h['fields']:
+            info = { 'uri': h['fields']['uri'][0], 
+                     'highlight': h['fields']['title'] }
+            res.append(info)
+        else:
+            info = { 'uri': h['fields']['uri'][0], 
+                     'highlight': '' }
 
     facets = results['aggregations']
     cardinalities = []
@@ -890,12 +926,6 @@ def faceted_search(request,project_slug=None):
             details['value_count'] = len(details['buckets'])
         else:
             details['value_count'] = len(details['buckets'])
-            # copy key_as_string in key for dates since
-            # we don't care about the integer values
-            for b in details['buckets']:
-                if 'key_as_string' in b:
-                    b['key'] = b['key_as_string']
-                    del b['key_as_string']
 
     for c in cardinalities:
         del facets[c]
@@ -995,6 +1025,7 @@ class EntityCendari(TopicAdminView):
     
 def editNoteCendari(request, note_id, project_slug):
     o = {}
+    user = request.user
     qs = main_models.Note.objects.select_related('license', 'project__default_license').prefetch_related('related_topics')
     note = get_object_or_404(qs, id=note_id, project__slug=project_slug)
     if note.is_private:
@@ -1016,6 +1047,7 @@ def editNoteCendari(request, note_id, project_slug):
     o['license'] = note.license or note.project.default_license
     o['history'] = reversion.get_unique_for_object(note)
     o['topics'] = [ta.topic for ta in o['note'].related_topics.all()]
+    o['image_place_holder'] =  utils.get_image_placeholder_document(request.user,note.project)
     o['sections'] = note.sections\
             .order_by('ordering', 'note_section_id')\
             .all()\
@@ -1076,6 +1108,8 @@ def editDocumentCendari(request, project_slug, document_id):
     o['object_type'] = 'document'
     o['object_id'] = document_id
     o['topic_type'] = 'NA'
+    o['image_place_holder'] =  utils.get_image_placeholder_document(request.user,o['document'].project)
+
     o['topics'] = (
         [ ta.topic for ta in o['document'].related_topics.all() ] +
         [ c.content_object for c in o['document'].citations.filter(content_type=ContentType.objects.get_for_model(main_models.Topic)) ])
@@ -1176,8 +1210,26 @@ def editEntityCendari(request, project_slug, topic_node_id):
                                    if topic['url'] != request.path))
             note_objects[note['id']] = (note_objects[note['id']], related_topics,)
     # o['notes'] = note_objects.values()
-    o['documents'] = topic.get_related_documents()
-    o['notes'] = topic.get_related_notes()
+    
+
+
+    o['documents']  = []
+    o['notes']      = []
+
+
+
+    for d in topic.get_related_documents():
+        if d.project in request.user.get_affiliated_projects():
+            o['documents'].append(d)
+
+    for n in topic.get_related_notes():
+        if n.project in request.user.get_affiliated_projects():
+            o['notes'].append(n)
+
+    # o['documents']  = topic.get_related_documents()
+    # o['notes']      = topic.get_related_notes()
+
+
     return render_to_response(
         'entityCendariEdit.html', o, context_instance=RequestContext(request))
 
@@ -1219,3 +1271,39 @@ def rdfa_view_document(request, project_slug, document_id):
         raise PermissionDenied("not authorized on %s project" % project.slug)
     return HttpResponse(semantic_rdfa(document, document.description))
     
+
+def image_browse(request,project_slug,document_id):
+    o = {}
+    user = request.user
+
+
+    if not user.is_authenticated():
+        raise PermissionDenied("anonymous access not allowed")
+    document = get_object_or_404(main_models.Document, id=document_id)
+    project = document.project
+
+
+    print document
+    print document.project
+    print document.creator
+    print project.slug
+    print project_slug
+    if project.slug!=project_slug:
+        raise PermissionDenied("Document %d does not belong to project %s"%(document_id,project_slug))
+    if not user.superuser_or_belongs_to(project):
+        raise PermissionDenied("not authorized on %s project" % project.slug)
+
+    o['document']       = document
+    o['project']        = document.project
+    o['object_type']    = 'document'
+    o['object_id']      = document_id
+    o['topic_type']     = 'NA'
+    o['scans']          = o['document'].scans.all()
+    o['project_slug']   = document.project.slug
+    return render_to_response(
+        'image_browser.html', o, context_instance=RequestContext(request))
+
+def cendari_chat(request, project_slug):
+    return render_to_response('cendari_chat.html',dict(project_slug=project_slug))
+
+

@@ -43,13 +43,13 @@ def cendari_filter(user=None,project_slugs=None):
         ]
     return filter
 
-def cendari_aggregations(size={},default_size=10,precision=3):
+def cendari_aggregations(size={},default_size=10,precision=2,interval='1y'):
     aggs = {
         'date': {
             "date_histogram" : {
                 "field" : "date",
-                "interval" : "year",
-                "format" : "yyyy"
+                "interval" : interval,
+                #"format" : "yyyy"
             }
         },
         'location': {
@@ -65,7 +65,8 @@ def cendari_aggregations(size={},default_size=10,precision=3):
         aggs[facet] = {
             "terms": {
                 "field": facet,
-                "size": s
+                "size": s,
+                "min_doc_count": 0
             }
         }
         aggs[facet+'_cardinality'] = { 

@@ -260,7 +260,8 @@
 		
 
 		$(document).ready(function(){
-			 $('#scanCendari').submit(function(e) { 
+			$('#document_content').find('img').each(function(){this.src= this.src.replace('http://'+document.location.host+'/cendari','')})
+			$('#scanCendari').submit(function(e) { 
 			    e.preventDefault();
 			    $(this).ajaxSubmit(); 
 			    // return false to prevent normal browser submit and page navigation 

@@ -269,6 +269,7 @@
 
 
 		$(document).ready(function(){
+			$('#note_content').find('img').each(function(){this.src= this.src.replace('http://'+document.location.host+'/cendari','')})
 			$('#note_toc').toc({content: "#note_content", headings: "h1,h2,h3,h4,h5,h6"});
 			if( $('#note_toc li').length >0)	{
 				$('.visibilityToc').on('click',function(e){
