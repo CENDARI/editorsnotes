@@ -88,7 +88,7 @@
                 function createScanElement(image_url,thumbnail_url,id){
                     var html = "";
                     html += '<li class="scan-list-item btn">'+
-                            '<a class="scan" id="1" href="'+image_url+'">'+
+                            '<a class="scan" id="'+id+'" href="'+image_url+'">'+
                             '<img id="ext-gen1206" class = "img" src="'+thumbnail_url+'" alt="Thumbnail of scan 1" width="100"></a>'+
                             '<a href="'+cendari_root_url+'api/projects/'+cendari_js_project_slug+'/documents/'+cendari_js_object_id+'/scans/'+id+'/" class="delete" data-confirm="Are you sure to delete this item?"><img src="'+cendari_root_url+'static/cendari/img/fileclose.png"></a>'+
                             '</li>';
@@ -148,6 +148,15 @@
             }
         }
 
+
+        getImageUrl=function(id) {
+            console.log('id',id);
+
+            if (id == null)
+                return '';
+            return cendari_root_url+'cendari/'+cendari_js_project_slug+'/scan/'+id+'/image'
+        }
+
         $( document ).ready(function() {
 
             var toastr_options = {
@@ -169,19 +178,12 @@
             }
             toastr.options = toastr_options;
 
-            $('.scan').click(function(e){
-                var selectedImage = $(this).attr('src');
-                var win = tinyMCEPopup.getWindowArg("window");
-                var dialogueBoxObject = win.document.getElementById(tinyMCEPopup.getWindowArg("input")).value = selectedImage;
-            });
-
             $('body').delegate( "a.scan", "click", function(event) {
                 event.preventDefault();
-                var selectedImage =  $(this).attr('href');
+                var scan_id = this.getAttribute('id');
                 var win = tinyMCEPopup.getWindowArg("window");
-                var dialogueBoxObject = win.document.getElementById(tinyMCEPopup.getWindowArg("input")).value = selectedImage;
+                var dialogueBoxObject = win.document.getElementById(tinyMCEPopup.getWindowArg("input")).value = getImageUrl(scan_id);
 
-                console.log('selectedImage: ',selectedImage);
                 // close popup window
                 tinyMCEPopup.close();
             });
