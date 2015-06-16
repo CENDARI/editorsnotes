@@ -260,7 +260,7 @@
 		
 
 		$(document).ready(function(){
-			$('#document_content').find('img').each(function(){this.src= this.src.replace('http://'+document.location.host+'/cendari','')})
+			$('#document_content').find('img').each(function(){this.src= this.src.replace('http://'+document.location.host,'').replace('documents/','')})			
 			$('#scanCendari').submit(function(e) { 
 			    e.preventDefault();
 			    $(this).ajaxSubmit(); 

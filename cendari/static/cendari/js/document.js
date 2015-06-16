@@ -58,9 +58,9 @@ $(document).ready(function()
 
 		$('a.btn-info').removeClass('btn-info');
 		$(this).addClass('btn-info');
-		// viewImage(scan_id);
+		viewImage(scan_id);
 
-		$('#scan-viewer').attr('src', this.getAttribute('href'));
+		// $('#scan-viewer').attr('src', this.getAttribute('href'));
     });
 
 
