@@ -4846,7 +4846,7 @@
     }), define("collections/messages", ["backbone", "models/message"], function(e, t) {
         return Messages = e.Collection.extend({
             model: t,
-            url: "/chat/api/"
+            url: cendari_root_url+"chat/api/"
         }), Messages
     }), define("text!templates/user.tmpl", [], function() {
         return '<div class="s_avatar">\n	<img src="<%= gravatar %>" width="32px" height="32px" />\n</div>\n<div class="s_username">\n	<a href="#"><%= username %></a>\n</div>\n<p class="clear-both"></p>'
@@ -4879,7 +4879,7 @@
         return Backbone.Model.extend({})
     }), define("collections/users", ["backbone", "models/user"], function(e, t) {
         return e.Collection.extend({
-            url: "/chat/api/users/",
+            url: cendari_root_url+"chat/api/users/",
             model: t
         })
     }), require.config({
@@ -4909,7 +4909,7 @@
         }), console.log("users fetched")
     }, 3e4), require(["jquery"], function(e) {
         setInterval(function() {
-            e.get("/chat/api/users/update/", function(e) {
+            e.get(cendari_root_url+"chat/api/users/update/", function(e) {
                 console.log("updated")
             })
         }, 3e4)
