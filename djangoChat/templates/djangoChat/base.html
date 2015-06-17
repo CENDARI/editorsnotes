@@ -7,6 +7,12 @@
     <link rel="stylesheet" type="text/css" href="{% static "djangoChat/css/normalize.css" %}"/>
     <link rel="stylesheet" type="text/css" href="{% static "djangoChat/css/main.css" %}"/>
     <script data-main="{% static "djangoChat/dist/scripts/main" %}" type="text/javascript" src="{% static "djangoChat/dist/scripts/vendor/requirejs/require.js" %}" ></script>
+
+    <script type="text/javascript">
+      cendari_root_url = "{%url 'index_view' %}";
+    </script>
+
+
   </head>
   <body>
     {% block body %}
