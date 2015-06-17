@@ -194,7 +194,7 @@ def scan_image(request, scan_id, project_slug):
     scan = get_object_or_404(main_models.Scan, id=scan_id)
     if scan.document.project.slug != project_slug:
         raise PermissionDenied("not authorized on %s project" % project_slug)
-    return sendfile(request, scan.image.path)
+    return sendfile(request, os.path.abspath(scan.image.path))
 
 @login_required
 def scan_tiffimage(request, scan_id, project_slug):
