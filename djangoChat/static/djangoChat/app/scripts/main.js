@@ -36,7 +36,7 @@ setInterval(function(){
 require(['jquery'],function($){
 
 	setInterval(function(){
-		$.get( "/chat/api/users/update/", function( data ) {
+		$.get( cendari_root_url+"chat/api/users/update/", function( data ) {
 		console.log("updated");
 	});
 	},30000);
