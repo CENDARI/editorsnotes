@@ -80,7 +80,6 @@ function create_form(schema,property,container){
 	console.log("schema = " + schema);
 	var tmp='';
 	var selected=all_schemas.types[schema];
-	console.log("NB, selected = " + selected);
 	var id;
 	// if it is the main schema
 	if(property==''){
@@ -101,7 +100,25 @@ function create_form(schema,property,container){
 		tmp=tmp+'</div>';
 		tmp=tmp+'</div>';
 		$('#form_'+id).append(tmp);
-		FBSuggest(schema);
+		// freebase is no longer supported, here it is replaced with jQuery autocomplete 
+		// FBSuggest(schema);
+		 var dummyList = [
+               		"a",
+			"ab",
+               		"b",
+			"c",
+			"cd",
+			"d"
+            	]; 
+		$( "#entity_freebase" ).autocomplete({
+  			source: dummyList,	
+			minLength: 1,		 
+			select: function( event, ui ) {
+        			console.log( ui.item ?
+          			"Selected: " + ui.item.value + " aka " + ui.item.id :
+          			"Nothing selected, input was " + this.value );
+      			}
+		});
 		$('#entity_freebase').mouseover(function() {
 			   $('#entity_freebase').tooltip({
 			        placement : 'right',
