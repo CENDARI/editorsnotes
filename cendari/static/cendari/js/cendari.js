@@ -297,9 +297,19 @@ Ext.application({
 	                    }
 	                });
 	                ed.onInit.add(function(ed) {
-			          console.log('Editor is done: ',ed);
-			          editors_crc32[ed.id] = CRC32(tinyMCE.getInstanceById(ed.id).getContent());
+			          	console.log('Editor is done: ',ed);
+			          	editors_crc32[ed.id] = CRC32(tinyMCE.getInstanceById(ed.id).getContent());
 				    });
+					// ed.onLoadContent.add(function(ed, o) {
+					// 	// Output the element name
+					// 	$(document).ready(function(){
+					// 		params = getQueryParams(document.location.search);
+					// 	    if(params.hasOwnProperty('entity')){
+					// 	        findEntity(params['entity']);
+					// 	    }
+					// 	})
+						
+					// });
             	}
 			});
 		
@@ -433,6 +443,65 @@ Ext.application({
 		});
 	}
 });
+
+
+function findEntity(entity_name){
+    var found = false;
+    var editor = undefined;
+    var nodes = [];
+    console.log('looking for: ',entity_name);
+    console.log('tinyMCE editors: ',tinyMCE.editors);
+    for(var i=0 ; i<tinyMCE.editors.length;i++){
+        editor = tinyMCE.editors[i];
+        nodes = editor.dom.select('span.r_entity');
+        for(j=0; j <nodes.length; j++){
+            console.log('textContent',nodes[j].textContent);
+            console.log('entity_name',entity_name);
+            if(nodes[j].textContent === entity_name){
+                if(editor.editorId === 'transcript-description'){
+                	console.log($('#tab2'));
+                    console.log($('#tab2').trigger('click'));
+                }
+                editor.selection.select(nodes[j]);
+                nodes[j].scrollIntoView()
+                console.log('Found!!!');
+                found = true;
+                break;
+            }
+            if(found){
+                break;
+            }
+        }
+    }
+}
+
+function getQueryParams(qs) {
+    qs = qs.split('+').join(' ');
+
+    var params = {},
+        tokens,
+        re = /[?&]?([^=]+)=([^&]*)/g;
+
+    while (tokens = re.exec(qs)) {
+        params[decodeURIComponent(tokens[1])] = decodeURIComponent(tokens[2]);
+    }
+
+    return params;
+}
+
+
+
+var everythingLoaded = setInterval(function() {
+  if (/loaded|complete/.test(document.readyState)) {
+    clearInterval(everythingLoaded);
+    // init(); // this is the function that gets called when everything is loaded
+    console.log('EVERYTHING IS LOADED!!!!');
+    params = getQueryParams(document.location.search);
+    if(params.hasOwnProperty('entity')){
+        findEntity(params['entity']);
+    }
+  }
+}, 10);
 
 function switchtabs(noOfTabs, type)
 {

@@ -450,7 +450,6 @@ function submitEntity(fc){
     });
 }
 
-
 $(document).ready(function(){
     var csrftoken = getCookie('csrftoken');    
     toastr.options = toastr_options
@@ -490,182 +489,17 @@ $(document).ready(function(){
 });
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/** deprecated 
-$(document).ready(function(){
-    var csrftoken = getCookie('csrftoken');
-    if(cendari_js_object_type === 'note' || cendari_js_object_type==='document'){
-        main_editor_crc32 = CRC32($('#'+cendari_js_object_type+'-description').text())
-        if(cendari_js_object_type === 'document'){
-            transcript_editor_crc32 = CRC32($('#transcript-description').text());   
-        }
+function setCaretPosition(ctrl, pos){
+ 
+    if(ctrl.setSelectionRange){
+        ctrl.focus();
+        ctrl.setSelectionRange(pos,pos);
     }
-    
-    
-    toastr.options = {
-        "closeButton": true,
-        "debug": false,
-        "newestOnTop": true,
-        "progressBar": false,
-        "positionClass": "toast-top-center",
-        "preventDuplicates": true,
-        "onclick": null,
-        "showDuration": "300",
-        "hideDuration": "1000",
-        "timeOut": "5000",
-        "extendedTimeOut": "1000",
-        "showEasing": "swing",
-        "hideEasing": "linear",
-        "showMethod": "fadeIn",
-        "hideMethod": "fadeOut"
+    else if (ctrl.createTextRange) {
+        var range = ctrl.createTextRange();
+        range.collapse(true);
+        range.moveEnd('character', pos);
+        range.moveStart('character', pos);
+        range.select();
     }
-
-    $('.formCendari').submit(function(e){
-        e.preventDefault();
-        
-        // if(tinyMCE.activeEditor!=null){
-        //     tinyMCE.activeEditor.save();
-        // }
-        if(id.length>0){
-            if(tinyMCE.getInstanceById(cendari_js_object_type'-description')){}
-
-        }
-
-        for (var edId in tinyMCE.editors){
-            if(tinyMCE.editors[edId]!=null){
-                tinyMCE.editors[edId].save();
-            }
-        }
-
-        var fc = $(this);
-        // console.log("form object is:");
-        // console.log(fc);
-        var model = "" // <<<<====
-        var type  = "none"
-        formData = "";
-        formData = formData+"csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&";
-        if($('#model_id').length){
-            formData=formData+"id="+$('#model_id').val()+"&";
-        }
-        if($('#note_title').length){
-            type = 'note';
-            formData =formData +'title='+$('#note_title').val()+"&related_topics=&status=open&is_private=false&";
-            if(tinyMCE.activeEditor!=null){
-                formData = formData+"content="+encodeURIComponent(tinyMCE.getInstanceById('note-description').getContent())+"&";
-            }        
-        }
-        if($('#document-description').length){
-            type = 'document';
-            if(tinyMCE.activeEditor!=null){
-                formData = formData+"&description="+encodeURIComponent(tinyMCE.getInstanceById('document-description').getContent())+"&";
-            }        
-        }
-        // if($('#transcript-description').length){
-        //     formData =formData +'document='+encodeURIComponent($('#transcript-document').val())+'&creator='+$('#transcript-creator').val()+'&last_uploader='+$('#transcript-uploader').val()+'&';
-        //     if(tinyMCE.activeEditor!=null){
-        //         formData = formData+"&content="+encodeURIComponent(tinyMCE.activeEditor.getContent())+"&";
-        // }        
-        
-        
-         if($('#rdf_id').length){
-            type = 'entity';
-            formData = formData + "rdf="+$('#rdf_id').val().trim()+"&";
-            formData = formData + "preferred_name="+$('#preferred_name_id').text().trim()+"&";
-         }
-
-        formData = formData+$("#saveButton").attr('name')+"="+$("#saveButton").val();
-
-        // var formData = fc.serialize()+"&"+$("#saveButton").attr('name')+"="+$("#saveButton").val();
-        // var formData = $("#saveButton").attr('name')+"="+$("#saveButton").val()+"&csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&_content_type=application/json&_content="+encodeURIComponent(content)
-        console.log("formData are : \n: "+formData);    
-        $.ajax({
-        // beforeSend: function (xhr) {xhr.setRequestHeader('X-CSRFToken', $('input[name="csrfmiddlewaretoken"]').val());},
-            url:fc.attr('action'),
-            type: fc.attr('method'),
-            data: formData,
-            // content_type:'application/json',
-            beforeSend:function(){
-                // addMessage('message-list',messages[type].beforeSend,messages[type].id);
-                console.log("saving ....")
-                toastr['info'](messages[type].beforeSend)
-            },
-            success: function(data){
-                console.log("response data:",data);
-                
-                toastr['success'](messages[type].success)
-                console.log(type);
-                console.log(type==='document');
-                console.log(type==='note');
-
-                if(type.length>0 && (type==='document' || type==='note')){
-                    updatedEnitiesTab(type,data.related_topics);
-                }
-
-                if($('#document-description').length){
-                    submitTranscript(data.id);
-                }
-                else{
-                    console.log('submitting non document');
-                    // var currentUrl = window.location.toString();
-                    // var newUrl = currentUrl.replace("add", data.id);
-                    // window.location.replace(newUrl);
-
-                    replaceWindowUrl(data.id)
-                }
-            },
-            error: function(XMLHttpRequest, textStatus, errorThrown) { 
-                // alert("Status: " + textStatus); alert("Error: " + errorThrown); 
-                // updateMessage(messages[type].error,messages[type].id);
-                // var currentUrl = window.location.toString();
-                
-                console.log("Error with status "+textStatus+":",errorThrown);
-                // updateMessage(messages.transcript.error,messages.transcript.id);
-                toastr['error'](messages[type].error)
-
-                // window.location.replace(currentUrl);
-            } 
-        });
-
-    }); 
-
-});
-**/
-
+}
