@@ -15,8 +15,8 @@ SEMANTIC_STORE = 'Sleepycat'
 #SEMANTIC_PATH = os.path.abspath(os.path.join(STORAGE_PATH, 'rdfstore'))
 #SEMANTIC_STORE = 'Virtuoso'
 
-SEMANTIC_NAMESPACE = 'http://localhost:8000/'
-#SEMANTIC_NAMESPACE = 'http://notes.cendari.daria.eu/'
+#SEMANTIC_NAMESPACE = 'http://localhost:8000/'
+SEMANTIC_NAMESPACE = 'http://resources.cendari.dariah.eu/'
 
 VIRTUOSO = {
     'dba_password': 'dba',

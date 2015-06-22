@@ -179,6 +179,7 @@ class CendariIndex(object):
             },
             'format': 'application/xhtml+xml', # nothing better eg. xhtml+rdfa
             'text': text,
+            'project': doc.project.slug,
             'groups_allowed': doc.project.slug,
              # FIXME when I know how to test public projects
             'users_allowed': [ doc.creator.username ]
@@ -217,6 +218,7 @@ class CendariIndex(object):
             },
             'format': 'application/xhtml+xml', # nothing better eg. xhtml+rdfa
             'text': text,
+            'project': note.project.slug,
             'groups_allowed': note.project.slug,
              # FIXME when I know how to test public projects
             'users_allowed': [ note.creator.username ]
@@ -244,6 +246,7 @@ class CendariIndex(object):
             'application': 'nte',
             'title': topic.preferred_name,
             'creator': topic.creator.username,
+            'project': topic.project.slug,
             'groups_allowed': topic.project.slug,
         }
         if topic.summary: document['text'] = xhtml_to_text(topic.summary)
@@ -328,7 +331,7 @@ class CendariIndex(object):
             project = kwargs['project']
             del kwargs['project']
             prepared_query['filter'] = {
-                "term": { 'groups_allowed': project }
+                "term": { 'project': project }
             }
 
         if highlight:
