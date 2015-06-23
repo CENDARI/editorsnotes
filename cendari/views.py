@@ -1,6 +1,7 @@
 import os
 import re
 import calendar
+from datetime import datetime
 from django.conf import settings
 from django.contrib import auth
 from django.contrib import messages
@@ -19,7 +20,7 @@ from django.utils.functional import lazy
 from editorsnotes.main import models as main_models
 from editorsnotes.search import en_index
 from cendari.search import cendari_index
-from cendari.search.facets import cendari_filter, cendari_aggregations
+from cendari.search.facets import cendari_filter, cendari_aggregations, cendari_faceted_search
 from cendari import utils
 from cendari.image import  ProjectAdminView, scan_to_dict
 from editorsnotes.admin.views.topics import TopicAdminView
@@ -194,7 +195,7 @@ def scan_image(request, scan_id, project_slug):
     scan = get_object_or_404(main_models.Scan, id=scan_id)
     if scan.document.project.slug != project_slug:
         raise PermissionDenied("not authorized on %s project" % project_slug)
-    return sendfile(request, scan.image.path)
+    return sendfile(request, os.path.abspath(scan.image.path))
 
 @login_required
 def scan_tiffimage(request, scan_id, project_slug):
@@ -816,128 +817,7 @@ def change_project(request, project_id):
     return editorsnotes.admin.views.projects.change_project(request, project.slug)
 
 def faceted_search(request,project_slug=None):
-    terms = {}
-    q = {}
-    filter_terms = []
-    query_terms = []
-    if project_slug:
-        filter_terms = cendari_filter(request.user,[project_slug])
-    else:
-        filter_terms = cendari_filter(request.user)
-    query = request.GET.get('q', None)
-    if query is not None and len(query)!=0:
-        query_terms.append({'match': {'_all': query} })
-    else:
-        query = ''
-    if 'selected_facets' in request.GET \
-      and request.GET['selected_facets']:
-        facets=request.GET.getlist('selected_facets')
-        for facet in facets:
-            values =facet.split(':')
-            facet = values[0]
-            values = values[1:]
-            if facet in terms:
-                terms[facet] += values
-            else:
-                terms[facet] = values
-        #TODO use date and location filters when appropriate
-        filter_terms += [{"terms": {key: val}} for (key, val) in terms.items()]
-
-    precision = 2
-    if 'bounds' in request.GET:
-        bounds=map(float, request.GET['bounds'].split(','))
-        if len(bounds)>4:
-            precision = bounds[4]
-        filter_terms += [{"geo_bounding_box" :
-                          {"location": {
-                              "top_left": ', '.join(map(str, bounds[:2])),
-                                  "bottom_right": ', '.join(map(str, bounds[2:4]))
-                              }
-                          }
-                        }]
-
-    buckets = {}
-    if 'show_facets' in request.GET \
-      and request.GET['show_facets']:
-      facets_shown = request.GET.getlist('show_facets')
-      for facet in facets_shown:
-          (facet,value) = facet.split(':')
-          buckets[facet] = int(value)
-
-    if len(query_terms)==1:
-        q['query'] = query_terms[0]
-    elif len(query_terms)>1:
-        q['query'] = { "bool" : { "must" : query_terms } }
-    if len(filter_terms)==1:
-        q['filter'] = filter_terms[0]
-    elif len(filter_terms)>1:
-        q['filter'] = {"bool" : { "must" : filter_terms } }
-    # craft a filtered query out of the query
-    # because aggregation use the result of the query
-    # and ignore the filter alone
-    q = {'query': { 'filtered': q } }
-    q['fields'] = ['uri', 'title']
-    size = int(request.GET.get('size', 50))
-    q['size'] = size
-    frm = int(request.GET.get('from', 0))
-    q['from'] = frm
-    q['aggregations'] = cendari_aggregations(size=buckets, precision=precision)
-    #pprint.pprint(q)
-    results = cendari_index.search(q, highlight=True, size=size)
-    # with open('res.log', 'w') as out:
-    #     pprint.pprint(results, stream=out)
-    res = []
-    total = int(results['hits']['total'])
-    sizes = {
-        'total': total,
-        'size': size,
-        'from': frm,
-        'last': frm+size,
-        'pages': total / size,
-        'page': int(frm / size),
-    }
-    for h in results['hits']['hits']:
-        highlight = []
-        if 'highlight' in h:
-            for field, values in h['highlight'].items():
-                highlight += values
-            info = { 'uri': h['fields']['uri'][0], 
-                     'highlight': highlight }
-            res.append(info)
-        elif 'title' in h['fields']:
-            info = { 'uri': h['fields']['uri'][0], 
-                     'highlight': h['fields']['title'] }
-            res.append(info)
-        else:
-            info = { 'uri': h['fields']['uri'][0], 
-                     'highlight': '' }
-
-    facets = results['aggregations']
-    cardinalities = []
-    for key,details in facets.iteritems():
-        if key.endswith('_cardinality'):
-            cardinalities.append(key)
-            continue
-        elif '_' in key: # non_facet names contain a _
-            continue
-        if key+'_cardinality' in facets:
-            details['value_count'] = facets[key+'_cardinality']['value']
-        elif key=='location':
-            details['value_count'] = len(details['buckets'])
-        else:
-            details['value_count'] = len(details['buckets'])
-
-    for c in cardinalities:
-        del facets[c]
-
-    o = {
-#        'project': project,
-        'facets': facets,
-        'sizes': sizes,
-        'results': res,
-        'query': query if isinstance(query, basestring) else ''
-    }
-
+    o = cendari_faceted_search(request,project_slug)
     return render_to_response(
         'cendarisearch.html', o, context_instance=RequestContext(request))
 

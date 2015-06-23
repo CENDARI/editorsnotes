@@ -2,6 +2,7 @@
 import os.path
 from datetime import datetime
 import re
+import math
 import unicodedata
 from lxml import etree
 from pytz import timezone, utc
@@ -105,3 +106,23 @@ def distance_on_unit_sphere(lat1, long1, lat2, long2):
 
 def distance_on_earth_in_km(lat1, long1, lat2, long2):
     return distance_on_unit_sphere(lat1, long1, lat2, long2)*6373
+
+GEOHASH_LENGTH = [
+    5000, # 1
+    1000, # 2
+    156,  # 3
+    30,   # 4
+    5,    # 5
+    1     # 6
+]
+
+def bounding_box_to_precision(lat1, long1, lat2, long2):
+#    print "Bounding box is %f,%f %f,%f" % (lat1, long1, lat2, long2)
+    dist = distance_on_earth_in_km(lat1, long1, lat2, long2)
+#    print "distance_on_earth_in_km=%f" % dist
+    dist = dist / math.sqrt(2)
+    for i in range(0, len(GEOHASH_LENGTH)):
+        if (dist / GEOHASH_LENGTH[i]) > 70:
+            break
+#    print "precision is %d" % i
+    return i

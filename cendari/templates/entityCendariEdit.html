@@ -198,5 +198,12 @@
 
 	})
 
+
+	$(document).ready(function(){
+		$('.model-link').each(function(){
+			this.href+='?entity={{ topic.preferred_name }}'
+		})
+	})
+
 	</script>
 {% endblock functions %}

@@ -131,14 +131,14 @@ function rebin(range, m, data) {
     if (m > 0) {
         i = -1; while(++i < n) {
             x = values[i];
-	    if (x == range[1])
-		index = m-1;
+            if (x == range[1])
+                index = m-1;
             else index = Math.floor((x - range[0])/dx);
-	    if (index >= 0 && index < m) {
-		bin = bins[index];
-		bin.y += weights[i];
-		bin.push(data[i]);
-	    }
+            if (index >= 0 && index < m) {
+                bin = bins[index];
+                bin.y += weights[i];
+                bin.push(data[i]);
+            }
         }
     }
 
@@ -151,11 +151,11 @@ function rebin(range, m, data) {
 function buildTimeline(timelineData, element) {
     for (var i = 0; i < timelineData.length; i++) {
         var td = timelineData[i];
-	if (td.doc_count == 0) {
-	    timelineData.splice(i, 1);
-	    i--;
-	    continue;
-	}
+        if (td.doc_count == 0) {
+            timelineData.splice(i, 1);
+            i--;
+            continue;
+        }
         td.date = new Date(td.key); // converts key to a proper date
         td.value = Math.log(1+td.doc_count)/Math.LN10;
     }
@@ -199,6 +199,18 @@ function buildTimeline(timelineData, element) {
             .append("g")
               .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+    var draw = function() {
+	console.log('translate='+d3.event.translate);
+	console.log('scale='+d3.event.scale);
+	console.log('axis(0)='+xAxis.scale().invert(0));
+	console.log('axis('+width+')='+xAxis.scale().invert(width));
+	//bg.select(".bg").call(xAxis);
+	//bar.select(".bar").call(xAxis);
+    };
+    var zoom = d3.behavior.zoom()
+	    .x(x)
+            .on("zoom", draw);
+
     var bg = chart.selectAll(".bg")
               .data(data)
            .enter().append("rect")
@@ -206,7 +218,7 @@ function buildTimeline(timelineData, element) {
             .attr("x", function(d) { return x(d.x); })
             .attr("width", width/data.length)
             .attr("height", height)
-	   .append("title")
+           .append("title")
             .text(function(d) { return formatTime(d.x)+": "+formatCount(d.y); });
 
     var bar = chart.selectAll(".bar")
@@ -214,12 +226,19 @@ function buildTimeline(timelineData, element) {
             .enter().append("g")
              .attr("class", "bar")
              .attr("transform", function(d) { return "translate(" + x(d.x) + "," + y(d.y) + ")"; });
+
     bar.append("rect")
         .attr("x", 1)
         .attr("width", width/data.length)
         .attr("height", function(d) { return Math.ceil(height - y(d.y)); })
       .append("title")
         .text(function(d) { return formatTime(d.x)+": "+formatCount(d.y); });
+
+    chart.append("rect")
+	.attr("class", "zoompane")
+	.attr("width", width)
+	.attr("height", height)
+	.call(zoom);
 
     // bar.append("text")
     //     .attr("dy", ".75em")
@@ -238,6 +257,8 @@ function buildTimeline(timelineData, element) {
     //     .attr("dy", "-.55em")
     //     .attr("transform", "rotate(-90)" );
 }
+
+
 
 
 var doc_params = [],
@@ -333,6 +354,9 @@ function facet_del_facet(facet) {
     var url = url_facets();
 }
 
+function filter_date(event) {
+    event.preventDefault();
+}
 
 function filter_location(event) {
     event.preventDefault();

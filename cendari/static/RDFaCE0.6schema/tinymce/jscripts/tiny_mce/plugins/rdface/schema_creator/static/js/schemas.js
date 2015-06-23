@@ -80,7 +80,6 @@ function create_form(schema,property,container){
 	console.log("schema = " + schema);
 	var tmp='';
 	var selected=all_schemas.types[schema];
-	console.log("NB, selected = " + selected);
 	var id;
 	// if it is the main schema
 	if(property==''){
@@ -101,7 +100,94 @@ function create_form(schema,property,container){
 		tmp=tmp+'</div>';
 		tmp=tmp+'</div>';
 		$('#form_'+id).append(tmp);
-		FBSuggest(schema);
+		// freebase is no longer supported, here it is replaced with jQuery autocomplete 
+		// FBSuggest(schema);
+		// var dummyList = [
+               	//	"a",
+		//	"ab",
+               	//	"b",
+		//	"c",
+		//	"cd",
+		//	"d"
+            	//]; 
+		//Getting data from dummy list
+		//$( "#entity_freebase" ).autocomplete({
+  		//	source: dummyList,	
+		//	minLength: 1,		 
+		//	select: function( event, ui ) {
+        	//		console.log( ui.item ?
+          	//		"Selected: " + ui.item.value + " aka " + ui.item.id :
+          	//		"Nothing selected, input was " + this.value );
+      		//	}
+		//});
+
+
+		//Getting data from Geonames webservice
+	   	//$( "#entity_freebase" ).autocomplete({
+		//     	source: function( request, response ) {
+		//		$.ajax({
+		//	  		url: "http://gd.geobytes.com/AutoCompleteCity",
+		//	  		dataType: "jsonp",
+		//	  		data: {
+		//	    			q: request.term
+		//	  		},
+		//	  		success: function( data ) {
+		//	    			response( data );
+		//	  		}
+		//		});
+		//      	},
+		//      	minLength: 3,
+		//      	select: function( event, ui ) {
+		//		console.log( ui.item ?
+		//	  		"Selected: " + ui.item.label :
+		//	  		"Nothing selected, input was " + this.value);
+		//      	},
+		//      	open: function() {
+		//		$( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" );
+		//      	},
+		//      	close: function() {
+		//		$( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" );
+		//      	}
+	    	//});
+
+		//Getting data from ElasticSearch
+		$("#entity_freebase").autocomplete({
+			source: function(request, response) {
+				//Add accent folding later
+				//query = {"query":{"match_all":{}}}
+				query = 
+				{
+				    "query": {
+					"query_string": {
+					    "query": request.term.toLowerCase()
+					}
+				    },
+				    "filter": {
+					"term": { "class": "http://schema.org/"+schema }
+			            }
+				}
+				$.ajax({
+				    url: "http://localhost:9200/_search",
+				    type: "POST",
+				    dataType: "JSON",
+				    data: JSON.stringify(query),
+				    success: function(data) {
+					//console.log("sent data= " + JSON.stringify(data));
+				        response($.map(data.hits.hits, function(item) {
+						suggestion_title = JSON.stringify(item._source["title"])
+						title = suggestion_title.substring(1, suggestion_title.length-1)
+						//console.log("url = " + item._source["url"]);
+				            return {
+				                label: title,
+				                id: item._source["uri"]
+				            }
+				        }));
+				    },
+				});
+			},
+		    	minLength: 2
+		});		
+
 		$('#entity_freebase').mouseover(function() {
 			   $('#entity_freebase').tooltip({
 			        placement : 'right',
