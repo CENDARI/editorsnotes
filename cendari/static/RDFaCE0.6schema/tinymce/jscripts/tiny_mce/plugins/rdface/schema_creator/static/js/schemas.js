@@ -154,23 +154,32 @@ function create_form(schema,property,container){
 		$("#entity_freebase").autocomplete({
 			source: function(request, response) {
 				//Add accent folding later
-				var wildcard = { "name": "*" + request.term.toLowerCase() + "*" };
-				var postData = {
-				    "query": { "wildcard": wildcard },
-				    "fields": ["_source", "_id"]
-				};
-				console.log("postData = " + postData);
+				//query = {"query":{"match_all":{}}}
+				query = 
+				{
+				    "query": {
+					"query_string": {
+					    "query": request.term.toLowerCase()
+					}
+				    },
+				    "filter": {
+					"term": { "class": "http://schema.org/"+schema }
+			            }
+				}
 				$.ajax({
 				    url: "http://localhost:9200/_search",
 				    type: "POST",
 				    dataType: "JSON",
-				    data: JSON.stringify(postData),
+				    data: JSON.stringify(query),
 				    success: function(data) {
-					console.log("got here actually: " + JSON.stringify(data));
+					//console.log("sent data= " + JSON.stringify(data));
 				        response($.map(data.hits.hits, function(item) {
+						suggestion_title = JSON.stringify(item._source["title"])
+						title = suggestion_title.substring(1, suggestion_title.length-1)
+						//console.log("url = " + item._source["url"]);
 				            return {
-				                label: JSON.stringify(item._id),
-				                id: item._source
+				                label: title,
+				                id: item._source["uri"]
 				            }
 				        }));
 				    },
