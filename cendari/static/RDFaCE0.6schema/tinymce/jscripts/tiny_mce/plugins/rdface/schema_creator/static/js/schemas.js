@@ -102,14 +102,15 @@ function create_form(schema,property,container){
 		$('#form_'+id).append(tmp);
 		// freebase is no longer supported, here it is replaced with jQuery autocomplete 
 		// FBSuggest(schema);
-		 var dummyList = [
-               		"a",
-			"ab",
-               		"b",
-			"c",
-			"cd",
-			"d"
-            	]; 
+		// var dummyList = [
+               	//	"a",
+		//	"ab",
+               	//	"b",
+		//	"c",
+		//	"cd",
+		//	"d"
+            	//]; 
+		//Getting data from dummy list
 		//$( "#entity_freebase" ).autocomplete({
   		//	source: dummyList,	
 		//	minLength: 1,		 
@@ -121,35 +122,62 @@ function create_form(schema,property,container){
 		//});
 
 
-	   $( "#entity_freebase" ).autocomplete({
-	      source: function( request, response ) {
-		$.ajax({
-		  url: "http://gd.geobytes.com/AutoCompleteCity",
-		  dataType: "jsonp",
-		  data: {
-		    q: request.term
-		  },
-		  success: function( data ) {
-		    response( data );
-		  }
-		});
-	      },
-	      minLength: 3,
-	      select: function( event, ui ) {
-		console.log( ui.item ?
-		  "Selected: " + ui.item.label :
-		  "Nothing selected, input was " + this.value);
-	      },
-	      open: function() {
-		$( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" );
-	      },
-	      close: function() {
-		$( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" );
-	      }
-	    });
+		//Getting data from Geonames webservice
+	   	//$( "#entity_freebase" ).autocomplete({
+		//     	source: function( request, response ) {
+		//		$.ajax({
+		//	  		url: "http://gd.geobytes.com/AutoCompleteCity",
+		//	  		dataType: "jsonp",
+		//	  		data: {
+		//	    			q: request.term
+		//	  		},
+		//	  		success: function( data ) {
+		//	    			response( data );
+		//	  		}
+		//		});
+		//      	},
+		//      	minLength: 3,
+		//      	select: function( event, ui ) {
+		//		console.log( ui.item ?
+		//	  		"Selected: " + ui.item.label :
+		//	  		"Nothing selected, input was " + this.value);
+		//      	},
+		//      	open: function() {
+		//		$( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" );
+		//      	},
+		//      	close: function() {
+		//		$( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" );
+		//      	}
+	    	//});
 
-
-
+		//Getting data from ElasticSearch
+		$("#entity_freebase").autocomplete({
+			source: function(request, response) {
+				//Add accent folding later
+				var wildcard = { "name": "*" + request.term.toLowerCase() + "*" };
+				var postData = {
+				    "query": { "wildcard": wildcard },
+				    "fields": ["_source", "_id"]
+				};
+				console.log("postData = " + postData);
+				$.ajax({
+				    url: "http://localhost:9200/_search",
+				    type: "POST",
+				    dataType: "JSON",
+				    data: JSON.stringify(postData),
+				    success: function(data) {
+					console.log("got here actually: " + JSON.stringify(data));
+				        response($.map(data.hits.hits, function(item) {
+				            return {
+				                label: JSON.stringify(item._id),
+				                id: item._source
+				            }
+				        }));
+				    },
+				});
+			},
+		    	minLength: 2
+		});		
 
 		$('#entity_freebase').mouseover(function() {
 			   $('#entity_freebase').tooltip({
