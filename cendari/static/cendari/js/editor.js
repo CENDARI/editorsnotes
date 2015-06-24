@@ -71,7 +71,7 @@ function showToastrMessage(type,message){
 }
 
 function showErrorMessage(message){
-    toastr.options.timeOut="500";
+    toastr.options.timeOut="1000";
     toastr.options.extendedTimeOut="1000";
     showToastrMessage('error',message);
 }
@@ -404,6 +404,13 @@ function submitNote(fc){
     });
 }
 
+
+var getLocation = function(href) {
+    var l = document.createElement("a");
+    l.href = href;
+    return l;
+}
+
 function submitEntity(fc){
     var formData = "";
     formData = formData +"csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&";
@@ -416,38 +423,42 @@ function submitEntity(fc){
     }
     formData = formData + $("#saveButton").attr('name')+"="+$("#saveButton").val();
     
+    if(($('#rdf_id').val().length && getLocation($('#rdf_id').val().trim()).hostname.split('.').indexOf('dbpedia') !== -1) || $('#rdf_id').val().length === 0 ){
+        $.ajax({
+            url:fc.attr('action'),
+            type: fc.attr('method'),
+            data: formData,
+            success: function(data){
 
-    $.ajax({
-        url:fc.attr('action'),
-        type: fc.attr('method'),
-        data: formData,
-        success: function(data){
-
-            // console.log('type')
-            // console.log('latlong')
-            if(data.type==='PLA'){
-                if(data.latlong === null || data.latlong=== undefined){
-                    showWarningMessage(messages.entity.warning_latlong);    
+                // console.log('type')
+                // console.log('latlong')
+                if(data.type==='PLA'){
+                    if(data.latlong === null || data.latlong=== undefined){
+                        showWarningMessage(messages.entity.warning_latlong);    
+                    }
+                    else{
+                        showSuccessMessage(messages.entity.success);
+                    }
                 }
                 else{
                     showSuccessMessage(messages.entity.success);
                 }
-            }
-            else{
-                showSuccessMessage(messages.entity.success);
-            }
 
-            updatedEnitiesTab(cendari_js_object_type,data.related_topics);           
-            replaceWindowUrl(data.id);
-            
-        },
-        error: function(XMLHttpRequest, textStatus, errorThrown) { 
-            console.log("Error with status "+textStatus+":",errorThrown);
-            // showErrorMessage(messages.entity.error);
-            showErrorMessage(errorThrown);
+                updatedEnitiesTab(cendari_js_object_type,data.related_topics);           
+                replaceWindowUrl(data.id);
+                
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) { 
+                console.log("Error with status "+textStatus+":",errorThrown);
+                // showErrorMessage(messages.entity.error);
+                showErrorMessage(errorThrown);
 
-        } 
-    });
+            } 
+        });
+    }
+    else{
+         showErrorMessage('Please use only dbpedia links');
+    }
 }
 
 $(document).ready(function(){
