@@ -405,7 +405,7 @@ function submitNote(fc){
 }
 
 
-var getLocation = function(href) {
+var getHref = function(href) {
     var l = document.createElement("a");
     l.href = href;
     return l;
@@ -423,7 +423,7 @@ function submitEntity(fc){
     }
     formData = formData + $("#saveButton").attr('name')+"="+$("#saveButton").val();
     
-    if(($('#rdf_id').val().length && getLocation($('#rdf_id').val().trim()).hostname.split('.').indexOf('dbpedia') !== -1) || $('#rdf_id').val().length === 0 ){
+    if(($('#rdf_id').val().length && getHref($('#rdf_id').val().trim()).hostname.split('.').indexOf('dbpedia') !== -1) || $('#rdf_id').val().length === 0 ){
         $.ajax({
             url:fc.attr('action'),
             type: fc.attr('method'),
