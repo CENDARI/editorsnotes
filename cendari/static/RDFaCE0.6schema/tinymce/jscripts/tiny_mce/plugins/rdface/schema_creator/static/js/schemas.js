@@ -93,15 +93,15 @@ function create_form(schema,property,container){
 	// add URI field for entity
 	if(property==''){
 		tmp='<div class="control-group">';
-		tmp=tmp+'<label class="control-label" for="entity_freebase">Entity Freebase Name</label>';
+		tmp=tmp+'<label class="control-label" for="entity_freebase">Start typing the entity name to get suggestions from Wikipedia: </label>';
 		tmp=tmp+'<div class="controls">';
-		tmp=tmp+'<input type="text" id="entity_freebase" placeholder="Freebase name of the entity">';
+		tmp=tmp+'<input type="text" id="entity_freebase" placeholder="Wikipedia name of the entity">';
 		tmp=tmp+'<span class="add-on subschema-icon" onclick="form_suggestURI()" title="Search for Name"><i class="icon-search"></i></span>';
 		tmp=tmp+'</div>';
 		tmp=tmp+'</div>';
 		$('#form_'+id).append(tmp);
 		// freebase is no longer supported, here it is replaced with jQuery autocomplete 
-		// FBSuggest(schema);
+		//FBSuggest(schema);
 		// var dummyList = [
                	//	"a",
 		//	"ab",
@@ -155,17 +155,31 @@ function create_form(schema,property,container){
 			source: function(request, response) {
 				//Add accent folding later
 				//query = {"query":{"match_all":{}}}
-				query = 
-				{
-				    "query": {
-					"query_string": {
-					    "query": request.term.toLowerCase()
+				if(schema='Thing'){
+					query = 
+					{
+					    "from" : 0, "size" : 15,
+					    "query": {
+						"query_string": {
+						    "query": request.term.toLowerCase()
+						}
+					    }
 					}
-				    },
-				    "filter": {
-					"term": { "class": "http://schema.org/"+schema }
-			            }
+				}else{
+					query = 
+					{
+					    "from" : 0, "size" : 15,
+					    "query": {
+						"query_string": {
+						    "query": request.term.toLowerCase()
+						}
+					    },
+					    "filter": {
+						"term": { "class": "http://schema.org/"+schema }
+					    }
+					}
 				}
+
 				$.ajax({
 				    url: "http://localhost:9200/_search",
 				    type: "POST",
@@ -174,20 +188,30 @@ function create_form(schema,property,container){
 				    success: function(data) {
 					//console.log("sent data= " + JSON.stringify(data));
 				        response($.map(data.hits.hits, function(item) {
-						suggestion_title = JSON.stringify(item._source["title"])
-						title = suggestion_title.substring(1, suggestion_title.length-1)
-						//console.log("url = " + item._source["url"]);
-				            return {
-				                label: title,
-				                id: item._source["uri"]
-				            }
+						title = JSON.stringify(item._source["title"])
+						suggestion_title = title.substring(1, title.length-1)
+						suggestion_id = item._source["uri"]
+				            	return {
+				                	label: suggestion_title,
+				                	id: suggestion_id
+				            	}
 				        }));
 				    },
 				});
 			},
-		    	minLength: 2
-		});		
+		    	minLength: 2,
+		      	select: function( event, ui ) {
+				console.log( ui.item ?
+			  		"Selected: " + ui.item.label :
+			  		"Nothing selected, input was " + this.value);
+		      	},
+			focus: function( event, ui ) {
+				console.log( ui.item ?
+			  		"Hovered over: " + ui.item.label :
+			  		"Nothing hovered over, input was " + this.value);
+		      	},
 
+		});		
 		$('#entity_freebase').mouseover(function() {
 			   $('#entity_freebase').tooltip({
 			        placement : 'right',
@@ -736,9 +760,9 @@ function create_microdata_tags_from_json(obj,pointer){
 function fillout_form_from_json(obj,property,form_container){
 	// console.log(obj);
 	var tmp;
-        if (obj.properties.name != null) {
-	    $('#entity_freebase').val(obj.properties.name.value);
-	}
+        //if (obj.properties.name != null) {
+	//    $('#entity_freebase').val(obj.properties.name.value);
+	//}
 	$.each(obj.properties,function(i,v){
 		if(v.is_repeated){
 			// number of instances
