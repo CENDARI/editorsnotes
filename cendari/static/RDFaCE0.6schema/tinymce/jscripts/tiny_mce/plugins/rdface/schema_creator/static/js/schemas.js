@@ -77,7 +77,7 @@ function initiate_form(schema){
 	create_form(schema,'','properties');
 }
 function create_form(schema,property,container){
-	console.log("schema = " + schema);
+	//console.log("schema = " + schema);
 	var tmp='';
 	var selected=all_schemas.types[schema];
 	var id;
@@ -202,13 +202,17 @@ function create_form(schema,property,container){
 		    	minLength: 2,
 		      	select: function( event, ui ) {
 				console.log( ui.item ?
-			  		"Selected: " + ui.item.label :
+			  		"Selected: " + ui.item.label + ", with uri = " + ui.item.id :
 			  		"Nothing selected, input was " + this.value);
+				var elem = document.getElementById("entity_uri");
+				if (elem != null){
+					elem.value = ui.item.id;
+				}
 		      	},
 			focus: function( event, ui ) {
-				console.log( ui.item ?
-			  		"Hovered over: " + ui.item.label :
-			  		"Nothing hovered over, input was " + this.value);
+				//console.log( ui.item ?
+			  	//	"Hovered over: " + ui.item.label :
+			  	//	"Nothing hovered over, input was " + this.value);
 		      	},
 
 		});		
@@ -758,11 +762,11 @@ function create_microdata_tags_from_json(obj,pointer){
 	})
 }
 function fillout_form_from_json(obj,property,form_container){
-	// console.log(obj);
 	var tmp;
         //if (obj.properties.name != null) {
 	//    $('#entity_freebase').val(obj.properties.name.value);
 	//}
+	//console.log("properties ..." + JSON.stringify(obj.properties));
 	$.each(obj.properties,function(i,v){
 		if(v.is_repeated){
 			// number of instances
