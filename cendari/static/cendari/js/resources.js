@@ -58,7 +58,7 @@ $(function() {
            				//console.log('==============================>>>>>>>>>> Resources/onClick: page url:' + page_url + ' does not contain node url:' + node.data.url);		 
 					window.open(node.data.url, "_parent");
 			    	}else{
-           				console.log('==============================>>>>>>>>>> Resources/onClick: page url:' + page_url + ' does contain node url:' + node.data.url);
+           				// console.log('==============================>>>>>>>>>> Resources/onClick: page url:' + page_url + ' does contain node url:' + node.data.url);
 				}
 			}else{
 			    //unselect other nodes (strange as selectMode:1)
@@ -74,7 +74,7 @@ $(function() {
 	    }
 	},
 	onDblClick: function(node, event){
-		console.log('dynatree node.data is : ',node.data);
+		// console.log('dynatree node.data is : ',node.data);
 	},
 	onPostInit: function(isReloading, isError){
 	  	//console.log('==============================>>>>>>>>>> Resources/onPostInit: cendari_js_project_slug = ' + cendari_js_project_slug);
@@ -88,7 +88,7 @@ $(function() {
 		            //console.log('==============================>>>>>>>>>> Resources/onPostInit: NOTE upload_keyPath = ' + upload_keyPath);
 			    tree_loadKeyPath(upload_keyPath, cendari_js_object_type);
 			}else{
-		            console.log('==============================>>>>>>>>>> Resources/onPostInit: NOTE lazy_node is null');
+		            // console.log('==============================>>>>>>>>>> Resources/onPostInit: NOTE lazy_node is null');
 			}		
 		} else if (cendari_js_object_type=='document'){
 		    	lazy_node = $("#tree").dynatree("getTree").getNodeByKey(cendari_js_project_slug);		
@@ -97,7 +97,7 @@ $(function() {
 		            	//console.log('==============================>>>>>>>>>> Resources/onPostInit: DOCUMENT upload_keyPath = ' + upload_keyPath);
 			    	tree_loadKeyPath(upload_keyPath, cendari_js_object_type);
 			}else{
-		            console.log('==============================>>>>>>>>>> Resources/onPostInit: DOCUMENT lazy_node is null');
+		            // console.log('==============================>>>>>>>>>> Resources/onPostInit: DOCUMENT lazy_node is null');
 			}
 		} else if (cendari_js_object_type=='topic'){
 		    	lazy_node = $("#tree").dynatree("getTree").getNodeByKey(cendari_js_project_slug);		
@@ -106,7 +106,7 @@ $(function() {
 		            	//console.log('==============================>>>>>>>>>> Resources/onPostInit: TOPIC upload_keyPath = ' + upload_keyPath);
 			    	tree_loadKeyPath(upload_keyPath, cendari_js_object_type);
 			}else{
-		            console.log('==============================>>>>>>>>>> Resources/onPostInit: TOPIC lazy_node is null');
+		            // console.log('==============================>>>>>>>>>> Resources/onPostInit: TOPIC lazy_node is null');
 			}
 		} else if (cendari_js_object_type==''){//this is a project
 			$("#tree").dynatree("getTree").selectKey(cendari_js_project_slug);
@@ -116,10 +116,10 @@ $(function() {
 			    project_node.expand(true);
 		            //console.log('==============================>>>>>>>>>> Resources/onPostInit: PROJECT lazy_node expanded = ' + project_node);
 			}else{
-		            console.log('==============================>>>>>>>>>> Resources/onPostInit: PROJECT lazy_node is null');
+		            // console.log('==============================>>>>>>>>>> Resources/onPostInit: PROJECT lazy_node is null');
 			}
 		} else {
-	            	console.log('==============================>>>>>>>>>> Resources/onPostInit: does it ever get to here?');
+	            	// console.log('==============================>>>>>>>>>> Resources/onPostInit: does it ever get to here?');
 		}
 
 	},
@@ -156,7 +156,7 @@ $(function() {
 	onRender: function(node, nodeSpan) {
     	// $(nodeSpan).find("a.dynatree-title").css("color", "red");
     	// console.log('Node is ',node);
-    	console.log($(nodeSpan).find('.dynatree-radio'));
+    	// console.log($(nodeSpan).find('.dynatree-radio'));
     	// console.log('is it a folder ? ', node);
     	// console.log(node.isFolder);
     	// radio_button = 

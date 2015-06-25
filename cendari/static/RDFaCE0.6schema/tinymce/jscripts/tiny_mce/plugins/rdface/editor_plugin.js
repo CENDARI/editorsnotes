@@ -20,12 +20,13 @@
 							$.each(data.types[entity_type].properties, function(i, v) {
 								if (all_datatypes.indexOf(data.properties[v].ranges[0]) != -1) { // only show atomic properties
 									//add_entity.add({title : data.properties[v].label, onclick: function(){
-									menu.add({
-										title : data.properties[v].label,
-										onclick : function() {
-											insert_entity(a, data.properties[v].ranges[0], b, data.properties[v].id);
-										}
-									});
+									// [NB] simplify context menu
+									//menu.add({
+									//	title : data.properties[v].label,
+									//	onclick : function() {
+									//		insert_entity(a, data.properties[v].ranges[0], b, data.properties[v].id);
+									//	}
+									//});
 								}
 							});
 							break;
@@ -77,6 +78,7 @@
 						if (parent_node.hasClass('r_entity')) {
 							// get the type of entity
 							var entity_type = getTypeOfEntity(parent_node, getCookie("annotationF"));
+							/*
 							var add_property = menu.addMenu({
 								title : 'Add as Property'
 							});
@@ -92,6 +94,7 @@
 									});
 								}
 							});
+							*/
 							break;
 						}
 						parent_node = parent_node.parent();

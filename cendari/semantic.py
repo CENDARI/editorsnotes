@@ -90,6 +90,10 @@ def fix_uri(uri):
     loc = urlparse.urlunsplit(loc)
     return loc
 
+def check_domain(url_string, domain):
+    o = urlparse.urlparse(url_string)
+    return domain in o.hostname.split('.')
+
 class SemanticHandler(object):
     def __init__(self):
         try:
@@ -415,6 +419,11 @@ def semantic_process_note(note,user=None):
             value = t['value']
             g.add( (subject, OWL.sameAs, rdftopic) )
             g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
+
+            if (not topic.rdf is None) and (not check_domain(topic.rdf,'dbpedia')):
+                topic.rdf = None
+                topic.save()
+
             if topic.rdf is None and subject.startswith('http'):
                 topic.rdf = unicode(subject)
                 topic.save()

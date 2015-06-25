@@ -75,7 +75,7 @@
 
 			// Register example button
 			ed.addButton('markcreativework', {
-				title : 'markcreativework.desc', 
+				title : 'Automatic Tagging of URLs as Publication Entities', //'markcreativework.desc'
 				cmd : 'mceMarkCreativeWork',
 				image : url + '/img/buttonRed.png'
 			});
