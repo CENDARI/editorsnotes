@@ -207,9 +207,9 @@ function buildTimeline(timelineData, element) {
 	//bg.select(".bg").call(xAxis);
 	//bar.select(".bar").call(xAxis);
     };
-    var zoom = d3.behavior.zoom()
-	    .x(x)
-            .on("zoom", draw);
+//    var zoom = d3.behavior.zoom()
+//	    .x(x)
+//            .on("zoom", draw);
 
     var bg = chart.selectAll(".bg")
               .data(data)
@@ -234,11 +234,11 @@ function buildTimeline(timelineData, element) {
       .append("title")
         .text(function(d) { return formatTime(d.x)+": "+formatCount(d.y); });
 
-    chart.append("rect")
-	.attr("class", "zoompane")
-	.attr("width", width)
-	.attr("height", height)
-	.call(zoom);
+    // chart.append("rect")
+    // 	.attr("class", "zoompane")
+    // 	.attr("width", width)
+    // 	.attr("height", height)
+    // 	.call(zoom);
 
     // bar.append("text")
     //     .attr("dy", ".75em")

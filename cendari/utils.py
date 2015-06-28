@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import os.path
-from datetime import datetime
+from datetime import datetime, date
+import calendar
+import time
 import re
 import math
 import unicodedata
@@ -126,3 +128,64 @@ def bounding_box_to_precision(lat1, long1, lat2, long2):
             break
 #    print "precision is %d" % i
     return i
+
+def timestamp2isodate(value):
+    if value is None:
+        return ''
+    t = time.localtime(value/1000.0)
+    return '%04d-%02d-%02d' % (t.tm_year, t.tm_mon, t.tm_mday)
+
+# Timestamp for year 2000
+TIMESTAMP_1 = calendar.timegm(datetime(1, 1, 1).timetuple())
+
+def leap_gregorian(year):
+    return (year % 4) == 0 and \
+      not (((year % 100) == 0) and ((year % 400) != 0))
+
+GREGORIAN_EPOCH = 1721425.5
+
+def gregorian_to_jd(year, month, day):
+    adj = 0 if (month <= 2) else (-1 if leap_gregorian(year) else -2)
+    return (GREGORIAN_EPOCH - 1) + \
+           (365 * (year - 1)) + \
+           math.floor((year - 1) / 4) + \
+           (-math.floor((year - 1) / 100)) + \
+           math.floor((year - 1) / 400) + \
+           math.floor((((367 * month) - 362) / 12) + adj + day)
+
+J1970 = 2440587.5 # Julian date at Unix epoch: 1970-01-01
+
+def jd_to_unix(jd):
+    utime = (jd - J1970) * (60 * 60 * 24 * 1000);
+    return round(utime / 1000)
+
+def isodate2timestamp(iso):
+    rem = iso
+    time = None
+    negative = False
+    if iso.startswith('-'):
+        rem = iso[1:]
+        negative = True
+    index = rem.find('T')
+    if index:
+        date = rem[:index]
+        time = rem[index+1]
+    else:
+        date = rem
+    try:
+        (year,month,day) = map(int, rem.split('-'))
+    except:
+        return None
+
+    # (hour, min, sec) = (0, 0, 0)
+    # if time:
+    #     if time.endswith('Z'):
+    #         time = time[:-1]
+    #     try:
+    #         (hour, min, sec) = map(float, time.split(':'))
+    #     except:
+    #         pass
+
+    if negative:
+        year = -year
+    return jd_to_unix(gregorian_to_jd(year, month, day))
