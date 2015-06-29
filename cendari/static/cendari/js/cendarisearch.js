@@ -421,6 +421,105 @@ function facet_toggle(event) {
     document.location.assign(url);
 }
 
+function datepicker_parseDate(format, value, settings) {
+    if (format == null || value == null) {
+	throw "Invalid arguments";
+    }
+
+    value = (typeof value === "object" ? value.toString() : value + "");
+    if (value === "") {
+	return null;
+    }
+
+    var year = 1, month = 0, day = 0, len;
+    var m = value.match('^[-]?[0-9]+');
+    if (! m) return null;
+    var date = new Date(2000, month, day);
+    year = Number(m[0]);
+    if (! year) 
+	year = 1;
+    date.setFullYear(year);
+    len = m[0].length;
+    if (len == value.length)
+	return date;
+    var sep = value[len];
+    if (sep != '-' && sep != '/' && sep != '.')
+	return null;
+    value = value.substring(len+1);
+    m = value.match('^[0-9]+');
+    if (! m)
+	return date;
+    month = Number(m[0]);
+    if (month < 1 || month > 12)
+	month = 1;
+    date.setMonth(month-1);
+    len = m[0].length;
+    if (len == value.length || sep != value[len])
+	return date;
+    value = value.substring(len+1);
+    m = value.match('^[0-9]+');
+    if (! m)
+	return date;
+    day = Number(m[0]);
+    if (day < 1 || day > 31) 
+	day = 1;
+    date.setDate(day);
+    return date;
+}
+
+function datepicker_formatDate(format, date, settings) {
+    if (!date) {
+	return "";
+    }
+    var year = date.getFullYear(),
+	negative = (year < 0);
+    if (negative) {
+	year = -year;
+    }
+    var ret = year.toString();
+    while (ret.length < 4) 
+	ret = '0' + ret;
+    if (negative)
+	ret = '-' + ret;
+    ret = ret + '-';
+    var v = (date.getMonth()+1).toString();
+    if (v.length < 2)
+	v = '0'+v;
+    ret = ret + v + '-';
+    v = (date.getDate()).toString();
+    if (v.length < 2)
+	v = '0'+v;
+    ret = ret + v;
+    return ret;
+}
+
+function datepicker__formatDate(inst, day, month, year) {
+    var date;
+    if (!day) {
+	inst.currentDay = inst.selectedDay;
+	inst.currentMonth = inst.selectedMonth;
+	inst.currentYear = inst.selectedYear;
+	date = new Date(inst.currentYear, inst.currentMonth, inst.currentDay);
+	date.setFullYear(inst.currentYear);
+	this._daylightSavingAdjust(date);
+    }
+    else if (typeof day !== "object") {
+	date = new Date(year, month, day);
+	date.setFullYear(year);
+	this._daylightSavingAdjust(date);
+    }
+    return this.formatDate(this._get(inst, "dateFormat"), date, this._getFormatConfig(inst));
+}
+
+var datepicker_options = {
+    dateFormat: "yy-mm-dd"
+};
+
+(function( $, dp ){
+    $.datepicker.parseDate = datepicker_parseDate;
+    $.datepicker.formatDate = datepicker_formatDate;
+    $.datepicker._formatDate = datepicker__formatDate;
+}( jQuery, jQuery.ui.datepicker ));
 
 function bind_faceted_widgets() {
     $('.facetview_morefacetvals').click(morefacetvals);
