@@ -92,7 +92,10 @@ def fix_uri(uri):
 
 def check_domain(url_string, domain):
     o = urlparse.urlparse(url_string)
-    return domain in o.hostname.split('.')
+    if o.hostname:
+        return domain in o.hostname.split('.')
+    else:
+        return False
 
 class SemanticHandler(object):
     def __init__(self):

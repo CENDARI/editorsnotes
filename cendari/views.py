@@ -652,15 +652,15 @@ def getTopicResources(request, project_slug, sfield):
 	    #o_query_set = sorted(query_set, key=operator.attrgetter('preferred_name'))              
         set_count = o_query_set.count()
         topic_count += 1
-        active_topics = utils.get_all_active_topics_for_project(project)
+        # active_topics = utils.get_all_active_topics_for_project(project)
 
         for e in o_query_set:
             #to make sure both url and node key have the same topic_id (when a topic exists in multiple probjects)
             #my_list.append({'title':str(e), 'key':str(project_slug)+'.topic.'+str(e.id), 'url':e.get_absolute_url()})
 
-            if not e in active_topics:
-                set_count -=1
-                continue
+            # if not e in active_topics:
+            #     set_count -=1
+            #     continue
 
             url_parts = e.get_absolute_url().split('/')
             topic_id_index = len(url_parts) - 2
