@@ -65,6 +65,7 @@ def geo_bounds_precision(geo_bounds):
     return bounding_box_to_precision(lat1, long1, lat2, long2)
 
 def date_range_interval(date_range):
+    pprint.pprint(date_range)
     return '1y'
 
 def cendari_aggregations(size={},default_size=10,geo_bounds=None,date_range=None):
@@ -196,6 +197,7 @@ def cendari_faceted_search(request,project_slug=None):
         # so we can split it/them into the right # of buckets
         q['aggregations'] = range_requests
         results = cendari_index.search(q,size=0)
+        pprint.pprint(results)
         if 'date_range' in results['aggregations']:
             date_range = [ long(results['aggregations']['date_range']['min']),
                            long(results['aggregations']['date_range']['max']) ]
@@ -253,6 +255,9 @@ def cendari_faceted_search(request,project_slug=None):
             details['value_count'] = facets[key+'_cardinality']['value']
         elif key=='location':
             details['value_count'] = len(details['buckets'])
+            details['bounds'] = geo_bounds
+        elif key=='date':
+            details['bounds'] = date_range
         else:
             details['value_count'] = len(details['buckets'])
 
