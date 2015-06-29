@@ -710,9 +710,16 @@ def getNoteResources(request, project_slug, sfield):
 def getDocumentResources(request, project_slug, sfield):
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     projects = request.user.get_authorized_projects()
+    image_place_holder = -1
+    current_project = None
     for p in projects:
         if p.slug == project_slug:
             project_id = p.id
+            current_project = p
+
+    if(current_project):
+        image_place_holder = utils.get_image_placeholder_document(request.user,current_project)
+
     max_count = 10000
     doc_list = []   
     if sfield == "created" or sfield == "-created" or sfield == "last_updated" or sfield == "-last_updated":
@@ -733,7 +740,10 @@ def getDocumentResources(request, project_slug, sfield):
     	sql_query = 'select *, xpath('+str("'")+'/p/text()'+str("'")+', description) as desc_raw from main_document where project_id ='+ str(project_id) +' order by ordering'
     	query_set =  main_models.Document.objects.raw(sql_query)
 
-    for e in query_set:
+
+    for e in query_set:  
+        if e.id == image_place_holder.id:
+            continue
         doc = {
             'title':str(e),
             'key':str(project_slug)+'.document.'+str(e.id),
@@ -875,6 +885,7 @@ class NoteCendari(NoteAdminView):
     def get_context_data(self, **kwargs):
         context = super(NoteCendari, self).get_context_data(**kwargs)       
         context['object_type'] = 'note'
+        context['image_place_holder'] =  utils.get_image_placeholder_document(self.request.user,self.project)
         return context
 
 class DocumentCendari(DocumentAdminView):
@@ -897,6 +908,7 @@ class DocumentCendari(DocumentAdminView):
     def get_context_data(self, **kwargs):
         context = super(DocumentCendari, self).get_context_data(**kwargs)       
         context['object_type'] = 'document'
+        context['image_place_holder'] =  utils.get_image_placeholder_document(self.request.user,self.project)
         return context
 
 class EntityCendari(TopicAdminView):
