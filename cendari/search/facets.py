@@ -1,7 +1,7 @@
 from editorsnotes.main.models import Project
 from . import cendari_index
 import pprint
-from ..utils import bounding_box_to_precision
+from ..utils import bounding_box_to_precision, date_range_to_interval
 
 CENDARI_FACETS = [
     "application",
@@ -62,11 +62,12 @@ def geo_bounds_precision(geo_bounds):
     if not geo_bounds:
         return 2
     (lat1, long1, lat2, long2) = geo_bounds
-    return bounding_box_to_precision(lat1, long1, lat2, long2)
+    return bounding_box_to_precision(lat1, long1, lat2, long2, 70)
 
 def date_range_interval(date_range):
-    pprint.pprint(date_range)
-    return '1y'
+    #pprint.pprint(date_range)
+    #return '2y'
+    return date_range_to_interval(date_range[0], date_range[1], 20)
 
 def cendari_aggregations(size={},default_size=10,geo_bounds=None,date_range=None):
     interval = date_range_interval(date_range)
@@ -76,7 +77,7 @@ def cendari_aggregations(size={},default_size=10,geo_bounds=None,date_range=None
             "date_histogram" : {
                 "field" : "date",
                 "interval" : interval,
-                #"format" : "yyyy"
+                "min_doc_count": 0
             }
         },
         'location': {

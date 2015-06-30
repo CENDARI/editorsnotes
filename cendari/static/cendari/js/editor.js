@@ -423,7 +423,8 @@ function submitEntity(fc){
     }
     formData = formData + $("#saveButton").attr('name')+"="+$("#saveButton").val();
     
-    if(($('#rdf_id').val().length && getHref($('#rdf_id').val().trim()).hostname.split('.').indexOf('dbpedia') !== -1) || $('#rdf_id').val().length === 0 ){
+
+    if(($('#rdf_id').val().length && getHref($('#rdf_id').val().trim()).href.indexOf('dbpedia') !== -1) || $('#rdf_id').val().length === 0 ){
         $.ajax({
             url:fc.attr('action'),
             type: fc.attr('method'),
