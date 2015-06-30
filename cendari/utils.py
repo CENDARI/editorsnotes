@@ -209,7 +209,7 @@ def date_range_to_interval(date1, date2, max_buckets=20):
     #pdb.set_trace()
     if date2 < date1:
         (date1, date2) = (date2, date1)
-    dist = (date2 - date1) / 1000
+    dist = (date2 - date1) / 1000 # using seconds units
     if dist == 0:
         return '1d'
     # for i in range(0, len(TIME_LENGTH)):
