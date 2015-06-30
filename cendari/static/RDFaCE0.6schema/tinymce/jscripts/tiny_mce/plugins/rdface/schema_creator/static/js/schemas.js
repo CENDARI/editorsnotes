@@ -158,7 +158,7 @@ function create_form(schema,property,container){
 				if(schema='Thing'){
 					query = 
 					{
-					    "from" : 0, "size" : 15,
+					    "from" : 0, "size" : 25,
 					    "query": {
 						"query_string": {
 						    "query": request.term.toLowerCase()
@@ -168,7 +168,7 @@ function create_form(schema,property,container){
 				}else{
 					query = 
 					{
-					    "from" : 0, "size" : 15,
+					    "from" : 0, "size" : 25,
 					    "query": {
 						"query_string": {
 						    "query": request.term.toLowerCase()
@@ -181,7 +181,7 @@ function create_form(schema,property,container){
 				}
 
 				$.ajax({
-				    url: "http://localhost:9200/_search",
+				    url: "https://localhost:9200/_search",
 				    type: "POST",
 				    dataType: "JSON",
 				    data: JSON.stringify(query),

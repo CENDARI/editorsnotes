@@ -4849,7 +4849,8 @@
             url: cendari_root_url+"chat/api/"
         }), Messages
     }), define("text!templates/user.tmpl", [], function() {
-        return '<div class="s_avatar">\n	<img src="<%= gravatar %>" width="32px" height="32px" />\n</div>\n<div class="s_username">\n	<a href="#"><%= username %></a>\n</div>\n<p class="clear-both"></p>'
+        //return '<div class="s_avatar">\n	<img src="<%= gravatar %>" width="32px" height="32px" />\n</div>\n<div class="s_username">\n	<a href="#"><%= username %></a>\n</div>\n<p class="clear-both"></p>'
+        return '<div class="s_avatar">\n	<img src="" width="32px" height="32px" />\n</div>\n<div class="s_username">\n	<a href="#"><%= username %></a>\n</div>\n<p class="clear-both"></p>'
     }), define("views/user", ["backbone", "underscore", "text!templates/user.tmpl"], function(e, t, n) {
         return e.View.extend({
             tagName: "div",
