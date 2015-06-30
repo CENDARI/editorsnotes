@@ -118,13 +118,13 @@ GEOHASH_LENGTH = [
     1     # 6
 ]
 
-def bounding_box_to_precision(lat1, long1, lat2, long2):
+def bounding_box_to_precision(lat1, long1, lat2, long2, max_buckets=70):
 #    print "Bounding box is %f,%f %f,%f" % (lat1, long1, lat2, long2)
     dist = distance_on_earth_in_km(lat1, long1, lat2, long2)
 #    print "distance_on_earth_in_km=%f" % dist
     dist = dist / math.sqrt(2)
     for i in range(0, len(GEOHASH_LENGTH)):
-        if (dist / GEOHASH_LENGTH[i]) > 70:
+        if (dist / GEOHASH_LENGTH[i]) > max_buckets:
             break
 #    print "precision is %d" % i
     return i
@@ -189,3 +189,34 @@ def isodate2timestamp(iso):
     if negative:
         year = -year
     return jd_to_unix(gregorian_to_jd(year, month, day))
+
+SECOND_PER_DAY = 24*60*60
+DAY_PER_YEAR = 365.25
+SECOND_PER_YEAR = SECOND_PER_DAY*DAY_PER_YEAR
+
+TIME_LENGTH = [
+#    round(SECOND_PER_YEAR),
+    round(SECOND_PER_YEAR/12), # number of seconds per month
+    round(SECOND_PER_YEAR/52), # number of seconds per week
+    SECOND_PER_DAY
+]
+
+TIME_UNIT = [
+#    'y',
+    'M', 'w', 'd' ]
+
+def date_range_to_interval(date1, date2, max_buckets=20):
+    #pdb.set_trace()
+    if date2 < date1:
+        (date1, date2) = (date2, date1)
+    dist = (date2 - date1) / 1000
+    if dist == 0:
+        return '1d'
+    # for i in range(0, len(TIME_LENGTH)):
+    #     if (dist / TIME_LENGTH[i]) > max_buckets:
+    #         if i > 0:
+    #             i -= 1
+    #         break
+    i = 2
+    scale = math.floor(dist / (TIME_LENGTH[i] * (max_buckets-1)))
+    return "%d%s" % (scale, TIME_UNIT[i])

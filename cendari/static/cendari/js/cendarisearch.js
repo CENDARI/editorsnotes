@@ -104,60 +104,40 @@ function buildMap(mapData, element) {
     }
 }
 
-function rebin(range, m, data) {
-    var bins = [],
-        values = data.map(function(d) { return d.key;}),
-        weights = data.map(function(d) { return d.value;}),
+function rebin(range, data) {
+    var m = data.length,
         dx = (range[1]-range[0])/m,
-        bin, index,
-        i = -1,
-        n = values.length,
-        x;
+        bin, i;
 
     if (dx == 0) {
         dx = 1;
-        m = 1;
     }
 
     // Initialize the bins.
-    while (++i < m) {
-        bin = bins[i] = [];
-        bin.x = range[0]+i*dx;
+    for (i = 0; i < m; i++) {
+        bin = data[i];
+        bin.x = bin.key;
         bin.dx = dx;
-        bin.y = 0;
     }
 
-    // Fill the bins, ignoring values outside the range.
-    if (m > 0) {
-        i = -1; while(++i < n) {
-            x = values[i];
-            if (x == range[1])
-                index = m-1;
-            else index = Math.floor((x - range[0])/dx);
-            if (index >= 0 && index < m) {
-                bin = bins[index];
-                bin.y += weights[i];
-                bin.push(data[i]);
-            }
-        }
-    }
-
-    return bins;
+    return data;
 }
 
 /**
  * Constructs a timeline visualization.
  **/
-function buildTimeline(timelineData, element) {
+function buildTimeline(timelineData, extent, element) {
+    var m = timelineData.length,
+	dateExtent = [ timelineData[0].key, timelineData[m-1].key],
+	dx = (dateExtent[1]-dateExtent[0])/m;
+    dateExtent[1] += dx;
+    if (dx == 0) dx = 1;
     for (var i = 0; i < timelineData.length; i++) {
         var td = timelineData[i];
-        if (td.doc_count == 0) {
-            timelineData.splice(i, 1);
-            i--;
-            continue;
-        }
+	td.dx = dx;
+	td.x = td.key;
         td.date = new Date(td.key); // converts key to a proper date
-        td.value = Math.log(1+td.doc_count)/Math.LN10;
+        td.y = Math.log(1+td.doc_count)/Math.LN10;
     }
     if (timelineData.length == 0) return;
     
@@ -174,14 +154,12 @@ function buildTimeline(timelineData, element) {
         width = total_width - margin.left - margin.right,
         height = total_height - margin.top - margin.bottom;
 
-    var dateExtent = d3.extent(timelineData.map(function(d) { return d.key; }));
 
     var x = d3.time.scale()
             .domain(dateExtent)
             .range([0, width]);
 
-    // Generate a histogram using twenty uniformly-spaced bins.
-    var data = rebin(dateExtent, 20, timelineData);
+    var data = timelineData; //rebin(dateExtent, timelineData.length, timelineData);
     var y = d3.scale.linear()
             .domain([0, d3.max(data, function(d) { return d.y; })])
             .range([height, 0]);
@@ -198,6 +176,7 @@ function buildTimeline(timelineData, element) {
               .attr('width', total_width)
             .append("g")
               .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    var bar_width = Math.floor(width / (data.length+1));
 
     var draw = function() {
 	console.log('translate='+d3.event.translate);
@@ -216,7 +195,7 @@ function buildTimeline(timelineData, element) {
            .enter().append("rect")
             .attr("class", "bg")
             .attr("x", function(d) { return x(d.x); })
-            .attr("width", width/data.length)
+            .attr("width", bar_width)
             .attr("height", height)
            .append("title")
             .text(function(d) { return formatTime(d.x)+": "+formatCount(d.y); });
@@ -229,7 +208,7 @@ function buildTimeline(timelineData, element) {
 
     bar.append("rect")
         .attr("x", 1)
-        .attr("width", width/data.length)
+        .attr("width", bar_width)
         .attr("height", function(d) { return Math.ceil(height - y(d.y)); })
       .append("title")
         .text(function(d) { return formatTime(d.x)+": "+formatCount(d.y); });
@@ -434,11 +413,11 @@ function datepicker_parseDate(format, value, settings) {
     var year = 1, month = 0, day = 0, len;
     var m = value.match('^[-]?[0-9]+');
     if (! m) return null;
-    var date = new Date(2000, month, day);
+    var date = new Date(Date.UTC(2000, month, day));
     year = Number(m[0]);
     if (! year) 
 	year = 1;
-    date.setFullYear(year);
+    date.setUTCFullYear(year);
     len = m[0].length;
     if (len == value.length)
 	return date;
@@ -471,7 +450,7 @@ function datepicker_formatDate(format, date, settings) {
     if (!date) {
 	return "";
     }
-    var year = date.getFullYear(),
+    var year = date.getUTCFullYear(),
 	negative = (year < 0);
     if (negative) {
 	year = -year;
@@ -482,11 +461,11 @@ function datepicker_formatDate(format, date, settings) {
     if (negative)
 	ret = '-' + ret;
     ret = ret + '-';
-    var v = (date.getMonth()+1).toString();
+    var v = (date.getUTCMonth()+1).toString();
     if (v.length < 2)
 	v = '0'+v;
     ret = ret + v + '-';
-    v = (date.getDate()).toString();
+    v = (date.getUTCDate()).toString();
     if (v.length < 2)
 	v = '0'+v;
     ret = ret + v;
@@ -499,13 +478,13 @@ function datepicker__formatDate(inst, day, month, year) {
 	inst.currentDay = inst.selectedDay;
 	inst.currentMonth = inst.selectedMonth;
 	inst.currentYear = inst.selectedYear;
-	date = new Date(inst.currentYear, inst.currentMonth, inst.currentDay);
-	date.setFullYear(inst.currentYear);
+	date = new Date(Date.UTC(inst.currentYear, inst.currentMonth, inst.currentDay));
+	date.setUTCFullYear(inst.currentYear);
 	this._daylightSavingAdjust(date);
     }
     else if (typeof day !== "object") {
-	date = new Date(year, month, day);
-	date.setFullYear(year);
+	date = new Date(Date.UTC(year, month, day));
+	date.setUTCFullYear(year);
 	this._daylightSavingAdjust(date);
     }
     return this.formatDate(this._get(inst, "dateFormat"), date, this._getFormatConfig(inst));
