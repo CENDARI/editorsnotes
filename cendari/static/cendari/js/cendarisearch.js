@@ -128,10 +128,11 @@ function rebin(range, data) {
  **/
 function buildTimeline(timelineData, extent, element) {
     var m = timelineData.length,
-	dateExtent = [ timelineData[0].key, timelineData[m-1].key],
-	dx = (dateExtent[1]-dateExtent[0])/m;
-    dateExtent[1] += dx;
+	dateExtent = [ Math.min(timelineData[0].key, extent[0]),
+		       Math.min(timelineData[m-1].key, extent[1])],
+	dx = (extent[1]-extent[0])/m;
     if (dx == 0) dx = 1;
+    dateExtent[1] += dx;
     for (var i = 0; i < timelineData.length; i++) {
         var td = timelineData[i];
 	td.dx = dx;
@@ -257,6 +258,7 @@ function parse_doc_params() {
 var doc_facets = {};
 var facets_prefix = 'selected_facets';
 var bounds = 0;
+var date_range = 0;
 function parse_facets() {
     doc_facets = {};
     for (var i = 0; i < doc_params.length; i++) {
@@ -275,6 +277,9 @@ function parse_facets() {
         else if (p[0] == 'bounds') {
             bounds = p[1];
         }
+	else if (p[0] == 'daterange') {
+	    date_range = p[1];
+	}
     }
 }
 
@@ -309,6 +314,13 @@ function url_facets() {
         }
         ret += 'bounds='+bounds;
     }
+    if (date_range) {
+        if (! first) {
+            ret += '&';
+            first = false;
+        }
+        ret += 'daterange='+date_range;
+    }
     return ret;
 }
 
@@ -335,6 +347,17 @@ function facet_del_facet(facet) {
 
 function filter_date(event) {
     event.preventDefault();
+    var min = $( "#min_date" ).val(),
+	max = $( "#max_date" ).val();
+    if (min && max) {
+	min = datepicker_parseDate(null, min, null);
+	max = datepicker_parseDate(null, max, null);
+	if (min >= max)
+	    return;
+	date_range = min.getTime()+","+max.getTime();
+	var url = url_facets();
+	document.location.assign(url);
+    }
 }
 
 function filter_location(event) {
@@ -401,7 +424,7 @@ function facet_toggle(event) {
 }
 
 function datepicker_parseDate(format, value, settings) {
-    if (format == null || value == null) {
+    if (value == null) {
 	throw "Invalid arguments";
     }
 
@@ -504,7 +527,7 @@ function bind_faceted_widgets() {
     $('.facetview_morefacetvals').click(morefacetvals);
     $('.facetview_toggle').click(facet_toggle);
     $('.facetview_filtershow').click(showfiltervals);
-    $('.facetview_filterlocation').click(filter_location);
     $('.facetview_adaptresolution').click(adapt_resolution);
     $('.facetview_resetlocation').click(reset_location);
+    $('.facetview_filterdate').click(filter_date);
 }
