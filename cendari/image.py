@@ -14,8 +14,8 @@ def scan_to_dict(scan):
     image_width, image_length = search('TIFF {:d}x{:d}', res).fixed
     image_width = int(image_width)
     image_length = int(image_length)
-    if image_width != scan.image.width or image_length != scan.image.height:
-        print "Discrepancy in image sizes for scan %s" % scan.image.name
+#    if image_width != scan.image.width or image_length != scan.image.height:
+#        print "Discrepancy in image sizes for scan %s" % scan.image.name
     tile_width = 256
     tile_length = 256
 

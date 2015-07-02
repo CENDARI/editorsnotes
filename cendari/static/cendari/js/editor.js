@@ -155,7 +155,7 @@ function updateScanTab(scans){
     console.log('scans',scans);
 
     for(var i=0;i<scans.length;i++){
-        scans_html += createScanElement(scans[i].image_url,scans[i].image_thumbnail_url,scans[i].id);
+        scans_html += createScanElement(scans[i].image_url,scans[i].name,scans[i].image_thumbnail_url,scans[i].id);
     }
 
     

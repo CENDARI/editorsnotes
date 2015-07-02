@@ -14,6 +14,7 @@ from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
+from django.core.files.images import get_image_dimensions
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.db import models
 from django.utils.html import escape, strip_tags, strip_entities
@@ -399,6 +400,28 @@ class Scan(CreationMetadata, ProjectPermissionsMixin):
                                   ContentFile(thumbfile.read()),
                                   save=save)
         thumbfile.close()
+
+    def is_image(self):
+        path, ext = os.path.splitext(self.image.name)
+        print "File is %s .... %s" % (path, ext)
+        if ext and ext.startswith('.'):
+            return ext[1:].lower() in settings.IMAGE_FILE_TYPES;
+        return False
+
+    def needs_image_viewer(self):
+        if not self.is_image():
+            print "Not an image"
+            return False
+        dimensions = self._get_image_dimensions()
+        print "Image dimension (%d,%d)" % (dimensions[0], dimensions[1])
+        return dimensions[0] > 1024 and dimensions[1] > 1024
+
+    def _get_image_dimensions(self):
+        if not hasattr(self, '_dimensions_cache'):
+            close = self.image.file.closed
+            self.image.file.open()
+            self._dimensions_cache = get_image_dimensions(str(self.image.file), close=close)
+        return self._dimensions_cache
 
     def get_tiff_path(self):
         return iipimage_storage.get_tiff_path(self.image.path)

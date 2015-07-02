@@ -75,6 +75,14 @@ UPLOAD_FILE_TYPES = [
     #NOT YET 'video/x-msvideo' # avi
 ]
 
+IMAGE_FILE_TYPES = {
+    'tiff': 'image/tiff',
+    'tif': 'image/tiff',
+    'png': 'image/png',
+    'jpg': 'image/jpeg',
+    'jpeg': 'image/jpeg',
+}
+
 CENDARI_LOGO_TIFF = 'cendari/img/cendari_logo.tif'
 CENDARI_LOGO_PNG = 'cendari/img/cendari_logo.png'
 
