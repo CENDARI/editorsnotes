@@ -135,12 +135,13 @@ function  updatedEnitiesTab(prefix,related_topics){
 }
 
 
-function createScanElement(image_url,thumbnail_url,id){
+function createScanElement(image_url,image_name,thumbnail_url,id){
     var html = "";
     html +='<li class="scan-list-item btn">'+
             '<a class="scan" id="'+id+'" href="'+image_url+'">'+
             '<img id="ext-gen1206" src="'+thumbnail_url+'" alt="Thumbnail of scan 1" width="100"></a>'+
             '<a href="'+cendari_root_url+'api/projects/'+cendari_js_project_slug+'/documents/'+cendari_js_object_id+'/scans/'+id+'/" class="delete" data-confirm="Are you sure to delete this item?"><img src="'+cendari_root_url+'static/cendari/img/fileclose.png"></a>'+
+	    '<br><span>'+image_name+'</span>'+
             '</li>';
     return html;
                     

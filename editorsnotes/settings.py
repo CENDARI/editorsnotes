@@ -57,19 +57,26 @@ AUTHENTICATION_BACKENDS = (
 #    'django_browserid.auth.BrowserIDBackend',
 )
 
-# CENDARI ADD
-# This is a 1.2.7 style configuration not used by version 2+ of haystack
-#HAYSTACK_SITECONF = 'editorsnotes.search_sites'
-#HAYSTACK_SEARCH_ENGINE = 'xapian'
-# This is a version 2+ of haystack
-HAYSTACK_CONNECTIONS = {
-    'default': {
-        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-        'URL': 'http://127.0.0.1:9200/',
-        'INDEX_NAME': 'haystack',
-    },
-}
-HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+# CENDARI ADD: supported mime types for uploads
+
+UPLOAD_FILE_TYPES = [
+    'image/tiff',
+    'image/png',
+    'image/jpeg',
+    'application/pdf',
+    'application/vnd.oasis.opendocument.text', # odt
+    'application/vnd.oasis.opendocument.spreadsheet', # ods
+    'application/vnd.ms-excel', # xls
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', # xlsx
+    'application/msword', # doc
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', # docx
+    'audio/mpeg', # mp3
+    'audio/x-wav', # wav
+    #NOT YET 'video/x-msvideo' # avi
+]
+
+CENDARI_LOGO_TIFF = 'cendari/img/cendari_logo.tif'
+CENDARI_LOGO_PNG = 'cendari/img/cendari_logo.png'
 
 #################
 # Path settings #

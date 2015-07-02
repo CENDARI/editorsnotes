@@ -1,5 +1,5 @@
 {% extends "centerCendari.html" %}
-{% load set_var %}
+{% load file %}
 {% load staticfiles typogrify display  compress %}
 
 {% block css %}
@@ -57,7 +57,7 @@
 			url: url,
 			dataType: 'json',
 			autoUpload: false,
-			acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
+			acceptFileTypes: /(\.|\/)(gif|jpe?g|png|doc|docx|pdf|xls|xlsx|odt|ods)$/i,
 			maxFileSize: 5000000, // 5 MB
 			disableImageResize: /Android(?!.*Chrome)|Opera/
 			.test(window.navigator.userAgent),
@@ -69,7 +69,7 @@
 			},
 			done: function (e, data) {
 				showSuccessMessage(messages.scan.success);
-				var scan_el = createScanElement(data.result.image_url,data.result.image_thumbnail_url,data.result.id);
+				var scan_el = createScanElement(data.result.image_url,data.result.name, data.result.image_thumbnail_url,data.result.id);
 				$('#scan-list').append(scan_el);
 				$('#scansTab').text('Scans ('+$('#scan-list li').size()+')');
 
@@ -228,50 +228,21 @@
 					{% else %}
 						Save document before adding a scan.
 					{%endif%}
-					<!-- {% if scans %}
 					<section id="scans-tab" >
 						<div id="scanlist-container">
-							<ul id="scan-list">
-								{% for scan in scans %}
-									<li>
-										<a class="scan btn" id="{{scan.id}}" href="http://{{ domain }}{{ scan.image.url }}">
-											<img class="thumbnail" src="{{scan.image_thumbnail.url}}" alt="Thumbnail of scan {{scan.id}}">
-										</a>
-									</li>
-								{% endfor %}
-							</ul>
+						  <ul id="scan-list">
+						    <script>
+    						    {% if scans %}
+						     {% for scan in scans %}
+						      document.write(createScanElement("{{scan.image.url}}","{{scan.image.name|basename}}","{{scan.image_thumbnail.url}}","{{scan.id}}"));
+    						     {% endfor %}
+						    {% endif %}
+						    </script>
+    						    </ul>
+    						    <iframe width="100%" allowfullscreen="true" id="scan-viewer" ></iframe>
 						</div>
-
-						<br/>
-
-						<iframe width="100%" allowfullscreen="true" id="scan-viewer" ></iframe>
-					</section>
-					{% endif %} -->
-
-					<section id="scans-tab" >
-						<div id="scanlist-container">
-							<ul id="scan-list">
-								{% if scans %}
-									{% for scan in scans %}
-									<li class='scan-list-item btn'>
-
-										<a class="scan" id="{{scan.id}}" href="{{ scan.image.url }}">
-											<img src="{{scan.image_thumbnail.url}}" width=100 alt="Thumbnail of scan {{scan.id}}">
-										<!-- {{ forloop.counter }} -->
-										 
-										</a>
-										<a href="{% url "api:api-scans-detail" project_slug=project.slug  document_id=document.id scan_id=scan.id  %}" class="delete" data-confirm="Are you sure to delete this scan?"><img src="{% static "cendari/img/fileclose.png" %}"></a>
-
-									</li>
-									{% endfor %}
-								{% endif %}
-							</ul>
-							<iframe width="100%" allowfullscreen="true" id="scan-viewer" ></iframe>
-						</div>
-
 						<br/>
 					</section>
-					
 				</div>
 			</li>
 		</ul>
@@ -384,6 +355,5 @@
 				
 			})
 		{% endif %}
-
 	</script>
 {% endblock functions %}

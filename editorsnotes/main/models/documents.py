@@ -7,7 +7,9 @@ import re
 from hashlib import md5
 from itertools import chain
 import unicodedata
+import mimetypes
 
+from django.conf import settings
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
@@ -16,6 +18,7 @@ from django.core.urlresolvers import reverse, NoReverseMatch
 from django.db import models
 from django.utils.html import escape, strip_tags, strip_entities
 from django.utils.safestring import mark_safe
+from django.utils._os import safe_join
 from lxml import etree, html
 from PIL import Image
 import reversion
@@ -359,7 +362,7 @@ class Scan(CreationMetadata, ProjectPermissionsMixin):
     A scanned image of (part of) a dcument.
     """
     document = models.ForeignKey(Document, related_name='scans')
-    image = models.ImageField(storage=iipimage_storage, upload_to=scan_file_name)
+    image = models.FileField(storage=iipimage_storage, upload_to=scan_file_name)
     image_thumbnail = models.ImageField(upload_to=scan_file_name, blank=True, null=True)
     ordering = models.IntegerField(blank=True, null=True)
     objects = OrderingManager()
@@ -375,15 +378,22 @@ class Scan(CreationMetadata, ProjectPermissionsMixin):
     def generate_thumbnail(self, save=True):
         size = 256, 256
 
-        self.image.seek(0)
-        thumbnail_image = Image.open(self.image)
+        (t,encoding) = mimetypes.guess_type(self.image.name)
+        if (not t) or t.split('/')[0] != 'image':
+            thumbnail_image = Image.open(safe_join(settings.STATIC_ROOT, settings.CENDARI_LOGO_PNG))
+            path, ext = os.path.splitext(self.image.name)
+            ext = '.png'
+        else:
+            self.image.seek(0)
+            thumbnail_image = Image.open(self.image)
+            path, ext = os.path.splitext(self.image.name)
+            
         thumbnail_image.thumbnail(size, Image.ANTIALIAS)
 
         thumbfile = BytesIO()
         thumbnail_image.save(thumbfile, format=thumbnail_image.format)
         thumbfile.seek(0)
 
-        path, ext = os.path.splitext(self.image.name)
         thumbnail_name = os.path.join(path + '_thumb', ext)
         self.image_thumbnail.save(path + '_thumb' + ext,
                                   ContentFile(thumbfile.read()),

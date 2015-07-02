@@ -1,5 +1,6 @@
 from collections import OrderedDict
 import json
+import os.path
 
 from lxml import etree
 from rest_framework import serializers
@@ -22,7 +23,7 @@ class ZoteroField(serializers.WritableField):
     def from_native(self, data):
         return data and json.dumps(data)
 
-class HyperLinkedImageField(serializers.ImageField):
+class HyperLinkedImageField(serializers.FileField):
     def to_native(self, value):
         if not value.name:
             ret = None
@@ -40,18 +41,22 @@ class ScanSerializer(serializers.ModelSerializer):
      # Cendari code E.G. aviz
     image_thumbnail_url = serializers.SerializerMethodField('it_url')
     image_url = serializers.SerializerMethodField('i_url')
+    name = serializers.SerializerMethodField('i_name')
     
     class Meta:
         model = Scan
         fields = ('id', 'image', 'image_thumbnail', 'ordering', 'created',
-                  'creator','image_thumbnail_url','image_url',)
+                  'creator','image_thumbnail_url','image_url', 'name')
     
     # Cendari code E.G. aviz
     def it_url(self,scan):
         return scan.image_thumbnail.url
 
     def i_url(self,scan):
-        return scan.image.url 
+        return scan.image.url
+
+    def i_name(self,scan):
+        return os.path.basename(scan.image.name)
 
 class DocumentSerializer(RelatedTopicSerializerMixin, ProjectSpecificItemMixin,
                          serializers.ModelSerializer):

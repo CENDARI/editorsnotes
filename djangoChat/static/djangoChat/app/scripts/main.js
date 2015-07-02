@@ -8,7 +8,7 @@ require.config({
 	urlArgs: "v=" +  (new Date()).getTime()
 });
 
-require(['views/messages','views/addMessage','collections/messages', ],function(MsgsView,AddMsg,MsgCollection){
+require(['views/messages','views/addMessage','collections/messages'],function(MsgsView,AddMsg,MsgCollection){
 
 	msgCollec = new MsgCollection();
 	v = new MsgsView({collection:msgCollec});
