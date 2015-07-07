@@ -1176,7 +1176,6 @@ def image_browse(request,project_slug,document_id):
     document = get_object_or_404(main_models.Document, id=document_id)
     project = document.project
 
-
     print document
     print document.project
     print document.creator
@@ -1200,5 +1199,11 @@ def image_browse(request,project_slug,document_id):
 @login_required
 def cendari_chat(request, project_slug):
     return render_to_response('cendari_chat.html',dict(project_slug=project_slug))
+
+@login_required
+def autocomplete_search(request, term):
+    search_results = 'no results'
+    print '********************** autocomplete_search, with search term: ' + term
+    return HttpResponse(search_results)
 
 

@@ -150,6 +150,11 @@ function create_form(schema,property,container){
 		//      	}
 	    	//});
 
+	        args = top.tinymce.activeEditor.windowManager.params;
+	        cendari_root_url = args.root_url;
+		cendari_js_project_slug = args.project_slug;
+	  	console.log("******************************* AJAX CALL URL = " + cendari_root_url + 'cendari/autocomplete_search/');
+
 		//Getting data from ElasticSearch
 		$("#entity_freebase").autocomplete({
 			source: function(request, response) {
@@ -181,21 +186,20 @@ function create_form(schema,property,container){
 				}
 
 				$.ajax({
-				    url: "https://localhost:9200/_search",
-				    type: "POST",
-				    dataType: "JSON",
-				    data: JSON.stringify(query),
+				    //url: "http://localhost:9200/_search",
+				    url: cendari_root_url+'cendari/autocomplete_search/term/'+request.term,
+				    type: 'GET',
 				    success: function(data) {
-					//console.log("sent data= " + JSON.stringify(data));
-				        response($.map(data.hits.hits, function(item) {
-						title = JSON.stringify(item._source["title"])
+					console.log("sent data========================= " + JSON.stringify(data));
+				        //response($.map(data.hits.hits, function(item) {
+						/*title = JSON.stringify(item._source["title"])
 						suggestion_title = title.substring(1, title.length-1)
 						suggestion_id = item._source["uri"]
 				            	return {
 				                	label: suggestion_title,
 				                	id: suggestion_id
-				            	}
-				        }));
+				            	}*/
+				       // }));
 				    },
 				});
 			},

@@ -203,6 +203,7 @@
 					plugin_url : b
 				});
 			});
+			console.log("testing .................................." + cendari_js_project_slug);
 			a.addCommand("editEntity", function(v1) {
 				var entity_type, param;
 				var aF = getCookie("annotationF");
@@ -229,7 +230,9 @@
 					entity_type : entity_type,
 					selected_txt : param,
 					annotationF : aF,
-					pointer : v1
+					pointer : v1,
+					project_slug : cendari_js_project_slug,
+					root_url: cendari_root_url,					
 				});
 			});
 			a.addCommand("mceRdfaHighlight", function() {
