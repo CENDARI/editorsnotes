@@ -10,6 +10,8 @@ logger = logging.getLogger('cendari.middleware')
 
 DATA_API_SESSION_KEY = '_cendari_api_key'
 
+
+
 class CendariUserMiddleware(RemoteUserMiddleware):
     def process_request(self, request):
 
@@ -113,21 +115,14 @@ def login_user_synchronize(sender, user, request, **kwargs):
     cn = request.META['cn']
     logger.debug('Received Shibboleth data eppn=%s, mail=%s, cn=%s', eppn, mail, cn)
 
-    from django.conf import settings
-    try:
-        data_api_server = settings.CENDARI_DATA_API_SERVER
-    except ValueError:
-        raise ImproperlyConfigured("CENDARI_DATA_API_SERVER must be configured in the settings file'")
-
-    api = None
+    api = cendari_data_api
     if DATA_API_SESSION_KEY in request.session:
         key = request.session[DATA_API_SESSION_KEY]
         logger.debug('Retrieved key in session: %s', key)
-        api = CendariDataAPI(data_api_server, key)
+        api.session(key)
     else:
         try:
             logger.debug('Getting key from DATA API')        
-            api = CendariDataAPI(data_api_server)
             if not api.session(eppn=eppn, mail=mail, cn=cn):
                 logger.warning("Cendari Data API refuses the connection")
                 return

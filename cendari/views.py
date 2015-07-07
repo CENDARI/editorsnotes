@@ -176,14 +176,16 @@ def scan(request, scan_id, project_slug):
     #print "scan view"
     o = {}
     scan = get_object_or_404(main_models.Scan, id=scan_id)
+    if not scan.needs_image_viewer():
+        return scan_image(request, scan_id, project_slug)
     if not scan.tiff_file_exists():
         scan.create_tiff_file()
         raise PermissionDenied("Tiff file is being built, try again...")
-    o['scan'] = scan
     info = scan_to_dict(scan)
+    o['image'] = info['path']
+    o['scan'] = scan
     o['server'] = settings.IIPSRV
     o['credit'] = 'INRIA Aviz for the Cendari project'
-    o['image'] = info['path']
     o['options'] = json.dumps(info)
     return render_to_response(
         'scan.html',
