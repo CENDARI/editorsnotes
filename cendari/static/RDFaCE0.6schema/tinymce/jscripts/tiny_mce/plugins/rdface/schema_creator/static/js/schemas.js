@@ -163,7 +163,7 @@ function create_form(schema,property,container){
 				    type: 'GET',
 				    data: {term: request.term, term_schema:schema},
 				    success: function(data) {
-					console.log("sent data========================= " + JSON.stringify(data));
+					//console.log("sent data========================= " + JSON.stringify(data));
 				        response($.map(data.hits.hits, function(item) {
 						title = JSON.stringify(item._source["title"])
 						suggestion_title = title.substring(1, title.length-1)
