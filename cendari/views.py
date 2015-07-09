@@ -1213,6 +1213,9 @@ def autocomplete_search(request):
 				"query_string": {
 				    "query": term.lower()
 				}
+			},
+			"sort": {
+			#	"uri": { "order": "asc" }
 			}
 		}
 	else:
@@ -1225,7 +1228,10 @@ def autocomplete_search(request):
 			},
 			"filter": {
 				"term": { "class": "http://schema.org/"+schema }
-			}
+			},
+			"sort": {
+			#	"uri": { "order": "asc" }
+			}	
 		}
 
 	es = ElasticSearch('http://localhost:9200/')
