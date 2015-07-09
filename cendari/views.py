@@ -52,6 +52,8 @@ from django.core.exceptions import PermissionDenied
 
 import operator
 
+from pyelasticsearch import ElasticSearch
+
 def about_cendari(request):
         return render_to_response(
         'aboutCendari.html', context_instance=RequestContext(request))
@@ -856,7 +858,6 @@ def search(request,project_slug=None):
         'results': results['hits']['hits'],
         'query': q if isinstance(q, basestring) else None
     }
-
     return render_to_response(
         'searchCendari.html', o, context_instance=RequestContext(request))
     
@@ -1201,9 +1202,37 @@ def cendari_chat(request, project_slug):
     return render_to_response('cendari_chat.html',dict(project_slug=project_slug))
 
 @login_required
-def autocomplete_search(request, term):
-    search_results = 'no results'
-    print '********************** autocomplete_search, with search term: ' + term
-    return HttpResponse(search_results)
+def autocomplete_search(request):
+    	term = request.GET.getlist('term')[0]
+    	schema = request.GET.getlist('term_schema')[0]
+    	#print '********************** autocomplete_search, with search term: ' + term + ', and schema: ' + schema + ', is done'
+	if (schema == 'Thing'):
+		query = {
+			"from" : 0, "size" : 25,
+			"query": {
+				"query_string": {
+				    "query": term.lower()
+				}
+			}
+		}
+	else:
+		query = {
+			"from" : 0, "size" : 25,
+			"query": {
+				"query_string": {
+					"query": term.lower()
+				}
+			},
+			"filter": {
+				"term": { "class": "http://schema.org/"+schema }
+			}
+		}
+
+	es = ElasticSearch('http://localhost:9200/')
+	results = es.search(query, index='cendari')
+	#print 'the results of the autocomplete search query:' + str(results)
+   	res = json.dumps(results, encoding="utf-8")
+    	return HttpResponse(res, mimetype='application/json') 
+
 
 
