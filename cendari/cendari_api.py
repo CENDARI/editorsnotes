@@ -15,7 +15,15 @@ except ImportError:
     # python 2
     from urllib import urlencode
 
-__all__ = [ 'DATA_API_URL', 'cendari_clean_name', 'CendariDataAPIException', 'CendariDataAPI' ]
+from django.conf import settings
+
+try:
+    DATA_API_SERVER = settings.CENDARI_DATA_API_SERVER
+except ValueError:
+    raise ImproperlyConfigured("CENDARI_DATA_API_SERVER must be configured in the settings file'")
+
+
+__all__ = [ 'DATA_API_URL', 'cendari_clean_name', 'CendariDataAPIException', 'CendariDataAPI', 'cendari_data_api' ]
 
 DATA_API_URL = 'http://localhost:42042/v1/'
 
@@ -42,9 +50,10 @@ class CendariDataAPI(object):
         self.url = url
         self.key = key
 
-    def session(self,eppn, mail, cn):
-        if self.key:
-            return self.key
+    def session(self,eppn=None, mail=None, cn=None, key=None):
+        if key:
+            self.key = key
+            return
         postfields = json.dumps({'eppn': eppn, 'mail': mail, 'cn': cn })
         buffer = BytesIO()
         c = pycurl.Curl()
@@ -64,6 +73,12 @@ class CendariDataAPI(object):
             # {"sessionKey": "xyz"}
             self.key = str(results['sessionKey'])
         return self.key
+
+    def has_key(self):
+        return self.key != None
+
+    def close(self):
+        self.key = None
 
     def read_url(self,url):
         results = []
@@ -257,6 +272,8 @@ class CendariDataAPI(object):
         else:
             return self.read_url(self.url+'privileges')
 
+
+cendari_data_api = CendariDataAPI(DATA_API_SERVER)
 
 import pprint
 import sys, os

@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import os.path
+import os
 from lxml import etree
 from pytz import timezone, utc
 from django.conf import settings
+from django.core.files import locks
 
 textify = etree.XSLT(etree.parse(
         os.path.abspath(os.path.join(os.path.dirname(__file__), 'textify.xsl'))))
@@ -103,3 +104,20 @@ def alpha_columns(items, sortattr, num_columns=3, itemkey='item'):
             { itemkey: item, 'first_letter': first_letter })
         item_index += 1
     return columns
+
+def copy_file(old_file_name, new_file_name,chunk_size = 1024*64):
+    print "Copying %s->%s" % (old_file_name, new_file_name)
+    with open(old_file_name, 'rb') as old_file:
+        # now open the new file, not forgetting allow_overwrite
+        fd = os.open(new_file_name, os.O_WRONLY | os.O_CREAT | getattr(os, 'O_BINARY', 0))
+        try:
+            locks.lock(fd, locks.LOCK_EX)
+            current_chunk = None
+            while current_chunk != b'':
+                current_chunk = old_file.read(chunk_size)
+                os.write(fd, current_chunk)
+        except:
+            print "Problem copying: %s" % sys.exc_info()[0]
+        finally:
+            locks.unlock(fd)
+            os.close(fd)

@@ -104,60 +104,41 @@ function buildMap(mapData, element) {
     }
 }
 
-function rebin(range, m, data) {
-    var bins = [],
-        values = data.map(function(d) { return d.key;}),
-        weights = data.map(function(d) { return d.value;}),
+function rebin(range, data) {
+    var m = data.length,
         dx = (range[1]-range[0])/m,
-        bin, index,
-        i = -1,
-        n = values.length,
-        x;
+        bin, i;
 
     if (dx == 0) {
         dx = 1;
-        m = 1;
     }
 
     // Initialize the bins.
-    while (++i < m) {
-        bin = bins[i] = [];
-        bin.x = range[0]+i*dx;
+    for (i = 0; i < m; i++) {
+        bin = data[i];
+        bin.x = bin.key;
         bin.dx = dx;
-        bin.y = 0;
     }
 
-    // Fill the bins, ignoring values outside the range.
-    if (m > 0) {
-        i = -1; while(++i < n) {
-            x = values[i];
-            if (x == range[1])
-                index = m-1;
-            else index = Math.floor((x - range[0])/dx);
-            if (index >= 0 && index < m) {
-                bin = bins[index];
-                bin.y += weights[i];
-                bin.push(data[i]);
-            }
-        }
-    }
-
-    return bins;
+    return data;
 }
 
 /**
  * Constructs a timeline visualization.
  **/
-function buildTimeline(timelineData, element) {
+function buildTimeline(timelineData, extent, element) {
+    var m = timelineData.length,
+	dateExtent = [ Math.min(timelineData[0].key, extent[0]),
+		       Math.min(timelineData[m-1].key, extent[1])],
+	dx = (extent[1]-extent[0])/m;
+    if (dx == 0) dx = 1;
+    dateExtent[1] += dx;
     for (var i = 0; i < timelineData.length; i++) {
         var td = timelineData[i];
-        if (td.doc_count == 0) {
-            timelineData.splice(i, 1);
-            i--;
-            continue;
-        }
+	td.dx = dx;
+	td.x = td.key;
         td.date = new Date(td.key); // converts key to a proper date
-        td.value = Math.log(1+td.doc_count)/Math.LN10;
+        td.y = Math.log(1+td.doc_count)/Math.LN10;
     }
     if (timelineData.length == 0) return;
     
@@ -174,14 +155,12 @@ function buildTimeline(timelineData, element) {
         width = total_width - margin.left - margin.right,
         height = total_height - margin.top - margin.bottom;
 
-    var dateExtent = d3.extent(timelineData.map(function(d) { return d.key; }));
 
     var x = d3.time.scale()
             .domain(dateExtent)
             .range([0, width]);
 
-    // Generate a histogram using twenty uniformly-spaced bins.
-    var data = rebin(dateExtent, 20, timelineData);
+    var data = timelineData; //rebin(dateExtent, timelineData.length, timelineData);
     var y = d3.scale.linear()
             .domain([0, d3.max(data, function(d) { return d.y; })])
             .range([height, 0]);
@@ -198,6 +177,7 @@ function buildTimeline(timelineData, element) {
               .attr('width', total_width)
             .append("g")
               .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    var bar_width = Math.floor(width / (data.length+1));
 
     var draw = function() {
 	console.log('translate='+d3.event.translate);
@@ -216,7 +196,7 @@ function buildTimeline(timelineData, element) {
            .enter().append("rect")
             .attr("class", "bg")
             .attr("x", function(d) { return x(d.x); })
-            .attr("width", width/data.length)
+            .attr("width", bar_width)
             .attr("height", height)
            .append("title")
             .text(function(d) { return formatTime(d.x)+": "+formatCount(d.y); });
@@ -229,7 +209,7 @@ function buildTimeline(timelineData, element) {
 
     bar.append("rect")
         .attr("x", 1)
-        .attr("width", width/data.length)
+        .attr("width", bar_width)
         .attr("height", function(d) { return Math.ceil(height - y(d.y)); })
       .append("title")
         .text(function(d) { return formatTime(d.x)+": "+formatCount(d.y); });
@@ -278,6 +258,7 @@ function parse_doc_params() {
 var doc_facets = {};
 var facets_prefix = 'selected_facets';
 var bounds = 0;
+var date_range = 0;
 function parse_facets() {
     doc_facets = {};
     for (var i = 0; i < doc_params.length; i++) {
@@ -296,6 +277,9 @@ function parse_facets() {
         else if (p[0] == 'bounds') {
             bounds = p[1];
         }
+	else if (p[0] == 'daterange') {
+	    date_range = p[1];
+	}
     }
 }
 
@@ -330,6 +314,13 @@ function url_facets() {
         }
         ret += 'bounds='+bounds;
     }
+    if (date_range) {
+        if (! first) {
+            ret += '&';
+            first = false;
+        }
+        ret += 'daterange='+date_range;
+    }
     return ret;
 }
 
@@ -356,6 +347,17 @@ function facet_del_facet(facet) {
 
 function filter_date(event) {
     event.preventDefault();
+    var min = $( "#min_date" ).val(),
+	max = $( "#max_date" ).val();
+    if (min && max) {
+	min = datepicker_parseDate(null, min, null);
+	max = datepicker_parseDate(null, max, null);
+	if (min >= max)
+	    return;
+	date_range = min.getTime()+","+max.getTime();
+	var url = url_facets();
+	document.location.assign(url);
+    }
 }
 
 function filter_location(event) {
@@ -421,12 +423,111 @@ function facet_toggle(event) {
     document.location.assign(url);
 }
 
+function datepicker_parseDate(format, value, settings) {
+    if (value == null) {
+	throw "Invalid arguments";
+    }
+
+    value = (typeof value === "object" ? value.toString() : value + "");
+    if (value === "") {
+	return null;
+    }
+
+    var year = 1, month = 0, day = 0, len;
+    var m = value.match('^[-]?[0-9]+');
+    if (! m) return null;
+    var date = new Date(Date.UTC(2000, month, day));
+    year = Number(m[0]);
+    if (! year) 
+	year = 1;
+    date.setUTCFullYear(year);
+    len = m[0].length;
+    if (len == value.length)
+	return date;
+    var sep = value[len];
+    if (sep != '-' && sep != '/' && sep != '.')
+	return null;
+    value = value.substring(len+1);
+    m = value.match('^[0-9]+');
+    if (! m)
+	return date;
+    month = Number(m[0]);
+    if (month < 1 || month > 12)
+	month = 1;
+    date.setMonth(month-1);
+    len = m[0].length;
+    if (len == value.length || sep != value[len])
+	return date;
+    value = value.substring(len+1);
+    m = value.match('^[0-9]+');
+    if (! m)
+	return date;
+    day = Number(m[0]);
+    if (day < 1 || day > 31) 
+	day = 1;
+    date.setDate(day);
+    return date;
+}
+
+function datepicker_formatDate(format, date, settings) {
+    if (!date) {
+	return "";
+    }
+    var year = date.getUTCFullYear(),
+	negative = (year < 0);
+    if (negative) {
+	year = -year;
+    }
+    var ret = year.toString();
+    while (ret.length < 4) 
+	ret = '0' + ret;
+    if (negative)
+	ret = '-' + ret;
+    ret = ret + '-';
+    var v = (date.getUTCMonth()+1).toString();
+    if (v.length < 2)
+	v = '0'+v;
+    ret = ret + v + '-';
+    v = (date.getUTCDate()).toString();
+    if (v.length < 2)
+	v = '0'+v;
+    ret = ret + v;
+    return ret;
+}
+
+function datepicker__formatDate(inst, day, month, year) {
+    var date;
+    if (!day) {
+	inst.currentDay = inst.selectedDay;
+	inst.currentMonth = inst.selectedMonth;
+	inst.currentYear = inst.selectedYear;
+	date = new Date(Date.UTC(inst.currentYear, inst.currentMonth, inst.currentDay));
+	date.setUTCFullYear(inst.currentYear);
+	this._daylightSavingAdjust(date);
+    }
+    else if (typeof day !== "object") {
+	date = new Date(Date.UTC(year, month, day));
+	date.setUTCFullYear(year);
+	this._daylightSavingAdjust(date);
+    }
+    return this.formatDate(this._get(inst, "dateFormat"), date, this._getFormatConfig(inst));
+}
+
+var datepicker_options = {
+    dateFormat: "yy-mm-dd"
+};
+
+(function( $, dp ){
+    $.datepicker.parseDate = datepicker_parseDate;
+    $.datepicker.formatDate = datepicker_formatDate;
+    $.datepicker._formatDate = datepicker__formatDate;
+}( jQuery, jQuery.ui.datepicker ));
 
 function bind_faceted_widgets() {
     $('.facetview_morefacetvals').click(morefacetvals);
     $('.facetview_toggle').click(facet_toggle);
     $('.facetview_filtershow').click(showfiltervals);
-    $('.facetview_filterlocation').click(filter_location);
     $('.facetview_adaptresolution').click(adapt_resolution);
     $('.facetview_resetlocation').click(reset_location);
+    $('.facetview_filterdate').click(filter_date);
 }

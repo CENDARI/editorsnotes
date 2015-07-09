@@ -1,7 +1,7 @@
 from editorsnotes.main.models import Project
 from . import cendari_index
 import pprint
-from ..utils import bounding_box_to_precision
+from ..utils import bounding_box_to_precision, date_range_to_interval, timestamp2isodate
 
 CENDARI_FACETS = [
     "application",
@@ -62,11 +62,12 @@ def geo_bounds_precision(geo_bounds):
     if not geo_bounds:
         return 2
     (lat1, long1, lat2, long2) = geo_bounds
-    return bounding_box_to_precision(lat1, long1, lat2, long2)
+    return bounding_box_to_precision(lat1, long1, lat2, long2, 70)
 
 def date_range_interval(date_range):
-    pprint.pprint(date_range)
-    return '1y'
+    #pprint.pprint(date_range)
+    #return '2y'
+    return date_range_to_interval(date_range[0], date_range[1], 20)
 
 def cendari_aggregations(size={},default_size=10,geo_bounds=None,date_range=None):
     interval = date_range_interval(date_range)
@@ -75,8 +76,7 @@ def cendari_aggregations(size={},default_size=10,geo_bounds=None,date_range=None
         'date': {
             "date_histogram" : {
                 "field" : "date",
-                "interval" : interval,
-                #"format" : "yyyy"
+                "interval" : interval
             }
         },
         'location': {
@@ -150,12 +150,13 @@ def build_es_query(request,project_slug):
                         }]
 
     if 'daterange' in request.REQUEST:
-        daterange=map(long, request.REQUEST['daterange'].split(','))
-        date_range = [datetime.fromtimestamp(daterange[0]).isoformat(),
-                      datetime.fromtimestamp(daterange[1]).isoformat()]
-        filter_terms += [{"range" :
-                          {"date": { "gte": date_range[0], "lte": date_range[1] } }
-                        }]
+        date_range=map(long, request.REQUEST['daterange'].split(','))
+        #daterange = [timestamp2isodate(date_range[0]), timestamp2isodate(date_range[1])]
+        filter_terms += [
+            {"range":
+             {"date": {"gte": date_range[0], "lte": date_range[1]}}
+            }
+        ]
 
     if len(query_terms)==1:
         q['query'] = query_terms[0]
@@ -169,7 +170,20 @@ def build_es_query(request,project_slug):
     # because aggregation use the result of the query
     # and ignore the filter alone
     q = {'query': { 'filtered': q } }
+    #pprint.pprint(q)
     return (q, query, geo_bounds, date_range)
+
+def del_out_of_bounds(buckets, bounds):
+    return buckets
+
+def del_out_of_range(buckets, date_range):
+    ret = []
+    (min, max) = date_range
+    for b in buckets:
+        key = b['key']
+        if key >= min and key <= max:
+            ret.append(b)
+    return ret
 
 def cendari_faceted_search(request,project_slug=None):
     (q, query, geo_bounds, date_range) = build_es_query(request, project_slug)
@@ -197,15 +211,23 @@ def cendari_faceted_search(request,project_slug=None):
         # so we can split it/them into the right # of buckets
         q['aggregations'] = range_requests
         results = cendari_index.search(q,size=0)
-        pprint.pprint(results)
+        #pprint.pprint(results)
         if 'date_range' in results['aggregations']:
-            date_range = [ long(results['aggregations']['date_range']['min']),
-                           long(results['aggregations']['date_range']['max']) ]
+            if 'min' in results['aggregations']['date_range']:
+                date_range = [
+                    long(results['aggregations']['date_range']['min']),
+                    long(results['aggregations']['date_range']['max'])
+                ]
+            else:
+                date_range = [] # no dates
         if 'location_range' in results['aggregations']:
-            geo_bounds = results['aggregations']['location_range']['bounds']
-            top_left = [ geo_bounds['top_left']['lat'], geo_bounds['top_left']['lon']]
-            bottom_right = [ geo_bounds['bottom_right']['lat'], geo_bounds['bottom_right']['lon']]
-            geo_bounds = [ top_left[0], top_left[1], bottom_right[0], bottom_right[1] ]
+            if 'bounds' in results['aggregations']['location_range']:
+                geo_bounds = results['aggregations']['location_range']['bounds']
+                top_left = [ geo_bounds['top_left']['lat'], geo_bounds['top_left']['lon']]
+                bottom_right = [ geo_bounds['bottom_right']['lat'], geo_bounds['bottom_right']['lon']]
+                geo_bounds = [ top_left[0], top_left[1], bottom_right[0], bottom_right[1] ]
+            else:
+                geo_bounds = [] # no geo bounds
     
     q['fields'] = ['uri', 'title']
     size = int(request.REQUEST.get('size', 50))
@@ -254,9 +276,11 @@ def cendari_faceted_search(request,project_slug=None):
         if key+'_cardinality' in facets:
             details['value_count'] = facets[key+'_cardinality']['value']
         elif key=='location':
+            details['buckets']=del_out_of_bounds(details['buckets'], geo_bounds)
             details['value_count'] = len(details['buckets'])
             details['bounds'] = geo_bounds
         elif key=='date':
+            details['buckets']=del_out_of_range(details['buckets'], date_range)
             details['bounds'] = date_range
         else:
             details['value_count'] = len(details['buckets'])

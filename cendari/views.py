@@ -52,6 +52,8 @@ from django.core.exceptions import PermissionDenied
 
 import operator
 
+from pyelasticsearch import ElasticSearch
+
 def about_cendari(request):
         return render_to_response(
         'aboutCendari.html', context_instance=RequestContext(request))
@@ -176,14 +178,16 @@ def scan(request, scan_id, project_slug):
     #print "scan view"
     o = {}
     scan = get_object_or_404(main_models.Scan, id=scan_id)
+    if not scan.needs_image_viewer():
+        return scan_image(request, scan_id, project_slug)
     if not scan.tiff_file_exists():
         scan.create_tiff_file()
         raise PermissionDenied("Tiff file is being built, try again...")
-    o['scan'] = scan
     info = scan_to_dict(scan)
+    o['image'] = info['path']
+    o['scan'] = scan
     o['server'] = settings.IIPSRV
     o['credit'] = 'INRIA Aviz for the Cendari project'
-    o['image'] = info['path']
     o['options'] = json.dumps(info)
     return render_to_response(
         'scan.html',
@@ -854,7 +858,6 @@ def search(request,project_slug=None):
         'results': results['hits']['hits'],
         'query': q if isinstance(q, basestring) else None
     }
-
     return render_to_response(
         'searchCendari.html', o, context_instance=RequestContext(request))
     
@@ -1174,7 +1177,6 @@ def image_browse(request,project_slug,document_id):
     document = get_object_or_404(main_models.Document, id=document_id)
     project = document.project
 
-
     print document
     print document.project
     print document.creator
@@ -1198,5 +1200,45 @@ def image_browse(request,project_slug,document_id):
 @login_required
 def cendari_chat(request, project_slug):
     return render_to_response('cendari_chat.html',dict(project_slug=project_slug))
+
+@login_required
+def autocomplete_search(request):
+    	term = request.GET.getlist('term')[0]
+    	schema = request.GET.getlist('term_schema')[0]
+    	#print '********************** autocomplete_search, with search term: ' + term + ', and schema: ' + schema + ', is done'
+	if (schema == 'Thing'):
+		query = {
+			"from" : 0, "size" : 25,
+			"query": {
+				"query_string": {
+				    "query": term.lower()
+				}
+			},
+			"sort": {
+			#	"uri": { "order": "asc" }
+			}
+		}
+	else:
+		query = {
+			"from" : 0, "size" : 25,
+			"query": {
+				"query_string": {
+					"query": term.lower()
+				}
+			},
+			"filter": {
+				"term": { "class": "http://schema.org/"+schema }
+			},
+			"sort": {
+			#	"uri": { "order": "asc" }
+			}	
+		}
+
+	es = ElasticSearch('http://localhost:9200/')
+	results = es.search(query, index='cendari')
+	#print 'the results of the autocomplete search query:' + str(results)
+   	res = json.dumps(results, encoding="utf-8")
+    	return HttpResponse(res, mimetype='application/json') 
+
 
 

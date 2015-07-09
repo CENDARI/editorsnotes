@@ -1,9 +1,11 @@
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 from rest_framework.parsers import MultiPartParser, JSONParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-#import pdb
+import pdb
+import mimetypes
 
 from editorsnotes.main.models import Document, Scan, Transcript
 
@@ -65,6 +67,10 @@ class ScanList(BaseListAPIView):
     serializer_class = ScanSerializer
     parser_classes = (MultiPartParser,)
     paginate_by = None
+    # def dispatch(self, request, *args, **kwargs):
+    #     pdb.set_trace()
+    #     return super(ScanList, self).dispatch(request, *args, **kwargs)
+        
     def get_document(self):
         document_id = self.kwargs.get('document_id')
         document_qs = Document.objects.prefetch_related('scans__creator')
@@ -73,9 +79,18 @@ class ScanList(BaseListAPIView):
     def get_queryset(self):
         return self.get_document().scans.all()
     def pre_save(self, obj):
+        #pdb.set_trace()
+        if hasattr(obj.image.file, 'content_type'):
+            content_type = obj.image.file.content_type
+        else:
+            (content_type,_) = mimetypes.guess_type(obj.image.file.name)
+        print "Content type is %s" % content_type
+        if content_type not in settings.UPLOAD_FILE_TYPES:
+            raise Exception('Unhandled content type %s' % content_type)
         super(ScanList, self).pre_save(obj)
         obj.document = self.get_document()
         return obj
+
 
 
 class ScanDetail(BaseDetailView):

@@ -36,16 +36,17 @@
 					parent_node = $(event);
 					var del_node;
 					//todo: enable deleting entities as well
+					//NB: currently delete is not supported by RDFaCE, so I commented it out.
 					while (parent_node.length) {
 						del_node = parent_node;
 						if (parent_node.hasClass('r_prop') || parent_node.hasClass('r_entity')) {
-							menu.add({
-								title : 'Delete',
-								onclick : function() {
-									remove_annotation(del_node, getCookie("annotationF"));
-									a.setContent(a.getContent());
-								}
-							});
+							//menu.add({
+							//	title : 'Delete',
+							//	onclick : function() {
+							//		remove_annotation(del_node, getCookie("annotationF"));
+							//		a.setContent(a.getContent());
+							//	}
+							//});
 							break;
 						}
 						parent_node = parent_node.parent();
@@ -202,6 +203,7 @@
 					plugin_url : b
 				});
 			});
+			console.log("testing .................................." + cendari_js_project_slug);
 			a.addCommand("editEntity", function(v1) {
 				var entity_type, param;
 				var aF = getCookie("annotationF");
@@ -228,7 +230,9 @@
 					entity_type : entity_type,
 					selected_txt : param,
 					annotationF : aF,
-					pointer : v1
+					pointer : v1,
+					project_slug : cendari_js_project_slug,
+					root_url: cendari_root_url,					
 				});
 			});
 			a.addCommand("mceRdfaHighlight", function() {

@@ -150,43 +150,20 @@ function create_form(schema,property,container){
 		//      	}
 	    	//});
 
+	        args = top.tinymce.activeEditor.windowManager.params;
+	        cendari_root_url = args.root_url;
+		cendari_js_project_slug = args.project_slug;
+
 		//Getting data from ElasticSearch
 		$("#entity_freebase").autocomplete({
 			source: function(request, response) {
-				//Add accent folding later
-				//query = {"query":{"match_all":{}}}
-				if(schema='Thing'){
-					query = 
-					{
-					    "from" : 0, "size" : 15,
-					    "query": {
-						"query_string": {
-						    "query": request.term.toLowerCase()
-						}
-					    }
-					}
-				}else{
-					query = 
-					{
-					    "from" : 0, "size" : 15,
-					    "query": {
-						"query_string": {
-						    "query": request.term.toLowerCase()
-						}
-					    },
-					    "filter": {
-						"term": { "class": "http://schema.org/"+schema }
-					    }
-					}
-				}
-
 				$.ajax({
-				    url: "http://localhost:9200/_search",
-				    type: "POST",
-				    dataType: "JSON",
-				    data: JSON.stringify(query),
+				    //url: "http://localhost:9200/_search",
+				    url: cendari_root_url+'cendari/autocomplete_search/',
+				    type: 'GET',
+				    data: {term: request.term, term_schema:schema},
 				    success: function(data) {
-					//console.log("sent data= " + JSON.stringify(data));
+					//console.log("sent data========================= " + JSON.stringify(data));
 				        response($.map(data.hits.hits, function(item) {
 						title = JSON.stringify(item._source["title"])
 						suggestion_title = title.substring(1, title.length-1)
