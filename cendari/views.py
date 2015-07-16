@@ -606,7 +606,7 @@ def getLazyProjectData(request, project_slug, sfield):
                     })
                 elif model_name == 'document':
                     query_set = model.objects.filter(project__slug=p.slug).order_by('-last_updated')[:max_count]
-                    set_count = query_set.count()
+                    set_count = query_set.count() -1 #due to placeholder (hidden) document
                     node_title = (model_name + 's').title() + ' (' + str(set_count)  + ')'
                     document_list = getDocumentResources(request, p.slug, sfield)
                     result_list.append({
