@@ -214,10 +214,13 @@ def cendari_faceted_search(request,project_slug=None):
         #pprint.pprint(results)
         if 'date_range' in results['aggregations']:
             if 'min' in results['aggregations']['date_range']:
-                date_range = [
-                    long(results['aggregations']['date_range']['min']),
-                    long(results['aggregations']['date_range']['max'])
-                ]
+                try:
+                    date_range = [
+                        long(results['aggregations']['date_range']['min']),
+                        long(results['aggregations']['date_range']['max'])
+                    ]
+                except TypeError:
+                    date_range = [] # agg returns {min: None, max: None,...}
             else:
                 date_range = [] # no dates
         if 'location_range' in results['aggregations']:

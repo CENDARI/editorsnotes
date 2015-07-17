@@ -200,19 +200,31 @@ Ext.application({
 					region : 'south',
 					height : 350,
 					split : true,
-					layout:'fit',
+					layout:'accordion',
 					collapsible : true,
-					title : 'Image Viewer',
-					id : 'imageViewer',
+					title : 'Viewers',
+					id : 'viewers',
 					collapsed : true,
-				    tools: [{
-					type: 'expand',
-					handler: function() {
-					    var src=$('#scan-viewer').attr('src');
-					    if (src)
-						window.open(src, 'scan');
+					layoutConfig:{
+					    animate:true
+					},
+					items: [{
+					    	title:'Image',
+					    	id : 'imageViewer',
+				    	   	tools: [{
+							type: 'expand',
+							handler: function() {
+					    			var src=$('#scan-viewer').attr('src');
+					    			if (src)
+									window.open(src, 'scan');
+							}
+				    		}]
+					},
+					{
+					    title:'Ontology',
+					    id : 'ontologyViewer'
 					}
-				    }]
+					]
 				}]
 			}, {
 				region : 'east',
