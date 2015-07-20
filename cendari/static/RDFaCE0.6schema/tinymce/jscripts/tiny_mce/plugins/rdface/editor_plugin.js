@@ -40,13 +40,15 @@
 					while (parent_node.length) {
 						del_node = parent_node;
 						if (parent_node.hasClass('r_prop') || parent_node.hasClass('r_entity')) {
-							//menu.add({
-							//	title : 'Delete',
-							//	onclick : function() {
-							//		remove_annotation(del_node, getCookie("annotationF"));
-							//		a.setContent(a.getContent());
-							//	}
-							//});
+							menu.add({
+								title : 'Delete',
+								onclick : function() {
+									console.log('del_node',del_node);
+									console.log('annotationF',getCookie('annotationF'));
+									remove_annotation(del_node, getCookie("annotationF"));
+									a.setContent(a.getContent());
+								}
+							});
 							break;
 						}
 						parent_node = parent_node.parent();
