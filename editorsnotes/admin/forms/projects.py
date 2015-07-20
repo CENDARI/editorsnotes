@@ -195,6 +195,9 @@ class ProjectForm(ModelForm):
         self.fields["editors"].choices = [u for u in users if u not in owners]
         current_members = [u.username for u in project.members if  u not in owners]
         self.fields["editors"].initial =  current_members
+        instance = getattr(self, 'instance', None)
+        if instance and instance.pk:
+            self.fields['name'].widget.attrs['readonly'] = True
     def save(self, commit=True):
         project = super(ProjectForm, self).save(commit=False)
 
@@ -212,40 +215,67 @@ class ProjectForm(ModelForm):
                 role.users.remove(user)
         return project
 # Cendari code E.G. aviz
+# class ProjectCreationForm(ModelForm):
+#     editors = forms.MultipleChoiceField( widget=forms.CheckboxSelectMultiple,
+#                                           choices=[])
+#     class Meta:
+#         model = Project
+#         fields = ('name', 'slug', 'image', 'description', 'default_license','editors')
+#     def __init__(self, *args, **kwargs):
+#         user = kwargs['user']
+#         del kwargs['user']
+#         super(ProjectCreationForm, self).__init__(*args, **kwargs)
+#         self.user = user
+#         project = self.instance
+#         owners = [user for  role in project.roles.filter(role='Owner') for user in role.group.user_set.all()]
+#         users = [(u.username, "{} {}".format(u.first_name,u.last_name) if u.last_name else u.username) for u in User.objects.all() if u not in owners]
+#         self.fields["editors"].choices = [u for u in users if u not in owners]
+#         current_members = [u.username for u in project.members if  u not in owners]
+#         self.fields["editors"].initial =  current_members
+#     def save(self, commit=True):
+#         project = super(ProjectCreationForm, self).save()
+
+#         owners = [user for  role in project.roles.filter(role='Owner') for user in role.group.user_set.all()]
+
+#         owners = [user for  role in project.roles.filter(role='Owner') for user in role.group.user_set.all()]
+#         previous_members = [u.username for u in project.members if u not in owners ]
+#         current_members = self.cleaned_data["editors"]
+#         to_remove = [e for e in previous_members if e not in current_members]
+#         to_add = [e for e in current_members if e not in previous_members]
+#         role = project.roles.get(role='Editor')
+#         for user in User.objects.filter(username__in=to_add):
+#             role.users.add(user)
+#         for user in User.objects.filter(username__in=to_remove):
+#             if not user in owners:
+#                 role.users.remove(user)
+#         return project
+
+
 class ProjectCreationForm(ModelForm):
-    editors = forms.MultipleChoiceField( widget=forms.CheckboxSelectMultiple,
-                                          choices=[])
+    """
+    Form for creating a project. Must be passed a user.
+    """
+    join_project = forms.BooleanField(initial=True,
+                                      help_text='Join project after creation?')
     class Meta:
         model = Project
-        fields = ('name', 'slug', 'image', 'description', 'default_license','editors')
+        fields = ('name', 'slug', 'image', 'description', 'default_license', 'join_project',)
     def __init__(self, *args, **kwargs):
-        user = kwargs['user']
-        del kwargs['user']
+        user = kwargs.pop('user')
         super(ProjectCreationForm, self).__init__(*args, **kwargs)
         self.user = user
-        project = self.instance
-        owners = [user for  role in project.roles.filter(role='Owner') for user in role.group.user_set.all()]
-        users = [(u.username, "{} {}".format(u.first_name,u.last_name) if u.last_name else u.username) for u in User.objects.all() if u not in owners]
-        self.fields["editors"].choices = [u for u in users if u not in owners]
-        current_members = [u.username for u in project.members if  u not in owners]
-        self.fields["editors"].initial =  current_members
-    def save(self, commit=True):
-        project = super(ProjectCreationForm, self).save()
+    def clean_slug(self):
+        data = self.cleaned_data['slug']
+        if data in BANNED_PROJECT_SLUGS:
+            raise ValidationError('This slug is a reserved word.')
+        return data
+    def save(self, *args, **kwargs):
+        obj = super(ProjectCreationForm, self).save()
+        if self.cleaned_data['join_project']:
+            role = obj.roles.get(role='Editor')
+            role.users.add(self.user)
+        return obj
 
-        owners = [user for  role in project.roles.filter(role='Owner') for user in role.group.user_set.all()]
-
-        owners = [user for  role in project.roles.filter(role='Owner') for user in role.group.user_set.all()]
-        previous_members = [u.username for u in project.members if u not in owners ]
-        current_members = self.cleaned_data["editors"]
-        to_remove = [e for e in previous_members if e not in current_members]
-        to_add = [e for e in current_members if e not in previous_members]
-        role = project.roles.get(role='Editor')
-        for user in User.objects.filter(username__in=to_add):
-            role.users.add(user)
-        for user in User.objects.filter(username__in=to_remove):
-            if not user in owners:
-                role.users.remove(user)
-        return project
 
 # original
 # class ProjectForm(ModelForm):

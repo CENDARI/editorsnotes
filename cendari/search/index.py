@@ -346,3 +346,43 @@ class CendariIndex(object):
 
         #pprint.pprint(prepared_query)
         return self.open().search(prepared_query, index=self.name, **kwargs)
+
+
+def cendari_get_project_topics(topic_type,project_name,name_prefix):
+    query = {
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "query_string": {
+                            "default_field": "topic.serialized.type",
+                            "query": topic_type
+                        }
+                    },
+                    {
+                        "query_string": {
+                            "default_field": "topic.serialized.project.name",
+                            "query": project_name
+                        }
+                    },
+                    {
+                        "prefix": {
+                            "topic.serialized.preferred_name": name_prefix.lower()
+                        }
+                    }
+                ],
+                "must_not": [],
+                "should": []
+            }
+        },
+        "from": 0,
+        "size": 10,
+        "sort": [],
+        "facets": {}
+    }
+
+    es = ElasticSearch('http://localhost:9200/')
+    results = es.search(query, index='editorsnotes-items')
+
+    return results
+   
