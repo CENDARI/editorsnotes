@@ -654,7 +654,7 @@ def getTopicResources(request, project_slug, sfield):
                 #query_set = main_models.Topic.objects\
                 #  .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)[:max_count]  
 	    #o_query_set = sorted(query_set, key=operator.attrgetter('preferred_name'))              
-        set_count = o_query_set.count()
+	set_count = len(o_query_set)
         topic_count += 1
         # active_topics = utils.get_all_active_topics_for_project(project)
 
