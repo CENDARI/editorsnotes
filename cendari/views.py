@@ -16,11 +16,15 @@ from django.shortcuts import render_to_response, get_object_or_404
 
 from django.template import RequestContext
 from django.utils.functional import lazy 
+from django.utils import simplejson
 
 from editorsnotes.main import models as main_models
 from editorsnotes.search import en_index
+
 from cendari.search import cendari_index
 from cendari.search.facets import cendari_filter, cendari_aggregations, cendari_faceted_search
+from cendari.search.index import cendari_get_project_topics
+
 from cendari import utils
 from cendari.image import  ProjectAdminView, scan_to_dict
 from editorsnotes.admin.views.topics import TopicAdminView
@@ -49,6 +53,7 @@ import StringIO
 import pycurl
 import urllib
 from django.core.exceptions import PermissionDenied
+
 
 import operator
 
@@ -133,6 +138,16 @@ def _check_project_privs_or_deny(user, project_slug):
             raise PermissionDenied("not authorized on %s project" % project_slug)
         return project
 
+def get_projects_owned_by_user(user):
+    owned_projects = []
+    authorized_projects = user.get_authorized_projects()
+
+    for p in authorized_projects:
+        if p.is_owned_by(user):
+            owned_projects.append(p)
+
+    return owned_projects
+
 def _check_privs(user, obj):
     project = obj.get_affiliation()
     if not user.superuser_or_belongs_to(project) and not project.is_owned_by(user):
@@ -148,7 +163,8 @@ def index(request,project_slug=None):
     #    project = user.get_authorized_projects()[0]
     #else:
     #    project = Project.objects.get(slug=project_slug)
-    project =  _check_project_privs_or_deny(request.user, project_slug)
+    # project =  _check_project_privs_or_deny(request.user, project_slug)
+    project =  get_projects_owned_by_user(request.user)[0]
     o = { 'project': project }
     return render_to_response(
         'emptytab.html', o, context_instance=RequestContext(request))
@@ -256,7 +272,9 @@ def cendari_project_add(request):
     user = request.user
     o['user']= request.user
     project = user.get_authorized_projects()[0]
-    o['user_has_perm'] = user.is_superuser #or utils.is_project_creator(user)
+    # o['user_has_perm'] = user.is_superuser
+    o['user_has_perm'] = True
+     #or utils.is_project_creator(user)
     # if not (user.is_superuser or utils.is_project_creator(user)):
     #     return HttpResponseForbidden(
     #         content='You do not have permission to create a new project.')
@@ -806,7 +824,7 @@ def proxyRDFaCE(request):
     return HttpResponse(response, mimetype='application/json') 
 
 def resources(request, project_slug):
-    #print "=====> project slug is :"+str(project_slug)
+    print "=====> project slug is :"+str(project_slug)
 
     return render_to_response('resources.html',dict(project_slug=project_slug))
 
@@ -830,6 +848,13 @@ def faceted_search(request,project_slug=None):
     o = cendari_faceted_search(request,project_slug)
     return render_to_response(
         'cendarisearch.html', o, context_instance=RequestContext(request))
+
+
+def get_project_topics(request,project_slug=None):
+    p = Project.objects.filter(slug=project_slug)[0]
+    data = simplejson.dumps(cendari_get_project_topics(request.GET['topic_type'],p.name,request.GET['topic_name_prefix']))
+
+    return HttpResponse(data, mimetype='application/json')
 
 @login_required
 def search(request,project_slug=None):

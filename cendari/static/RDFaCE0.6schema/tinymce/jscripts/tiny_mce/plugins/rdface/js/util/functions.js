@@ -151,6 +151,8 @@ function remove_annotation(pointer,format){
 		pointer.find('>[property]').each(function(i,v){
 			remove_annotation($(v),'RDFa')
 		});
+
+		console.log('pointer_updated',pointer);
 	}else{
 		pointer.css("background-color","");
 		pointer.removeAttr("itemtype").removeAttr("class").removeAttr("itemid").removeAttr("itemscope").removeAttr("itemprop");
@@ -172,6 +174,7 @@ function remove_annotation(pointer,format){
 		pointer.replaceWith(pointer.html());
 	}
 }
+
 function remove_annotations(editor,only_automatic){
 	var tmp;
 	var aF=getCookie("annotationF");

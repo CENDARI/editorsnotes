@@ -42,6 +42,8 @@
 							menu.add({
 								title : 'Delete',
 								onclick : function() {
+									console.log('del_node',del_node);
+									console.log('annotationF',getCookie('annotationF'));
 									remove_annotation(del_node, getCookie("annotationF"));
 									a.setContent(a.getContent());
 								}
