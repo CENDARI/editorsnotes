@@ -493,7 +493,7 @@ def semantic_process_document(document,user=None):
             rdftopic = semantic_uri(topic)
             document.related_topics.create(creator=user, topic=topic)
             subject = t['rdfsubject']
-            value = t['value']
+            value = t['value'].strip() #NB to remove spaces after event string
             g.add( (subject, OWL.sameAs, rdftopic) )
             g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
             if topic.rdf is None and subject.startswith('http'):
@@ -504,25 +504,29 @@ def semantic_process_document(document,user=None):
                 topic.rdf = value
                 topic.save()
             elif t['type']=='EVT':
+		print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!, parsing event string->' + str(value) +'<'
          	if utils.parse_well_known_date(value):
+			print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!, this is a pure date: ' + str(utils.parse_well_known_date(value))
                 	topic.date = utils.parse_well_known_date(value)
-			topic.rdf = value
+			#topic.rdf = value
                 	logger.debug('Found a valid date: %s', topic.date)
 			topic.save()	
  		else:
 			results_reg = re.search('\[(.*?)\]', value)
+			#print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!, not just a date, search bewteen [] found: ' + str(results_reg)
 			if results_reg!=None:
 				results_reg = str(results_reg.group(0))
 				explicit_date = results_reg[1:len(results_reg)-1]
+				#print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!, explicit date: ' + str(explicit_date)
 				if utils.parse_well_known_date(explicit_date):
                 			topic.date = utils.parse_well_known_date(explicit_date)
-					topic.rdf = explicit_date
+					#print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!, explicit date is a recognised format '
+					#topic.rdf = explicit_date
                 			logger.debug('Found a valid date between []: %s', topic.date)
 					topic.save()	
     semantic.commit()
 
  
-
 def semantic_process_transcript(transcript,user=None):
     """Extract the semantic information from a note,
     creating topics on behalf of the specific user."""
