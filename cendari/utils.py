@@ -15,13 +15,12 @@ import pdb
 
 import logging
 
-from datetime_safe import datetime as sdatetime
-
 from rest_framework.views import exception_handler
 
 from editorsnotes.main.models.documents import get_or_create_document
 
-import datetime as dt
+import datetime_safe
+
 
 logger = logging.getLogger('cendari.utils')
 
@@ -34,15 +33,67 @@ WELL_KNOWN_DATE_FORMATS=[
 
 def parse_well_known_date(str):
     for format in WELL_KNOWN_DATE_FORMATS:
+	dparts = []
         try:
-            return datetime.strptime(str, format)  # does not work for dates < 1900
+	    #return datetime.strptime(str, format)  # does not work for dates < 1900
+	    dparts = get_date_parts(str,format)
+	    if len(dparts) == 3:
+		    #res = datetime_safe.date(int(dparts[0]), int(dparts[1]), int(dparts[2])).strftime(format) # expecting date(year, month, day)
+        	    return datetime_safe.date(int(dparts[0]), int(dparts[1]), int(dparts[2]))
+	    else:
+		return None
         except ValueError:
             pass
     return None
 
+
+# gets date parts as list in this order: year, month, day
+def get_date_parts(str, format):
+	parts = []
+ 	if format == "%m/%d/%Y":
+		res = str.split("/")
+		if len(res) == 3:
+			parts.append(res[2])
+			parts.append(res[0])
+			parts.append(res[1])
+	elif format == "%Y/%m/%d":
+		res = str.split("/")
+		if len(res) == 3:
+			parts.append(res[0])
+			parts.append(res[1])
+			parts.append(res[2])
+	elif format == "%d.%m.%Y":
+		res = str.split(".")
+		if len(res) == 3:
+			parts.append(res[2])
+			parts.append(res[1])
+			parts.append(res[0])
+	elif format == "%Y-%m-%d":
+		res = str.split("-")
+		if len(res) == 3:
+			parts.append(res[0])
+			parts.append(res[1])
+			parts.append(res[2])
+	return parts
+
+
 def change_to_well_known_format(d):
     if d:
-    	return d.strftime(WELL_KNOWN_DATE_FORMATS[3]) 
+	dparts = []
+	if isinstance(d, datetime):
+		d_iso = d.isoformat()
+		cut = d_iso.find("T")
+		d_str = d_iso[0:cut]
+		dparts = get_date_parts(d_str,WELL_KNOWN_DATE_FORMATS[3])
+	else:
+		dparts = get_date_parts(d,WELL_KNOWN_DATE_FORMATS[3])
+
+	if len(dparts) == 3:
+		res = datetime_safe.date(int(dparts[0]), int(dparts[1]), int(dparts[2])).strftime(WELL_KNOWN_DATE_FORMATS[3])
+		return res
+	else:
+		return None
+    	#return d.strftime(WELL_KNOWN_DATE_FORMATS[3]) 
     return None
 
 
