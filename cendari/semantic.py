@@ -419,7 +419,7 @@ def semantic_process_note(note,user=None):
             note.related_topics.create(creator=user, topic=topic)
             rdftopic = semantic_uri(topic)
             subject = t['rdfsubject']
-            value = t['value'].strip() #NB to remove spaces after event string
+            value = t['value']
             g.add( (subject, OWL.sameAs, rdftopic) )
             g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
 
@@ -437,7 +437,7 @@ def semantic_process_note(note,user=None):
             elif t['type']=='EVT':
          	if utils.parse_well_known_date(value):
                 	topic.date = utils.parse_well_known_date(value)
-			#topic.rdf = value
+			topic.rdf = value
                 	logger.debug('Found a valid date: %s', topic.date)
 			topic.save()	
  		else:
@@ -447,7 +447,7 @@ def semantic_process_note(note,user=None):
 				explicit_date = results_reg[1:len(results_reg)-1]
 				if utils.parse_well_known_date(explicit_date):
                 			topic.date = utils.parse_well_known_date(explicit_date)
-					#topic.rdf = explicit_date
+					# topic.rdf = explicit_date
                 			logger.debug('Found a valid date between []: %s', topic.date)
 					topic.save()	
     semantic.commit()
@@ -493,7 +493,7 @@ def semantic_process_document(document,user=None):
             rdftopic = semantic_uri(topic)
             document.related_topics.create(creator=user, topic=topic)
             subject = t['rdfsubject']
-            value = t['value'].strip() #NB to remove spaces after event string
+            value = t['value']
             g.add( (subject, OWL.sameAs, rdftopic) )
             g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
             if topic.rdf is None and subject.startswith('http'):
@@ -506,7 +506,7 @@ def semantic_process_document(document,user=None):
             elif t['type']=='EVT':
          	if utils.parse_well_known_date(value):
                 	topic.date = utils.parse_well_known_date(value)
-			#topic.rdf = value
+			# topic.rdf = value
                 	logger.debug('Found a valid date: %s', topic.date)
 			topic.save()	
  		else:
@@ -516,12 +516,13 @@ def semantic_process_document(document,user=None):
 				explicit_date = results_reg[1:len(results_reg)-1]
 				if utils.parse_well_known_date(explicit_date):
                 			topic.date = utils.parse_well_known_date(explicit_date)
-					#topic.rdf = explicit_date
+					# topic.rdf = explicit_date
                 			logger.debug('Found a valid date between []: %s', topic.date)
 					topic.save()	
     semantic.commit()
 
  
+
 def semantic_process_transcript(transcript,user=None):
     """Extract the semantic information from a note,
     creating topics on behalf of the specific user."""
@@ -558,7 +559,7 @@ def semantic_process_transcript(transcript,user=None):
             rdftopic = semantic_uri(topic)
             transcript.document.related_topics.create(creator=user, topic=topic)
             subject = t['rdfsubject']
-            value = t['value'].strip() #NB to remove spaces after event string
+            value = t['value']
             g.add( (subject, OWL.sameAs, rdftopic) )
             g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
             if topic.rdf is None and subject.startswith('http'):
@@ -567,7 +568,7 @@ def semantic_process_transcript(transcript,user=None):
             elif t['type']=='EVT':
          	if utils.parse_well_known_date(value):
                 	topic.date = utils.parse_well_known_date(value)
-			#topic.rdf = value
+			topic.rdf = value
                 	logger.debug('Found a valid date: %s', topic.date)
 			topic.save()	
  		else:

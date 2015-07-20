@@ -15,35 +15,34 @@ import pdb
 
 import logging
 
+from datetime_safe import datetime as sdatetime
 
 from rest_framework.views import exception_handler
 
 from editorsnotes.main.models.documents import get_or_create_document
 
+import datetime as dt
 
 logger = logging.getLogger('cendari.utils')
 
-# for simplicity I only left THE european date format as dates in different formats are not reconciled yet
 WELL_KNOWN_DATE_FORMATS=[
-    "%d/%m/%Y",
-#    "%m/%d/%Y",
-#    "%Y/%m/%d",
-#    "%d.%m.%Y",
-#    "%Y-%m-%d",
+    "%m/%d/%Y",
+    "%Y/%m/%d",
+    "%d.%m.%Y",
+    "%Y-%m-%d",
 ]
 
 def parse_well_known_date(str):
     for format in WELL_KNOWN_DATE_FORMATS:
         try:
-            return datetime.strptime(str, format) 
+            return datetime.strptime(str, format)  # does not work for dates < 1900
         except ValueError:
             pass
     return None
 
 def change_to_well_known_format(d):
     if d:
-    	#return d.strftime(WELL_KNOWN_DATE_FORMATS[0]) 
-    	return d.strftime("%Y-%m-%d") # html 5 date input format, this is the wire format. The presentation format of the date is browser dependent!
+    	return d.strftime(WELL_KNOWN_DATE_FORMATS[3]) 
     return None
 
 
