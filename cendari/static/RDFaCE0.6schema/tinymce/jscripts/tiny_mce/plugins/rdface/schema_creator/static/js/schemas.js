@@ -87,6 +87,9 @@ function create_form(schema,property,container){
 	}else{
 		id=schema+'_'+property;
 	}
+
+	console.log('==========> schema  :::: ', schema);
+
 	$('#'+container).append('<div id="schema_form_'+id+'"></div>');
 	$('#schema_form_'+id).append('<h4><a href="'+selected.url+'" target="_blank">'+selected.label+'</a></h4><small id="schema_description" class="muted">-- '+selected.comment+'</small>');
 	$('#schema_form_'+id).append('<form class="form-vertical well well-small" id="form_'+id+'"></form>');
