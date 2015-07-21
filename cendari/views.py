@@ -1233,7 +1233,7 @@ def autocomplete_search(request):
     	#print '********************** autocomplete_search, with search term: ' + term + ', and schema: ' + schema + ', is done'
 	if (schema == 'Thing'):
 		query = {
-			"from" : 0, "size" : 25,
+			"from" : 0, "size" : 30,
 			"query": {
 				"query_string": {
 				    "query": term.lower()
@@ -1245,7 +1245,7 @@ def autocomplete_search(request):
 		}
 	else:
 		query = {
-			"from" : 0, "size" : 25,
+			"from" : 0, "size" : 30,
 			"query": {
 				"query_string": {
 					"query": term.lower()

@@ -123,12 +123,15 @@
 
 				{% if topic.topic_node.type == 'EVT' %}
 
-				<label class="editorlabel bold"> Date (using your local calendar format):</label> 
-				
-				
-				<section data-error-target="content">
-					<input  type="date" id="date_id" name="date" value="{%if topic.id%}{{ topic.date }}{%endif%}"/>
-				</section>
+					<!-- <label class="editorlabel bold"> Date (using your local calendar format):</label>  -->
+					{% if topic.date %}
+						<div id = "date_id" class="fieldset-content">
+							{{ topic.date }} 
+						</div>
+					{% endif %}
+					<!-- <section data-error-target="content">
+						<input  type="date" id="date_id" name="date" value="{%if topic.id%}{{ topic.date }}{%endif%}"/>
+					</section> -->
 				{%endif%}
 
 				<label class="editorlabel bold"> Resolve: </label> 
@@ -224,14 +227,17 @@
 				type: 'GET',
 				data: {term: request.term, term_schema:schema},
 				success: function(data) {
-					//console.log("sent data========================= " + JSON.stringify(data));
+					console.log("sent data========================= " + JSON.stringify(data));
+
 					response($.map(data.hits.hits, function(item) {
-						title = JSON.stringify(item._source["title"])
-						suggestion_title = title.substring(1, title.length-1)
-						suggestion_id = item._source["uri"]
-						return {
-							label: suggestion_title,
-							id: suggestion_id
+						if(item._source["application"] === "dbpedia"){
+							title = JSON.stringify(item._source["title"])
+							suggestion_title = title.substring(1, title.length-1)
+							suggestion_id = item._source["uri"]
+							return {
+								label: suggestion_title,
+								id: suggestion_id
+							}
 						}
 					}));
 				},
@@ -239,10 +245,11 @@
 		},
 		minLength: 2,
 		select: function( event, ui ) {
+			event.preventDefault();
 			console.log( ui.item ?
 				"Selected: " + ui.item.label + ", with uri = " + ui.item.id :
 				"Nothing selected, input was " + this.value);
-			var elem = document.getElementById("entity_uri");
+			var elem = document.getElementById("rdf_id");
 			if (elem != null){
 				elem.value = ui.item.id;
 			}
