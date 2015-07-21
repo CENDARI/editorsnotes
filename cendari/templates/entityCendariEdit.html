@@ -176,6 +176,15 @@
 {% block functions %}
 
 	<script>
+
+	{% if topic.topic_node.type == "PER" %} schema ="Person"
+	{% elif topic.topic_node.type == "ORG" %} schema ="Organization"
+	{% elif topic.topic_node.type == "EVT" %} schema ="Event"
+	{% elif topic.topic_node.type == "PLA" %} schema ="Place"
+	{% elif topic.topic_node.type == "TAG" %} schema ="Thing"
+	{% endif %}
+
+
 	switchtabs(4,"note");
 
 
@@ -204,6 +213,54 @@
 			this.href+='?entity={{ topic.preferred_name }}'
 		})
 	})
+
+
+	//Getting data from ElasticSearch
+	$("#rdf_id").autocomplete({
+		source: function(request, response) {
+			$.ajax({
+				//url: "http://localhost:9200/_search",
+				url: cendari_root_url+'cendari/autocomplete_search/',
+				type: 'GET',
+				data: {term: request.term, term_schema:schema},
+				success: function(data) {
+					//console.log("sent data========================= " + JSON.stringify(data));
+					response($.map(data.hits.hits, function(item) {
+						title = JSON.stringify(item._source["title"])
+						suggestion_title = title.substring(1, title.length-1)
+						suggestion_id = item._source["uri"]
+						return {
+							label: suggestion_title,
+							id: suggestion_id
+						}
+					}));
+				},
+			});
+		},
+		minLength: 2,
+		select: function( event, ui ) {
+			console.log( ui.item ?
+				"Selected: " + ui.item.label + ", with uri = " + ui.item.id :
+				"Nothing selected, input was " + this.value);
+			var elem = document.getElementById("entity_uri");
+			if (elem != null){
+				elem.value = ui.item.id;
+			}
+		},
+		focus: function( event, ui ) {
+		//console.log( ui.item ?
+		//	"Hovered over: " + ui.item.label :
+		//	"Nothing hovered over, input was " + this.value);
+		},
+
+	});		
+	$('#rdf_id').mouseover(function() {
+		$('#entity_freebase').tooltip({
+			placement : 'right',
+			title : 'resolvable URI of the entity'
+		});
+	});
+
 
 	</script>
 {% endblock functions %}
