@@ -85,8 +85,10 @@ def change_to_well_known_format(d):
 		cut = d_iso.find("T")
 		d_str = d_iso[0:cut]
 		dparts = get_date_parts(d_str,WELL_KNOWN_DATE_FORMATS[3])
-	else:
+	elif isinstance(d, string):
 		dparts = get_date_parts(d,WELL_KNOWN_DATE_FORMATS[3])
+	else:
+		dparts = None
 
 	if len(dparts) == 3:
 		res = datetime_safe.date(int(dparts[0]), int(dparts[1]), int(dparts[2])).strftime(WELL_KNOWN_DATE_FORMATS[3])

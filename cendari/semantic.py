@@ -504,6 +504,7 @@ def semantic_process_document(document,user=None):
                 topic.rdf = value
                 topic.save()
             elif t['type']=='EVT':
+		print 'working with EVT entity...'
          	if utils.parse_well_known_date(value):
                 	topic.date = utils.parse_well_known_date(value)
 			# topic.rdf = value
