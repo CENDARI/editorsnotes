@@ -419,9 +419,14 @@ function submitEntity(fc){
     formData = formData + "summary="+$('#entity_description').val().trim()+"&";
     formData = formData + "rdf="+$('#rdf_id').val().trim()+"&";
     formData = formData + "preferred_name="+$('#preferred_name_id').text().trim()+"&";
+    // if($('#date_id').length){
+    //     formData = formData + 'date_custom='+$('#date_id').val()+"&";
+    // }
+
     if($('#date_id').length){
-        formData = formData + 'date_custom='+$('#date_id').val()+"&";
+        formData = formData + 'date_custom='+$('#date_id').text().trim()+"&";
     }
+
     formData = formData + $("#saveButton").attr('name')+"="+$("#saveButton").val();
     
 
