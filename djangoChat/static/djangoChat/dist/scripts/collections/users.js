@@ -1,1 +1,0 @@
-define(["backbone","models/user"],function(e,t){return e.Collection.extend({url:"/chat/api/users/",model:t})});

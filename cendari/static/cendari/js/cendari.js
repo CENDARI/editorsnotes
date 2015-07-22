@@ -74,23 +74,26 @@ Ext.application({
 					minWidth : 175,					
 					collapsible: true,
 					margins : '0 0 0 2',
-					layout:'accordion',
-					layoutConfig:{
-					    animate:true
-					},
-					items: [{
-					    title:'Navigation',
-					    autoScroll:true,
-					    border:false,
-					    iconCls:'nav',
-					    contentEl : 'west'
-					},{
-					    title:'Chat',
-					    border:false,
-					    autoScroll:true,
-					    iconCls:'chat',
-					    contentEl : 'southWest'
-					}]	
+					layout:'fit',
+					// layoutConfig:{
+					//     animate:true
+					// },
+					//items: [
+					// {
+					    // title:'Resources',
+				    autoScroll:true,
+				    border:false,
+				    iconCls:'nav',
+				    contentEl : 'west'
+					// }
+					// ,{
+					//     title:'Chat',
+					//     border:false,
+					//     autoScroll:true,
+					//     iconCls:'chat',
+					//     contentEl : 'southWest'
+					// }
+					//]	
 
 				}, 
 			{

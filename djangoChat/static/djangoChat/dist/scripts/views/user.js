@@ -1,1 +1,0 @@
-define(["backbone","underscore","text!templates/user.tmpl"],function(e,t,n){return e.View.extend({tagName:"div",className:"s_user",template:t.template(n),render:function(){return this.$el.html(this.template(this.model.toJSON())),this}})});
