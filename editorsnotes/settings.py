@@ -183,7 +183,7 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'widget_tweaks' ,
     'django_rq',
-    'djangoChat',
+    # 'djangoChat',
 )
 
 STATICFILES_FINDERS = (

@@ -20,6 +20,8 @@
 {% block init %}
 	<meta name="document_id" id="document_id" content="{{ document.id }}" />
 	<meta name="document_name" id="document_name" content="{{ document.import_id }}" />
+	
+	{% compress js%}
 	<script type="text/javascript" src="{% static "cendari/js/document.js" %}"></script>
 
 
@@ -85,8 +87,9 @@
 		})
 	});
 </script>
-{% endif %}
 
+{% endif %}
+{% endcompress js%}
 {% endblock init %}
 
 {% block model_fields %}

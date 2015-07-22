@@ -170,8 +170,8 @@ cendaripatterns = patterns('cendari.views',
     url(r'^cendari/autocomplete_search/$', 'autocomplete_search', name = 'autocomplete_search_view'),
 
    # Cendari chat
-   url(r'^chat/', include('djangoChat.urls')),
-   url(r'^cendari/(?P<project_slug>[-\w]+)/chat/$',                                       'cendari_chat',                         name='cendari_chat_view'),
+   # url(r'^chat/', include('djangoChat.urls')),
+   # url(r'^cendari/(?P<project_slug>[-\w]+)/chat/$',                                       'cendari_chat',                         name='cendari_chat_view'),
 
    #Cendari image browser
    url(r'^cendari/(?P<project_slug>[-\w]+)/documents/(?P<document_id>\d+)/image_browse/$', 'image_browse',name='image_browse'),
