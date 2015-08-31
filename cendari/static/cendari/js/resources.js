@@ -1,3 +1,23 @@
+// --- Contextmenu helper --------------------------------------------------
+function bindContextMenu(span) {
+    // Add context menu to this node:
+    $(span).contextMenu({menu: "myMenu"}, function(action, el, pos) {
+      // The event was bound to the <span> tag, but the node object
+      // is stored in the parent <li> tag
+	alert("bindContextMenu was called ...");
+      var node = $.ui.dynatree.getNode(el);
+      switch( action ) {
+      case "cut":
+      case "copy":
+      case "paste":
+        copyPaste(action, node);
+        break;
+      default:
+        alert("Todo: appply action '" + action + "' to node " + node);
+      }
+    });
+};
+
 $(function() {
     $("#tree").dynatree({
      checkbox: true,
@@ -6,11 +26,19 @@ $(function() {
 
 
 	minExpandLevel:2,
-	selectMode:1,//single selection
+	selectMode:2,//1 single selection,2:multi,3:multi-hier
 	clickFolderMode: 3,
 	//selectExpandsFolders: false,
 	//persist: true,
 	onClick: function(node, event) {
+
+	   // Close context  menu on click
+	   if( $(".contextMenu:visible").length > 0 ){
+	 	$(".contextMenu").hide();
+		// return false;
+	    }
+
+
 	    selected_node = node.data.key;
 	    //value = '{project:' + selected_node + ', node:' + node.data.title + ',url:' + node.data.url + '}';
 	    //trace.event("_user","select", "resources", value);//remove call for now, causes a bug	   
@@ -52,11 +80,26 @@ $(function() {
 			if (node.data.url ) {
 			    	page_url = parent.location;
 				node_url = node.data.url;
+				node_key = node.data.key;
            			//console.log('==============================>>>>>>>>>> 1esources/onClick: if not a project node is selected, with node url = ' + node.data.url);	
 				//alert("page_url.href.indexOf(node_url) = " + page_url.href.indexOf(node_url));	 
 			    	if(page_url.href.indexOf(node_url)==-1){
-           				//console.log('==============================>>>>>>>>>> Resources/onClick: page url:' + page_url + ' does not contain node url:' + node.data.url);		 
-					window.open(node.data.url, "_parent");
+           				//console.log('==============================>>>>>>>>>> Resources/onClick: page url:' + page_url + ' does not contain node url:' + node.data.url);
+					if (node.data.key.indexOf(cendari_js_project_slug+'.topic.')==-1){
+					}else{
+						//found a topic
+						console.log("==============================>>>>>>>>>> selected node is a topic, with key : " + node_key);
+						if(event.shiftKey){
+							node.toggleSelect();
+							console.log("==============================>>>>>>>>>> selected node is a topic, and shift was preseed.");
+						}else{
+							$("#tree").dynatree("getRoot").visit(function(node) { 
+								node.select(false);
+							});
+							console.log("==============================>>>>>>>>>> selected node is a topic, and shift was NOT preseed.");
+						}
+					}		 
+					//window.open(node.data.url, "_parent");
 			    	}else{
            				// console.log('==============================>>>>>>>>>> Resources/onClick: page url:' + page_url + ' does contain node url:' + node.data.url);
 				}
@@ -76,6 +119,15 @@ $(function() {
 	onDblClick: function(node, event){
 		// console.log('dynatree node.data is : ',node.data);
 	},
+      /*Bind context menu for every node when it's DOM element is created.
+        We do it here, so we can also bind to lazy nodes, which do not
+        exist at load-time. (abeautifulsite.net menu control does not
+        support event delegation)*/
+      onCreate: function(node, span){
+	alert("onCreate function called ..");
+        bindContextMenu(span);
+      },
+
 	onPostInit: function(isReloading, isError){
 	  	//console.log('==============================>>>>>>>>>> Resources/onPostInit: cendari_js_project_slug = ' + cendari_js_project_slug);
 	  	//console.log('==============================>>>>>>>>>> Resources/onPostInit: cendari_js_object_type = ' + cendari_js_object_type);
