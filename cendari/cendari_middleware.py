@@ -10,7 +10,9 @@ logger = logging.getLogger('cendari.middleware')
 
 DATA_API_SESSION_KEY = '_cendari_api_key'
 
-
+ADMIN_GROUP_MAP = settings.LDAP_GROUP_MAPS['admin_groups'].split(';')
+CONTRIBUTOR_GROUP_MAP = settings.LDAP_GROUP_MAPS['contributor_groups'].split(';')
+USER_GROUP_MAP = settings.LDAP_GROUP_MAPS['user_groups'].split(';')
 
 class CendariUserMiddleware(RemoteUserMiddleware):
     def process_request(self, request):
@@ -29,11 +31,11 @@ class CendariUserMiddleware(RemoteUserMiddleware):
             is_admin = False
             is_editor = False
             for group in groups:
-                if group in group_maps['admin_groups']:
+                if group in ADMIN_GROUP_MAP:
                     is_admin = True
                     logger.debug("User is admin")
                     break
-                elif group in group_maps['contributor_groups']:
+                elif group in CONTRIBUTOR_GROUP_MAP:
                     logger.debug("User is editor")
                     is_editor = True
             if is_admin:
