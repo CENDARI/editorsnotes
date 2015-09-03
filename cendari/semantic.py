@@ -2,8 +2,7 @@ import logging
 
 from editorsnotes.main.utils import xhtml_to_text
 from editorsnotes.main.templatetags.display import as_html
-from editorsnotes.main.models.topics import get_or_create_topic
-
+from editorsnotes.main.models.topics import get_or_create_topic,get_topic_with_rdf
 from models import PlaceTopicModel
 
 from django.conf import settings
@@ -522,7 +521,12 @@ def semantic_process_document(document,user=None):
 					topic.save()	
     semantic.commit()
 
- 
+def semantic_get_topic_graph(obj):
+    uri = semantic_uri(obj)
+    g = Semantic.graph(uri)
+    return g
+
+
 
 def semantic_process_transcript(transcript,user=None):
     """Extract the semantic information from a note,
@@ -535,7 +539,7 @@ def semantic_process_transcript(transcript,user=None):
     if user is None:
         user = transcript.document.last_updater
 
-    # Cleanup entities related to note
+    # Cleanup entities related to note11
     uri = semantic_uri(transcript.document)
     g = Semantic.graph(uri)
     Semantic.remove_graph(g)
@@ -563,7 +567,7 @@ def semantic_process_transcript(transcript,user=None):
             value = t['value']
             g.add( (subject, OWL.sameAs, rdftopic) )
             g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
-            if topic.rdf is None and subject.startswith('http'):
+            if topic.rdf is None and subject.startswit0h('http'):
                 topic.rdf = unicode(subject)
                 topic.save()
             elif t['type']=='EVT':
@@ -582,6 +586,37 @@ def semantic_process_transcript(transcript,user=None):
                 			logger.debug('Found a valid date between []: %s', topic.date)
 					topic.save()	
     semantic.commit()  
+
+
+# def semantic_get_indetifier_from_rdf(topic_rdf):
+#     dataset = Semantic.dataset()
+#     graph_identifiers = set(dataset.subjects(OWL['sameAs'], URIRef(topic_rdf)))
+#     if not graph_identifiers:
+#         return None
+
+#     return list(graph_identifiers)[0]
+
+
+def semantic_get_topic_graph(obj):
+    uri = semantic_uri(obj)
+    g = Semantic.graph(uri)
+    return g
+
+def semantic_check_user_alias(topic,user):
+    t = get_topic_with_rdf(topic.rdf)
+    if t== None:
+        return topic
+    g = semantic_get_topic_graph(t)
+
+    g.add((g.identifier,OWL['sameAs'],Literal(topic.preferred_name)))
+
+    t.alternate_names.create(name=topic.preferred_name,creator=user)
+    for alt_name in topic.alternate_names.all():
+        t.alternate_names.add(alt_name)
+        g.add((g.identifier,OWL['sameAs'],Literal(alt_name.name)))
+    topic.deleted = True
+    return t  
+    
 
 
 def semantic_process_topic(topic,user=None,doCommit=True):
