@@ -321,6 +321,12 @@ def get_or_create_topic(user, name, type, project, date=None):
         return None
     return t
 
+def get_topic_with_rdf(topic_rdf):
+    topics = Topic.objects.filter(rdf=topic_rdf)
+    if len(topics):
+        return topics[0]
+    return None
+
 
 class AlternateName(CreationMetadata, ProjectPermissionsMixin):
     topic = models.ForeignKey(Topic, related_name='alternate_names')
