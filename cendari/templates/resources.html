@@ -6,9 +6,10 @@
     <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
     <title>Resources</title>
 
-    {% compress css %}
+     {% compress css %}
       <link rel="stylesheet" href="{% static "style/jquery-ui/jquery-ui-1.8.10.custom.css" %}" type="text/css"/>
       <link rel="stylesheet" type="text/css" href="{% static "dynatree/dist/skin/ui.dynatree-custom.css" %}" /> 
+      <link rel="stylesheet" href="{% static "style/jquery-ui/jquery.contextMenu.css" %}" type="text/css"/>
       
       <style type="text/css">
         input[type="radio"].radio_link {
@@ -144,6 +145,28 @@
       <script type="text/javascript" src="{% static "dynatree/jquery/jquery.cookie.js" %}"></script>
       <script type="text/javascript" src="{% static "tracing/trace_test_130529.js" %}"></script>
 
+	//http://labs.abeautifulsite.net/archived/jquery-contextMenu/demo/jquery.contextMenu.js
+      <script type="text/javascript" src="{% static "function/jquery/jquery.contextMenu.js" %}"></script>
+      <script type="text/javascript"> 
+	// --- Contextmenu helper --------------------------------------------------
+	function bindContextMenu(span) {
+	    // Add context menu to this node:
+	    $(span).contextMenu({menu: "myMenu"}, function(action, el, pos) {
+	      // The event was bound to the <span> tag, but the node object
+	      // is stored in the parent <li> tag
+	      var node = $.ui.dynatree.getNode(el);
+	      switch( action ) {
+	      case "unify":
+		sendAlternativeNames(action, node);
+		break;
+	      default:
+		alert("Todo: appply action '" + action + "' to node " + node);
+	      }
+	    });
+	};
+      </script>
+
+
       <script type="text/javascript"> 
         	//resources are ordered alphabetically by default
 		      
@@ -246,6 +269,13 @@
       <label class ='sfield_label radio_link' id='label_last_updated' for="radio_button_last_updated">last updated</label>
       
     </p>
+
+    <!-- Definition of context menu -->
+    <ul id="myMenu" class="contextMenu">
+      <li class="unify"><a href="#unify">Unify</a></li>
+      <li class="split"><a href="#split">Collapse</a></li>
+      <li class="remove separator"><a href="#remove">Remove Aliases</a></li>
+    </ul>
 
     <div id="tree"></div>
   </body>

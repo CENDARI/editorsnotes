@@ -3,6 +3,10 @@ import urllib
 import json
 import re
 
+import logging
+
+logger = logging.getLogger('cendari.api')
+
 try:
     from io import BytesIO
 except ImportError:
@@ -19,9 +23,13 @@ from django.conf import settings
 
 try:
     DATA_API_SERVER = settings.CENDARI_DATA_API_SERVER
-except ValueError:
+except AttributeError:
     raise ImproperlyConfigured("CENDARI_DATA_API_SERVER must be configured in the settings file'")
 
+try:
+    DATA_API_TIMEOUT = settings.CENDARI_DATA_API_TIMEOUT
+except AttributeError:
+    DATA_API_TIMEOUT = 3
 
 __all__ = [ 'DATA_API_URL', 'cendari_clean_name', 'CendariDataAPIException', 'CendariDataAPI', 'cendari_data_api' ]
 
@@ -34,8 +42,6 @@ def cendari_clean_name(name):
     name = re.sub(r'[^a-z0-9_-]', '_', name.lower())
     if len(name) > 30:
         name = name[:30]
-    #print "name is: "
-    #print name,len(name)
     return name
 
 class CendariDataAPIException(Exception):
@@ -64,7 +70,7 @@ class CendariDataAPI(object):
         c.setopt(pycurl.WRITEDATA, buffer)
         c.perform()
         status = c.getinfo(c.RESPONSE_CODE)
-        #print('Status: %d' % status)
+        logger.debug('Data API call return status: %d', status)
         c.close()
         if status==200:
             body = buffer.getvalue()
@@ -152,6 +158,8 @@ class CendariDataAPI(object):
         c.setopt(pycurl.POST, True)
         c.setopt(pycurl.POSTFIELDS, postfields)
         c.setopt(pycurl.WRITEDATA, buffer)
+        c.setopt(pycurl.CONNECTTIMEOUT, DATA_API_TIMEOUT)
+        c.setopt(pycurl.TIMEOUT, DATA_API_TIMEOUT)
         c.perform()
         status = c.getinfo(c.RESPONSE_CODE)
         print('Status: %d' % status)
@@ -201,6 +209,8 @@ class CendariDataAPI(object):
         c.setopt(pycurl.HTTPHEADER, ["Authorization:"+self.key])
         c.setopt(pycurl.HTTPPOST, fields)
         c.setopt(pycurl.WRITEDATA, buffer)
+        c.setopt(pycurl.CONNECTTIMEOUT, DATA_API_TIMEOUT)
+        c.setopt(pycurl.TIMEOUT, DATA_API_TIMEOUT)
         c.perform()
         status = c.getinfo(c.RESPONSE_CODE)
         print('Status: %d' % status)
@@ -239,6 +249,8 @@ class CendariDataAPI(object):
         c.setopt(pycurl.HTTPPOST, fields)
         c.setopt(pycurl.CUSTOMREQUEST, "PUT")
         c.setopt(pycurl.WRITEDATA, buffer)
+        c.setopt(pycurl.CONNECTTIMEOUT, DATA_API_TIMEOUT)
+        c.setopt(pycurl.TIMEOUT, DATA_API_TIMEOUT)
         c.perform()
         status = c.getinfo(c.RESPONSE_CODE)
         print('Status: %d' % status)

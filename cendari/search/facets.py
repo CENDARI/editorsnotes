@@ -169,8 +169,14 @@ def build_es_query(request,project_slug):
     # craft a filtered query out of the query
     # because aggregation use the result of the query
     # and ignore the filter alone
-    q = {'query': { 'filtered': q } }
-    #pprint.pprint(q)
+    #q = {'query': { 'filtered': q } }
+    q['functions'] = [ {'filter': { 'term': { 'application': 'nte'}},
+                        'weight': 2
+                        }]
+    q['score_mode'] = 'sum'
+    q = {'query': { 'function_score': q } }
+    
+    pprint.pprint(q)
     return (q, query, geo_bounds, date_range)
 
 def del_out_of_bounds(buckets, bounds):
