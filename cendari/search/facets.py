@@ -176,7 +176,7 @@ def build_es_query(request,project_slug):
     # and ignore the filter alone
     #q = {'query': { 'filtered': q } }
     q['functions'] = [ {'filter': { 'term': { 'application': 'nte'}},
-                        'weight': 2
+                        'weight': 10
                         },
 # Need to change the mapping on the server... wait a bit
 #                        {'field_value_factor': {
