@@ -1,21 +1,11 @@
-// --- Contextmenu helper --------------------------------------------------
-function bindContextMenu(span) {
-    // Add context menu to this node:
-    $(span).contextMenu({menu: "myMenu"}, function(action, el, pos) {
-      // The event was bound to the <span> tag, but the node object
-      // is stored in the parent <li> tag
-	alert("bindContextMenu was called ...");
-      var node = $.ui.dynatree.getNode(el);
-      switch( action ) {
-      case "cut":
-      case "copy":
-      case "paste":
-        copyPaste(action, node);
-        break;
-      default:
-        alert("Todo: appply action '" + action + "' to node " + node);
-      }
-    });
+function sendAlternativeNames(action, node) {
+	var selTopicIDs = $.map($("#tree").dynatree("getSelectedNodes"), function(node) {
+                            return node.data.key;
+                        });
+	var selTopicNames = $.map($("#tree").dynatree("getSelectedNodes"), function(node) {
+                            return node.data.title;
+                        });
+	alert('selected nodes (IDs then names) for aliasing are (in order they appear in tree): ' + selTopicNames);
 };
 
 $(function() {
@@ -99,7 +89,7 @@ $(function() {
 							console.log("==============================>>>>>>>>>> selected node is a topic, and shift was NOT preseed.");
 						}
 					}		 
-					//window.open(node.data.url, "_parent");
+					window.open(node.data.url, "_parent");
 			    	}else{
            				// console.log('==============================>>>>>>>>>> Resources/onClick: page url:' + page_url + ' does contain node url:' + node.data.url);
 				}
@@ -119,15 +109,6 @@ $(function() {
 	onDblClick: function(node, event){
 		// console.log('dynatree node.data is : ',node.data);
 	},
-      /*Bind context menu for every node when it's DOM element is created.
-        We do it here, so we can also bind to lazy nodes, which do not
-        exist at load-time. (abeautifulsite.net menu control does not
-        support event delegation)*/
-      onCreate: function(node, span){
-	alert("onCreate function called ..");
-        bindContextMenu(span);
-      },
-
 	onPostInit: function(isReloading, isError){
 	  	//console.log('==============================>>>>>>>>>> Resources/onPostInit: cendari_js_project_slug = ' + cendari_js_project_slug);
 	  	//console.log('==============================>>>>>>>>>> Resources/onPostInit: cendari_js_object_type = ' + cendari_js_object_type);
@@ -176,7 +157,24 @@ $(function() {
 
 	},
 	onCreate: function(dtnode, nodeSpan){
-		// When nodes are created, add hover event handlers to trigger highlighting in the vis
+	      /*Bind context menu for every node when it's DOM element is created.
+		We do it here, so we can also bind to lazy nodes, which do not
+		exist at load-time. (abeautifulsite.net menu control does not
+		support event delegation) http://labs.abeautifulsite.net/archived/jquery-contextMenu/demo/*/
+		bindContextMenu(nodeSpan);
+
+		$(document).on('contextmenu', function(e) {
+			if (e.target.id != "special")
+    			//	return false;
+				alert ('coucou, e.target.id is not special, it is =' + e.target);
+
+		    	//alert('#special right clicked');
+		    	// you may want e.preventDefault() here
+		});
+
+	     
+
+	    // When nodes are created, add hover event handlers to trigger highlighting in the vis
 	    $(nodeSpan).hover(function(){
 			var node = $.ui.dynatree.getNode(this);
 			if(!node) 
