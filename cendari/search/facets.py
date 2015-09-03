@@ -67,18 +67,15 @@ def geo_bounds_precision(geo_bounds):
 def date_range_interval(date_range):
     #pprint.pprint(date_range)
     #return '2y'
-    return date_range_to_interval(date_range[0], date_range[1], 20)
+    if date_range:
+        return date_range_to_interval(date_range[0], date_range[1], 20)
+    else:
+        return None
 
 def cendari_aggregations(size={},default_size=10,geo_bounds=None,date_range=None):
     interval = date_range_interval(date_range)
     precision = geo_bounds_precision(geo_bounds)
     aggs = {
-        'date': {
-            "date_histogram" : {
-                "field" : "date",
-                "interval" : interval
-            }
-        },
         'location': {
             "geohash_grid" : {
                 "field" : "location",
@@ -87,6 +84,14 @@ def cendari_aggregations(size={},default_size=10,geo_bounds=None,date_range=None
             }
         }
     }
+    if interval:
+        aggs['date'] = {
+            "date_histogram" : {
+                "field" : "date",
+                "interval" : interval
+                }
+            }
+        
     for facet in CENDARI_FACETS:
         s =  size[facet] if facet in size else default_size
         aggs[facet] = {
@@ -176,7 +181,7 @@ def build_es_query(request,project_slug):
     q['score_mode'] = 'sum'
     q = {'query': { 'function_score': q } }
     
-    pprint.pprint(q)
+    #pprint.pprint(q)
     return (q, query, geo_bounds, date_range)
 
 def del_out_of_bounds(buckets, bounds):

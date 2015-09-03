@@ -167,7 +167,7 @@ class CendariDataAPI(object):
         body = buffer.getvalue()
         #print(body)
         if status<200 or status>=300:
-            raise CendariDataAPIException(body)
+            raise CendariDataAPIException(("Trying to create dataspace '%s': \n"%name)+body)
         results=json.loads(body)
         return results
         
