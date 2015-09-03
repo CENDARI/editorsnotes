@@ -16,7 +16,6 @@ USER_GROUP_MAP = settings.LDAP_GROUP_MAPS['user_groups'].split(';')
 
 class CendariUserMiddleware(RemoteUserMiddleware):
     def process_request(self, request):
-
         request.META['REMOTE_USER'] = cendari_clean_name(request.META['REMOTE_USER'])
         super(CendariUserMiddleware, self).process_request(request)
         user = request.user
@@ -122,6 +121,7 @@ def login_user_synchronize(sender, user, request, **kwargs):
         key = request.session[DATA_API_SESSION_KEY]
         logger.debug('Retrieved key in session: %s', key)
         api.session(key)
+        return # Only do the dataspace creation when we create the key
     else:
         try:
             logger.debug('Getting key from DATA API')        
