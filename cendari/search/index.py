@@ -3,6 +3,7 @@ from itertools import chain
 import json
 import os
 import logging
+from datetime import datetime
 
 from pyelasticsearch import ElasticSearch, IndexAlreadyExistsError
 from pyelasticsearch.exceptions import InvalidJsonResponseError
@@ -43,10 +44,9 @@ class OrderedResponseElasticSearch(ElasticSearch):
 class CendariIndex(object):
     document_types = [ Note, Document, Topic ]
 
-    def __init__(self):
-        if not hasattr(self, 'get_name'):
-            raise NotImplementedError('Must implement get_name method')
-        self.name = self.get_name()
+    def __init__(self, name='cendari', alias=True):
+        self.name = name
+        self.alias = alias
         self.is_open = False
         self.update_list = set()
         self.delete_list = set()
@@ -59,32 +59,54 @@ class CendariIndex(object):
 
         if self.is_open:
             return self.es
-        print('opening ElasticSearch')
+        logger.info('opening ElasticSearch index %s', self.name)
         if not hasattr(self, 'es'):
             self.es = OrderedResponseElasticSearch(settings.ELASTICSEARCH_URLS)
         self.is_open = True
-        #if not self.exists():
         try:
             logger.info('Creating Cendari index')
-            self.create()
-            self.created = True
+            self.created = self.create()
         except IndexAlreadyExistsError as ex:
             self.created = False
-        if not self.mapping_exists():
-            self.put_mapping()
+        self.ensure_mapping(self.name)
         self._open()
         return self.es
 
     def get_settings(self):
         return {}
 
+    def generate_real_name(self):
+        return self.name+datetime.now().strftime('_%Y-%m-%d_%H:%M:%S')
+
     def create(self):
-        print 'Creating index '+self.name
-        created = self.open().create_index(self.name, self.get_settings())
+        logger.info("Creating index '%s'", self.name)
+        aliases = self.open().aliases(self.name)
+        if len(aliases)>1:
+            raise RuntimeError('Unexpected multiple aliases for %s: %s', self.name, alias.keys())
+        elif len(aliases)==0: # no alias or index exist, create index and maybe alias
+            if self.alias:
+                real_name = self.generate_real_name()
+            else:
+                real_name = self.name
+            created = self.open().create_index(real_name, self.get_settings())
+            if self.alias:
+                self.open().update_aliases({ "add": { "alias": self.name, "index": real_name}})
+        else:
+            # len(alias)==1, either an alias exists or the index is already created
+            self.real_name = alias.keys()[0]
+            created = self.open().create_index(self.real_name, self.get_settings()) # raises err
         return created
 
     def delete(self):
-        ret = self.open().delete_index(self.name)
+        aliases = self.open().aliases(self.name)
+        if len(aliases)>1:
+            raise RuntimeError('Unexpected multiple aliases for %s: %s', self.name, alias.keys())
+        elif len(aliases)==0:
+            return # already deleted
+        real_name = aliases.keys()[0]
+        if real_name != self.name:
+            self.open().update_aliases({ "remove": { "alias": self.name, "index": real_name}})
+        ret = self.open().delete_index(real_name)
         self.is_open = False
         return ret
 
@@ -98,27 +120,19 @@ class CendariIndex(object):
         self.is_open = False
         return ret
 
-    def get_name(self):
-        return 'cendari'
-
-    def exists(self):
-        #server_url, _ = self.open().servers.get()
-        resp = self.open().session.head(server_url + '/' + 'cendari')
-        return resp.status_code == 200
-
-    def mapping_exists(self):
-        exists = self.open().get_mapping(self.name)\
-                            .get(self.name,{})\
-                            .get('mappings',{})\
-                            .keys()
-        return 'document' in exists
-
-    def put_mapping(self):
-        print "Creating mapping"
-        self.open().put_mapping(self.name, 'document',
-                                self.get_mapping_document())
-        self.open().put_mapping(self.name, 'entity',
-                                self.get_mapping_entity())
+    def ensure_mapping(self, name):
+        mappings = self.open().get_mapping(name)\
+                              .get(name,{})\
+                              .get('mappings',{})\
+                              .keys()
+        if 'document' not in mappings:
+            logger.info("Creating 'document' mapping in %s", name)
+            self.open().put_mapping(name, 'document',
+                                    self.get_mapping_document())
+        if 'entity' not in mappings:
+            logger.info("Creating 'entity' mapping in %s", name)
+            self.open().put_mapping(name, 'entity',
+                                    self.get_mapping_entity())
 
     def get_mapping_document(self):
         with open(os.path.join(current_dir, 'mapping_document.json')) as f:
