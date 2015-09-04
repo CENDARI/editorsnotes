@@ -93,7 +93,7 @@ class CendariIndex(object):
                 self.open().update_aliases({ "add": { "alias": self.name, "index": real_name}})
         else:
             # len(alias)==1, either an alias exists or the index is already created
-            self.real_name = alias.keys()[0]
+            self.real_name = aliases.keys()[0]
             created = self.open().create_index(self.real_name, self.get_settings()) # raises err
         return created
 
