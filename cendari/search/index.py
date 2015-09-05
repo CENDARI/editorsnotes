@@ -86,12 +86,12 @@ class CendariIndex(object):
             raise RuntimeError('Unexpected multiple aliases for %s: %s', self.name, alias.keys())
         elif len(aliases)==0: # no alias or index exist, create index and maybe alias
             if self.alias:
-                real_name = self.generate_real_name()
+                self.real_name = self.generate_real_name()
             else:
-                real_name = self.name
-            created = self.open().create_index(real_name, self.get_settings())
+                self.real_name = self.name
+            created = self.open().create_index(self.real_name, self.get_settings())
             if self.alias:
-                self.open().update_aliases({ "add": { "alias": self.name, "index": real_name}})
+                self.open().update_aliases(actions=[{ "add": { "alias": self.name, "index": self.real_name}}])
         else:
             # len(alias)==1, either an alias exists or the index is already created
             self.real_name = aliases.keys()[0]
@@ -99,14 +99,18 @@ class CendariIndex(object):
         return created
 
     def delete(self):
+        logger.info("Deleting index '%s'", self.name)
         aliases = self.open().aliases(self.name)
         if len(aliases)>1:
             raise RuntimeError('Unexpected multiple aliases for %s: %s', self.name, alias.keys())
         elif len(aliases)==0:
+            logger.info("Already deleted index '%s'", self.name)
             return # already deleted
         real_name = aliases.keys()[0]
         if real_name != self.name:
-            self.open().update_aliases({ "remove": { "alias": self.name, "index": real_name}})
+            logger.info("Deleting alias '%s' for index '%s'", self.name, real_name)
+            self.open().update_aliases(actions=[{ "remove": { "alias": self.name, "index": real_name}}])
+        logger.info("Deleting real index '%s'", real_name)
         ret = self.open().delete_index(real_name)
         self.is_open = False
         return ret
