@@ -31,6 +31,7 @@ def format_location(loc):
 
 # Copy from editorsnotes.search.index
 # For some reason, I cannot import it??
+# Then drift-away to fit Cendari's needs
 class OrderedResponseElasticSearch(ElasticSearch):
     def _decode_response(self, response):
         try:
@@ -94,7 +95,7 @@ class CendariIndex(object):
         else:
             # len(alias)==1, either an alias exists or the index is already created
             self.real_name = aliases.keys()[0]
-            created = self.open().create_index(self.real_name, self.get_settings()) # raises err
+            created = False # self.open().create_index(self.real_name, self.get_settings()) # raises err
         return created
 
     def delete(self):
