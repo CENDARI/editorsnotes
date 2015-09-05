@@ -69,7 +69,7 @@ class CendariIndex(object):
             self.created = self.create()
         except IndexAlreadyExistsError as ex:
             self.created = False
-        self.ensure_mapping(self.name)
+        self.ensure_mapping(self.real_name)
         self._open()
         return self.es
 

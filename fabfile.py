@@ -1,4 +1,5 @@
 from fabric.api import env, local, lcd
+from fabric.context_managers import shell_env
 from fabric.colors import red, green
 from fabric.decorators import task, runs_once
 from fabric.operations import prompt
@@ -85,14 +86,33 @@ def runserver():
     "Run the development server"
     with lcd(PROJ_ROOT):
         if 'REMOTE_USER' not in env:
-            env['REMOTE_USER'] = 'emmanouil'
+            env['REMOTE_USER'] = env['user']
+            print 'REMOTE_USER is %s', env['REMOTE_USER']
         if 'eppn' not in env:
             env['eppn'] = 'cendari@dariah.eu'
         if 'mail' not in env:
             env['mail'] = 'em.giannisakis@gmail.com'
         if 'cn' not in env:
             env['cn'] = 'Cendari Test User'
-        local('{python} manage.py runserver --traceback'.format(**env))
+        with shell_env(REMOTE_USER=env['REMOTE_USER']):# , eppn=env['eppn'], mail=env['mail'],cn=env['cn']):
+            local('{python} manage.py runserver --traceback'.format(**env))
+
+@task
+def profserver():
+    "Run the development server in profile mode"
+    with lcd(PROJ_ROOT):
+        if 'REMOTE_USER' not in env:
+            env['REMOTE_USER'] = env['user']
+            print 'REMOTE_USER is %s', env['REMOTE_USER']
+        if 'eppn' not in env:
+            env['eppn'] = 'cendari@dariah.eu'
+        if 'mail' not in env:
+            env['mail'] = 'em.giannisakis@gmail.com'
+        if 'cn' not in env:
+            env['cn'] = 'Cendari Test User'            
+        with shell_env(REMOTE_USER=env['REMOTE_USER']):# , eppn=env['eppn'], mail=env['mail'],cn=env['cn']):
+            local('{python} -m cProfile -o cendari.profile manage.py runserver --traceback'.format(**env))
+
 
 @task
 @runs_once

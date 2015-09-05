@@ -31,9 +31,8 @@ try:
 except AttributeError:
     DATA_API_TIMEOUT = 3
 
-__all__ = [ 'DATA_API_URL', 'cendari_clean_name', 'CendariDataAPIException', 'CendariDataAPI', 'cendari_data_api' ]
+__all__ = [ 'DATA_API_SERVER', 'cendari_clean_name', 'CendariDataAPIException', 'CendariDataAPI', 'cendari_data_api' ]
 
-DATA_API_URL = 'http://localhost:42042/v1/'
 
 def cendari_clean_name(name):
     name = name.split('@')[0]
