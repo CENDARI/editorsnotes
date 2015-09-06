@@ -18,3 +18,7 @@ class SearchTestCase(unittest.TestCase):
         index = CendariIndex('test-cendari-index', alias=True)
         es=index.open()
         index.delete()
+
+if __name__ == '__main__':
+    unittest.main()
+

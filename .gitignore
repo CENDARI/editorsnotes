@@ -31,6 +31,7 @@
 /PGDATA
 /old
 /media
+/profiles
 
 secret.txt
 settings_local.py*
@@ -49,3 +50,4 @@ document-list.txt
 fabfile_local.py
 vhost-editorsnotes.local.conf
 /rdfstore*
+/pip-selfcheck.json

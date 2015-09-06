@@ -109,9 +109,11 @@ def profserver():
         if 'mail' not in env:
             env['mail'] = 'em.giannisakis@gmail.com'
         if 'cn' not in env:
-            env['cn'] = 'Cendari Test User'            
+            env['cn'] = 'Cendari Test User'
+        env['timestamp'] = datetime.datetime.now().isoformat()
         with shell_env(REMOTE_USER=env['REMOTE_USER']):# , eppn=env['eppn'], mail=env['mail'],cn=env['cn']):
-            local('{python} -m cProfile -o cendari.profile manage.py runserver --traceback'.format(**env))
+            local('if [ ! -d profiles ]; then mkdir profiles; fi')
+            local('{python} -m cProfile -o profiles/cendari-{timestamp}.prof manage.py runserver --traceback'.format(**env))
 
 
 @task
