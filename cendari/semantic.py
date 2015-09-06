@@ -787,6 +787,14 @@ def semantic_resolve_topic(topic, force=False):
             logger.info("Found in geo:lat/geo:long: %s", g.value(uri, GRS['point']))
             break
 
+        lat = g.value(uri, DBPROP['latitude'])
+        lon = g.value(uri, DBPROP['longitude'])
+        if lat and lon:
+            loc = str(lat)+" "+str(lon)
+            g.add( (uri, GRS['point'], Literal(loc)) )
+            logger.info("Found in dbp:latitude/dbp:longitude: %s", g.value(uri, GRS['point']))
+            break
+
         lat = g.value(uri, DBPPROP['latDeg'])
         latmin = g.value(uri, DBPPROP['latMin'])
         lon = g.value(uri, DBPPROP['lonDeg'])

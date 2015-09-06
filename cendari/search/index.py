@@ -28,6 +28,7 @@ topic_field = {
 def format_location(loc):
     return ', '.join(map(str, loc))
 
+
 # Copy from editorsnotes.search.index
 # For some reason, I cannot import it??
 # Then drift-away to fit Cendari's needs
@@ -177,7 +178,7 @@ class CendariIndex(object):
         return topics
 
     def document_to_cendari(self, doc):
-        id=semantic_uri(doc)
+        id=str(semantic_uri(doc))
         contributors = set(doc.get_all_updaters())
         contributors.add(doc.creator)
         topics=self.collect_topics(doc)
@@ -209,7 +210,7 @@ class CendariIndex(object):
         if topics['PLA']:
             pla = topics['PLA']
             document['place'] = map(lambda p: p['name'], pla)
-            document['location'] = [ format_location(l['location']) for l in pla if 'location' in l ]
+            document['location'] = format_location([l['location'] for l in pla if 'location' in l ])
         # 'publisher': publishers,
         if topics['PUB']: document['ref'] = topics['PUB']
         if topics['TAG']: document['tag'] = topics['TAG']
@@ -218,7 +219,7 @@ class CendariIndex(object):
         return document
 
     def note_to_cendari(self, note):
-        id=semantic_uri(note)
+        id=str(semantic_uri(note))
         contributors = set(note.get_all_updaters())
         contributors.add(note.creator)
         topics=self.collect_topics(note)
@@ -257,7 +258,7 @@ class CendariIndex(object):
 
     def topic_to_cendari(self, topic):
         if not topic.topic_node: return
-        id=semantic_uri(topic)
+        id=str(semantic_uri(topic))
         type = topic.topic_node.type
         document = {
             'uri': id,
@@ -280,7 +281,7 @@ class CendariIndex(object):
 
     def object_changed(self, obj):
         if type(obj) not in self.document_types: return
-        id = semantic_uri(obj)
+        id = str(semantic_uri(obj))
         if id in self.delete_list: # was removed, just update now
             self.delete_list.remove(id)
         self.update_list.add(obj)
@@ -293,7 +294,7 @@ class CendariIndex(object):
 
     def object_deleted(self, obj):
         if type(obj) not in self.document_types: return
-        id = semantic_uri(obj)
+        id = str(semantic_uri(obj))
         if obj in self.update_list: # was updated, just remove now
             self.update_list.remove(obj)
         self.delete_list.add(id)

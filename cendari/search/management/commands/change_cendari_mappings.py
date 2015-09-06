@@ -13,8 +13,6 @@ from elasticsearch.helpers import reindex
 class Command(BaseCommand):
     help = 'Change elasticsearch mappings'
     def handle(self, *args, **kwargs):
-        import pdb
-        pdb.set_trace()
         index_name = cendari_index.name
         new_name = cendari_index.generate_real_name()
         new_index = CendariIndex(new_name, alias=False)
