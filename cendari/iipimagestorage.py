@@ -9,7 +9,7 @@ from django.utils._os import safe_join
 from django.conf import settings
 
 from editorsnotes.main.utils import copy_file
-#from cendari_middleware import DATA_API_SESSION_KEY
+from cendari_api import cendari_data_api
 
 import django_rq
 
@@ -32,10 +32,12 @@ class IIPImageStorage(FileSystemStorage):
         """
         name = super(IIPImageStorage, self)._save(name, content)
 
-        (t,encoding) = mimetypes.guess_type(self.image.name)
+        (t,encoding) = mimetypes.guess_type(name)
         if t and t.split('/')[0] == 'image':
             nname = self.get_tiff_path(name)
             self.create_tiff_file(self.path(name), self.path(nname))
+        if cendari_data_api.has_key():
+            job = q.enqueue(dataapi_send, self.path(name), key)
         return name
 
     def file_exists(self, name):
@@ -64,3 +66,15 @@ def convert_to_pyramid_tiff(path,npath):
         print "Converted %s into %s" % (path, npath)
         
             
+def dataapi_send(path, key):
+    if key is None: # you neve know...
+        return
+    saved = cendari_data_api.key
+    if saved != key:
+        cendari_data_api.session(key=key)
+    dir, filename = os.path.split(path)
+    p = dir.split('/')
+    try:
+        cendari_data_api.create_resource(p[-2], fileName=filename, fileContents=path)
+    except CendariDataAPIException as e:
+        logger.error("Problem uploading resource '%s'", path, e)
