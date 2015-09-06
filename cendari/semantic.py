@@ -84,6 +84,8 @@ def fix_uri(uri):
         uri = "http://dbpedia.org/resource/"+uri[len(WRONG_PREFIX):]
     loc=list(urlparse.urlsplit(uri))
     if not is_ascii(loc[2]):
+        import pdb
+        pdb.set_trace()
         loc[2] = urllib.quote(loc[2].encode('utf8'))
     loc = urlparse.urlunsplit(loc)
     return loc
@@ -770,6 +772,8 @@ def semantic_resolve_topic(topic, force=False):
     loc = g.value(uri, GRS['point'])
     while not loc:
         logger.info("No grs:point in RDF, chasing for lat/long")
+        import pdb
+        pdb.set_trace()
         o = g.value(uri, GEO['geometry'])
 
         match = []
@@ -787,8 +791,8 @@ def semantic_resolve_topic(topic, force=False):
             logger.info("Found in geo:lat/geo:long: %s", g.value(uri, GRS['point']))
             break
 
-        lat = g.value(uri, DBPROP['latitude'])
-        lon = g.value(uri, DBPROP['longitude'])
+        lat = g.value(uri, DBPPROP['latitude'])
+        lon = g.value(uri, DBPPROP['longitude'])
         if lat and lon:
             loc = str(lat)+" "+str(lon)
             g.add( (uri, GRS['point'], Literal(loc)) )
