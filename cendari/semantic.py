@@ -27,7 +27,6 @@ import urlparse
 import json
 import sys, traceback
 import re
-import pdb
 
 __all__ = [
     'CENDARI',
@@ -84,8 +83,6 @@ def fix_uri(uri):
         uri = "http://dbpedia.org/resource/"+uri[len(WRONG_PREFIX):]
     loc=list(urlparse.urlsplit(uri))
     if not is_ascii(loc[2]):
-        import pdb
-        pdb.set_trace()
         loc[2] = urllib.quote(loc[2].encode('utf8'))
     loc = urlparse.urlunsplit(loc)
     return loc
@@ -658,6 +655,8 @@ imported_relations = set([
     RDF.type,
     DBPPROP['latitude'],
     DBPPROP['longitude'],
+    DBPPROP['latd'],
+    DBPPROP['longd'],
     DBPPROP['latMin'],
     DBPPROP['latDeg'],
     DBPPROP['lonMin'],
@@ -687,6 +686,8 @@ imported_relations = set([
 no_duplicates = set([
     DBPPROP['latitude'],
     DBPPROP['longitude'],
+    DBPPROP['latd'],
+    DBPPROP['longd'],
     GRS['point'],
     GEO['lat'],
     GEO['long'],
@@ -772,8 +773,6 @@ def semantic_resolve_topic(topic, force=False):
     loc = g.value(uri, GRS['point'])
     while not loc:
         logger.info("No grs:point in RDF, chasing for lat/long")
-        import pdb
-        pdb.set_trace()
         o = g.value(uri, GEO['geometry'])
 
         match = []
@@ -793,6 +792,14 @@ def semantic_resolve_topic(topic, force=False):
 
         lat = g.value(uri, DBPPROP['latitude'])
         lon = g.value(uri, DBPPROP['longitude'])
+        if lat and lon:
+            loc = str(lat)+" "+str(lon)
+            g.add( (uri, GRS['point'], Literal(loc)) )
+            logger.info("Found in dbp:latitude/dbp:longitude: %s", g.value(uri, GRS['point']))
+            break
+
+        lat = g.value(uri, DBPPROP['latd'])
+        lon = g.value(uri, DBPPROP['longd'])
         if lat and lon:
             loc = str(lat)+" "+str(lon)
             g.add( (uri, GRS['point'], Literal(loc)) )
