@@ -1,4 +1,5 @@
 import sys, os, subprocess
+import mimetypes
 
 from django.core.files.storage import FileSystemStorage
 from django.core.files.uploadedfile import UploadedFile
@@ -12,7 +13,9 @@ from editorsnotes.main.utils import copy_file
 
 import django_rq
 
-import pdb
+import logging
+logger = logging.getLogger(__name__)
+
 
 q = django_rq.get_queue("default")
 
@@ -27,11 +30,12 @@ class IIPImageStorage(FileSystemStorage):
         """
         If the file is not a tif pyramid file, replace with one.
         """
-#        pdb.set_trace()
         name = super(IIPImageStorage, self)._save(name, content)
-        nname = self.get_tiff_path(name)
 
-        self.create_tiff_file(self.path(name), self.path(nname))
+        (t,encoding) = mimetypes.guess_type(self.image.name)
+        if t and t.split('/')[0] == 'image':
+            nname = self.get_tiff_path(name)
+            self.create_tiff_file(self.path(name), self.path(nname))
         return name
 
     def file_exists(self, name):

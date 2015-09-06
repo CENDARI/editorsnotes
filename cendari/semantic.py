@@ -1,5 +1,3 @@
-import logging
-
 from editorsnotes.main.utils import xhtml_to_text
 from editorsnotes.main.templatetags.display import as_html
 from editorsnotes.main.models.topics import get_or_create_topic,get_topic_with_rdf
@@ -49,7 +47,8 @@ __all__ = [
     'semantic_rdfa'
 ]
 
-logger = logging.getLogger('cendari.semantic')
+import logging
+logger = logging.getLogger(__name__)
 
 if hasattr(settings,'SEMANTIC_NAMESPACE'):
     CENDARI = Namespace(settings.SEMANTIC_NAMESPACE)

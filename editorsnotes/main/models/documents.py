@@ -34,6 +34,9 @@ from base import (CreationMetadata, LastUpdateMetadata, URLAccessible, Administe
 from cendari.iipimagestorage import IIPImageStorage
 iipimage_storage = IIPImageStorage()
 
+import logging
+logger = logging.getLogger(__name__)
+
 #CENDARI : OrderingManager is also used 
 
 __all__ = ['Document', 'Transcript', 'Footnote', 'Scan', 'DocumentLink',
@@ -226,7 +229,7 @@ class Document(LastUpdateMetadata, Administered, URLAccessible,
 
     # Cendari code E.G. aviz
     def get_form_kwargs(self):
-        print "KWARGS"
+        logger.info("KWARGS")
         kwargs = super(ModelFormMixin, self).get_form_kwargs()
         if hasattr(self, 'object') and self.object:
             kwargs.update({'instance': self.object})
@@ -403,17 +406,17 @@ class Scan(CreationMetadata, ProjectPermissionsMixin):
 
     def is_image(self):
         path, ext = os.path.splitext(self.image.name)
-        print "File is %s .... %s" % (path, ext)
+        logger.info("File is %s .... %s", path, ext)
         if ext and ext.startswith('.'):
             return ext[1:].lower() in settings.IMAGE_FILE_TYPES;
         return False
 
     def needs_image_viewer(self):
         if not self.is_image():
-            print "Not an image"
+            logger.debug("Not an image")
             return False
         dimensions = self._get_image_dimensions()
-        print "Image dimension (%d,%d)" % (dimensions[0], dimensions[1])
+        logger.info("Image dimension (%d,%d)", dimensions[0], dimensions[1])
         return dimensions[0] > 1024 and dimensions[1] > 1024
 
     def _get_image_dimensions(self):

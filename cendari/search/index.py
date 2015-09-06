@@ -2,7 +2,6 @@ from collections import OrderedDict
 from itertools import chain
 import json
 import os
-import logging
 from datetime import datetime
 
 from pyelasticsearch import ElasticSearch, IndexAlreadyExistsError
@@ -13,8 +12,8 @@ from editorsnotes.main.utils import xhtml_to_text
 from editorsnotes.search.utils import clean_query_string
 from cendari.semantic import semantic_uri, semantic_query_latlong, schema_topic, topic_schema
 
-
-logger = logging.getLogger('cendari.search.index')
+import logging
+logger = logging.getLogger(__name__)
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 

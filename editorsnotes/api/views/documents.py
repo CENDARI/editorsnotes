@@ -14,6 +14,10 @@ from .base import (BaseListAPIView, BaseDetailView, DeleteConfirmAPIView,
 from ..permissions import ProjectSpecificPermissions
 from ..serializers import (DocumentSerializer, ScanSerializer,TranscriptSerializer)
 
+import logging
+logger = logging.getLogger(__name__)
+
+
 __all__ = ['DocumentList', 'DocumentDetail', 'DocumentConfirmDelete',
            'ScanList', 'ScanDetail', 'NormalizeScanOrder', 'Transcript']
 
@@ -84,7 +88,7 @@ class ScanList(BaseListAPIView):
             content_type = obj.image.file.content_type
         else:
             (content_type,_) = mimetypes.guess_type(obj.image.file.name)
-        print "Content type is %s" % content_type
+        logger.debug("Content type is %s", content_type)
         if content_type not in settings.UPLOAD_FILE_TYPES:
             raise Exception('Unhandled content type %s' % content_type)
         super(ScanList, self).pre_save(obj)

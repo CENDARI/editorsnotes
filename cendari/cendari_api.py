@@ -4,8 +4,7 @@ import json
 import re
 
 import logging
-
-logger = logging.getLogger('cendari.api')
+logger = logging.getLogger(__name__)
 
 try:
     from io import BytesIO
@@ -77,6 +76,7 @@ class CendariDataAPI(object):
             results=json.loads(body)
             # {"sessionKey": "xyz"}
             self.key = str(results['sessionKey'])
+        self.key = None
         return self.key
 
     def has_key(self):

@@ -43,7 +43,6 @@ import json
 from editorsnotes.admin import forms
 import reversion
 
-import pdb
 import traceback
 import pprint
 
@@ -200,6 +199,8 @@ def scan(request, scan_id, project_slug):
         scan.create_tiff_file()
         raise PermissionDenied("Tiff file is being built, try again...")
     info = scan_to_dict(scan)
+    if info is None:
+        raise PermissionDenied("Tiff file is being built, try again...")
     o['image'] = info['path']
     o['scan'] = scan
     o['server'] = settings.IIPSRV

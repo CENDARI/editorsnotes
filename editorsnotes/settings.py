@@ -63,6 +63,8 @@ UPLOAD_FILE_TYPES = [
     'image/tiff',
     'image/png',
     'image/jpeg',
+    'text/plain',
+    'text/html',
     'application/pdf',
     'application/vnd.oasis.opendocument.text', # odt
     'application/vnd.oasis.opendocument.spreadsheet', # ods

@@ -13,16 +13,14 @@ import json
 
 import pdb
 
-import logging
-
 from rest_framework.views import exception_handler
 
 from editorsnotes.main.models.documents import get_or_create_document
 
 import datetime_safe
 
-
-logger = logging.getLogger('cendari.utils')
+import logging
+logger = logging.getLogger(__name__)
 
 WELL_KNOWN_DATE_FORMATS=[
     "%m/%d/%Y",

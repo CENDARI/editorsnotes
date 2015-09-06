@@ -5,8 +5,7 @@ from editorsnotes.main.models import Project
 from cendari_api import *
 
 import logging
-
-logger = logging.getLogger('cendari.middleware')
+logger = logging.getLogger(__name__)
 
 DATA_API_SESSION_KEY = '_cendari_api_key'
 
@@ -120,7 +119,7 @@ def login_user_synchronize(sender, user, request, **kwargs):
     if DATA_API_SESSION_KEY in request.session:
         key = request.session[DATA_API_SESSION_KEY]
         logger.debug('Retrieved key in session: %s', key)
-        api.session(key)
+        api.session(key=key)
         return # Only do the dataspace creation when we create the key
     else:
         try:
