@@ -210,7 +210,7 @@ class CendariIndex(object):
         if topics['PLA']:
             pla = topics['PLA']
             document['place'] = map(lambda p: p['name'], pla)
-            document['location'] = format_location([l['location'] for l in pla if 'location' in l ])
+            document['location'] = [l['location'] for l in pla if 'location' in l ]
         # 'publisher': publishers,
         if topics['PUB']: document['ref'] = topics['PUB']
         if topics['TAG']: document['tag'] = topics['TAG']
