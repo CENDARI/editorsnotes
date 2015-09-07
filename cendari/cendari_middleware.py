@@ -131,6 +131,7 @@ def login_user_synchronize(sender, user, request, **kwargs):
             logger.debug('Received key from API: %s', api.key)
         except:
             logger.warning('Cannot contact the Cendari Data API at %s', DATA_API_SERVER)
+            api.close()
             return
     try:
         dataspaces = api.get_dataspace()

@@ -76,7 +76,8 @@ class CendariDataAPI(object):
             results=json.loads(body)
             # {"sessionKey": "xyz"}
             self.key = str(results['sessionKey'])
-        self.key = None
+        else:
+            self.key = None
         return self.key
 
     def has_key(self):
