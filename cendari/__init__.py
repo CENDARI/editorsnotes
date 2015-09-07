@@ -4,6 +4,9 @@ from django.dispatch import receiver
 from editorsnotes.main.models import Project
 from .cendari_api import *
 
+import logging
+logger = logging.getLogger(__name__)
+
 @receiver(post_save)
 def update_elastic_cendari_handler(sender, instance, created, **kwargs):
     if isinstance(instance, Project) and cendari_data_api.has_key():
