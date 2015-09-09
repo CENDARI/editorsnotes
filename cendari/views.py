@@ -783,12 +783,11 @@ def getProjectID(request, project_slug, new_slug):
     _check_project_privs_or_deny(request.user, new_slug) # only 4 check
     editorsnotes.admin.views.projects.change_project(request, new_slug)
     projects = request.user.get_authorized_projects()
-    project_id = ''
-    for p in projects:
-        if p.slug == new_slug:
-            project_id = p.id
-    res = {'project_id':project_id}
+    selected_project = list((x for x in request.user.get_authorized_projects() if x.slug == new_slug))
+    selected_project_id = selected_project[0].id #there should only be one project with slug == new_slug
+    res = {'project_id':selected_project_id}
     ret = json.dumps(res, encoding="utf-8")
+    print '55555555555555555555 getProjectID called and ended ....'
     return HttpResponse(ret, mimetype='application/json') 
 
 @login_required

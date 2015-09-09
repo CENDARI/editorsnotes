@@ -10,10 +10,9 @@ function sendAlternativeNames(action, node) {
 
 $(function() {
     $("#tree").dynatree({
-     checkbox: true,
-      // Override class name for checkbox icon:
-      classNames: {checkbox: "dynatree-radio"},
-
+        checkbox: true,
+        // Override class name for checkbox icon:
+        classNames: {checkbox: "dynatree-radio"},
 
 	minExpandLevel:2,
 	selectMode:2,//1 single selection,2:multi,3:multi-hier
@@ -35,6 +34,11 @@ $(function() {
 	    level = node.getLevel();
             //console.log('==============================>>>>>>>>>> Resources/onClick: selected node key, level = ' + selected_node + ' , ' + level);
 	    if(level==3){
+			//unselect other projects etc
+			$("#tree").dynatree("getRoot").visit(function(node) { 
+				node.select(false);
+			});
+
 			//alert('clicked on project ' + cendari_root_url+'cendari/'+cendari_js_project_slug+'/getProjectID/new_slug/'+node.data.key)
             		//console.log('==============================>>>>>>>>>> Resources/onClick: selected node is a project');
 
