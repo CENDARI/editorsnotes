@@ -165,18 +165,8 @@ $(function() {
 		We do it here, so we can also bind to lazy nodes, which do not
 		exist at load-time. (abeautifulsite.net menu control does not
 		support event delegation) http://labs.abeautifulsite.net/archived/jquery-contextMenu/demo/*/
-		bindContextMenu(nodeSpan);
-
-		$(document).on('contextmenu', function(e) {
-			if (e.target.id != "special")
-    			//	return false;
-				alert ('coucou, e.target.id is not special, it is =' + e.target);
-
-		    	//alert('#special right clicked');
-		    	// you may want e.preventDefault() here
-		});
-
-	     
+		//bindContextMenu(nodeSpan);
+     
 
 	    // When nodes are created, add hover event handlers to trigger highlighting in the vis
 	    $(nodeSpan).hover(function(){
