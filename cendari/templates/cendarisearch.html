@@ -126,7 +126,9 @@ rect.zoompane {
       event.preventDefault();
       var url = document.location.href;
       url = url.replace(/[&]from=[^&]*/, "");
+      {% if size %}
       url = url + '&from='+Math.min({{sizes.total}}-{{sizes.size}}+1,{{sizes.from}}+{{sizes.size}});
+      {%endif%}
       document.location.assign(url);
   }
 
@@ -134,7 +136,10 @@ rect.zoompane {
       event.preventDefault();
       var url = document.location.href;
       url = url.replace(/[&]from=[^&]*/, "");
+      
+      {% if size %}
       url = url + '&from='+Math.max(0,{{sizes.from}}-{{sizes.size}});
+      {%endif%}
       document.location.assign(url);
   }
 {% endautoescape %}
@@ -143,10 +148,73 @@ rect.zoompane {
 {% endblock js_nocompress %}
 
 {% block nolayout_content %}
+
+
+<div class="navbar">
+    <div class="navbar-inner">
+      <div class="container">
+        <ul class="nav">
+          <li><a class="brand" href="{% url 'index_view' %}"><img src="{% static "img/cendari_logo.png" %}" height="50" width="200" border="5"/></a> </li>
+          <li class="divider-vertical"></li>
+          <li><a href="{% url 'index_view' %}">Home</a></li>
+          <li><a href="{% url 'cendari_browse_view' %}">Browse</a></li>
+          <li><a href="{% url 'cendari_about_view' %}">About</a></li>
+          <li><a target="_blank" href="https://archives.cendari.dariah.eu/">AtoM</a></li>
+
+          {% if user.is_superuser %}
+            <li><a href="https://dev.dariah.eu/jira/browse/CVRE" target="_blank">Issue Report</a></li>
+          {% elif user.is_staff %}
+            <li><a href="https://dev.dariah.eu/jira/secure/CreateIssue.jspa?pid=10900&issuetype=1" target="_blank">Issue Report</a></li>
+          {% else %}
+            <li><a href="" id='issueCollector'>Issue Report</a></li>
+          {% endif %}
+            <li><a href="https://docs.google.com/forms/d/1LgNR3GLfMmql2acSryzVQRGPjEBmr6ZfvsVJZ8xX9QI/viewform" target="_blank">Survey</a></li>
+            <li class="divider-vertical"></li>
+            {% if p_slug %}
+              <form class="navbar-search" action="{% url "cendari_faceted_search_view" project_slug=p_slug %}" method="get">
+            {% else %}
+              <form class="navbar-search" action="{% url "cendari_faceted_search_view" %}" method="get">
+            {%endif%}
+              <input type="text" class="search-query search-autocomplete" name="q" x-search-target="topics" placeholder="Search" />
+            </form> 
+        </ul>
+
+        <!--<button id="submitButtonCendari" onclick="submitCendariForm()"  value=""></button>
+        <script type="text/javascript" src="{% static "cendari/js/editor.js" %}"></script> -->
+
+        {% with user=request.user %}
+          {% if user.is_authenticated %}
+            {% if user.email %}
+              <input type="hidden" id="logged-in-user-email" value="{{ user.email }}" />
+            {% endif %}
+            <ul class="nav pull-right">
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                {{ user.display_name }}
+                 <b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                  <li><a href="{{ user.get_absolute_url }}">My profile</a></li>
+                  <li><a {% if browserid_authenticated %}class="browserid-logout" {% endif %}href="{% url "user_logout_view" %}">Log out</a></li>
+                </ul>
+              </li>
+          </ul>
+          {% else %}
+            <ul class="nav pull-right">
+              <li><a href="{% url 'django.contrib.auth.views.login' %}{% if request.path|length > 1 %}?return_to={{ request.path }}{% endif %}">Log in</a></li>
+              </ul>
+          {% endif %}
+        {% endwith %}
+      </div>
+    </div>
+  </div>
+
+
 <form method="get" action=".">
   <p>
-    <input type="text" name="q" value="{{ query }}">
-    <input type="submit" value="Search">
+    <input id="searchText" type="text" name="q" value="{{ query }}">
+    <input id="searchSubmit" type="submit" value="Search">
+    <br>Include TRAME <input id='trameCheckbox' type="checkbox" name="TRAME" value= "TRAME"> 
   </p>
 
 <!-- Begin faceting. -->
@@ -225,7 +293,6 @@ rect.zoompane {
   </table>
   {% endfor %}
 </div>
-
 <!-- End faceting -->
 
 <div class="mainpanel">
@@ -254,12 +321,65 @@ rect.zoompane {
     <a class="btn btn-small next_page" title="Next Page" href="prev">Next</a>
   </h2>
 {% endif %}
+  
+  <div id='trameresults'>
+  </div>
+
 </div>
 
 <script type="text/javascript">
-    bind_faceted_widgets();
+
+  function getQueryParams(qs) {
+    qs = qs.split('+').join(' ');
+
+    var params = {},
+        tokens,
+        re = /[?&]?([^=]+)=([^&]*)/g;
+
+    while (tokens = re.exec(qs)) {
+      params[decodeURIComponent(tokens[1])] = decodeURIComponent(tokens[2]);
+    }
+
+    return params;
+  }
+
+  bind_faceted_widgets();
   $('.next_page').click(next_page);
   $('.prev_page').click(prev_page);
+
+  $(document).ready(function(){
+    var query = getQueryParams(document.location.search);
+
+
+
+    if(query.hasOwnProperty('TRAME')){
+      var iframe_src = "http://trame.fefonlus.it/trame/index.php?op=search&Field0="+query['q']+"&Field6_loc=&Field6_lib=&Field6_hold=&Field6_shelf=&Field4=&Field41=&Field42=&Field5=&Field7=&Field2=&Field1=&Field3=&Field6=&dbs=90|82|83|87|2|19|89|91|92|58|88|17|84|85|57|86|48|1&maxnum=10"
+
+      h2 = document.createElement('h2')
+      h2.innerHTML = 'TRAME results'
+      $('#trameresults').append(h2)
+      
+      var div = document.createElement('div');
+      div.id = "loadingMessage";
+      div.innerHTML = "Loading TRAME results";
+      $('#trameresults').append(h2)
+
+      var iframe = document.createElement('iframe');
+      iframe.id = "trameIframe";
+      iframe.src = iframe_src; 
+      iframe.width = 800;
+      $('#trameresults').append(iframe)
+      $("#trameIframe").ready(function() {
+        $("#trameIframe").show();
+        $("#loadingMessage").hide();
+      });
+
+      $('#trameCheckbox').prop("checked","true");
+      console.log("TRAMMMEEEEE");
+      // $('#trameIframe').attr('src',iframe_src)
+    }
+    $("#searchText").val(query['q'])
+  })
 </script>
 </form>
 {% endblock nolayout_content %}

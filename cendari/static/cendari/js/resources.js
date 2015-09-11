@@ -10,10 +10,9 @@ function sendAlternativeNames(action, node) {
 
 $(function() {
     $("#tree").dynatree({
-     checkbox: true,
-      // Override class name for checkbox icon:
-      classNames: {checkbox: "dynatree-radio"},
-
+        checkbox: true,
+        // Override class name for checkbox icon:
+        classNames: {checkbox: "dynatree-radio"},
 
 	minExpandLevel:2,
 	selectMode:2,//1 single selection,2:multi,3:multi-hier
@@ -35,6 +34,11 @@ $(function() {
 	    level = node.getLevel();
             //console.log('==============================>>>>>>>>>> Resources/onClick: selected node key, level = ' + selected_node + ' , ' + level);
 	    if(level==3){
+			//unselect other projects etc
+			$("#tree").dynatree("getRoot").visit(function(node) { 
+				node.select(false);
+			});
+
 			//alert('clicked on project ' + cendari_root_url+'cendari/'+cendari_js_project_slug+'/getProjectID/new_slug/'+node.data.key)
             		//console.log('==============================>>>>>>>>>> Resources/onClick: selected node is a project');
 
@@ -161,18 +165,8 @@ $(function() {
 		We do it here, so we can also bind to lazy nodes, which do not
 		exist at load-time. (abeautifulsite.net menu control does not
 		support event delegation) http://labs.abeautifulsite.net/archived/jquery-contextMenu/demo/*/
-		bindContextMenu(nodeSpan);
-
-		$(document).on('contextmenu', function(e) {
-			if (e.target.id != "special")
-    			//	return false;
-				alert ('coucou, e.target.id is not special, it is =' + e.target);
-
-		    	//alert('#special right clicked');
-		    	// you may want e.preventDefault() here
-		});
-
-	     
+		//bindContextMenu(nodeSpan);
+     
 
 	    // When nodes are created, add hover event handlers to trigger highlighting in the vis
 	    $(nodeSpan).hover(function(){

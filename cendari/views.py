@@ -643,9 +643,7 @@ def getLazyProjectData(request, project_slug, sfield):
 @login_required
 def getTopicResources(request, project_slug, sfield):
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
-
     project = Project.objects.filter(slug=project_slug)[0]
-
     max_count = 10000
     topic_count = 0
     topic_list = []
@@ -657,6 +655,35 @@ def getTopicResources(request, project_slug, sfield):
             query_set = main_models.Topic.objects\
               .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)[:max_count] 
             o_query_set = sorted(query_set, key=operator.attrgetter(sfield))  
+
+	    '''
+	    # No access to 'deleted' or sort fields in the cendari index
+            query = {
+		  "query": {
+		    "bool": {
+		      "must": [
+			{
+			  "query_string": {
+			    "default_field": "topic.serialized.type",
+			    "query": "PER"
+			  }
+			},
+			{
+			  "query_string": {
+			    "default_field": "topic.serialized.project.name",
+			    "query": "test"
+			  }
+			}
+		      ]
+		    }
+		  },
+		  "from": 0,
+		  "size": 1,
+		  "sort": []
+	    }
+	    es = ElasticSearch('http://localhost:9200/')
+	    results = es.search(query)'''
+
     	elif sfield == "-created" or sfield == "-last_updated":
             query_set = main_models.Topic.objects\
               .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)[:max_count] 
@@ -695,7 +722,8 @@ def getTopicResources(request, project_slug, sfield):
             my_list.append({
                 'title': unicode(e)+toresolve_flag,
                 'key': str(project_slug)+'.topic.'+str(topic_id),
-                'url':e.get_absolute_url()
+                'url':e.get_absolute_url(),
+		'class':'topic_item'
             })
             node_title = topic_name + ' (' + str(set_count)  + ')'
     	css_class = '<span class="dynatree-topicfolder u' + topic_name + '">'
@@ -783,11 +811,9 @@ def getProjectID(request, project_slug, new_slug):
     _check_project_privs_or_deny(request.user, new_slug) # only 4 check
     editorsnotes.admin.views.projects.change_project(request, new_slug)
     projects = request.user.get_authorized_projects()
-    project_id = ''
-    for p in projects:
-        if p.slug == new_slug:
-            project_id = p.id
-    res = {'project_id':project_id}
+    selected_project = list((x for x in request.user.get_authorized_projects() if x.slug == new_slug))
+    selected_project_id = selected_project[0].id #there should only be one project with slug == new_slug
+    res = {'project_id':selected_project_id}
     ret = json.dumps(res, encoding="utf-8")
     return HttpResponse(ret, mimetype='application/json') 
 
@@ -850,7 +876,9 @@ def change_project(request, project_id):
     return editorsnotes.admin.views.projects.change_project(request, project.slug)
 
 def faceted_search(request,project_slug=None):
-    o = cendari_faceted_search(request,project_slug)
+    # o = cendari_faceted_search(request,project_slug)
+    o={}
+    o['p_slug']=project_slug
     return render_to_response(
         'cendarisearch.html', o, context_instance=RequestContext(request))
 

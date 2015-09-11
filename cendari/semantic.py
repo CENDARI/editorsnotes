@@ -374,6 +374,18 @@ def fix_links(xml):
                     span.set('class', u' '.join(c))
     return changed
 
+def list_diff(a,b):
+    return list(set(a)-set(b))
+
+def semantic_update_topics(existing_topics,new_topics):
+    to_be_deleted = []
+    to_be_added   = []
+    to_be_added = list_diff(new_topics,existing_topics)
+    to_be_deleted = list_diff(existing_topics,new_topics)
+
+    return (to_be_added,to_be_deleted)
+
+
 def semantic_process_note(note,user=None):
     """Extract the semantic information from a note,
     creating topics on behalf of the specific user."""
