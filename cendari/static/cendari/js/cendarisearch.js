@@ -258,7 +258,7 @@ function parse_doc_params() {
 var doc_facets = {};
 var facets_prefix = 'selected_facets';
 var bounds = 0;
-var date_range = 0;
+
 function parse_facets() {
     doc_facets = {};
     for (var i = 0; i < doc_params.length; i++) {

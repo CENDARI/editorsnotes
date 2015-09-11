@@ -273,6 +273,7 @@ rect.zoompane {
 	      $( "#min_date" ).datepicker(datepicker_options);
 	      $( "#max_date" ).datepicker(datepicker_options);
 	  });
+	  date_range = 0; // otherwise, the next queries will specify dates
 	</script>
 	{% endautoescape %}
 	{% endif %}
@@ -380,7 +381,7 @@ rect.zoompane {
       // $('#trameIframe').attr('src',iframe_src)
     }
     $("#searchText").val(query['q'])
-  })
+  });
 </script>
 </form>
 {% endblock nolayout_content %}

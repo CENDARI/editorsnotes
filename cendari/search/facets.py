@@ -3,6 +3,10 @@ from . import cendari_index
 import pprint
 from ..utils import bounding_box_to_precision, date_range_to_interval, timestamp2isodate
 
+import logging
+logger = logging.getLogger(__name__)
+
+
 CENDARI_FACETS = [
     "application",
     "artifact",
@@ -22,12 +26,14 @@ CENDARI_FACETS = [
 
 def cendari_filter(user=None,project_slugs=None):
     if user is None:
+        logger.debug('Creating filter for unknown user')
         filter = [
             { "missing": { "field" : "groups_allowed" } },
             { "missing": { "field" : "users_allowed" } }
         ]
     else:
         if user.is_superuser:
+            logger.debug('Creating filter for super user')
             return []
         username=user.username
         if project_slugs is None:
@@ -35,6 +41,7 @@ def cendari_filter(user=None,project_slugs=None):
         else:
             groups=project_slugs
 
+        logger.debug("Creating filter for user '%s' in projects %s", username, groups)
         filter = [
             {"bool": { "should": [
                 { "missing": { "field" : "groups_allowed" } },
@@ -118,12 +125,15 @@ def build_es_query(request,project_slug):
     geo_bounds = None
     query = request.REQUEST.get('q', '')
     if query is not None and len(query)!=0:
+        logger.debug("Buidling textual query '%s'", query)
         query_terms.append({'match': {'_all': query} })
     else:
+        logger.debug("Buidling no textual query")
         query = ''
     if 'selected_facets' in request.REQUEST \
       and request.REQUEST['selected_facets']:
         facets=request.REQUEST.getlist('selected_facets')
+        logger.debug('Filtering facets %s', facets)
         for facet in facets:
             values =facet.split(':')
             facet = values[0]
@@ -146,6 +156,7 @@ def build_es_query(request,project_slug):
     if 'bounds' in request.REQUEST:
         bounds=map(float, request.REQUEST['bounds'].split(','))
         geo_bounds = bounds
+        logger.debug('Filter bounds %s', geo_bounds)
         filter_terms += [{"geo_bounding_box" :
                           {"location": {
                               "top_left": ', '.join(map(str, bounds[:2])),
@@ -153,15 +164,20 @@ def build_es_query(request,project_slug):
                               }
                           }
                         }]
+    else:
+        logger.debug('No filter bounds')
 
     if 'daterange' in request.REQUEST:
         date_range=map(long, request.REQUEST['daterange'].split(','))
+        logger.debug('Filter date range %s', date_range)
         #daterange = [timestamp2isodate(date_range[0]), timestamp2isodate(date_range[1])]
         filter_terms += [
             {"range":
              {"date": {"gte": date_range[0], "lte": date_range[1]}}
             }
         ]
+    else:
+        logger.debug('No filter date range')
 
     if len(query_terms)==1:
         q['query'] = query_terms[0]

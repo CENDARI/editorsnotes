@@ -65,7 +65,6 @@ class CendariIndex(object):
             self.es = OrderedResponseElasticSearch(settings.ELASTICSEARCH_URLS)
         self.is_open = True
         try:
-            logger.info('Creating Cendari index')
             self.created = self.create()
         except IndexAlreadyExistsError as ex:
             self.created = False
@@ -80,7 +79,6 @@ class CendariIndex(object):
         return self.name+datetime.now().strftime('_%Y-%m-%d_%H:%M:%S')
 
     def create(self):
-        logger.info("Creating index '%s'", self.name)
         aliases = self.open().aliases(self.name)
         if len(aliases)>1:
             raise RuntimeError('Unexpected multiple aliases for %s: %s', self.name, alias.keys())
@@ -89,12 +87,15 @@ class CendariIndex(object):
                 self.real_name = self.generate_real_name()
             else:
                 self.real_name = self.name
+            logger.debug("Creating index '%s'", self.real_name)
             created = self.open().create_index(self.real_name, self.get_settings())
             if self.alias:
+                logger.info("Aliasing index '%s' as '%s'", self.real_name, self.name)
                 self.open().update_aliases(actions=[{ "add": { "alias": self.name, "index": self.real_name}}])
         else:
             # len(alias)==1, either an alias exists or the index is already created
             self.real_name = aliases.keys()[0]
+            logger.debug("Index '%s' already created", self.name)
             created = False # self.open().create_index(self.real_name, self.get_settings()) # raises err
         return created
 
