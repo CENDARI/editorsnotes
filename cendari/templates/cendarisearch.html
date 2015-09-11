@@ -353,7 +353,8 @@ rect.zoompane {
 
 
     if(query.hasOwnProperty('TRAME')){
-      var iframe_src = "http://trame.fefonlus.it/trame/index.php?op=search&Field0="+query['q']+"&Field6_loc=&Field6_lib=&Field6_hold=&Field6_shelf=&Field4=&Field41=&Field42=&Field5=&Field7=&Field2=&Field1=&Field3=&Field6=&dbs=90|82|83|87|2|19|89|91|92|58|88|17|84|85|57|86|48|1&maxnum=10"
+      var iframe_src = "{% url 'trame_search_view' %}?q="+query['q']
+      // var iframe_src = "http://trame.fefonlus.it/trame/index.php?op=search&Field0="+query['q']+"&Field6_loc=&Field6_lib=&Field6_hold=&Field6_shelf=&Field4=&Field41=&Field42=&Field5=&Field7=&Field2=&Field1=&Field3=&Field6=&dbs=90|82|83|87|2|19|89|91|92|58|88|17|84|85|57|86|48|1&maxnum=10"
 
       h2 = document.createElement('h2')
       h2.innerHTML = 'TRAME results'

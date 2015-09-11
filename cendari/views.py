@@ -55,6 +55,7 @@ from django.core.exceptions import PermissionDenied
 
 
 import operator
+import requests
 
 from pyelasticsearch import ElasticSearch
 
@@ -877,11 +878,14 @@ def change_project(request, project_id):
 
 def faceted_search(request,project_slug=None):
     o = cendari_faceted_search(request,project_slug)
+    # o={}
     o['p_slug']=project_slug
     return render_to_response(
         'cendarisearch.html', o, context_instance=RequestContext(request))
 
-
+def trame_search(request):
+    r = requests.post("http://trame.fefonlus.it/trame/index.php?op=search&Field0="+request.GET.get('q', '')+"&Field6_loc=&Field6_lib=&Field6_hold=&Field6_shelf=&Field4=&Field41=&Field42=&Field5=&Field7=&Field2=&Field1=&Field3=&Field6=&dbs=90|82|83|87|2|19|89|91|92|58|88|17|84|85|57|86|48|1&maxnum=10")
+    return HttpResponse(r.content)
 def get_project_topics(request,project_slug=None):
     p = Project.objects.filter(slug=project_slug)[0]
     data = simplejson.dumps(cendari_get_project_topics(request.GET['topic_type'],p.name,request.GET['topic_name_prefix']))
