@@ -1272,7 +1272,7 @@ def autocomplete_search(request):
 				}
 			},
 			"sort": {
-			#	"uri": { "order": "asc" }
+				"pageviews": { "order": "asc", "ignore_unmapped" : True}
 			}
 		}
 	else:
@@ -1287,12 +1287,13 @@ def autocomplete_search(request):
 				"term": { "class": "http://schema.org/"+schema }
 			},
 			"sort": {
-			#	"uri": { "order": "asc" }
+				"pageviews": { "order": "asc", "ignore_unmapped" : True }
 			}	
 		}
 
 	es = ElasticSearch('http://localhost:9200/')
-	results = es.search(query, index='cendari')
+	results = es.search(query)
+	#results = es.search(query, index='cendari')
 	#print 'the results of the autocomplete search query:' + str(results)
    	res = json.dumps(results, encoding="utf-8")
     	return HttpResponse(res, mimetype='application/json') 
