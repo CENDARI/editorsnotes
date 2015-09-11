@@ -6,6 +6,7 @@ from cendari_api import *
 
 import logging
 logger = logging.getLogger(__name__)
+from sys import exc_info
 
 DATA_API_SESSION_KEY = '_cendari_api_key'
 
@@ -160,6 +161,6 @@ def login_user_synchronize(sender, user, request, **kwargs):
     except CendariDataAPIException as e:
         logger.error('Problem synchonizing projects with DATA Api: %s', e)
     except:
-        logger.error("Unexpected error: %s", sys.exc_info()[0])
+        logger.error("Unexpected error: %s", exc_info()[0])
 
 user_logged_in.connect(login_user_synchronize)
