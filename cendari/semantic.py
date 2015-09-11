@@ -52,7 +52,7 @@ logger = logging.getLogger(__name__)
 if hasattr(settings,'SEMANTIC_NAMESPACE'):
     CENDARI = Namespace(settings.SEMANTIC_NAMESPACE)
 else:
-    CENDARI = Namespace("http://localhost:8000/")
+    CENDARI = Namespace(settings.SITE_URL) # "http://localhost:8000/")
 
 #CENDARI = Namespace("http://pro2.cendari.dariah.eu/enotes/")
 SCHEMA  = Namespace("http://schema.org/")
