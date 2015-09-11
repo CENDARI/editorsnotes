@@ -379,9 +379,7 @@ class TopicAssignment(CreationMetadata, ProjectPermissionsMixin):
                         instance.topic.deleted = True
                         instance.topic.save()
         except Exception, e:
-            print type(instance)
-            print dir(instance)
-            print instance.topic  == None
+            pass
         else:
             pass
         finally:

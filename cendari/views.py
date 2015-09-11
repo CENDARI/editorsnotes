@@ -876,7 +876,9 @@ def change_project(request, project_id):
     return editorsnotes.admin.views.projects.change_project(request, project.slug)
 
 def faceted_search(request,project_slug=None):
-    o = cendari_faceted_search(request,project_slug)
+    # o = cendari_faceted_search(request,project_slug)
+    o={}
+    o['p_slug']=project_slug
     return render_to_response(
         'cendarisearch.html', o, context_instance=RequestContext(request))
 

@@ -374,38 +374,16 @@ def fix_links(xml):
                     span.set('class', u' '.join(c))
     return changed
 
-def semantic_process_project(project,user=None,doCommit=True):
-    """Extract the semantic information from a project."""
-    logger.info("inside semantic_process_project ")
-    if project is None:
-        return
-    
-    if user is None:
-        user = project.last_updater
-    # Cleanup entities related to note
-    uri = semantic_uri(project)
-    g = Semantic.graph(uri)
-    Semantic.remove_graph(g)
-    # This is not a creative work
-    schema = topic_to_schema(topic.topic_node.type)
+def list_diff(a,b):
+    return list(set(a)-set(b))
 
-    if schema:
-        g.add( (g.identifier, RDF.type, URIRef(schema)) )
-    if topic.date:
-        g.add( (g.identifier, SCHEMA['startDate'], Literal(topic.date)) )
-    g.add( (g.identifier, SCHEMA['creator'], URIRef(semantic_uri(topic.creator))) )
-    g.add( (g.identifier, SCHEMA['dateCreated'], Literal(topic.created)) )
-    g.add( (g.identifier, SCHEMA['dateModified'], Literal(topic.last_updated)) )
-    g.add( (g.identifier, CENDARI['name'], Literal(topic.preferred_name)) )
-    if topic.rdf is not None:
-        uri = fix_uri(topic.rdf)
-        if uri != topic.rdf:
-            logger.debug(u'Fixing rdf URI from %s to %s', topic.rdf.encode('ascii','xmlcharrefreplace'), uri)
-            topic.rdf = uri
-            topic.save()
-        g.add( (g.identifier, OWL['sameAs'], URIRef(topic.rdf)) )
-    if doCommit:
-        semantic.commit()
+def semantic_update_topics(existing_topics,new_topics):
+    to_be_deleted = []
+    to_be_added   = []
+    to_be_added = list_diff(new_topics,existing_topics)
+    to_be_deleted = list_diff(existing_topics,new_topics)
+
+    return (to_be_added,to_be_deleted)
 
 
 def semantic_process_note(note,user=None):
@@ -423,7 +401,7 @@ def semantic_process_note(note,user=None):
 
     # This note is a creative work
     g.add( (g.identifier, RDF.type, SCHEMA['CreativeWork']) )
-    g.add( (g.identifier, SCHEMA['creator'], URIRef(semantic_uri(note.creator))) )
+    g.add( (g.identifier, SCHEMA['creator'], URIRef(note.creator.get_absolute_url()[1:])) )
     g.add( (g.identifier, SCHEMA['dateCreated'], Literal(note.created)) )
     g.add( (g.identifier, SCHEMA['dateModified'], Literal(note.last_updated)) )
     g.add( (g.identifier, CENDARI['name'], Literal(note.title)) )
@@ -483,6 +461,8 @@ def semantic_process_note(note,user=None):
 					topic.save()	
     semantic.commit()
 
+
+
 def semantic_process_document(document,user=None):
     """Extract the semantic information from a note,
     creating topics on behalf of the specific user."""
@@ -501,7 +481,7 @@ def semantic_process_document(document,user=None):
 
     # This not is a creative work
     g.add( (g.identifier, RDF.type, SCHEMA['CreativeWork']) )
-    g.add( (g.identifier, SCHEMA['creator'], URIRef(semantic_uri(document.creator))) )
+    g.add( (g.identifier, SCHEMA['creator'], URIRef(document.creator.get_absolute_url()[1:])) )
     g.add( (g.identifier, SCHEMA['dateCreated'], Literal(document.created)) )
     g.add( (g.identifier, SCHEMA['dateModified'], Literal(document.last_updated)) )
     #g.add( (g.identifier, CENDARI['name'], Literal(xhtml_to_text(document.description))) )
@@ -576,7 +556,7 @@ def semantic_process_transcript(transcript,user=None):
 
     # This not is a creative work
     g.add( (g.identifier, RDF.type, SCHEMA['CreativeWork']) )
-    g.add( (g.identifier, SCHEMA['creator'], URIRef(semantic_uri(transcript.document.creator)))) 
+    g.add( (g.identifier, SCHEMA['creator'], URIRef(transcript.document.creator.get_absolute_url()[1:])) )
     g.add( (g.identifier, SCHEMA['dateCreated'], Literal(transcript.document.created)) )
     g.add( (g.identifier, SCHEMA['dateModified'], Literal(transcript.document.last_updated)) )
     g.add( (g.identifier, CENDARI['name'], Literal(transcript.document.description)) )
@@ -668,7 +648,7 @@ def semantic_process_topic(topic,user=None,doCommit=True):
         g.add( (g.identifier, RDF.type, URIRef(schema)) )
     if topic.date:
         g.add( (g.identifier, SCHEMA['startDate'], Literal(topic.date)) )
-    g.add( (g.identifier, SCHEMA['creator'], URIRef(semantic_uri(topic.creator))) )
+    g.add( (g.identifier, SCHEMA['creator'], URIRef(topic.creator.get_absolute_url()[1:])) )
     g.add( (g.identifier, SCHEMA['dateCreated'], Literal(topic.created)) )
     g.add( (g.identifier, SCHEMA['dateModified'], Literal(topic.last_updated)) )
     g.add( (g.identifier, CENDARI['name'], Literal(topic.preferred_name)) )
