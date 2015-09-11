@@ -1272,7 +1272,7 @@ def autocomplete_search(request):
 				}
 			},
 			"sort": {
-				"pageviews": { "order": "asc", "ignore_unmapped" : True}
+				"pageviews": { "order": "desc", "ignore_unmapped" : True}
 			}
 		}
 	else:
@@ -1287,7 +1287,7 @@ def autocomplete_search(request):
 				"term": { "class": "http://schema.org/"+schema }
 			},
 			"sort": {
-				"pageviews": { "order": "asc", "ignore_unmapped" : True }
+				"pageviews": { "order": "desc", "ignore_unmapped" : True }
 			}	
 		}
 
