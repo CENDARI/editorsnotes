@@ -423,6 +423,19 @@ function facet_toggle(event) {
     document.location.assign(url);
 }
 
+function facet_submit(event) {
+    event.preventDefault();
+    var url = url_facets();
+    document.location.assign(url);
+}
+
+function facet_keyup(event) {
+    if (event.keyCode==13) {
+	doc_args['q'] = $('#searchText').val();
+	facet_submit(event);
+    }
+}
+
 function datepicker_parseDate(format, value, settings) {
     if (value == null) {
 	throw "Invalid arguments";
@@ -530,4 +543,6 @@ function bind_faceted_widgets() {
     $('.facetview_adaptresolution').click(adapt_resolution);
     $('.facetview_resetlocation').click(reset_location);
     $('.facetview_filterdate').click(filter_date);
+    $('.searchSubmit').click(facet_submit);
+    $('#searchText').keyup(facet_keyup);
 }
