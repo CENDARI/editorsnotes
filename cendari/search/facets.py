@@ -190,7 +190,7 @@ def build_es_query(request,project_slug):
     # craft a filtered query out of the query
     # because aggregation use the result of the query
     # and ignore the filter alone
-    #q = {'query': { 'filtered': q } }
+    q = {'query': { 'filtered': q } }
     q['functions'] = [ {'filter': { 'term': { 'application': 'nte'}},
                         'weight': 10
                         },
