@@ -229,12 +229,15 @@ def semantic_query_latlong(topic):
     if topic.rdf is None:
         return None
     url = topic.rdf
-    g = Semantic.graph(url)
-    o = g.value(g.identifier, GRS['point'])
-    if o:
-        latlong = map(float, unicode(o).split(' '))
-        location = PlaceTopicModel(topic, lat=latlong[0], lon=latlong[1])
-        return latlong
+    try:
+        g = Semantic.graph(url)
+        o = g.value(g.identifier, GRS['point'])
+        if o:
+            latlong = map(float, unicode(o).split(' '))
+            location = PlaceTopicModel(topic, lat=latlong[0], lon=latlong[1])
+            return latlong
+    except Exception as e:
+        logger.warn('Problem in RDF: %s', e)
     return None
 
 schema_topic = {
