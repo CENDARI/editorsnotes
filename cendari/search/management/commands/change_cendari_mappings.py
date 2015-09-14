@@ -37,7 +37,7 @@ class Command(BaseCommand):
                 traceback.print_exc(e)
 
             if not aliases[old_name]['aliases']:
-                print('Index %s exists and cannot be aliased to %s, removing it...', index_name,new_name)
+                print 'Index %s exists and cannot be aliased to %s, removing it...'%(index_name,new_name)
                 es.delete_index(old_name)
                 es.update_aliases(actions=[{ "add": { "alias": index_name, "index": new_name }}])
             else:
@@ -51,5 +51,7 @@ class Command(BaseCommand):
                         "index": new_name
                     }}
                 ])
-            print 'You can now delete the old index %s' % old_name
-            print "curl -XDELETE '%s/%s/'" % (settings.ELASTICSEARCH_URLS, old_name)
+                print 'You can now delete the old index %s' % old_name
+                print "curl -XDELETE '%s/%s/'" % (settings.ELASTICSEARCH_URLS, old_name)
+            print "Created alias from '%s' to '%s'" % (index_name, new_name)
+        
