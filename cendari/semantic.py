@@ -28,6 +28,9 @@ import json
 import sys, traceback
 import re
 
+import time
+
+
 __all__ = [
     'CENDARI',
     'SCHEMA',
@@ -417,11 +420,17 @@ def semantic_process_note(note,user=None):
     xml = note.content
 #    print '---------------------------'
 #    print as_html(note.content)
+    start_time = time.time()
     topics = xml_to_topics(xml, uri) 
+    print("Time for xml to topics :  %s seconds " % (time.time() - start_time))
 #    print topics
 #    print '---------------------------'
     done=set()
+    start_time = time.time()
     note.related_topics.all().delete()
+    print("Time for deleting all topics:  %s seconds " % (time.time() - start_time))
+
+    start_time = time.time()
     for t in topics:
         topic=get_or_create_topic(user, t['value'], t['type'],note.project)
         if topic is None:
@@ -432,8 +441,8 @@ def semantic_process_note(note,user=None):
             rdftopic = semantic_uri(topic)
             subject = t['rdfsubject']
             value = t['value']
-            g.add( (subject, OWL.sameAs, rdftopic) )
-            g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
+            # g.add( (subject, OWL.sameAs, rdftopic) )
+            # g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
 
             if (not topic.rdf is None) and (not check_domain(topic.rdf,'dbpedia')):
                 topic.rdf = None
@@ -461,8 +470,12 @@ def semantic_process_note(note,user=None):
                 			topic.date = utils.parse_well_known_date(explicit_date)
 					# topic.rdf = explicit_date
                 			logger.debug('Found a valid date between []: %s', topic.date)
-					topic.save()	
+					topic.save()
+    print("Time for iterating :  %s seconds " % (time.time() - start_time))	
+
+    start_time = time.time()
     semantic.commit()
+    print("Time for semantic commit :  %s seconds " % (time.time() - start_time))
 
 
 
