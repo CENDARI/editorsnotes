@@ -61,6 +61,7 @@ AUTHENTICATION_BACKENDS = (
 
 UPLOAD_FILE_TYPES = [
     'image/tiff',
+    'image/x-tiff',
     'image/png',
     'image/jpeg',
     'text/plain',
