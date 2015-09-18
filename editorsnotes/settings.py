@@ -73,6 +73,8 @@ UPLOAD_FILE_TYPES = [
     'application/msword', # doc
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document', # docx
     'audio/mpeg', # mp3
+    'audio/mpeg3',
+    'audio/x-mpeg-3',
     'audio/x-wav', # wav
     #NOT YET 'video/x-msvideo' # avi
 ]
