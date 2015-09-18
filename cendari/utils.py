@@ -18,6 +18,7 @@ from rest_framework.views import exception_handler
 from editorsnotes.main.models.documents import get_or_create_document
 
 import datetime_safe
+import dateinfer
 
 import logging
 logger = logging.getLogger(__name__)
@@ -30,7 +31,11 @@ WELL_KNOWN_DATE_FORMATS=[
 ]
 
 def parse_well_known_date(str):
-    for format in WELL_KNOWN_DATE_FORMATS:
+    #print '.................................. parsing date str = ' + str
+    format =  dateinfer.infer([str])
+    #print '.................................. infering format for this str = ' + format
+
+    if format in WELL_KNOWN_DATE_FORMATS:
 	dparts = []
         try:
 	    #return datetime.strptime(str, format)  # does not work for dates < 1900
@@ -47,7 +52,9 @@ def parse_well_known_date(str):
 
 # gets date parts as list in this order: year, month, day
 def get_date_parts(str, format):
+
 	parts = []
+	#print '************************** trying to get parts for date: ' + str + ', with expected format: ' +format
  	if format == "%m/%d/%Y":
 		res = str.split("/")
 		if len(res) == 3:
@@ -72,6 +79,8 @@ def get_date_parts(str, format):
 			parts.append(res[0])
 			parts.append(res[1])
 			parts.append(res[2])
+
+	#print '************************** parsing the date, should return date(year, month, day) = (' + res[0] + ',' + res[1] + ',' + res[2] + ')' 
 	return parts
 
 

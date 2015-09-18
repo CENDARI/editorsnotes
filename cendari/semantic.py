@@ -689,12 +689,14 @@ def semantic_process_topic(topic,user=None,doCommit=True):
 			d = result["eventDate"]["value"]
 			eventDates.append(d)
 
-		for d in eventDates:
-			if utils.parse_well_known_date(d):
-                		topic.date = utils.parse_well_known_date(d)
-				print '............................................. format of this event date is recognized (d= ' + d + ')'
-				topic.save() #tofix saving twice! see below
-				break
+		if eventDates != []:
+			#print '............................................. RETREIVED DATE IS = ' + eventDates[0]
+			for d in eventDates:
+				if utils.parse_well_known_date(d):
+		        		topic.date = utils.parse_well_known_date(d)
+					#print '............................................. format of this event date is recognized (d= ' + d + ')'
+					topic.save() #tofix saving twice! see below
+					break
         if uri != topic.rdf:
             logger.debug(u'Fixing rdf URI from %s to %s', topic.rdf.encode('ascii','xmlcharrefreplace'), uri)
             topic.rdf = uri
