@@ -123,7 +123,7 @@
 
 				{% if topic.topic_node.type == 'EVT' %}
 
-					<!-- <label class="editorlabel bold"> Date (using your local calendar format):</label>  -->
+					<label class="editorlabel bold"> Date (using your local calendar format):</label> 
 					{% if topic.date %}
 						<div id = "date_id" class="fieldset-content">
 							{{ topic.date }} 
@@ -135,12 +135,12 @@
 				{%endif%}
 
 				<label class="editorlabel bold"> Resolve: </label> 
-				{% if topic.topic_node.type == 'PLA' %}(e.g. to resolve the place entity 'Berlin' use the URL: http://dbpedia.org/resource/Berlin)
-	 			{% elif topic.topic_node.type == 'EVT' %}(e.g. to resolve the event entity 'WWI' use the URL: http://dbpedia.org/resource/WWI)
-	 			{% elif topic.topic_node.type == 'PER' %}(e.g. to resolve the person entity 'Napoleon' use the URL: http://dbpedia.org/resource/Napoleon)
-	 			{% elif topic.topic_node.type == 'ORG' %}(e.g. to resolve the organisation entity 'NATO' use the URL: http://dbpedia.org/resource/NATO)
-	 			{% elif topic.topic_node.type == 'PUB' %}(e.g. to resolve the publication entity 'The Odyssey' use the URL: http://dbpedia.org/resource/Odyssey)
-	 			{% elif topic.topic_node.type == 'TAG' %}(e.g. to resolve the tag entity 'imperialism' use the URL: http://dbpedia.org/resource/Imperialism)
+				{% if topic.topic_node.type == 'PLA' %}(e.g. to resolve the place entity 'Berlin', type the word 'Berlin' or copy-paste the following URL into the field below: http://dbpedia.org/resource/Berlin)
+	 			{% elif topic.topic_node.type == 'EVT' %}(e.g. to resolve the event entity 'WWI', type the word 'WWI' or copy-paste the following URL into the field below: : http://dbpedia.org/resource/WWI)
+	 			{% elif topic.topic_node.type == 'PER' %}(e.g. to resolve the person entity 'Napoleon', type the word 'Napoleon' or copy-paste the following URL into the field below: http://dbpedia.org/resource/Napoleon)
+	 			{% elif topic.topic_node.type == 'ORG' %}(e.g. to resolve the organisation entity 'NATO', type the word 'NATO' or copy-paste the following URL into the field below: http://dbpedia.org/resource/NATO)
+	 			{% elif topic.topic_node.type == 'PUB' %}(e.g. to resolve the publication entity 'The Odyssey', type 'The Odyssey' or copy-paste the following URL into the field below: http://dbpedia.org/resource/Odyssey)
+	 			{% elif topic.topic_node.type == 'TAG' %}(e.g. to resolve the tag entity 'Imperialism', type the word 'Imperialism' or copy-paste the following URL into the field below: http://dbpedia.org/resource/Imperialism)
 				{%endif%}
 
 				<section data-error-target="content">

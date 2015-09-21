@@ -5,76 +5,20 @@
 {% block css %}
 	<link rel="stylesheet" type="text/css" media="all" href="{% static "iipmooviewer/css/iip.css" %}" />
 	<style type="text/css">
-		.toc  a{
-			color: #000;
-			text-decoration: underline;
-
-		}
-		.toc  li {
-		    list-style:decimal;}
-		.toc  ol li {
-			list-style-type:lower-roman;
-		}
-		.toc  ol ol li {
-			list-style-type:lower-latin;
-		}
-		.toc  ul li {
-			list-style-type:lower-roman;
-		}
-		.toc  ul ul li {
-			list-style-type:lower-latin;
-		}
-		.toc{
-			padding-left: 2em;
-		}
-		.toc ul, .toc ol{
-		    padding-left: 2em;
-		}
-
-		.toc  {
-	    	list-style-position:inside;
-	    	border: 1px solid black;
-	 	}  
-
-	 	u {
+		u {
 		    text-decoration: none;
 		    /*border-bottom: 2px solid black;*/
 		}
 		u::after{
 			content: "*";
 		}
-
-		#note_content ul li {
-			list-style-type:circle;
-		}
-
-		#note_content ol li {
-			list-style-type:decimal;
-		}
-
-
-		#note_content ol li {
-			list-style:decimal;
-		}
-		#note_content ul li {
-			list-style:disc;
-		}
-		#note_content ul ul li {
-			list-style:circle;
-		}
-		#note_content ul, #note_content ol {
-			padding-left: 2em;
-		}
-
-
+		
 	</style>
 {% endblock %}
 
 {% block init %}
 	<meta name="note_id" id="note_id" content="{{ note.id }}" />
 	<meta name="note_name" id="note_name" content="{{ note.title }}" />
-	<script type="text/javascript" src="{% static "cendari/js/jquery.toc.min.js" %}"></script>
-	<!--<script type="text/javascript" src="{% static "cendari/js/toc.min.js" %}"></script>-->
 {% endblock init %}
 
 
@@ -100,7 +44,7 @@
 								{% elif 	topic.topic_node.type == "PLA" %} class ="form-entities r_place"
 								{% elif 	topic.topic_node.type == "TAG" %} class ="form-entities r_thing"
 								{% else 						%} class = "form-entities"
-								{% endif %}
+								{% endif %} 
 								> 
 									{% if topic.topic_node.type == "EVT" %}
 										{% if  topic.date%} 
@@ -197,7 +141,7 @@
 								Last updated
 							</dt>
 							<dd>
-								{{ note.last_updated }} <!--(<a href="#">view history</a>) -->
+								{{ note.last_updated }} (<a href="#">view history</a>)
 							</dd>
 						{% endif %}
 						</dl>
@@ -213,25 +157,54 @@
 		<div class="stop-float"></div>
 		<div style="height:5px"> &nbsp;</div>
 
-		
-		{% if note %}
-			<h1> {{note.title}} </h1>
-
-			<!-- <div id="note_toc" class='toc'></div> -->
-			<!-- <ul id="note_toc"></ul> -->
-			<div id='note_toc_wrapper'>
-				<p>Table of contents (<a class='visibilityToc' href="">hide</a>)</p>
-				<ol id="note_toc" class='toc'></ol>
-			</div>
-			
-			<div id="note_content"> 
-				{{note.content|as_html}}
-			</div>
-
+		{% if note.id %}
+			<form class="formCendari" id="noteCendari" action="{% url "api:api-notes-detail" project_slug=project.slug  pk=note.id %}" method="POST">  
+			{% csrf_token %}
+		{% else %}
+			<form class="formCendari" id="noteCendari" action="{% url "api:api-notes-list" project_slug=project.slug %}" method="POST" >
+			{% csrf_token %}
 		{% endif %}
-		<section id="note-sections">
-				{% for section in sections %}{% include section|ns_template_name %}{% endfor %}
-		</section>
+			<!-- <div class="form-main edit-section" > -->
+
+			{% if not note.id %}
+				<input type="hidden" name="related_topics" value="" /> 
+				<input type="hidden" name="status" value="open" />
+				<input type="hidden" name="is_private" value="false" />
+			{% else %}
+				<input type="hidden" name="related_topics" value="" />
+				<input type="hidden" name="status" value="open" />
+				<input type="hidden" name="is_private" value="{{note.is_private}}" />
+				<input type="hidden" id = "model_id" name="id" value="{{note.id}}" />
+			{% endif %}
+			<div class="form-main edit-section" >
+		
+				<input  class="editorlabel" id="noteDescEditBut" type="button" value= {% if note.id > 0 %} "[ Read Only ]                --- click here for Edit mode" {% else %} "[ Editable ]                    --- click here for Read-Only mode" {% endif %} />
+				<div data-error-target="note-title"></div>
+				<!-- <label for="note-title">Note's title</label> -->
+				<p>Note's title</p>
+				<input type="text" id="note_title" name="title" style="height:30px;" value="{%if note%}{{note.title}}{%endif%}">
+				<p>Note's content</p>
+				<div data-error-target="note-description"></div>
+				<textarea id="note-description" type="text"  class="mceEditor" name="content"  >
+				{% if note %} {{ note.content|as_html }} {% endif %}	
+				</textarea>
+				<!-- </section> -->
+
+				<section id="note-sections">
+					{% for section in sections %}{% include section|ns_template_name %}{% endfor %}
+				</section>
+
+				{% if note.id %}
+					<button id="saveButton" style="visibility: hidden;" class="save-item" name="_method" value="PUT" >Save</button>
+				{% else %}
+					<button id="saveButton" style="visibility: hidden;" class="save-item"  method="POST" name="_method" value="POST">Save</button>
+				{% endif %}
+				<div id="statusMessages"></div>
+			</div>
+
+			
+			
+		</form>
 	</div>
 {% endblock model_fields %}
 
@@ -242,17 +215,17 @@
 		$("#note-title").attr("placeholder", "Insert Note Title  . . . ");
 		var isReadOnly = false, title = "New Note", id = document.getElementById("note_id").getAttribute("content");
 
-		// if (id > 0) {
-		// 	var name = document.getElementById("note_name").getAttribute("content");
-		// 	title = "Note " + id + ": " + name;
-		// 	isReadOnly = false;
-		// }
+		if (id > 0) {
+			var name = document.getElementById("note_name").getAttribute("content");
+			title = "Note " + id + ": " + name;
+			isReadOnly = false;
+		}
 
-		// var descriptionLabel = "Note Description ";
-		// var temp = document.getElementById("noteDescEditBut").getAttribute("value");
-		// document.getElementById("noteDescEditBut").value = descriptionLabel + temp;
+		var descriptionLabel = "Note Description ";
+		var temp = document.getElementById("noteDescEditBut").getAttribute("value");
+		document.getElementById("noteDescEditBut").value = descriptionLabel + temp;
 		cendari.addInit(function() {
-			// cendari.createEditor(500, "note-description", isReadOnly, "noteDescEditBut", descriptionLabel);
+			cendari.createEditor(500, "note-description", isReadOnly, "noteDescEditBut", descriptionLabel);
 			cendari.addTab(title);
 			cendari.addWidgetToActiveTab("form", "noteform", "border");
 		});
@@ -267,39 +240,10 @@
 			}, document.location.origin);
 		{% endif %}
 
-
-		$(document).ready(function(){
-			$('#note_content').find('img').each(function(){this.src= this.src.replace('http://'+document.location.host,'').replace('documents/','')})
-			$('#note_toc').toc({content: "#note_content", headings: "h1,h2,h3,h4,h5,h6"});
-			if( $('#note_toc li').length >0)	{
-				$('.visibilityToc').on('click',function(e){
-					e.preventDefault();
-					if($(this).text().indexOf('show')>-1){
-						$(this).text('hide');
-						$('#note_toc').show();
-					}
-					else{
-						$(this).text('show');
-						$('#note_toc').hide();
-					}
-				})
-			}
-			else{
-				$('#note_toc_wrapper').hide()
-			}
-		});
-		
-
 		Ext.onReady(function(){
-			$('#extraButtonId').css('left',$('#versionHistoryButtonId').css('left'))
-			$('#versionHistoryButtonId').hide();
-			$('#extraButtonId').text('Edit Mode');
-			$('#extraButtonId').on('click',function(e){
-				var readModeUrl = '{% url "note_view" project_slug=project.slug  note_id=note.id %}';
-				window.location.replace(readModeUrl);
-			});
-
+			$('#toolbarId').empty()
 		})
+		
 
 	</script>
 {% endblock functions %}

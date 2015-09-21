@@ -1,0 +1,31 @@
+{% extends "centerCendari.html" %}
+{% load typogrify display %}
+{% load staticfiles compress %}
+
+{% block model_fields %}
+
+<meta name="document_id" id="document_id" content="{{ document_id }}" />
+
+
+<div id="editorsDom">
+ <ul class="unstyled">
+  {% for version in version_list%}
+    <li> <a target="_blank" href="{% url "document_version" project_slug=project.slug  document_id=document_id version_id=version.id %}" > Version updated at {{version.field_dict.last_updated | date}} </a> </li>
+  {% endfor %}
+</ul>
+
+<script>
+
+    cendari.addInit(function() { 
+    	cendari.addTab("Version histoy for document "+$("#document_id").attr('content'));
+    	cendari.addWidgetToActiveTab("panel","editorsDom" ,"border");
+
+    });
+    Ext.onReady(function(){
+    	$('#extraButtonId').hide()
+    	$('#versionHistoryButtonId').hide();
+    })
+
+</script>
+
+{% endblock %}

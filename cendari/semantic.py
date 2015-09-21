@@ -28,6 +28,9 @@ import json
 import sys, traceback
 import re
 
+import time
+
+
 __all__ = [
     'CENDARI',
     'SCHEMA',
@@ -233,12 +236,15 @@ def semantic_query_latlong(topic):
     if topic.rdf is None:
         return None
     url = topic.rdf
-    g = Semantic.graph(url)
-    o = g.value(g.identifier, GRS['point'])
-    if o:
-        latlong = map(float, unicode(o).split(' '))
-        location = PlaceTopicModel(topic, lat=latlong[0], lon=latlong[1])
-        return latlong
+    try:
+        g = Semantic.graph(url)
+        o = g.value(g.identifier, GRS['point'])
+        if o:
+            latlong = map(float, unicode(o).split(' '))
+            location = PlaceTopicModel(topic, lat=latlong[0], lon=latlong[1])
+            return latlong
+    except Exception as e:
+        logger.warn('Problem in RDF: %s', e)
     return None
 
 schema_topic = {
@@ -418,11 +424,17 @@ def semantic_process_note(note,user=None):
     xml = note.content
 #    print '---------------------------'
 #    print as_html(note.content)
+    start_time = time.time()
     topics = xml_to_topics(xml, uri) 
+    print("Time for xml to topics :  %s seconds " % (time.time() - start_time))
 #    print topics
 #    print '---------------------------'
     done=set()
+    start_time = time.time()
     note.related_topics.all().delete()
+    print("Time for deleting all topics:  %s seconds " % (time.time() - start_time))
+
+    start_time = time.time()
     for t in topics:
         topic=get_or_create_topic(user, t['value'], t['type'],note.project)
         if topic is None:
@@ -433,8 +445,8 @@ def semantic_process_note(note,user=None):
             rdftopic = semantic_uri(topic)
             subject = t['rdfsubject']
             value = t['value']
-            g.add( (subject, OWL.sameAs, rdftopic) )
-            g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
+            # g.add( (subject, OWL.sameAs, rdftopic) )
+            # g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
 
             if (not topic.rdf is None) and (not check_domain(topic.rdf,'dbpedia')):
                 topic.rdf = None
@@ -462,8 +474,12 @@ def semantic_process_note(note,user=None):
                 			topic.date = utils.parse_well_known_date(explicit_date)
 					# topic.rdf = explicit_date
                 			logger.debug('Found a valid date between []: %s', topic.date)
-					topic.save()	
+					topic.save()
+    print("Time for iterating :  %s seconds " % (time.time() - start_time))	
+
+    start_time = time.time()
     semantic.commit()
+    print("Time for semantic commit :  %s seconds " % (time.time() - start_time))
 
 
 
@@ -632,7 +648,7 @@ def semantic_check_user_alias(topic,user):
     return t  
     
 
-
+from SPARQLWrapper import SPARQLWrapper, JSON
 def semantic_process_topic(topic,user=None,doCommit=True):
     """Extract the semantic information from a topic."""
     logger.info("inside semantic_process_topic ")
@@ -656,8 +672,35 @@ def semantic_process_topic(topic,user=None,doCommit=True):
     g.add( (g.identifier, SCHEMA['dateCreated'], Literal(topic.created)) )
     g.add( (g.identifier, SCHEMA['dateModified'], Literal(topic.last_updated)) )
     g.add( (g.identifier, CENDARI['name'], Literal(topic.preferred_name)) )
+
+
     if topic.rdf is not None:
         uri = fix_uri(topic.rdf)
+	#[NB] get date for events
+	if topic.topic_node.type == 'EVT':
+		sparql = SPARQLWrapper("http://dbpedia.org/sparql")
+		sparql.setQuery("""		
+			PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+			SELECT ?eventDate WHERE {
+				<"""+uri+""">
+				<http://dbpedia.org/property/date> ?eventDate
+		}
+		""")
+		sparql.setReturnFormat(JSON)
+		results = sparql.query().convert()
+		eventDates = []
+		for result in results["results"]["bindings"]:
+			d = result["eventDate"]["value"]
+			eventDates.append(d)
+
+		if eventDates != []:
+			#print '............................................. RETREIVED DATE IS = ' + eventDates[0]
+			for d in eventDates:
+				if utils.parse_well_known_date(d):
+		        		topic.date = utils.parse_well_known_date(d)
+					#print '............................................. format of this event date is recognized (d= ' + d + ')'
+					topic.save() #tofix saving twice! see below
+					break
         if uri != topic.rdf:
             logger.debug(u'Fixing rdf URI from %s to %s', topic.rdf.encode('ascii','xmlcharrefreplace'), uri)
             topic.rdf = uri
@@ -665,6 +708,22 @@ def semantic_process_topic(topic,user=None,doCommit=True):
         g.add( (g.identifier, OWL['sameAs'], URIRef(topic.rdf)) )
     if doCommit:
         semantic.commit()
+
+
+def query(q,epr,f='application/json'):
+    try:
+        params = {'query': q}
+        params = urllib.urlencode(params)
+        opener = urllib2.build_opener(urllib2.HTTPHandler)
+        request = urllib2.Request(epr+'?'+params)
+        request.add_header('Accept', f)
+        request.get_method = lambda: 'GET'
+        url = opener.open(request)
+        return url.read()
+    except Exception, e:
+        traceback.print_exc(file=sys.stdout)
+        raise e 
+
 
 imported_relations = set([
     # Place

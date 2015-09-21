@@ -315,6 +315,8 @@
 		});
 
 		Ext.onReady(function(){
+			$('#extraButtonId').css('left',$('#versionHistoryButtonId').css('left'))
+			$('#versionHistoryButtonId').hide();
 			$('#extraButtonId').text('Edit Mode');
 			$('#extraButtonId').on('click',function(e){
 				var readModeUrl = '{% url "document_view" project_slug=project.slug  document_id=document.id %}';
