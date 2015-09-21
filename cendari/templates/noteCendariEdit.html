@@ -252,7 +252,9 @@
 				$('#versionHistoryButtonId').on('click',function(e){
 					var versionHistoryUrl = '{% url "note_version_history" project_slug=project.slug  note_id=note.id %}';
 					console.log("versionHistoryUrl",versionHistoryUrl);
-					window.location.replace(versionHistoryUrl);
+					// window.location.replace(versionHistoryUrl);
+					var win = window.open(versionHistoryUrl, '_blank');
+  					win.focus();
 				});
 				$('#deleteButtonId').on('click',function(e){
 					var url = '{% url "api:api-notes-detail" project_slug=project.slug  pk=note.id %}'
