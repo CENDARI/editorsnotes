@@ -197,7 +197,7 @@
 								Last updated
 							</dt>
 							<dd>
-								{{ note.last_updated }} (<a href="#">view history</a>)
+								{{ note.last_updated }} <!--(<a href="#">view history</a>) -->
 							</dd>
 						{% endif %}
 						</dl>
@@ -291,6 +291,8 @@
 		
 
 		Ext.onReady(function(){
+			$('#extraButtonId').css('left',$('#versionHistoryButtonId').css('left'))
+			$('#versionHistoryButtonId').hide();
 			$('#extraButtonId').text('Edit Mode');
 			$('#extraButtonId').on('click',function(e){
 				var readModeUrl = '{% url "note_view" project_slug=project.slug  note_id=note.id %}';

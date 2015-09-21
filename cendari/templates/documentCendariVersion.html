@@ -323,45 +323,9 @@
 		// });
 
 	
-		{% if document %}
-			Ext.onReady(function(){
-				$('#versionHistoryButtonId').on('click',function(e){
-					var versionHistoryUrl = '{% url "document_version_history" project_slug=project.slug  document_id=document.id %}';
-					console.log("versionHistoryUrl",versionHistoryUrl);
-					window.location.replace(versionHistoryUrl);
-				});
-				$('#extraButtonId').text('Read Mode');
-				$('#extraButtonId').on('click',function(e){
-					var readModeUrl = '{% url "document_read" project_slug=project.slug  document_id=document.id %}';
-					window.location.replace(readModeUrl);
-				});
-				$('#deleteButtonId').on('click',function(e){
-					var url = '{% url "api:api-documents-detail" project_slug=project.slug  pk=document.id %}'
-					var choice = confirm('Are you sure you want to delete this document?')
-					if(choice){
-						var formData ="csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&_method=DELETE";
-						$.ajax({
-						// beforeSend: function (xhr) {xhr.setRequestHeader('X-CSRFToken', $('input[name="csrfmiddlewaretoken"]').val());},
-							url:url,
-							type: 'POST',
-							data: formData,
-							success: function(data){
-								window.location.href = 'http://'+window.location.host
-							},
-							error: function(XMLHttpRequest, textStatus, errorThrown) { 
-							console.log("Error with status "+textStatus+":",errorThrown);
-							showErrorMessage(messages.transcript.error);
-							} 
-						});
-					}
-				})
-			})
-		{% else %}
-			Ext.onReady(function(){
-				$('#extraButtonId').hide();
-				$('#deleteButtonId').hide();
-				
-			})
-		{% endif %}
+		Ext.onReady(function(){
+			$('#toolbarId').empty();
+			$('#id_image').hide();
+		})
 	</script>
 {% endblock functions %}

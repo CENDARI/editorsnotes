@@ -64,6 +64,7 @@ UPLOAD_FILE_TYPES = [
     'image/x-tiff',
     'image/png',
     'image/jpeg',
+    'image/gif',
     'text/plain',
     'text/html',
     'application/pdf',
@@ -75,7 +76,14 @@ UPLOAD_FILE_TYPES = [
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document', # docx
     'audio/mpeg', # mp3
     'audio/mpeg3',
+    'audio/mp3',
     'audio/x-mpeg-3',
+    'video/mpeg',
+    'video/x-mpeg',
+    'application/x-troff-msvideo', #avi
+    'video/avi',
+    'video/msvideo',
+    'video/x-msvideo',
     'audio/x-wav', # wav
     #NOT YET 'video/x-msvideo' # avi
 ]

@@ -132,9 +132,14 @@ Ext.application({
 							id : 'saveNoteID'
 						},
 						{
+							text : 'Version history',
+							id: 'versionHistoryButtonId'
+						},
+						{
 							text : 'Button',
 							id: 'extraButtonId'
 						},
+						
 						{
 							itemId : 'toggleCw',
 							text : 'Pop-up Window',
