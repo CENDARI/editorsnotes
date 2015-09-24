@@ -172,6 +172,7 @@ cendaripatterns = patterns('cendari.views',
     url(r'^cendari/(?P<project_slug>[-\w]+)/faceted/$', 'faceted_search', name='cendari_faceted_search_view'),
     url(r'^cendari/autocomplete_search/$', 'autocomplete_search', name = 'autocomplete_search_view'),
     url(r'^cendari/trame/$', 'trame_search', name='trame_search_view'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/find_dates/(?P<topic_node_id>\d+)/$', 'find_date', name='find_date_view'),
    # Cendari chat
    # url(r'^chat/', include('djangoChat.urls')),
    # url(r'^cendari/(?P<project_slug>[-\w]+)/chat/$',                                       'cendari_chat',                         name='cendari_chat_view'),

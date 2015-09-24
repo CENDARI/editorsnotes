@@ -46,16 +46,21 @@ __all__ = [
     'semantic_query',
     'semantic_query_latlong',
     'semantic_resolve_topic',
-    'semantic_rdfa'
+    'semantic_rdfa',
+    'semantic_find_dates'
 ]
 
 import logging
 logger = logging.getLogger(__name__)
 
 if hasattr(settings,'SEMANTIC_NAMESPACE'):
-    CENDARI = Namespace(settings.SEMANTIC_NAMESPACE)
+    SEMANTIC_NAMESPACE=settings.SEMANTIC_NAMESPACE
 else:
-    CENDARI = Namespace(settings.SITE_URL) # "http://localhost:8000/")
+    SEMANTIC_NAMESPACE=settings.SITE_URL
+    
+if not SEMANTIC_NAMESPACE[-1] == '/':
+    SEMANTIC_NAMESPACE += '/'
+CENDARI = Namespace(SEMANTIC_NAMESPACE)
 
 #CENDARI = Namespace("http://pro2.cendari.dariah.eu/enotes/")
 SCHEMA  = Namespace("http://schema.org/")
@@ -645,6 +650,30 @@ def semantic_check_user_alias(topic,user):
     
 
 from SPARQLWrapper import SPARQLWrapper, JSON
+
+def semantic_find_dates(topic,uri=None):
+    if not uri:
+        uri = semantic_uri(topic)
+    sparql = SPARQLWrapper("http://dbpedia.org/sparql")
+    sparql.setQuery("""     
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        SELECT ?eventDate WHERE {
+            <"""+uri+""">
+            <http://dbpedia.org/property/date> ?eventDate
+    }
+    """)
+    sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
+    eventDates = []
+    for result in results["results"]["bindings"]:
+        d = result["eventDate"]["value"]
+        eventDates.append(d)
+    print "!!!!!!!!!!!!!!!!!!!!!!!!!"
+    print uri
+    print eventDates
+    print "!!!!!!!!!!!!!!!!!!!!!!!!!"
+    return eventDates
+
 def semantic_process_topic(topic,user=None,doCommit=True):
     """Extract the semantic information from a topic."""
     logger.info("inside semantic_process_topic ")
@@ -673,30 +702,16 @@ def semantic_process_topic(topic,user=None,doCommit=True):
     if topic.rdf is not None:
         uri = fix_uri(topic.rdf)
 	#[NB] get date for events
-	if topic.topic_node.type == 'EVT':
-		sparql = SPARQLWrapper("http://dbpedia.org/sparql")
-		sparql.setQuery("""		
-			PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-			SELECT ?eventDate WHERE {
-				<"""+uri+""">
-				<http://dbpedia.org/property/date> ?eventDate
-		}
-		""")
-		sparql.setReturnFormat(JSON)
-		results = sparql.query().convert()
-		eventDates = []
-		for result in results["results"]["bindings"]:
-			d = result["eventDate"]["value"]
-			eventDates.append(d)
-
-		if eventDates != []:
-			#print '............................................. RETREIVED DATE IS = ' + eventDates[0]
-			for d in eventDates:
-				if utils.parse_well_known_date(d):
-		        		topic.date = utils.parse_well_known_date(d)
-					#print '............................................. format of this event date is recognized (d= ' + d + ')'
-					topic.save() #tofix saving twice! see below
-					break
+    if topic.topic_node.type == 'EVT':
+        eventDates = semantic_find_dates(topic,uri)
+        if eventDates != []:
+            #print '............................................. RETREIVED DATE IS = ' + eventDates[0]
+            for d in eventDates:
+                if utils.parse_well_known_date(d):
+                    topic.date = utils.parse_well_known_date(d)
+                    #print '............................................. format of this event date is recognized (d= ' + d + ')'
+                    topic.save() #tofix saving twice! see below
+                    break
         if uri != topic.rdf:
             logger.debug(u'Fixing rdf URI from %s to %s', topic.rdf.encode('ascii','xmlcharrefreplace'), uri)
             topic.rdf = uri

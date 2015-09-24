@@ -902,6 +902,14 @@ def faceted_search(request,project_slug=None):
 def trame_search(request):
     r = requests.post("http://trame.fefonlus.it/trame/index.php?op=search&Field0="+request.GET.get('q', '')+"&Field6_loc=&Field6_lib=&Field6_hold=&Field6_shelf=&Field4=&Field41=&Field42=&Field5=&Field7=&Field2=&Field1=&Field3=&Field6=&dbs=90|82|83|87|2|19|89|91|92|58|88|17|84|85|57|86|48|1&maxnum=10")
     return HttpResponse(r.content)
+
+def find_date(request,project_slug,topic_node_id):
+    topic_qs = main_models.Topic.objects.select_related('topic_node', 'creator', 'last_updater', 'project').prefetch_related('related_topics__topic')
+    topic = get_object_or_404(topic_qs,topic_node_id=topic_node_id,project__slug=project_slug)
+    eventDates = semantic_find_dates(topic)
+    return HttpResponse(simplejson.dumps(eventDates), content_type="application/json")
+
+
 def get_project_topics(request,project_slug=None):
     p = Project.objects.filter(slug=project_slug)[0]
     data = simplejson.dumps(cendari_get_project_topics(request.GET['topic_type'],p.name,request.GET['topic_name_prefix']))
