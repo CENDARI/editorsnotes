@@ -1099,7 +1099,10 @@ def versionNoteCendari(request, note_id, project_slug,version_id):
             raise PermissionDenied()
 
     o['project'] = note.project
+    
     version  = reversion.get_for_object(note).filter(id=version_id)[0]
+    o['version'] = version
+
     note = version.object_version.object
     o['breadcrumb'] = (
         (note.project.name, note.project.get_absolute_url()),
@@ -1216,13 +1219,19 @@ def versionHistoryDocumentCendari(request, document_id, project_slug):
 
 def versionDocumentCendari(request, document_id, project_slug,version_id):
     
+
+
     o = {}
     qs = main_models.Document.objects.select_related('project')
     document = get_object_or_404(main_models.Document, id=document_id, project__slug=project_slug)
+
     o['project_slug'] = project_slug
 
     o['project'] = document.project
     version  = reversion.get_for_object(document).filter(id=version_id)[0]
+    if request.method == 'POST':
+        version.revert()
+    o['version'] = version
     o['document'] = version.object_version.object
     o['project_slug'] = project_slug
     o['breadcrumb'] = (

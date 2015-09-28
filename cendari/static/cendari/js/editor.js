@@ -415,6 +415,10 @@ var getHref = function(href) {
 function find_dates(topic_node_id){
     var url = 'http://'+document.location.host+'/cendari/'+cendari_js_project_slug+'/find_dates/'+topic_node_id;
     var i =0;
+    if(!$('#rdf_id').val().trim().length){
+        alert('Please add a valid dbpedia url and save before using this fucntionality');
+        return;
+    }
     $.get(url,function(data){
         if(data.length){
             for (var i = data.length - 1; i >= 0; i--) {
