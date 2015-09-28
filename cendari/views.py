@@ -904,10 +904,16 @@ def trame_search(request):
     return HttpResponse(r.content)
 
 def find_date(request,project_slug,topic_node_id):
+    response_dates= []
     topic_qs = main_models.Topic.objects.select_related('topic_node', 'creator', 'last_updater', 'project').prefetch_related('related_topics__topic')
     topic = get_object_or_404(topic_qs,topic_node_id=topic_node_id,project__slug=project_slug)
     eventDates = semantic_find_dates(topic)
-    return HttpResponse(simplejson.dumps(eventDates), content_type="application/json")
+    if eventDates != []:
+        #print '............................................. RETREIVED DATE IS = ' + eventDates[0]
+        for d in eventDates:
+            if utils.parse_well_known_date(d):
+                response_dates.append(d)
+    return HttpResponse(simplejson.dumps(response_dates), content_type="application/json")
 
 
 def get_project_topics(request,project_slug=None):
