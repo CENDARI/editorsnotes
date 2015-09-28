@@ -462,8 +462,8 @@ def semantic_process_note(note,user=None):
                 topic.rdf = value
                 topic.save()
             elif t['type']=='EVT':
-         	if utils.parse_well_known_date(value):
-                	topic.date = utils.parse_well_known_date(value)
+         	if utils.parse_well_known_date(value, True):
+                	topic.date = utils.parse_well_known_date(value, True)
 			topic.rdf = value
                 	logger.debug('Found a valid date: %s', topic.date)
 			topic.save()	
@@ -472,8 +472,8 @@ def semantic_process_note(note,user=None):
 			if results_reg!=None:
 				results_reg = str(results_reg.group(0))
 				explicit_date = results_reg[1:len(results_reg)-1]
-				if utils.parse_well_known_date(explicit_date):
-                			topic.date = utils.parse_well_known_date(explicit_date)
+				if utils.parse_well_known_date(explicit_date, True):
+                			topic.date = utils.parse_well_known_date(explicit_date, True)
 					# topic.rdf = explicit_date
                 			logger.debug('Found a valid date between []: %s', topic.date)
 					topic.save()
@@ -536,8 +536,8 @@ def semantic_process_document(document,user=None):
                 topic.save()
             elif t['type']=='EVT':
 		print 'working with EVT entity...'
-         	if utils.parse_well_known_date(value):
-                	topic.date = utils.parse_well_known_date(value)
+         	if utils.parse_well_known_date(value, True):
+                	topic.date = utils.parse_well_known_date(value, True)
 			# topic.rdf = value
                 	logger.debug('Found a valid date: %s', topic.date)
 			topic.save()	
@@ -546,8 +546,8 @@ def semantic_process_document(document,user=None):
 			if results_reg!=None:
 				results_reg = str(results_reg.group(0))
 				explicit_date = results_reg[1:len(results_reg)-1]
-				if utils.parse_well_known_date(explicit_date):
-                			topic.date = utils.parse_well_known_date(explicit_date)
+				if utils.parse_well_known_date(explicit_date, True):
+                			topic.date = utils.parse_well_known_date(explicit_date, True)
 					# topic.rdf = explicit_date
                 			logger.debug('Found a valid date between []: %s', topic.date)
 					topic.save()	
@@ -603,8 +603,8 @@ def semantic_process_transcript(transcript,user=None):
                 topic.rdf = unicode(subject)
                 topic.save()
             elif t['type']=='EVT':
-         	if utils.parse_well_known_date(value):
-                	topic.date = utils.parse_well_known_date(value)
+         	if utils.parse_well_known_date(value, True):
+                	topic.date = utils.parse_well_known_date(value, True)
 			topic.rdf = value
                 	logger.debug('Found a valid date: %s', topic.date)
 			topic.save()	
@@ -613,8 +613,8 @@ def semantic_process_transcript(transcript,user=None):
 			if results_reg!=None:
 				results_reg = str(results_reg.group(0))
 				explicit_date = results_reg[1:len(results_reg)-1]
-				if utils.parse_well_known_date(explicit_date):
-                			topic.date = utils.parse_well_known_date(explicit_date)
+				if utils.parse_well_known_date(explicit_date, True):
+                			topic.date = utils.parse_well_known_date(explicit_date, True)
                 			logger.debug('Found a valid date between []: %s', topic.date)
 					topic.save()	
     semantic.commit()  
@@ -724,8 +724,8 @@ def semantic_process_topic(topic,user=None,doCommit=True):
         eventDates = semantic_find_dates(topic,uri)
         if eventDates != []:
             for d in eventDates:
-                if utils.parse_well_known_date(d):
-                    topic.date = utils.parse_well_known_date(d)
+                if utils.parse_well_known_date(d, False):
+                    topic.date = utils.parse_well_known_date(d, False)
                     topic.save() #tofix saving twice! see below
                     break
         if uri != topic.rdf:

@@ -90,7 +90,7 @@ class TopicSerializer(RelatedTopicSerializerMixin, ProjectSpecificItemMixin,
         # Cendari code E.G. aviz
         if self.context['request']:
             if 'date_custom' in self.context['request'].DATA :
-                date_tbs = parse_well_known_date(self.context['request'].DATA['date_custom'])   
+                date_tbs = parse_well_known_date(self.context['request'].DATA['date_custom'], False)   
                 if date_tbs != None:
                     obj.date = date_tbs         
         semantic_resolve_topic(obj)

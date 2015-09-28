@@ -31,7 +31,12 @@ WELL_KNOWN_DATE_FORMATS=[
     "%Y-%d-%m"
 ]
 
-def parse_well_known_date(str):
+INPUT_FORMATS=[
+    "%m/%d/%Y",
+    "%d/%m/%Y"
+]
+
+def parse_well_known_date(str, restricted_formats):
     cut = str.find("T")
     if cut > -1:
 	date_str = str[0:cut] 
@@ -39,7 +44,14 @@ def parse_well_known_date(str):
 	date_str = str
 
     format =  dateinfer.infer([date_str])
-    if format in WELL_KNOWN_DATE_FORMATS:
+
+    valid_formats = []
+    if (restricted_formats):
+	valid_formats = INPUT_FORMATS
+    else:
+	valid_formats = WELL_KNOWN_DATE_FORMATS
+ 
+    if format in valid_formats:
 	dparts = []
         try:
 	    #return datetime.strptime(str, format)  # does not work for dates < 1900
