@@ -665,27 +665,31 @@ def semantic_find_dates(topic,uri=None):
     es = ElasticSearch('http://localhost:9200/')
     es_results = es.search(es_query)
     eventDates = []
+    print "-----------------------"
+    print es_results["hits"]["hits"]
+    print "-----------------------"
     for r in es_results["hits"]["hits"]:
-	d = [r["_source"]][0]["serialized"]["date"]
-	if d != None:
-		eventDates.append(str(d))
-		break
+        if "date" in [r["_source"]][0]["serialized"]:
+        	d = [r["_source"]][0]["serialized"]["date"]
+        	if d != None:
+        		eventDates.append(str(d))
+        		break
 
     if eventDates == []:
-	sparql = SPARQLWrapper("http://dbpedia.org/sparql")
-	sparql.setQuery("""     
-		PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-		SELECT ?eventDate WHERE {
-		    <"""+uri+""">
-		    <http://dbpedia.org/property/date> ?eventDate
-	}
-	""")
-	sparql.setReturnFormat(JSON)
-	results = sparql.query().convert()
-	eventDates = []
-	for result in results["results"]["bindings"]:
-		d = result["eventDate"]["value"]
-		eventDates.append(d)
+    	sparql = SPARQLWrapper("http://dbpedia.org/sparql")
+    	sparql.setQuery("""     
+    		PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    		SELECT ?eventDate WHERE {
+    		    <"""+uri+""">
+    		    <http://dbpedia.org/property/date> ?eventDate
+    	}
+    	""")
+    	sparql.setReturnFormat(JSON)
+    	results = sparql.query().convert()
+    	eventDates = []
+    	for result in results["results"]["bindings"]:
+    		d = result["eventDate"]["value"]
+    		eventDates.append(d)
     return eventDates
 
 def semantic_process_topic(topic,user=None,doCommit=True):

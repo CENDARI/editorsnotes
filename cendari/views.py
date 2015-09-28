@@ -908,6 +908,10 @@ def find_date(request,project_slug,topic_node_id):
     topic_qs = main_models.Topic.objects.select_related('topic_node', 'creator', 'last_updater', 'project').prefetch_related('related_topics__topic')
     topic = get_object_or_404(topic_qs,topic_node_id=topic_node_id,project__slug=project_slug)
     eventDates = semantic_find_dates(topic)
+    print '!!!!!!!!!!!!!!!!!'
+    print "RESULT IS"
+    print eventDates
+    print '!!!!!!!!!!!!!!!!!'
     if eventDates != []:
         #print '............................................. RETREIVED DATE IS = ' + eventDates[0]
         for d in eventDates:
@@ -1102,7 +1106,8 @@ def versionNoteCendari(request, note_id, project_slug,version_id):
     
     version  = reversion.get_for_object(note).filter(id=version_id)[0]
     o['version'] = version
-
+    if request.method == 'POST':
+        version.revert()
     note = version.object_version.object
     o['breadcrumb'] = (
         (note.project.name, note.project.get_absolute_url()),

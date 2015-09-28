@@ -420,6 +420,8 @@ function find_dates(topic_node_id){
         return;
     }
     $.get(url,function(data){
+        console.log('data are :', data)
+        console.log('data length is  :', data.length)
         if(data.length){
             for (var i = data.length - 1; i >= 0; i--) {
                 if(data[i] === $('#date_id').text()){
@@ -427,7 +429,8 @@ function find_dates(topic_node_id){
                     break;
                 }
             };
-            if(i=== data.length){
+            console.log(i+"=="+data.length)
+            if(i<0){
                 var r = confirm("We found in dbpedia the date "+data[0]+" would you like to  use this date for your topic?");
                 if (r == true) {
                     $('#date_id').text(data[0]);

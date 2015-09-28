@@ -183,7 +183,7 @@
 				<!-- <label for="note-title">Note's title</label> -->
 				<p>Note's title</p>
 				<input type="text" id="note_title" name="title" style="height:30px;" value="{%if note%}{{note.title}}{%endif%}">
-				<p>Note's content ({{version.field_dict.last_updated | date}})</p>
+				<p>Note's content ({{version.field_dict.last_updated | date}}).  <a href="{% url "note_version" project_slug=project.slug  note_id=note.id version_id=version.id %}" id="revertToVersion">Revert to this version</a></p>
 				<div data-error-target="note-description"></div>
 				<textarea id="note-description" type="text"  class="mceEditor" name="content"  >
 				{% if note %} {{ note.content|as_html }} {% endif %}	
@@ -244,6 +244,14 @@
 			$('#toolbarId').empty()
 		})
 		
+		$(document).ready(function(){
+			$('#revertToVersion').on('click',function(e){
+				e.preventDefault()
+				$.post($(this).attr('href'),{"csrfmiddlewaretoken":$('input[name="csrfmiddlewaretoken"]').val()},function(data){
+					window.location.replace('{% url "note_view" project_slug=project.slug  note_id=note.id %}')
+				})
+			})
+		})
 
 	</script>
 {% endblock functions %}
