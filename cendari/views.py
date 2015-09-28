@@ -759,7 +759,7 @@ def getNoteResources(request, project_slug, sfield):
     return note_list
 
 @login_required
-def getDocumentResources(request, project_slug, sfield):
+def getDocumentResources_old(request, project_slug, sfield):
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     projects = request.user.get_authorized_projects()
     image_place_holder = -1
@@ -793,7 +793,7 @@ def getDocumentResources(request, project_slug, sfield):
     	query_set =  main_models.Document.objects.raw(sql_query)
 
 
-	'''filter_terms = cendari_filter(request.user)
+	filter_terms = cendari_filter(request.user)
         es_query = {
 		  "query": {
 			"match" : {"project.serialized.project.name" : project_slug }
@@ -807,7 +807,8 @@ def getDocumentResources(request, project_slug, sfield):
 	}
 	es = ElasticSearch('http://localhost:9200/')
 	es_results = es.search(es_query)
-	print 'get the documents for this project: ' + str(es_results)'''
+	print '........................................ get the documents for this project: ' + str(es_results)
+
 
     for e in query_set:  
         if e.id == image_place_holder.id:
@@ -821,6 +822,74 @@ def getDocumentResources(request, project_slug, sfield):
         }
         doc_list.append(doc)        
     return doc_list
+
+
+@login_required
+def getDocumentResources(request, project_slug, sfield):
+    _check_project_privs_or_deny(request.user, project_slug) # only 4 check
+    projects = request.user.get_authorized_projects()
+    image_place_holder = -1
+    current_project = None
+    for p in projects:
+        if p.slug == project_slug:
+            project_id = p.id
+            current_project = p
+
+    if(current_project):
+        image_place_holder = utils.get_image_placeholder_document(request.user,current_project)
+
+    max_count = 10000
+    doc_list = []   
+    sort_field = ""
+    sort_order = ""
+
+    if sfield == "last_updated":
+	sort_field = "document.serialized.last_updated"
+	sort_order = "asc"
+    elif sfield == "-last_updated":
+	sort_field = "document.serialized.last_updated"
+	sort_order = "desc"
+    elif sfield == "-alpha":
+	sort_field = "document.display_title"
+	sort_order = "desc"
+    else:
+	sort_field = "document.display_title"
+	sort_order = "asc"
+
+    filter_terms = cendari_filter(request.user)
+    
+    es_query = {
+		  "query": {
+			"match" : {"document.serialized.project.name" : project_slug }
+
+		  },
+		  "from": 0,
+		  "size": max_count,
+		  "sort": [
+			{sort_field: { "order": sort_order, "ignore_unmapped" : "true" }}
+			]
+    }
+    es = ElasticSearch('http://localhost:9200/')
+    es_results = es.search(es_query)
+
+    for r in es_results["hits"]["hits"]:
+	doc_title = [r["_source"]][0]["display_title"]
+	doc_id = str([r["_source"]][0]["id"])
+	doc_key = str(project_slug)+'.document.'+doc_id
+	doc_url = [r["_source"]][0]["display_url"]
+       	if doc_id == str(image_place_holder.id):
+    		continue
+	doc = {
+		    'title': doc_title,
+		    'key': doc_key,
+		    'addClass': '',
+		    'url': doc_url,
+		    'children': []
+	}
+	doc_list.append(doc)
+
+    return doc_list
+
 
 @login_required
 def getProjectID(request, project_slug, new_slug):

@@ -668,12 +668,12 @@ def semantic_find_dates(topic,uri=None):
     print "-----------------------"
     print es_results["hits"]["hits"]
     print "-----------------------"
-    for r in es_results["hits"]["hits"]:
-        if "date" in [r["_source"]][0]["serialized"]:
-        	d = [r["_source"]][0]["serialized"]["date"]
-        	if d != None:
-        		eventDates.append(str(d))
-        		break
+    #for r in es_results["hits"]["hits"]:
+    #    if "date" in [r["_source"]][0]["serialized"]:
+   #     	d = [r["_source"]][0]["serialized"]["date"]
+    #    	if d != None:
+     #   		eventDates.append(str(d))
+      #  		break
 
     if eventDates == []:
     	sparql = SPARQLWrapper("http://dbpedia.org/sparql")
