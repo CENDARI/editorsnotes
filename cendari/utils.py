@@ -25,21 +25,25 @@ logger = logging.getLogger(__name__)
 
 WELL_KNOWN_DATE_FORMATS=[
     "%m/%d/%Y",
-    "%Y/%m/%d",
+    "%d/%m/%Y",
     "%d.%m.%Y",
     "%Y-%m-%d",
+    "%Y-%d-%m"
 ]
 
 def parse_well_known_date(str):
-    #print '.................................. parsing date str = ' + str
-    format =  dateinfer.infer([str])
-    #print '.................................. infering format for this str = ' + format
+    cut = str.find("T")
+    if cut > -1:
+	date_str = str[0:cut] 
+    else:
+	date_str = str
 
+    format =  dateinfer.infer([date_str])
     if format in WELL_KNOWN_DATE_FORMATS:
 	dparts = []
         try:
 	    #return datetime.strptime(str, format)  # does not work for dates < 1900
-	    dparts = get_date_parts(str,format)
+	    dparts = get_date_parts(date_str,format)
 	    if len(dparts) == 3:
 		    #res = datetime_safe.date(int(dparts[0]), int(dparts[1]), int(dparts[2])).strftime(format) # expecting date(year, month, day)
         	    return datetime_safe.date(int(dparts[0]), int(dparts[1]), int(dparts[2]))
@@ -52,21 +56,19 @@ def parse_well_known_date(str):
 
 # gets date parts as list in this order: year, month, day
 def get_date_parts(str, format):
-
 	parts = []
-	#print '************************** trying to get parts for date: ' + str + ', with expected format: ' +format
  	if format == "%m/%d/%Y":
 		res = str.split("/")
 		if len(res) == 3:
 			parts.append(res[2])
 			parts.append(res[0])
 			parts.append(res[1])
-	elif format == "%Y/%m/%d":
+	elif format == "%d/%m/%Y":
 		res = str.split("/")
 		if len(res) == 3:
-			parts.append(res[0])
-			parts.append(res[1])
 			parts.append(res[2])
+			parts.append(res[1])
+			parts.append(res[0])
 	elif format == "%d.%m.%Y":
 		res = str.split(".")
 		if len(res) == 3:
@@ -79,7 +81,12 @@ def get_date_parts(str, format):
 			parts.append(res[0])
 			parts.append(res[1])
 			parts.append(res[2])
-
+	elif format == "%Y-%d-%m":
+		res = str.split("-")
+		if len(res) == 3:
+			parts.append(res[0])
+			parts.append(res[2])
+			parts.append(res[1])
 	#print '************************** parsing the date, should return date(year, month, day) = (' + res[0] + ',' + res[1] + ',' + res[2] + ')' 
 	return parts
 
