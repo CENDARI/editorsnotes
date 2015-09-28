@@ -14,6 +14,7 @@
 
 {% block init %}
 	<meta name="topic_id" id="topic_id" content="{{ topic.id }}" />
+	<meta name="topic_node_id" id="topic_node_id" content="{{ topic.topic_node_id }}" />
 	<meta name="topic_prefname" id="prefname_id" content="{{ topic.preferred_name }}" />
 
 {% endblock init %}
@@ -121,18 +122,7 @@
 					<textarea name="entity_description" id="entity_description" cols="40" rows="5">{%if topic.id%}{{ topic.summary|as_text }}{%endif%}</textarea>
 				</section>
 
-				{% if topic.topic_node.type == 'EVT' %}
-
-					<label class="editorlabel bold"> Date (using your local calendar format):</label> 
-					{% if topic.date %}
-						<div id = "date_id" class="fieldset-content">
-							{{ topic.date }} 
-						</div>
-					{% endif %}
-					<!-- <section data-error-target="content">
-						<input  type="date" id="date_id" name="date" value="{%if topic.id%}{{ topic.date }}{%endif%}"/>
-					</section> -->
-				{%endif%}
+				
 
 				<label class="editorlabel bold"> Resolve: </label> 
 				{% if topic.topic_node.type == 'PLA' %}(e.g. to resolve the place entity 'Berlin', type the word 'Berlin' or copy-paste the following URL into the field below: http://dbpedia.org/resource/Berlin)
@@ -146,6 +136,21 @@
 				<section data-error-target="content">
 					<input  type="text" id="rdf_id" name="rdf" value="{%if topic.rdf%}{{ topic.rdf }}{%endif%}"/>
 				</section>
+
+				{% if topic.topic_node.type == 'EVT' %}
+
+					<label class="editorlabel bold"> Date :</label> 
+					{% if topic.date %}
+						<div id = "date_id" class="fieldset-content">
+							{{ topic.date }} 
+						</div>
+					{% endif %}
+					<button  type="button" id="findDatesButton"> Search for dates</button>
+					<!-- <section data-error-target="content">
+						<input  type="date" id="date_id" name="date" value="{%if topic.id%}{{ topic.date }}{%endif%}"/>
+					</section> -->
+				{%endif%}
+
 				{% if topic.id %}
 					<input type="hidden" id = "model_id" name="id" value="{{topic.id}}" >
 				{%endif%}
@@ -211,9 +216,13 @@
 	})
 
 
-	$(document).ready(function(){
+	$(document).ready(function(e){
 		$('.model-link').each(function(){
 			this.href+='?entity={{ topic.preferred_name }}'
+		})
+		// $('#findDatesButton').submit(function(){return false;});
+		$("#findDatesButton").on("click",function(){
+			find_dates($('meta[name=topic_node_id]').attr("content"));
 		})
 	})
 

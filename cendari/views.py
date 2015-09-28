@@ -904,10 +904,16 @@ def trame_search(request):
     return HttpResponse(r.content)
 
 def find_date(request,project_slug,topic_node_id):
+    response_dates= []
     topic_qs = main_models.Topic.objects.select_related('topic_node', 'creator', 'last_updater', 'project').prefetch_related('related_topics__topic')
     topic = get_object_or_404(topic_qs,topic_node_id=topic_node_id,project__slug=project_slug)
     eventDates = semantic_find_dates(topic)
-    return HttpResponse(simplejson.dumps(eventDates), content_type="application/json")
+    if eventDates != []:
+        #print '............................................. RETREIVED DATE IS = ' + eventDates[0]
+        for d in eventDates:
+            if utils.parse_well_known_date(d):
+                response_dates.append(d)
+    return HttpResponse(simplejson.dumps(response_dates), content_type="application/json")
 
 
 def get_project_topics(request,project_slug=None):
@@ -1093,7 +1099,10 @@ def versionNoteCendari(request, note_id, project_slug,version_id):
             raise PermissionDenied()
 
     o['project'] = note.project
+    
     version  = reversion.get_for_object(note).filter(id=version_id)[0]
+    o['version'] = version
+
     note = version.object_version.object
     o['breadcrumb'] = (
         (note.project.name, note.project.get_absolute_url()),
@@ -1210,13 +1219,19 @@ def versionHistoryDocumentCendari(request, document_id, project_slug):
 
 def versionDocumentCendari(request, document_id, project_slug,version_id):
     
+
+
     o = {}
     qs = main_models.Document.objects.select_related('project')
     document = get_object_or_404(main_models.Document, id=document_id, project__slug=project_slug)
+
     o['project_slug'] = project_slug
 
     o['project'] = document.project
     version  = reversion.get_for_object(document).filter(id=version_id)[0]
+    if request.method == 'POST':
+        version.revert()
+    o['version'] = version
     o['document'] = version.object_version.object
     o['project_slug'] = project_slug
     o['breadcrumb'] = (

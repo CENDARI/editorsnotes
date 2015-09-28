@@ -210,11 +210,13 @@ rect.zoompane {
   </div>
 
 
-<form method="get" action=".">
+<form id ='facetedSearchForm' method="get" action=".">
   <p>
     <input id="searchText" type="text" name="q" value="{{ query }}">
     <input id="searchSubmit" type="submit" value="Search">
+    <input type="hidden" id="project_slug" name="project_slug" value="">
     <br>Include TRAME <input id='trameCheckbox' type="checkbox" name="TRAME" value= "TRAME"> 
+    <br>Limit search to current project  <input id='currentProjectCheckbox' type="checkbox" name="currentProject" value= "currentProject"> 
   </p>
 
 <!-- Begin faceting. -->
@@ -352,6 +354,20 @@ rect.zoompane {
     var query = getQueryParams(document.location.search);
 
 
+    if(query.hasOwnProperty('project_slug')){
+      $('#project_slug').val(query['project_slug']);
+    }
+    if(query.hasOwnProperty('currentProject')){
+      $('#currentProjectCheckbox').prop("checked","true");
+    }
+    $('#currentProjectCheckbox').change(function() {
+      if($(this).is(":checked")) {
+        $('#facetedSearchForm').attr('action','http://'+location.host+'/cendari/'+$('#project_slug').val()+'/faceted/')
+      }
+      else{
+        $('#facetedSearchForm').attr('action','http://'+location.host+'/cendari/faceted/')
+      }
+    })
 
     if(query.hasOwnProperty('TRAME')){
       var iframe_src = "{% url 'trame_search_view' %}?q="+query['q']
