@@ -656,40 +656,39 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 def semantic_find_dates(topic,uri=None):
     if not uri:
         uri = semantic_uri(topic)
-
+        # uri = topic.rdf
     es_query = {
-	"query": {
-		"match" : {"topic.rdf" : uri }
-	  }
+        "query": {
+            "match" : {"topic.rdf" : uri }
+          }
     }
     es = ElasticSearch('http://localhost:9200/')
     es_results = es.search(es_query)
     eventDates = []
-    print "-----------------------"
-    print es_results["hits"]["hits"]
-    print "-----------------------"
-    #for r in es_results["hits"]["hits"]:
-    #    if "date" in [r["_source"]][0]["serialized"]:
-   #     	d = [r["_source"]][0]["serialized"]["date"]
-    #    	if d != None:
-     #   		eventDates.append(str(d))
-      #  		break
+   
+    for r in es_results["hits"]["hits"]:
+        if "date" in [r["_source"]][0]["serialized"]:
+            d = [r["_source"]][0]["serialized"]["date"]
+        if d != None and not d in eventDates:
+            eventDates.append(str(d))
+     		
 
     if eventDates == []:
-    	sparql = SPARQLWrapper("http://dbpedia.org/sparql")
-    	sparql.setQuery("""     
-    		PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-    		SELECT ?eventDate WHERE {
-    		    <"""+uri+""">
-    		    <http://dbpedia.org/property/date> ?eventDate
-    	}
-    	""")
-    	sparql.setReturnFormat(JSON)
-    	results = sparql.query().convert()
-    	eventDates = []
-    	for result in results["results"]["bindings"]:
-    		d = result["eventDate"]["value"]
-    		eventDates.append(d)
+        sparql = SPARQLWrapper("http://dbpedia.org/sparql")
+        sparql.setQuery("""     
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            SELECT ?eventDate WHERE {
+                <"""+uri+""">
+                <http://dbpedia.org/property/date> ?eventDate
+    	   }
+        """)
+        sparql.setReturnFormat(JSON)
+        results = sparql.query().convert()
+        eventDates = []
+        for result in results["results"]["bindings"]:
+            d = result["eventDate"]["value"]
+            if not d in eventDates:
+                eventDates.append(d)
     return eventDates
 
 def semantic_process_topic(topic,user=None,doCommit=True):
@@ -722,12 +721,12 @@ def semantic_process_topic(topic,user=None,doCommit=True):
 	#[NB] get date for events
     if topic.topic_node.type == 'EVT':
         eventDates = semantic_find_dates(topic,uri)
-        if eventDates != []:
-            for d in eventDates:
-                if utils.parse_well_known_date(d, False):
-                    topic.date = utils.parse_well_known_date(d, False)
-                    topic.save() #tofix saving twice! see below
-                    break
+        # if eventDates != []:
+        #     for d in eventDates:
+        #         if utils.parse_well_known_date(d, False):
+        #             topic.date = utils.parse_well_known_date(d, False)
+        #             topic.save() #tofix saving twice! see below
+        #             break
         if uri != topic.rdf:
             logger.debug(u'Fixing rdf URI from %s to %s', topic.rdf.encode('ascii','xmlcharrefreplace'), uri)
             topic.rdf = uri

@@ -36,7 +36,7 @@ INPUT_FORMATS=[
     "%d/%m/%Y"
 ]
 
-def parse_well_known_date(str, restricted_formats):
+def parse_well_known_date(str, restricted_formats=False):
     cut = str.find("T")
     if cut > -1:
 	date_str = str[0:cut] 
