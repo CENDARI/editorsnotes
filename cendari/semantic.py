@@ -670,7 +670,7 @@ def semantic_find_dates(topic,uri=None):
         if "date" in [r["_source"]][0]["serialized"]:
             d = [r["_source"]][0]["serialized"]["date"]
         if d != None and not d in eventDates:
-            eventDates.append(str(d))
+            eventDates.append(str(d).replace("T00:00:00",""))
      		
 
     if eventDates == []:
@@ -678,7 +678,7 @@ def semantic_find_dates(topic,uri=None):
         sparql.setQuery("""     
             PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
             SELECT ?eventDate WHERE {
-                <"""+uri+""">
+                <"""+topic.rdf+""">
                 <http://dbpedia.org/property/date> ?eventDate
     	   }
         """)

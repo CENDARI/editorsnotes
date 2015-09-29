@@ -413,7 +413,7 @@ var getHref = function(href) {
 }
 
 function find_dates(topic_node_id){
-    var url = 'http://'+document.location.host+'/cendari/'+cendari_js_project_slug+'/find_dates/'+topic_node_id;
+    var url = cendari_root_url+'cendari/'+cendari_js_project_slug+'/find_dates/'+topic_node_id;
     var i =0;
     if(!$('#rdf_id').val().trim().length){
         alert('Please add a valid dbpedia url and save before using this fucntionality');
@@ -431,7 +431,7 @@ function find_dates(topic_node_id){
             };
             console.log(i+"=="+data.length)
             if(i<0){
-                var r = confirm("We found in dbpedia the date "+data[0]+" would you like to  use this date for your topic?");
+                var r = confirm("We found in dbpedia the date "+data[0]+" would you like to  use this date for your entity?");
                 if (r == true) {
                     $('#date_id').text(data[0]);
                     $('.formCendari').submit()
