@@ -121,9 +121,6 @@
 				<section data-error-target="content">					
 					<textarea name="entity_description" id="entity_description" cols="40" rows="5">{%if topic.id%}{{ topic.summary|as_text }}{%endif%}</textarea>
 				</section>
-
-				
-
 				<label class="editorlabel bold"> Resolve: </label> 
 				{% if topic.topic_node.type == 'PLA' %}(e.g. to resolve the place entity 'Berlin', type the word 'Berlin' or copy-paste the following URL into the field below: http://dbpedia.org/resource/Berlin)
 	 			{% elif topic.topic_node.type == 'EVT' %}(e.g. to resolve the event entity 'WWI', type the word 'WWI' or copy-paste the following URL into the field below: : http://dbpedia.org/resource/WWI)
@@ -139,17 +136,20 @@
 
 				{% if topic.topic_node.type == 'EVT' %}
 
-					<label class="editorlabel bold"> Date :</label> 
-					{% if topic.date %}
-						<div id = "date_id" class="fieldset-content">
+					<label class="editorlabel bold"> Date (<a href="#" data-toggle="tooltip" title="The format of the date displayed below is browser dependent. The date format you should use whent tagging events in  notes and documents should be [%d/%m/%Y] or [%m/%d/%Y].">formats?</a>):</label> 
+					
+					<div id = "date_id" class="fieldset-content">
+						{% if topic.date %}
 							{{ topic.date }} 
-						</div>
-					{% endif %}
+						{% endif %}
+					</div>
+					
 					<button  type="button" id="findDatesButton"> Search for dates</button>
 					<!-- <section data-error-target="content">
 						<input  type="date" id="date_id" name="date" value="{%if topic.id%}{{ topic.date }}{%endif%}"/>
 					</section> -->
 				{%endif%}
+
 
 				{% if topic.id %}
 					<input type="hidden" id = "model_id" name="id" value="{{topic.id}}" >

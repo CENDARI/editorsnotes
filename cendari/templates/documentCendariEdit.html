@@ -263,7 +263,7 @@
 		{% endif %}
 			<div class="form-main edit-section" >
 				<input  style="visibility: hidden;"  id="documentDescEditBut" type="button" value= {% if document.id > 0 %} " [ Read Only ]                --- click here for Edit mode" {% else %} " [ Editable ]                    --- click here for Read-Only mode" {% endif %} />
-				<p>Document's description</p>
+				<p>Document description</p>
 				<div data-error-target="description"></div>
 				<textarea id="document-description" class="mceEditor" type="text" name="description" > 
 					{% if document %} {{document.description|as_html}} {% endif %}

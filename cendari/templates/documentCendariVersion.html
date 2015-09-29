@@ -263,7 +263,7 @@
 		{% endif %}
 			<div class="form-main edit-section" >
 				<input  style="visibility: hidden;"  id="documentDescEditBut" type="button" value= {% if document.id > 0 %} " [ Read Only ]                --- click here for Edit mode" {% else %} " [ Editable ]                    --- click here for Read-Only mode" {% endif %} />
-				<p>Document's description ({{version.field_dict.last_updated | date}}) </p>
+				<p>Document's description ({{version.field_dict.last_updated | date}}). <a href="{% url "document_version" project_slug=project.slug  document_id=document.id version_id=version.id %}" id="revertToVersion">Revert to this version</a> </p>
 				<div data-error-target="description"></div>
 				<textarea id="document-description" class="mceEditor" type="text" name="description" > 
 					{% if document %} {{document.description|as_html}} {% endif %}
@@ -325,8 +325,8 @@
 		$(document).ready(function(){
 			$('#revertToVersion').on('click',function(e){
 				e.preventDefault()
-				$.post($(this).attr('href'),function(data){
-					window.location.replace("{% url "document_view" project_slug=project.slug  document_id=document.id %}")
+				$.post($(this).attr('href'),{"csrfmiddlewaretoken":$('input[name="csrfmiddlewaretoken"]').val()},function(data){
+					window.location.replace('{% url "document_view" project_slug=project.slug  document_id=document.id %}')
 				})
 			})
 		})
