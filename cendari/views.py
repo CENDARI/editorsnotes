@@ -759,7 +759,7 @@ def getNoteResources(request, project_slug, sfield):
     return note_list
 
 @login_required
-def getDocumentResources_old(request, project_slug, sfield):
+def getDocumentResources(request, project_slug, sfield):
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     projects = request.user.get_authorized_projects()
     image_place_holder = -1
@@ -793,23 +793,6 @@ def getDocumentResources_old(request, project_slug, sfield):
     	query_set =  main_models.Document.objects.raw(sql_query)
 
 
-	filter_terms = cendari_filter(request.user)
-        es_query = {
-		  "query": {
-			"match" : {"project.serialized.project.name" : project_slug }
-
-		  },
-		  "from": 0,
-		  "size": max_count
-		  #"sort": [
-		#	{"document.serialized.description": { "order": "desc", "ignore_unmapped" : True }}
-		#	]
-	}
-	es = ElasticSearch('http://localhost:9200/')
-	es_results = es.search(es_query)
-	print '........................................ get the documents for this project: ' + str(es_results)
-
-
     for e in query_set:  
         if e.id == image_place_holder.id:
             continue
@@ -825,7 +808,7 @@ def getDocumentResources_old(request, project_slug, sfield):
 
 
 @login_required
-def getDocumentResources(request, project_slug, sfield):
+def getDocumentResources_Faster(request, project_slug, sfield):
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     projects = request.user.get_authorized_projects()
     image_place_holder = -1
