@@ -14,7 +14,7 @@ class Command(NoArgsCommand):
             try:
                 semantic_process_note(note)
             except:
-                self.stdout.write('Note failed')
+                self.stdout.write('Note %d failed', node.id)
         if options['verbosity'] > 0:
             self.stdout.write('')
         if options['verbosity'] > 0:

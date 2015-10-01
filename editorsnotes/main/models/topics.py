@@ -19,6 +19,9 @@ import shutil
 from django.db.models.signals import pre_delete,post_save 
 from django.dispatch import receiver
 
+import logging
+logger = logging.getLogger(__name__)
+
 __all__ = ['Topic', 'TopicNode', 'TopicAssignment', 'AlternateName',
            'LegacyTopic']
 
@@ -290,40 +293,42 @@ reversion.register(Topic)
 
 def get_or_create_topic(user, name, type, project, date=None):
     name = name.strip()
-    res = list(Topic.objects.filter(preferred_name=name,project=project))
-    cnt = len(res)
+    res = Topic.objects.filter(preferred_name=name,project=project)
     created = False
     t = None
-    if cnt==0:
-        #print "Creating topic '%s' of type '%s'" % (name.encode("utf-8"), type)
+    if not bool(res):
+        logger.debug("Creating topic '%s' of type '%s'", name, type)
         topic_node, c = TopicNode.objects.get_or_create(_preferred_name=name,
                                                         type=type,
                                                         defaults={'creator': user,
                                                                  'last_updater': user})
-        
-        query_topic = Topic.objects.filter(project_id=project.id,topic_node_id=topic_node.id)
-        if len(query_topic) == 0:
-            t, created=Topic.objects.get_or_create(creator=user, last_updater=user, preferred_name=name, topic_node=topic_node, project=project)
-        else:
-            t = query_topic[0]
+        t, created=Topic.objects.get_or_create(creator=user,
+                                               last_updater=user,
+                                               preferred_name=name,
+                                               topic_node=topic_node,
+                                               project=project)
 
         if type=='EVT':
             t.date = date
-            #if (t.date):
-            #    print "Parsed %s into a proper date %s" % (name,t.date.isoformat())
+            if (t.date):
+                logger.debug("Parsed %s into a proper date %s", name,t.date.isoformat())
         
-        if not created : t.save()
-#        t.topic_node.type=type
-        if not c: t.topic_node.save()
-    elif res[0].topic_node.type==type:
-        t=res[0]
+        if created :
+            t.save()
+        if c:
+            t.topic_node.save()
     else:
+        for t in res:
+            if t.topic_node.type==type:
+                logger.debug("Topic '%s' for project '%s' already created", name, project)
+                return t
+        logger.debug("Topic '%s' or type %s for project '%s' already created with other type(s): %s", name, type, project)
         return None
     return t
 
 def get_topic_with_rdf(topic_rdf):
     topics = Topic.objects.filter(rdf=topic_rdf)
-    if len(topics):
+    if bool(topics):
         return topics[0]
     return None
 
@@ -389,14 +394,12 @@ class TopicAssignment(CreationMetadata, ProjectPermissionsMixin):
     def save_topic_assigment(sender,instance,**kwargs):
         try:
             if type(instance) is TopicAssignment: 
-                if instance.topic is not None :
+                if instance.topic is not None:
                     if (len(instance.topic.get_related_documents()) + len(instance.topic.get_related_notes())) > 0:
                         instance.topic.deleted = False
                         instance.topic.save()
         except Exception, e:
-            print type(instance)
-            print dir(instance)
-            print instance.topic  == None
+            logger.error("Problem saving topic %s", instance)
         else:
             pass
         finally:

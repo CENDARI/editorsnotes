@@ -334,6 +334,14 @@ class CendariIndex(object):
                                   index=self.name, doc_type='document',
                                   **kwargs)
 
+    def get_location(self, id):
+        ret = self.open().get(index=self.name, doc_type='entity', id=id, fields='location')
+        if ret['found'] and 'location' in ret['fields']:
+            locs = ret['fields']['location']
+            if isinstance(locs, list):
+                locs = locs[0]
+            return locs
+        return None
 
     def search(self, query, highlight=False, **kwargs):
         self.open()

@@ -236,15 +236,7 @@ class EditTopicAdminView(TopicAdminView):
         #print "Save_object on topic"
         user = self.request.user
         obj, action = super(EditTopicAdminView, self).save_object(form, formsets)
-        loc = semantic_resolve_topic(obj)
-        if obj.topic_node.type=='PLA' and loc:
-            location = obj.location
-            if location is None:
-                location = PlaceTopicModel(topic=obj, lat=loc[0], lon=loc[1])
-            else:
-                location.lat = loc[0]
-                location.log = loc[1]
-            location.save()
+        semantic_resolve_topic(obj)
         return obj, action
 
 def edit_topic_node(request, topic_node_id):
