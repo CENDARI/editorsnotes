@@ -295,11 +295,11 @@ def cendari_faceted_search(request,project_slug=None):
             info = { 'uri': h['fields']['uri'][0], 
                      'highlight': highlight }
             res.append(info)
-        elif 'title' in h['fields']:
+        elif 'fields' in h and 'title' in h['fields']:
             info = { 'uri': h['fields']['uri'][0], 
                      'highlight': h['fields']['title'] }
             res.append(info)
-        else:
+        elif 'fields' in h:
             info = { 'uri': h['fields']['uri'][0], 
                      'highlight': '' }
 
