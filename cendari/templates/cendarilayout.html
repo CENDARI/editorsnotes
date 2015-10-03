@@ -44,10 +44,12 @@
       if(current_url.indexOf('note')===-1 && current_url.indexOf('document')===-1){
         $('#extraButtonId').hide();
         $('#deleteButtonId').hide();
+        $('#versionHistoryButtonId').hide();
       }
       if(document.location.href.indexOf('note')===-1 && document.location.href.indexOf('document')===-1){
         $('#extraButtonId').hide();
         $('#deleteButtonId').hide();
+        $('#versionHistoryButtonId').hide();
       }
 
     })
@@ -88,16 +90,14 @@
           {% else %}
             <li><a href="" id='issueCollector'>Issue Report</a></li>
           {% endif %}
-            <li><a href="https://docs.google.com/forms/d/1LgNR3GLfMmql2acSryzVQRGPjEBmr6ZfvsVJZ8xX9QI/viewform" target="_blank">Survey</a></li>
+            <li><a href="https://docs.google.com/forms/d/1LgNR3GLfMmql2acSryzVQRGPjEBmr6ZfvsVJZ8xX9QI/viewform" target="_blank" >Survey</a></li>
             <li class="divider-vertical"></li>
-            {% if project%}
-              <form class="navbar-search" action="{% url "cendari_faceted_search_view" project_slug=project.slug %}" method="get">
-            {% else %}
-              <form class="navbar-search" action="{% url "cendari_faceted_search_view" %}" method="get">
-            {%endif%}
+              <form class="navbar-search" action="{% url "cendari_faceted_search_view" %}" target="_blank" method="get">
             <!-- <form class="navbar-search" action="{% url "cendari_faceted_search_view" project_slug=project.slug %}" method="get"> -->
               <input type="text" class="search-query search-autocomplete" name="q" x-search-target="topics" placeholder="Search" />
-              <input type="checkbox" name="TRAME" value= "TRAME" checked="true" style="visibility: hidden;" checked="true">
+              <input type="hidden" name="project_slug" value="{{project.slug}}">
+              <input type="checkbox" name="TRAME" value= "TRAME" checked="true" style="visibility: hidden;">
+              <input type="checkbox" name="currentProject" value= "currentProject" style="visibility: hidden;">
             </form> 
         </ul>
 

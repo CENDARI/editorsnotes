@@ -183,9 +183,11 @@ class CendariIndex(object):
         contributors = set(doc.get_all_updaters())
         contributors.add(doc.creator)
         topics=self.collect_topics(doc)
-        text=xhtml_to_text(doc.description)
+        title=xhtml_to_text(doc.description)
         if doc.has_transcript():
-            text += xhtml_to_text(doc.transcript.content)
+            text = xhtml_to_text(doc.transcript.content)
+        else:
+            text=''
         document = {
             'uri': id,
             'artifact': 'document',
@@ -197,13 +199,15 @@ class CendariIndex(object):
                 "name": doc.creator.username,
                 "email": doc.creator.email
             },
+            'created': doc.created,
+            'updated': doc.last_updated,
             'format': 'application/xhtml+xml', # nothing better eg. xhtml+rdfa
+            'title': title,
             'text': text,
             'project': doc.project.slug,
             'groups_allowed': doc.project.slug,
              # FIXME when I know how to test public projects
-            'users_allowed': [ doc.creator.username ]
-            
+            'users_allowed': [ doc.creator.username ],
         }
         if topics['EVT']: document['date'] = topics['EVT']
         if topics['ORG']: document['org'] = topics['ORG']
@@ -236,7 +240,10 @@ class CendariIndex(object):
                 "name": note.creator.username,
                 "email": note.creator.email
             },
+            'created': note.created,
+            'updated': note.last_updated,
             'format': 'application/xhtml+xml', # nothing better eg. xhtml+rdfa
+            'title': note.title,
             'text': text,
             'project': note.project.slug,
             'groups_allowed': note.project.slug,
@@ -266,6 +273,8 @@ class CendariIndex(object):
             'application': 'nte',
             'title': topic.preferred_name,
             'creator': topic.creator.username,
+            'created': topic.created,
+            'updated': topic.last_updated,
             'project': topic.project.slug,
             'groups_allowed': topic.project.slug,
         }
@@ -334,6 +343,14 @@ class CendariIndex(object):
                                   index=self.name, doc_type='document',
                                   **kwargs)
 
+    def get_location(self, id):
+        ret = self.open().get(index=self.name, doc_type='entity', id=id, fields='location')
+        if ret['found'] and 'location' in ret['fields']:
+            locs = ret['fields']['location']
+            if isinstance(locs, list):
+                locs = locs[0]
+            return locs
+        return None
 
     def search(self, query, highlight=False, **kwargs):
         self.open()
@@ -348,8 +365,7 @@ class CendariIndex(object):
             prepared_query = query
 
         if 'project' in kwargs:
-            project = kwargs['project']
-            del kwargs['project']
+            project = kwargs.pop('project')
             prepared_query['filter'] = {
                 "term": { 'project': project }
             }

@@ -37,7 +37,7 @@ def cendari_filter(user=None,project_slugs=None):
             return []
         username=user.username
         if project_slugs is None:
-            groups=[proj.slug for proj in user.get_affiliated_projects()]
+            groups=[proj.slug for proj in user.get_authorized_projects()]
         else:
             groups=project_slugs
 
@@ -295,11 +295,11 @@ def cendari_faceted_search(request,project_slug=None):
             info = { 'uri': h['fields']['uri'][0], 
                      'highlight': highlight }
             res.append(info)
-        elif 'title' in h['fields']:
+        elif 'fields' in h and 'title' in h['fields']:
             info = { 'uri': h['fields']['uri'][0], 
                      'highlight': h['fields']['title'] }
             res.append(info)
-        else:
+        elif 'fields' in h:
             info = { 'uri': h['fields']['uri'][0], 
                      'highlight': '' }
 

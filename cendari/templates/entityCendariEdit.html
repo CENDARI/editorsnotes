@@ -14,6 +14,7 @@
 
 {% block init %}
 	<meta name="topic_id" id="topic_id" content="{{ topic.id }}" />
+	<meta name="topic_node_id" id="topic_node_id" content="{{ topic.topic_node_id }}" />
 	<meta name="topic_prefname" id="prefname_id" content="{{ topic.preferred_name }}" />
 
 {% endblock init %}
@@ -120,32 +121,36 @@
 				<section data-error-target="content">					
 					<textarea name="entity_description" id="entity_description" cols="40" rows="5">{%if topic.id%}{{ topic.summary|as_text }}{%endif%}</textarea>
 				</section>
-
-				{% if topic.topic_node.type == 'EVT' %}
-
-					<!-- <label class="editorlabel bold"> Date (using your local calendar format):</label>  -->
-					{% if topic.date %}
-						<div id = "date_id" class="fieldset-content">
-							{{ topic.date }} 
-						</div>
-					{% endif %}
-					<!-- <section data-error-target="content">
-						<input  type="date" id="date_id" name="date" value="{%if topic.id%}{{ topic.date }}{%endif%}"/>
-					</section> -->
-				{%endif%}
-
 				<label class="editorlabel bold"> Resolve: </label> 
-				{% if topic.topic_node.type == 'PLA' %}(e.g. to resolve the place entity 'Berlin' use the URL: http://dbpedia.org/resource/Berlin)
-	 			{% elif topic.topic_node.type == 'EVT' %}(e.g. to resolve the event entity 'WWI' use the URL: http://dbpedia.org/resource/WWI)
-	 			{% elif topic.topic_node.type == 'PER' %}(e.g. to resolve the person entity 'Napoleon' use the URL: http://dbpedia.org/resource/Napoleon)
-	 			{% elif topic.topic_node.type == 'ORG' %}(e.g. to resolve the organisation entity 'NATO' use the URL: http://dbpedia.org/resource/NATO)
-	 			{% elif topic.topic_node.type == 'PUB' %}(e.g. to resolve the publication entity 'The Odyssey' use the URL: http://dbpedia.org/resource/Odyssey)
-	 			{% elif topic.topic_node.type == 'TAG' %}(e.g. to resolve the tag entity 'imperialism' use the URL: http://dbpedia.org/resource/Imperialism)
+				{% if topic.topic_node.type == 'PLA' %}(e.g. to resolve the place entity 'Berlin', type the word 'Berlin' or copy-paste the following URL into the field below: http://dbpedia.org/resource/Berlin)
+	 			{% elif topic.topic_node.type == 'EVT' %}(e.g. to resolve the event entity 'WWI', type the word 'WWI' or copy-paste the following URL into the field below: : http://dbpedia.org/resource/WWI)
+	 			{% elif topic.topic_node.type == 'PER' %}(e.g. to resolve the person entity 'Napoleon', type the word 'Napoleon' or copy-paste the following URL into the field below: http://dbpedia.org/resource/Napoleon)
+	 			{% elif topic.topic_node.type == 'ORG' %}(e.g. to resolve the organisation entity 'NATO', type the word 'NATO' or copy-paste the following URL into the field below: http://dbpedia.org/resource/NATO)
+	 			{% elif topic.topic_node.type == 'PUB' %}(e.g. to resolve the publication entity 'The Odyssey', type 'The Odyssey' or copy-paste the following URL into the field below: http://dbpedia.org/resource/Odyssey)
+	 			{% elif topic.topic_node.type == 'TAG' %}(e.g. to resolve the tag entity 'Imperialism', type the word 'Imperialism' or copy-paste the following URL into the field below: http://dbpedia.org/resource/Imperialism)
 				{%endif%}
 
 				<section data-error-target="content">
 					<input  type="text" id="rdf_id" name="rdf" value="{%if topic.rdf%}{{ topic.rdf }}{%endif%}"/>
 				</section>
+
+				{% if topic.topic_node.type == 'EVT' %}
+
+					<label class="editorlabel bold"> Date (<a href="#" data-toggle="tooltip" title="The format of the date displayed below is browser dependent. The date format you should use whent tagging events in  notes and documents should be [%d/%m/%Y] or [%m/%d/%Y].">formats?</a>):</label> 
+					
+					<div id = "date_id" class="fieldset-content">
+						{% if topic.date %}
+							{{ topic.date }} 
+						{% endif %}
+					</div>
+					
+					<button  type="button" id="findDatesButton"> Search for dates</button>
+					<!-- <section data-error-target="content">
+						<input  type="date" id="date_id" name="date" value="{%if topic.id%}{{ topic.date }}{%endif%}"/>
+					</section> -->
+				{%endif%}
+
+
 				{% if topic.id %}
 					<input type="hidden" id = "model_id" name="id" value="{{topic.id}}" >
 				{%endif%}
@@ -211,9 +216,13 @@
 	})
 
 
-	$(document).ready(function(){
+	$(document).ready(function(e){
 		$('.model-link').each(function(){
 			this.href+='?entity={{ topic.preferred_name }}'
+		})
+		// $('#findDatesButton').submit(function(){return false;});
+		$("#findDatesButton").on("click",function(){
+			find_dates($('meta[name=topic_node_id]').attr("content"));
 		})
 	})
 

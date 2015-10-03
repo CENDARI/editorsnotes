@@ -132,9 +132,14 @@ Ext.application({
 							id : 'saveNoteID'
 						},
 						{
+							text : 'Version history',
+							id: 'versionHistoryButtonId'
+						},
+						{
 							text : 'Button',
 							id: 'extraButtonId'
 						},
+						
 						{
 							itemId : 'toggleCw',
 							text : 'Pop-up Window',
@@ -283,7 +288,7 @@ Ext.application({
 				content:"Description",
 				toolbar:"description",
 				// plugins : "style,table,noneditable,example,lists,advhr,advimage,advlink,iespell,inlinepopups,media,paste,directionality,noneditable,nonbreaking,wordcount,advlist,contextmenu,fullscreen,rdface",
-				plugins : "markcreativework,style,table,noneditable,example,lists,advhr,advimage,advlink,iespell,inlinepopups,media,paste,directionality,nonbreaking,wordcount,advlist,contextmenu,fullscreen,rdface,autolink,spellchecker,pagebreak,layer,save,emotions,insertdatetime,preview,searchreplace,print,fullscreen,visualchars,xhtmlxtras,template",
+				plugins : "markcreativework,style,table,noneditable,example,lists,advhr,advimage,advlink,iespell,inlinepopups,media,paste,directionality,nonbreaking,wordcount,advlist,contextmenu,fullscreen,rdface,autolink,spellchecker,pagebreak,layer,emotions,insertdatetime,preview,searchreplace,print,fullscreen,visualchars,xhtmlxtras,template",
 				theme_advanced_buttons1 : "undo,redo,cut,copy,paste,fontsizeselect,bold,italic,underline,strikethrough,bullist,numlist,forecolor,backcolor, code,rdfaceHelp,rdfaceRun,rdfaceFacts,rdfaceSetting,markcreativework",//,
 				theme_advanced_buttons2 : "image,|,tablecontrols,|,link,unlink,anchor,|,justifyleft,justifycenter,justifyright,justifyfull,|,styleselect,formatselect,fontselect,fontsizeselect",
 				fullscreen_new_window : true,

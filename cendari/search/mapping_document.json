@@ -34,6 +34,14 @@
                     }
                 }
             },
+            "created" : {
+                "type" : "date",
+                "format" : "dateOptionalTime"
+            },
+            "updated" : {
+                "type" : "date",
+                "format" : "dateOptionalTime"
+            },
             "date" : {
                 "type" : "date",
                 "format" : "dateOptionalTime"

@@ -412,6 +412,38 @@ var getHref = function(href) {
     return l;
 }
 
+function find_dates(topic_node_id){
+    var url = cendari_root_url+'cendari/'+cendari_js_project_slug+'/find_dates/'+topic_node_id;
+    var i =0;
+    if(!$('#rdf_id').val().trim().length){
+        alert('Please add a valid dbpedia url and save before using this fucntionality');
+        return;
+    }
+    $.get(url,function(data){
+        console.log('data are :', data)
+        console.log('data length is  :', data.length)
+        if(data.length){
+            for (var i = data.length - 1; i >= 0; i--) {
+                if(data[i] === $('#date_id').text()){
+                    alert('the date you are using matches the one we found  in our search results')
+                    break;
+                }
+            };
+            console.log(i+"=="+data.length)
+            if(i<0){
+                var r = confirm("We found in dbpedia the date "+data[0]+" would you like to  use this date for your entity?");
+                if (r == true) {
+                    $('#date_id').text(data[0]);
+                    $('.formCendari').submit()
+                }
+            }
+        }
+        else{
+            alert('no dates found');
+        }
+    })
+}
+
 function submitEntity(fc){
     var formData = "";
     formData = formData +"csrfmiddlewaretoken="+document.getElementsByName("csrfmiddlewaretoken")[2].value+"&";

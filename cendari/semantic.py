@@ -1,6 +1,6 @@
 from editorsnotes.main.utils import xhtml_to_text
 from editorsnotes.main.templatetags.display import as_html
-from editorsnotes.main.models.topics import get_or_create_topic,get_topic_with_rdf
+from editorsnotes.main.models.topics import get_or_create_topic,get_topic_with_rdf, Topic
 from models import PlaceTopicModel
 
 from django.conf import settings
@@ -28,6 +28,10 @@ import json
 import sys, traceback
 import re
 
+import time
+from pyelasticsearch import ElasticSearch
+
+
 __all__ = [
     'CENDARI',
     'SCHEMA',
@@ -43,7 +47,8 @@ __all__ = [
     'semantic_query',
     'semantic_query_latlong',
     'semantic_resolve_topic',
-    'semantic_rdfa'
+    'semantic_rdfa',
+    'semantic_find_dates'
 ]
 
 import logging
@@ -233,12 +238,15 @@ def semantic_query_latlong(topic):
     if topic.rdf is None:
         return None
     url = topic.rdf
-    g = Semantic.graph(url)
-    o = g.value(g.identifier, GRS['point'])
-    if o:
-        latlong = map(float, unicode(o).split(' '))
-        location = PlaceTopicModel(topic, lat=latlong[0], lon=latlong[1])
-        return latlong
+    try:
+        g = Semantic.graph(url)
+        o = g.value(g.identifier, GRS['point'])
+        if o:
+            latlong = map(float, unicode(o).split(' '))
+            location = PlaceTopicModel(topic, lat=latlong[0], lon=latlong[1])
+            return latlong
+    except Exception as e:
+        logger.warn('Problem in RDF: %s', e)
     return None
 
 schema_topic = {
@@ -292,91 +300,6 @@ def xml_to_topics(xml, uri):
         logger.debug("Entity %s: %s", e["type"], e["value"])
     return entities
 
-def fix_links(xml):
-    """
-    Transform <a href='uri'>...</a> into
-    <span class="r_entity r_creativework" typeof="schema:CreativeWork">
-      <a class="r_prop r_url" property="schema:url" href='<uri>'>...</a>
-    </span>
-    to become proper RDFa and also to be understood by the RDFace editor.
-
-    # test simple case
-    >>> from lxml import html
-    >>> import lxml.html.usedoctest
-    
-    >>> xml = html.fragment_fromstring('<div><a href="http://example.com">example</a></div>')
-    >>> fix_links(xml)
-    True
-    >>> print html.tostring(xml)
-    <div><span class="r_entity r_creativework" typeof="schema:CreativeWork"><a class="r_prop r_url" property="schema:url" href="http://example.com">example</a></span></div>
-
-    >>> xml = html.fragment_fromstring('<div>Simple <a href="http://example.com">example</a> to test</div>')
-    >>> fix_links(xml)
-    True
-    >>> print html.tostring(xml)
-    <div>Simple <span class="r_entity r_creativework" typeof="schema:CreativeWork"><a class="r_prop r_url" property="schema:url" href="http://example.com">example</a></span> to test</div>
-
-    # Also, make sure that if the structure is right, it's not changed:
-    >>> xml=html.fragment_fromstring('<div>Simple <span class="r_entity r_creativework" typeof="schema:CreativeWork"><a class="r_prop r_url" property="schema:url" href="http://example.com">example</a></span> to test</div>')
-    >>> fix_links(xml)
-    False
-    >>> print html.tostring(xml)
-    <div>Simple <span class="r_entity r_creativework" typeof="schema:CreativeWork"><a class="r_prop r_url" property="schema:url" href="http://example.com">example</a></span> to test</div>
-    
-    # More complicated are almost-good configuration that need not to be touched
-    >>> xml=html.fragment_fromstring('<div>Simple <span class="r_entity r_somethingelse" typeof="schema:Thing"><a class="r_prop r_url" property="schema:url" href="http://example.com">example</a></span> to test</div>')
-    >>> fix_links(xml)
-    False
-    >>> print html.tostring(xml)
-    <div>Simple <span class="r_entity r_somethingelse" typeof="schema:Thing"><a class="r_prop r_url" property="schema:url" href="http://example.com">example</a></span> to test</div>
-    """
-    if xml is None:
-        return False
-    changed = False
-    for (el, at, lnk, pos) in xml.iterlinks():
-        o = u'schema:CreativeWork'
-        if el.tag=='a' and el.get("href"):
-            parent = el.getparent()
-            span = parent
-            if not el.get('property'):
-                changed = True
-                el.set('property', "schema:url")
-                el.set('class', el.get('class', default='')+"r_prop r_url")
-            elif el.get('property') != "schema:url":
-                # don't change it
-                continue # restart at the next for loop
-
-            if parent.tag=='span' and parent.get('typeof')==o:
-                pass # do nothing
-            elif parent.get('typeof',o)!=o:
-                continue # the parent already has a typeof
-            elif parent.tag=='span' and parent.get('typeof') is None:
-                changed = True
-                parent.set('typeof', o)
-            elif parent.tag!='span':
-                changed = True
-                span=el.makeelement('span')
-                span.set('typeof', o)
-                span.tail = el.tail
-                el.tail = ''
-                parent.replace(el, span)
-                span.append(el)
-
-            cls = span.get('class')
-            if cls is None:
-                changed = True
-                span.set('class', 'r_entity r_creativework')
-            else:
-                c=re.split(r'[ ]+', cls)
-                if 'r_entity' not in c:
-                    changed = True
-                    c.append('r_entity')
-                if 'r_creativework' not in c:
-                    changed = True
-                    c.append('r_creativework')
-                if changed:
-                    span.set('class', u' '.join(c))
-    return changed
 
 def list_diff(a,b):
     return list(set(a)-set(b))
@@ -388,6 +311,45 @@ def semantic_update_topics(existing_topics,new_topics):
     to_be_deleted = list_diff(existing_topics,new_topics)
 
     return (to_be_added,to_be_deleted)
+
+def create_topics_for(entity, topics, user):
+    done=set()
+    for t in topics:
+        topic=get_or_create_topic(user, t['value'], t['type'], entity.project)
+        if topic is None:
+            continue
+        if topic not in done:
+            done.add(topic)
+            entity.related_topics.create(creator=user, topic=topic)
+            rdftopic = semantic_uri(topic)
+            subject = t['rdfsubject']
+            value = t['value']
+            #g.add( (subject, OWL.sameAs, rdftopic) )
+            #g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
+            if (not topic.rdf is None) and (not check_domain(topic.rdf,'dbpedia')):
+                topic.rdf = None
+                topic.save()
+            elif topic.rdf is None and subject.startswith('http'):
+                topic.rdf = unicode(subject)
+                topic.save()
+            elif topic.rdf is None and t['type']=='PUB' and value.startswith('http'):
+                topic.rdf = value
+                topic.save()
+            elif t['type']=='EVT':
+                logger.debug('working with EVT entity...')
+                if utils.parse_well_known_date(value, True):
+                    topic.date = utils.parse_well_known_date(value, True)
+                    logger.debug('Found a valid date: %s', topic.date)
+                topic.save()    
+        else:
+            results_reg = re.search('\[(.*?)\]', value)
+            if results_reg!=None:
+                results_reg = str(results_reg.group(0))
+                explicit_date = results_reg[1:len(results_reg)-1]
+                if utils.parse_well_known_date(explicit_date, True):
+                    topic.date = utils.parse_well_known_date(explicit_date, True)
+                    logger.debug('Found a valid date between []: %s', topic.date)
+                    topic.save()
 
 
 def semantic_process_note(note,user=None):
@@ -412,59 +374,21 @@ def semantic_process_note(note,user=None):
 
     #pdb.set_trace()
    
-#    if fix_links(note.content):
-#        note.save()
-
     xml = note.content
-#    print '---------------------------'
-#    print as_html(note.content)
+    start_time = time.time()
     topics = xml_to_topics(xml, uri) 
-#    print topics
-#    print '---------------------------'
-    done=set()
+    logger.debug("Time for xml to topics :  %s seconds " % (time.time() - start_time))
+    start_time = time.time()
     note.related_topics.all().delete()
-    for t in topics:
-        topic=get_or_create_topic(user, t['value'], t['type'],note.project)
-        if topic is None:
-            continue
-        if topic not in done:
-            done.add(topic)
-            note.related_topics.create(creator=user, topic=topic)
-            rdftopic = semantic_uri(topic)
-            subject = t['rdfsubject']
-            value = t['value']
-            g.add( (subject, OWL.sameAs, rdftopic) )
-            g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
+    logger.debug("Time for deleting all topics:  %s seconds " % (time.time() - start_time))
 
-            if (not topic.rdf is None) and (not check_domain(topic.rdf,'dbpedia')):
-                topic.rdf = None
-                topic.save()
+    start_time = time.time()
+    create_topics_for(note, topics, user)
+    logger.debug("Time for iterating :  %s seconds " % (time.time() - start_time))  
 
-            if topic.rdf is None and subject.startswith('http'):
-                topic.rdf = unicode(subject)
-                topic.save()
-            elif topic.rdf is None and t['type']=='PUB'\
-                 and value.startswith('http'):
-                topic.rdf = value
-                topic.save()
-            elif t['type']=='EVT':
-         	if utils.parse_well_known_date(value):
-                	topic.date = utils.parse_well_known_date(value)
-			topic.rdf = value
-                	logger.debug('Found a valid date: %s', topic.date)
-			topic.save()	
- 		else:
-			results_reg = re.search('\[(.*?)\]', value)
-			if results_reg!=None:
-				results_reg = str(results_reg.group(0))
-				explicit_date = results_reg[1:len(results_reg)-1]
-				if utils.parse_well_known_date(explicit_date):
-                			topic.date = utils.parse_well_known_date(explicit_date)
-					# topic.rdf = explicit_date
-                			logger.debug('Found a valid date between []: %s', topic.date)
-					topic.save()	
+    start_time = time.time()
     semantic.commit()
-
+    logger.debug("Time for semantic commit :  %s seconds " % (time.time() - start_time))
 
 
 def semantic_process_document(document,user=None):
@@ -476,8 +400,6 @@ def semantic_process_document(document,user=None):
 #    pdb.set_trace()
     if user is None:
         user = document.last_updater
-#    if fix_links(document.description):
-#        document.save()
     # Cleanup entities related to document
     uri = semantic_uri(document)
     g = Semantic.graph(uri)
@@ -495,143 +417,59 @@ def semantic_process_document(document,user=None):
     if(document.transcript):
         topics += xml_to_topics(document.transcript.content, uri)
 
-    done=set()
     document.related_topics.all().delete()
-    for t in topics:
-        topic=get_or_create_topic(user, t['value'], t['type'], document.project)
-        if topic is None:
-            continue
-        if topic not in done:
-            done.add(topic)
-            rdftopic = semantic_uri(topic)
-            document.related_topics.create(creator=user, topic=topic)
-            subject = t['rdfsubject']
-            value = t['value']
-            g.add( (subject, OWL.sameAs, rdftopic) )
-            g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
-            if topic.rdf is None and subject.startswith('http'):
-                topic.rdf = unicode(subject)
-                topic.save()
-            elif topic.rdf is None and t['type']=='PUB'\
-                 and value.startswith('http'):
-                topic.rdf = value
-                topic.save()
-            elif t['type']=='EVT':
-		print 'working with EVT entity...'
-         	if utils.parse_well_known_date(value):
-                	topic.date = utils.parse_well_known_date(value)
-			# topic.rdf = value
-                	logger.debug('Found a valid date: %s', topic.date)
-			topic.save()	
- 		else:
-			results_reg = re.search('\[(.*?)\]', value)
-			if results_reg!=None:
-				results_reg = str(results_reg.group(0))
-				explicit_date = results_reg[1:len(results_reg)-1]
-				if utils.parse_well_known_date(explicit_date):
-                			topic.date = utils.parse_well_known_date(explicit_date)
-					# topic.rdf = explicit_date
-                			logger.debug('Found a valid date between []: %s', topic.date)
-					topic.save()	
+    create_topics_for(document, topics, user)
     semantic.commit()
 
-def semantic_get_topic_graph(obj):
-    uri = semantic_uri(obj)
-    g = Semantic.graph(uri)
-    return g
-
-
-
 def semantic_process_transcript(transcript,user=None):
-    """Extract the semantic information from a note,
+    """Extract the semantic information from a document's transcript,
     creating topics on behalf of the specific user."""
     logger.info("semantic transcript")
     if transcript is None:
         return
     if transcript.document is None:
         return
-    if user is None:
-        user = transcript.document.last_updater
-
-    # Cleanup entities related to note11
-    uri = semantic_uri(transcript.document)
-    g = Semantic.graph(uri)
-    Semantic.remove_graph(g)
-
-    # This not is a creative work
-    g.add( (g.identifier, RDF.type, SCHEMA['CreativeWork']) )
-    g.add( (g.identifier, SCHEMA['creator'], URIRef(transcript.document.creator.get_absolute_url()[1:])) )
-    g.add( (g.identifier, SCHEMA['dateCreated'], Literal(transcript.document.created)) )
-    g.add( (g.identifier, SCHEMA['dateModified'], Literal(transcript.document.last_updated)) )
-    g.add( (g.identifier, CENDARI['name'], Literal(transcript.document.description)) )
-
-    topics = xml_to_topics(transcript.document.description, uri) 
-    topics += xml_to_topics(transcript.content, uri) 
-    done=set()
-    transcript.document.related_topics.all().delete()
-    for t in topics:
-        topic=get_or_create_topic(user, t['value'], t['type'], transcript.document.project)
-        if topic is None:
-            continue
-        if topic not in done:
-            done.add(topic)
-            rdftopic = semantic_uri(topic)
-            transcript.document.related_topics.create(creator=user, topic=topic)
-            subject = t['rdfsubject']
-            value = t['value']
-            g.add( (subject, OWL.sameAs, rdftopic) )
-            g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
-            if topic.rdf is None and subject.startswit0h('http'):
-                topic.rdf = unicode(subject)
-                topic.save()
-            elif t['type']=='EVT':
-         	if utils.parse_well_known_date(value):
-                	topic.date = utils.parse_well_known_date(value)
-			topic.rdf = value
-                	logger.debug('Found a valid date: %s', topic.date)
-			topic.save()	
- 		else:
-			results_reg = re.search('\[(.*?)\]', value)
-			if results_reg!=None:
-				results_reg = str(results_reg.group(0))
-				explicit_date = results_reg[1:len(results_reg)-1]
-				if utils.parse_well_known_date(explicit_date):
-                			topic.date = utils.parse_well_known_date(explicit_date)
-                			logger.debug('Found a valid date between []: %s', topic.date)
-					topic.save()	
-    semantic.commit()  
+    semantic_process_document(transcript.document,user)
 
 
-# def semantic_get_indetifier_from_rdf(topic_rdf):
-#     dataset = Semantic.dataset()
-#     graph_identifiers = set(dataset.subjects(OWL['sameAs'], URIRef(topic_rdf)))
-#     if not graph_identifiers:
-#         return None
+from SPARQLWrapper import SPARQLWrapper, JSON
+def semantic_find_dates(topic,uri=None):
+    if not uri:
+        uri = semantic_uri(topic)
+        # uri = topic.rdf
+    es_query = {
+        "query": {
+            "match" : {"topic.rdf" : uri }
+          }
+    }
+    es = ElasticSearch('http://localhost:9200/')
+    es_results = es.search(es_query)
+    eventDates = []
+   
+    for r in es_results["hits"]["hits"]:
+        if "date" in [r["_source"]][0]["serialized"]:
+            d = [r["_source"]][0]["serialized"]["date"]
+        if d != None and not d in eventDates:
+            eventDates.append(str(d).replace("T00:00:00",""))
+            
 
-#     return list(graph_identifiers)[0]
-
-
-def semantic_get_topic_graph(obj):
-    uri = semantic_uri(obj)
-    g = Semantic.graph(uri)
-    return g
-
-def semantic_check_user_alias(topic,user):
-    t = get_topic_with_rdf(topic.rdf)
-    if t== None:
-        return topic
-    g = semantic_get_topic_graph(t)
-
-    g.add((g.identifier,OWL['sameAs'],Literal(topic.preferred_name)))
-
-    t.alternate_names.create(name=topic.preferred_name,creator=user)
-    for alt_name in topic.alternate_names.all():
-        t.alternate_names.add(alt_name)
-        g.add((g.identifier,OWL['sameAs'],Literal(alt_name.name)))
-    topic.deleted = True
-    return t  
-    
-
+    if eventDates == []:
+        sparql = SPARQLWrapper("http://dbpedia.org/sparql")
+        sparql.setQuery("""     
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            SELECT ?eventDate WHERE {
+                <"""+topic.rdf+""">
+                <http://dbpedia.org/property/date> ?eventDate
+           }
+        """)
+        sparql.setReturnFormat(JSON)
+        results = sparql.query().convert()
+        eventDates = []
+        for result in results["results"]["bindings"]:
+            d = result["eventDate"]["value"]
+            if not d in eventDates:
+                eventDates.append(d)
+    return eventDates
 
 def semantic_process_topic(topic,user=None,doCommit=True):
     """Extract the semantic information from a topic."""
@@ -656,8 +494,19 @@ def semantic_process_topic(topic,user=None,doCommit=True):
     g.add( (g.identifier, SCHEMA['dateCreated'], Literal(topic.created)) )
     g.add( (g.identifier, SCHEMA['dateModified'], Literal(topic.last_updated)) )
     g.add( (g.identifier, CENDARI['name'], Literal(topic.preferred_name)) )
+
+
     if topic.rdf is not None:
         uri = fix_uri(topic.rdf)
+    #[NB] get date for events
+    if topic.topic_node.type == 'EVT':
+        eventDates = semantic_find_dates(topic,uri)
+        # if eventDates != []:
+        #     for d in eventDates:
+        #         if utils.parse_well_known_date(d, False):
+        #             topic.date = utils.parse_well_known_date(d, False)
+        #             topic.save() #tofix saving twice! see below
+        #             break
         if uri != topic.rdf:
             logger.debug(u'Fixing rdf URI from %s to %s', topic.rdf.encode('ascii','xmlcharrefreplace'), uri)
             topic.rdf = uri
@@ -665,6 +514,7 @@ def semantic_process_topic(topic,user=None,doCommit=True):
         g.add( (g.identifier, OWL['sameAs'], URIRef(topic.rdf)) )
     if doCommit:
         semantic.commit()
+
 
 imported_relations = set([
     # Place
@@ -740,41 +590,40 @@ def semantic_resolve_topic(topic, force=False):
         return
 
     rdf_url = topic.rdf
-    logger.debug(u'Trying to resolve topic %s from url %s', unicode(topic), unicode(rdf_url))
+    logger.debug(u"Trying to resolve topic %s from url '%s'", unicode(topic), unicode(rdf_url))
     uri = URIRef(rdf_url)
     g = Semantic.graph(identifier=uri)
     if len(g) != 0 and not force:
         logger.debug('Uri %s already resolved', unicode(uri))
         return # already resolved
+    return load_dbpedia(uri, topic.id)
 
-    logger.debug("parsing uri %s", unicode(uri))
+def load_dbpedia(uri, topicid):
+    rdf_url = str(uri)
+    logger.debug("parsing uri %s", rdf_url)
     loaded = Graph(identifier=uri)
 
     try:
+        logger.info('Downloading %s', rdf_url)
         loaded.parse(location=uri)
-    except:
-        logger.warning("Exception in parsing code from url %s", unicode(rdf_url))
-        if rdf_url.startswith('http://rdf.freebase') or rdf_url.startswith('https://rdf.freebase'):
-            try:
-                rdf = urllib2.urlopen(rdf_url).read()
-                rdf = re.sub(r'\\x(..)', r'\\u00\1', rdf)
-                loaded.parse(data=rdf, format="n3")
-            except:
-                traceback.print_exc(file=sys.stdout)
-                pass
+    except Exception as e:
+        logger.warning("Exception in parsing code from url %s: %s", rdf_url, e)
+        return
 
+    topic = Topic.objects.get(id=topicid)
     type = URIRef(topic_to_schema(topic.topic_node.type))
     
-    logger.info("Loaded %s of type %s: %d triples", unicode(rdf_url), unicode(type), len(loaded))
+    logger.info("Loaded %s of type %s: %d triples", rdf_url, unicode(type), len(loaded))
 
     if (uri, RDF.type, type) in loaded:
-        logger.info ("Ontology in %s contains %s as expected", unicode(rdf_url), unicode(type))
+        logger.info ("Ontology in %s contains %s as expected", rdf_url, unicode(type))
     elif topic.topic_node.type=='PLA' and (uri, RDF.type, GEO['SpatialThing']) in loaded:
-        logger.warning("%s: Missing type %s", unicode(rdf_url), unicode(type))
+        logger.warning("%s: Missing type %s", rdf_url, unicode(type))
         loaded.add( (uri, RDF.type, type) )
     else:
-        logger.warning("%s: Missing type %s", unicode(rdf_url), unicode(type))
+        logger.warning("%s: Missing type %s", rdf_url, unicode(type))
 
+    g = Semantic.graph(identifier=uri)
     Semantic.remove_graph(g)
     
     for s,p,o in loaded.triples( (uri, None, None) ):
@@ -815,11 +664,17 @@ def semantic_resolve_topic(topic, force=False):
             break
 
         lat = g.value(uri, DBPPROP['latd'])
+        latmin = g.value(uri, DBPPROP['latm'])
         lon = g.value(uri, DBPPROP['longd'])
-        if lat and lon:
+        lonmin = g.value(uri, DBPPROP['lonm'])
+        if lat and latmin and lon and lonmin:
+            # Degrees + minutes/60 
+            lat = float(lat) + float(latmin)/60.0
+            lon = float(lon) + float(lonmin)/60.0
+            loc = "%f %f" % (lat, lon)
             loc = str(lat)+" "+str(lon)
             g.add( (uri, GRS['point'], Literal(loc)) )
-            logger.info("Found in dbp:latitude/dbp:longitude: %s", g.value(uri, GRS['point']))
+            logger.info("Found in dbp:latd/dbp:longd: %s", g.value(uri, GRS['point']))
             break
 
         lat = g.value(uri, DBPPROP['latDeg'])
@@ -848,6 +703,7 @@ def semantic_resolve_topic(topic, force=False):
         # chase in geonames later
     semantic.commit()
     if loc:
+        logger.info("Lat/Lon is %s", loc)
         latlong = map(float, loc.split(' '))
         location = None
         if hasattr(topic, 'location'):

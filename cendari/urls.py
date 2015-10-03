@@ -121,6 +121,8 @@ cendaripatterns = patterns('cendari.views',
     url(r'^cendari/(?P<project_slug>[-\w]+)/notes/add/$',                                       NoteCendari.as_view(),                name='addnote_view'),
     url(r'^cendari/(?P<project_slug>[-\w]+)/notes/(?P<note_id>\d+)/$',                          'editNoteCendari',                name='note_view'),
     url(r'^cendari/(?P<project_slug>[-\w]+)/notes/(?P<note_id>\d+)/read$',                          'readNoteCendari',                name='note_read'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/notes/(?P<note_id>\d+)/version_history$',                          'versionHistoryNoteCendari',                name='note_version_history'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/notes/(?P<note_id>\d+)/version_history/(?P<version_id>\d+)$',  'versionNoteCendari',                name='note_version'),
     url(r'^cendari/(?P<project_slug>[-\w]+)/notes/(?P<note_id>\d+)/rdfa/$', 'rdfa_view_note', name='rdfa_view_note'),
 
 
@@ -132,7 +134,8 @@ cendaripatterns = patterns('cendari.views',
     url(r'^cendari/(?P<project_slug>[-\w]+)/documents/(?P<document_id>\d+)/read/$',                 'readDocumentCendari',                name='document_read'),
    # url(r'^cendari/(?P<project_slug>[-\w]+)/documents/add/$',                                   EditDocumentAdminView.as_view(),     name='adddocument_view'),
     url(r'^cendari/(?P<project_slug>[-\w]+)/documents/add/$',                                   DocumentCendari.as_view(),     name='adddocument_view'),
-
+    url(r'^cendari/(?P<project_slug>[-\w]+)/document/(?P<document_id>\d+)/version_history$',                          'versionHistoryDocumentCendari',                name='document_version_history'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/documents/(?P<document_id>\d+)/version_history/(?P<version_id>\d+)$',  'versionDocumentCendari',                name='document_version'),
     # Cendari Topics
     #url(r'^cendari/(?P<project_slug>[-\w]+)/topics/add/$',                                      EditTopicAdminView.as_view(),        name='addtopic_view'),
     #url(r'^cendari/(?P<project_slug>[-\w]+)/topics/(?P<topic_node_id>\d+)/$',                   EditTopicAdminView.as_view(),        name='topic_view'),
@@ -169,6 +172,7 @@ cendaripatterns = patterns('cendari.views',
     url(r'^cendari/(?P<project_slug>[-\w]+)/faceted/$', 'faceted_search', name='cendari_faceted_search_view'),
     url(r'^cendari/autocomplete_search/$', 'autocomplete_search', name = 'autocomplete_search_view'),
     url(r'^cendari/trame/$', 'trame_search', name='trame_search_view'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/find_dates/(?P<topic_node_id>\d+)/$', 'find_date', name='find_date_view'),
    # Cendari chat
    # url(r'^chat/', include('djangoChat.urls')),
    # url(r'^cendari/(?P<project_slug>[-\w]+)/chat/$',                                       'cendari_chat',                         name='cendari_chat_view'),
