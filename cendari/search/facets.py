@@ -37,7 +37,7 @@ def cendari_filter(user=None,project_slugs=None):
             return []
         username=user.username
         if project_slugs is None:
-            groups=[proj.slug for proj in user.get_affiliated_projects()]
+            groups=[proj.slug for proj in user.get_authorized_projects()]
         else:
             groups=project_slugs
 
