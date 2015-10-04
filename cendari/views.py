@@ -1413,46 +1413,41 @@ def image_browse(request,project_slug,document_id):
 
 @login_required
 def autocomplete_search(request):
-    	term = request.GET.getlist('term')[0]
-    	schema = request.GET.getlist('term_schema')[0]
-    	#print '********************** autocomplete_search, with search term: ' + term + ', and schema: ' + schema + ', is done'
-	if (schema == 'Thing'):
-		query = {
-			"from" : 0, "size" : 30,
-			"query": {
-				"query_string": {
-				    "query": term.lower()
-				}
-			},
-			"sort": {
-				"pageviews": { "order": "desc", "ignore_unmapped" : True}
-			}
-		}
-	else:
-		query = {
-			"from" : 0, "size" : 30,
-			"query": {
-				"query_string": {
-					"query": term.lower()
-				}
-			},
-			"filter": {
-				"term": { "class": "http://schema.org/"+schema }
-			},
-			"sort": {
-				"pageviews": { "order": "desc", "ignore_unmapped" : True }
-			}	
-		}
+    term = request.GET.getlist('term')[0]
+    schema = request.GET.getlist('term_schema')[0]
+    filter_terms = cendari_filter(request.user)
+    q = {
+        "query": {
+            "match": { "title": term.lower() }
+        }
+    }
+    if (schema != 'Thing'):
+        filter_terms += [{"term": { "class": "http://schema.org/"+schema }}]
 
-	es = ElasticSearch('http://localhost:9200/')
-	results = es.search(query)
-	#results = es.search(query, index='cendari')
-	#print 'the results of the autocomplete search query:' + str(results)
-   	res = json.dumps(results, encoding="utf-8")
-    	return HttpResponse(res, mimetype='application/json') 
+    if len(filter_terms)==1:
+        q['filter'] = filter_terms[0]
+    elif len(filter_terms)>1:
+        q['filter'] = {"bool" : { "must" : filter_terms } }
 
+    q = {'query': {'filtered': q} }
+    q['functions'] = [
+        {'filter': { 'term': { 'application': 'nte'}},
+         'weight': 10 },
+         {'field_value_factor': {
+             "field": "pageviews",
+             "factor": 0.1,
+             "modifier": "log1p",
+             "missing": 1 }}
+    ]
+    q['score_mode'] = 'sum'
+    q = {'query': { 'function_score': q } }
 
+    q["from"] = 0
+    q["size"] = 30
+#    q["sort"] = {
+#        "pageviews": { "order": "desc", "ignore_unmapped" : True, "missing" : "_last"}
+#    }
 
-
-
-
+    results = cendari_index.search(q, doc_type='entity')
+    res = json.dumps(results, encoding="utf-8")
+    return HttpResponse(res, mimetype='application/json') 

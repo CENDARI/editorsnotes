@@ -118,7 +118,6 @@ def cendari_aggregations(size={},default_size=10,geo_bounds=None,date_range=None
 def build_es_query(request,project_slug):
     terms = {}
     q = {}
-    filter_terms = []
     query_terms = []
     filter_terms = cendari_filter(request.user)
     date_range = None
@@ -194,13 +193,12 @@ def build_es_query(request,project_slug):
     q['functions'] = [ {'filter': { 'term': { 'application': 'nte'}},
                         'weight': 10
                         },
-# Need to change the mapping on the server... wait a bit
-#                        {'field_value_factor': {
-#                            "field": "pageviews",
-#                            "factor": 0.1,
-#                            "modifier": "log1p",
-#                            "missing": 1
-#                        }}]
+                        {'field_value_factor': {
+                            "field": "pageviews",
+                            "factor": 0.1,
+                            "modifier": "log1p",
+                            "missing": 1
+                        }}
     ]
     q['score_mode'] = 'sum'
     q = {'query': { 'function_score': q } }
