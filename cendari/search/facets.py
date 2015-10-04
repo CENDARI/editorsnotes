@@ -115,7 +115,7 @@ def cendari_aggregations(size={},default_size=10,geo_bounds=None,date_range=None
         }
     return aggs
 
-def build_es_query(request,project_slug):
+def build_es_query(request,project_slug, version):
     terms = {}
     q = {}
     query_terms = []
@@ -190,19 +190,20 @@ def build_es_query(request,project_slug):
     # because aggregation use the result of the query
     # and ignore the filter alone
     q = {'query': { 'filtered': q } }
-    q['functions'] = [ {'filter': { 'term': { 'application': 'nte'}},
-                        'weight': 10
-                        },
-                        {'field_value_factor': {
-                            "field": "pageviews",
-                            "factor": 0.1,
-                            "modifier": "log1p",
-                            "missing": 1
-                        }}
-    ]
-    q['score_mode'] = 'sum'
-    q = {'query': { 'function_score': q } }
-    
+    if version > '1.6':
+        q['functions'] = [ {'filter': { 'term': { 'application': 'nte'}},
+                            'weight': 10
+                            },
+                            {'field_value_factor': {
+                                "field": "pageviews",
+                                "factor": 0.1,
+                                "modifier": "log1p",
+                                "missing": 1
+                            }}
+        ]
+        q['score_mode'] = 'sum'
+        q = {'query': { 'function_score': q } }
+
 #    pprint.pprint(q)
     return (q, query, geo_bounds, date_range)
 
@@ -219,7 +220,8 @@ def del_out_of_range(buckets, date_range):
     return ret
 
 def cendari_faceted_search(request,project_slug=None):
-    (q, query, geo_bounds, date_range) = build_es_query(request, project_slug)
+    version = cendari_index.version()
+    (q, query, geo_bounds, date_range) = build_es_query(request, project_slug, version)
 
     # Prepare the aggregations
 

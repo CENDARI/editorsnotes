@@ -51,6 +51,7 @@ class CendariIndex(object):
         self.is_open = False
         self.update_list = set()
         self.delete_list = set()
+        self._version = None
 
     def _open(self):
         pass
@@ -74,6 +75,15 @@ class CendariIndex(object):
 
     def get_settings(self):
         return {}
+
+    def version(self):
+        if self._version is None:
+            self._info = self.open().send_request('GET', [], query_params={})
+            try:
+                self._version = self._info['version']['number']
+            except:
+                self._version = "unknown"
+        return self._version
 
     def generate_real_name(self):
         return self.name+datetime.now().strftime('_%Y-%m-%d_%H:%M:%S')

@@ -56,8 +56,6 @@ from django.core.exceptions import PermissionDenied
 import operator
 import requests
 
-from pyelasticsearch import ElasticSearch
-
 import logging
 logger = logging.getLogger(__name__)
 
@@ -628,33 +626,33 @@ def getTopicResources(request, project_slug, sfield):
               .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)[:max_count] 
             o_query_set = sorted(query_set, key=operator.attrgetter(sfield))  
 
-	    '''
-	    # No access to 'deleted' or sort fields in the cendari index
-            query = {
-		  "query": {
-		    "bool": {
-		      "must": [
-			{
-			  "query_string": {
-			    "default_field": "topic.serialized.type",
-			    "query": "PER"
-			  }
-			},
-			{
-			  "query_string": {
-			    "default_field": "topic.serialized.project.name",
-			    "query": "test"
-			  }
-			}
-		      ]
-		    }
-		  },
-		  "from": 0,
-		  "size": 1,
-		  "sort": []
-	    }
-	    es = ElasticSearch('http://localhost:9200/')
-	    results = es.search(query)'''
+	    # '''
+	    # # No access to 'deleted' or sort fields in the cendari index
+            # query = {
+	    #       "query": {
+	    #         "bool": {
+	    #           "must": [
+	    #     	{
+	    #     	  "query_string": {
+	    #     	    "default_field": "topic.serialized.type",
+	    #     	    "query": "PER"
+	    #     	  }
+	    #     	},
+	    #     	{
+	    #     	  "query_string": {
+	    #     	    "default_field": "topic.serialized.project.name",
+	    #     	    "query": "test"
+	    #     	  }
+	    #     	}
+	    #           ]
+	    #         }
+	    #       },
+	    #       "from": 0,
+	    #       "size": 1,
+	    #       "sort": []
+	    # }
+	    # es = ElasticSearch('http://localhost:9200/')
+	    # results = es.search(query)'''
 
     	elif sfield == "-created" or sfield == "-last_updated":
             query_set = main_models.Topic.objects\
@@ -1430,17 +1428,20 @@ def autocomplete_search(request):
         q['filter'] = {"bool" : { "must" : filter_terms } }
 
     q = {'query': {'filtered': q} }
-    q['functions'] = [
-        {'filter': { 'term': { 'application': 'nte'}},
-         'weight': 10 },
-         {'field_value_factor': {
-             "field": "pageviews",
-             "factor": 0.1,
-             "modifier": "log1p",
-             "missing": 1 }}
-    ]
-    q['score_mode'] = 'sum'
-    q = {'query': { 'function_score': q } }
+    version = cendari_index.version()
+    if version > '1.6':
+        q['functions'] = [
+            {'filter': { 'term': { 'application': 'nte'}},
+             'weight': 10 },
+            {'field_value_factor': {
+                "field": "pageviews",
+                "factor": 0.1,
+                "modifier": "log1p",
+                "missing": 1 }
+            }
+        ]
+        q['score_mode'] = 'sum'
+        q = {'query': { 'function_score': q } }
 
     q["from"] = 0
     q["size"] = 30
