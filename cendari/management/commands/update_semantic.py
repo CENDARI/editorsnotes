@@ -11,10 +11,7 @@ class Command(NoArgsCommand):
         for note in Note.objects.all():
             if options['verbosity'] > 1:
                 self.stdout.write(self.style.NOTICE('%d' % note.id), ending=' ')
-            try:
-                semantic_process_note(note)
-            except:
-                self.stdout.write('Note %d failed', node.id)
+            semantic_process_note(note)
         if options['verbosity'] > 0:
             self.stdout.write('')
         if options['verbosity'] > 0:
@@ -22,16 +19,10 @@ class Command(NoArgsCommand):
         for document in Document.objects.all():
             if options['verbosity'] > 1:
                 self.stdout.write(self.style.NOTICE('%d' % document.id), ending=' ')
-            try:
-                semantic_process_document(document)
-            except:
-                self.stdout.write('Document failed')
+            semantic_process_document(document)
         for topic in Topic.objects.all():
             if options['verbosity'] > 1:
                 self.stdout.write(self.style.NOTICE('%d' % topic.id), ending=' ')
-            try:
-                semantic_process_topic(topic)
-            except:
-                self.stdout.write('Topic failed')            
+            semantic_process_topic(topic)
         if options['verbosity'] > 0:
             self.stdout.write('')

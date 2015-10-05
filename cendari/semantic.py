@@ -324,8 +324,6 @@ def create_topics_for(entity, topics, user):
             rdftopic = semantic_uri(topic)
             subject = t['rdfsubject']
             value = t['value']
-            #g.add( (subject, OWL.sameAs, rdftopic) )
-            #g.add( (g.identifier, SCHEMA['mentions'], rdftopic) )
             if (not topic.rdf is None) and (not check_domain(topic.rdf,'dbpedia')):
                 topic.rdf = None
                 topic.save()
@@ -352,6 +350,7 @@ def create_topics_for(entity, topics, user):
                     topic.save()
 
 
+
 def semantic_process_note(note,user=None):
     """Extract the semantic information from a note,
     creating topics on behalf of the specific user."""
@@ -367,7 +366,7 @@ def semantic_process_note(note,user=None):
 
     # This note is a creative work
     g.add( (g.identifier, RDF.type, SCHEMA['CreativeWork']) )
-    g.add( (g.identifier, SCHEMA['creator'], URIRef(note.creator.get_absolute_url()[1:])) )
+    g.add( (g.identifier, SCHEMA['creator'], semantic_uri(note.creator)) )
     g.add( (g.identifier, SCHEMA['dateCreated'], Literal(note.created)) )
     g.add( (g.identifier, SCHEMA['dateModified'], Literal(note.last_updated)) )
     g.add( (g.identifier, CENDARI['name'], Literal(note.title)) )
@@ -407,7 +406,7 @@ def semantic_process_document(document,user=None):
 
     # This not is a creative work
     g.add( (g.identifier, RDF.type, SCHEMA['CreativeWork']) )
-    g.add( (g.identifier, SCHEMA['creator'], URIRef(document.creator.get_absolute_url()[1:])) )
+    g.add( (g.identifier, SCHEMA['creator'], semantic_uri(document.creator)) )
     g.add( (g.identifier, SCHEMA['dateCreated'], Literal(document.created)) )
     g.add( (g.identifier, SCHEMA['dateModified'], Literal(document.last_updated)) )
     #g.add( (g.identifier, CENDARI['name'], Literal(xhtml_to_text(document.description))) )
@@ -435,30 +434,20 @@ def semantic_process_transcript(transcript,user=None):
 from SPARQLWrapper import SPARQLWrapper, JSON
 def semantic_find_dates(topic,uri=None):
     if not uri:
-        uri = semantic_uri(topic)
-        # uri = topic.rdf
-    es_query = {
-        "query": {
-            "match" : {"topic.rdf" : uri }
-          }
-    }
-    es = ElasticSearch('http://localhost:9200/')
-    es_results = es.search(es_query)
-    eventDates = []
-   
-    for r in es_results["hits"]["hits"]:
-        if "date" in [r["_source"]][0]["serialized"]:
-            d = [r["_source"]][0]["serialized"]["date"]
-        if d != None and not d in eventDates:
-            eventDates.append(str(d).replace("T00:00:00",""))
-            
+        return # uri = semantic_uri(topic)
+    from .search import cendari_index
+    eventDates = None
+    d = cendari_index.get_dates(uri)
+    if d:
+        eventDates = [str(date).replace("T00:00:00","") for date in d]
 
-    if eventDates == []:
+    if eventDates is None:
+        logger.info('Querying SPARQL at dbpedia for %s', uri)
         sparql = SPARQLWrapper("http://dbpedia.org/sparql")
         sparql.setQuery("""     
             PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
             SELECT ?eventDate WHERE {
-                <"""+topic.rdf+""">
+                <"""+uri+""">
                 <http://dbpedia.org/property/date> ?eventDate
            }
         """)
@@ -473,7 +462,6 @@ def semantic_find_dates(topic,uri=None):
 
 def semantic_process_topic(topic,user=None,doCommit=True):
     """Extract the semantic information from a topic."""
-    logger.info("inside semantic_process_topic ")
     if topic is None:
         return
     
@@ -490,7 +478,7 @@ def semantic_process_topic(topic,user=None,doCommit=True):
         g.add( (g.identifier, RDF.type, URIRef(schema)) )
     if topic.date:
         g.add( (g.identifier, SCHEMA['startDate'], Literal(topic.date)) )
-    g.add( (g.identifier, SCHEMA['creator'], URIRef(topic.creator.get_absolute_url()[1:])) )
+    g.add( (g.identifier, SCHEMA['creator'], semantic_uri(topic.creator)) )
     g.add( (g.identifier, SCHEMA['dateCreated'], Literal(topic.created)) )
     g.add( (g.identifier, SCHEMA['dateModified'], Literal(topic.last_updated)) )
     g.add( (g.identifier, CENDARI['name'], Literal(topic.preferred_name)) )
@@ -498,20 +486,15 @@ def semantic_process_topic(topic,user=None,doCommit=True):
 
     if topic.rdf is not None:
         uri = fix_uri(topic.rdf)
-    #[NB] get date for events
-    if topic.topic_node.type == 'EVT':
-        eventDates = semantic_find_dates(topic,uri)
-        # if eventDates != []:
-        #     for d in eventDates:
-        #         if utils.parse_well_known_date(d, False):
-        #             topic.date = utils.parse_well_known_date(d, False)
-        #             topic.save() #tofix saving twice! see below
-        #             break
+        g.add( (g.identifier, OWL['sameAs'], URIRef(uri)) )
         if uri != topic.rdf:
-            logger.debug(u'Fixing rdf URI from %s to %s', topic.rdf.encode('ascii','xmlcharrefreplace'), uri)
+            logger.debug(u'Fixing rdf URI from %s to %s', topic.rdf, uri)
             topic.rdf = uri
             topic.save()
-        g.add( (g.identifier, OWL['sameAs'], URIRef(topic.rdf)) )
+    #[NB] get date for events
+    #if topic.topic_node.type == 'EVT':
+        #eventDates = semantic_find_dates(topic,uri)
+        
     if doCommit:
         semantic.commit()
 
@@ -589,7 +572,7 @@ def semantic_resolve_topic(topic, force=False):
         semantic.commit()
         return
 
-    rdf_url = topic.rdf
+    rdf_url = fix_uri(topic.rdf)
     logger.debug(u"Trying to resolve topic %s from url '%s'", unicode(topic), unicode(rdf_url))
     uri = URIRef(rdf_url)
     g = Semantic.graph(identifier=uri)

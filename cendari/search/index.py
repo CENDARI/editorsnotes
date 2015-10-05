@@ -367,6 +367,15 @@ class CendariIndex(object):
             return locs
         return None
 
+    def get_dates(self, id):
+        ret = self.open().get(index=self.name, doc_type='entity', id=id, fields='date')
+        if ret['found'] and 'date' in ret['fields']:
+            dates = ret['fields']['date']
+            if not isinstance(dates, list):
+                dates = [dates]
+            return dates
+        return None
+
     def search(self, query, highlight=False, **kwargs):
         self.open()
         if isinstance(query, basestring):
