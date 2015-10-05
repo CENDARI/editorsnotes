@@ -302,6 +302,9 @@ class CendariIndex(object):
     def object_changed(self, obj):
         if type(obj) not in self.document_types: return
         id = str(semantic_uri(obj))
+        if isinstance(obj, Topic) and obj.deleted:
+            self.delete_list.add(id)
+            return
         if id in self.delete_list: # was removed, just update now
             self.delete_list.remove(id)
         self.update_list.add(obj)
@@ -322,7 +325,7 @@ class CendariIndex(object):
     def delete_ops(self):
         for id in self.delete_list:
             doc_type = 'document' if '/topic/' in id else 'entity'
-            yield es.delete(id=id, doc_type=doc_type)
+            yield self.open().delete_op(id=id, doc_type=doc_type)
 
     def index_ops(self):
         for obj in self.update_list:
@@ -337,14 +340,16 @@ class CendariIndex(object):
                 doc_type = 'entity'
             else:
                 continue
-            yield self.es.index_op(doc, doc_type=doc_type)
+            yield self.open().index_op(doc, doc_type=doc_type)
 
     def process_update_list(self):
         # Should I test the values returned by bulk?
         if len(self.delete_list):
+            logger.info('Deleting %d from delete_list', len(self.delete_list))
             self.open().bulk(self.delete_ops(), index=self.name)
             self.delete_list = set()
         if len(self.update_list):
+            logger.info('Update %d from update_list', len(self.update_list))
             self.open().bulk(self.index_ops(), index=self.name)
             self.update_list = set()
 
