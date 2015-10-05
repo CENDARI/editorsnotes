@@ -758,7 +758,7 @@ def getDocumentResources(request, project_slug, sfield):
     return doc_list
 
 
-ID_RE = re.compile(r'/(\d+)/$')
+ID_RE = re.compile(r'/documents/(\d+)/$')
 
 @login_required
 def getDocumentResources_Faster(request, project_slug, sfield):
@@ -789,7 +789,7 @@ def getDocumentResources_Faster(request, project_slug, sfield):
         "query": {"constant_score":  {"filter": {"term": {"project": project_slug }}}},
         "fields": ['title'],
         "sort": [
-                {sort_field: { "order": sort_order, "ignore_unmapped" : "true" }}
+            {sort_field: { "order": sort_order, "ignore_unmapped" : "true" }}
         ]
     }
     es_results = cendari_index.search(es_query, doc_type='document')
@@ -805,7 +805,6 @@ def getDocumentResources_Faster(request, project_slug, sfield):
         if found:
             doc_id = found.group(1)
         else:
-            logger.error('cannot parse document id from url: %s', doc_url)
             continue
 	doc_key = project_slug+'.document.'+doc_id
        	#if doc_id == str(image_place_holder.id):

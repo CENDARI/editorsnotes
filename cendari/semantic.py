@@ -213,22 +213,22 @@ def semantic_prepare_query(q):
     return prepareQuery(q, initNs = INIT_NS )
 
 
-GEO_QUERY = None
+# GEO_QUERY = None
 
-def get_query_geo():
-    global GEO_QUERY
-    if GEO_QUERY is None:
-        GEO_QUERY = semantic_prepare_query("""SELECT ?name ?pos ?loc
-        WHERE {
-           ?pos cendari:name ?name.
-           ?pos a schema:Place.
-           ?pos owl:sameAs+ ?db.
-           ?db grs:point ?loc
-        }""")
-    return GEO_QUERY
+# def get_query_geo():
+#     global GEO_QUERY
+#     if GEO_QUERY is None:
+#         GEO_QUERY = semantic_prepare_query("""SELECT ?name ?pos ?loc
+#         WHERE {
+#            ?pos cendari:name ?name.
+#            ?pos a schema:Place.
+#            ?pos owl:sameAs+ ?db.
+#            ?db grs:point ?loc
+#         }""")
+#     return GEO_QUERY
 
-def semantic_query_geo():
-    return semantic_query(get_query_geo())
+# def semantic_query_geo():
+#     return semantic_query(get_query_geo())
 
 def semantic_query_latlong(topic):
     if topic.topic_node.type != 'PLA':
