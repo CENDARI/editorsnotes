@@ -899,8 +899,10 @@ def faceted_search(request,project_slug=None):
         'cendarisearch.html', o, context_instance=RequestContext(request))
 
 def trame_search(request):
-    r = requests.post("http://trame.fefonlus.it/trame/index.php?op=search&Field0="+request.GET.get('q', '')+"&Field6_loc=&Field6_lib=&Field6_hold=&Field6_shelf=&Field4=&Field41=&Field42=&Field5=&Field7=&Field2=&Field1=&Field3=&Field6=&dbs=90|82|83|87|2|19|89|91|92|58|88|17|84|85|57|86|48|1&maxnum=10")
-    return HttpResponse(r.content)
+    trame_url = "http://git-trame.fefonlus.it/Rest.php?&type=freetext&q="+request.GET.get('q', '')+"&dbs=127|129"
+    # trame_url = "http://git-trame.fefonlus.it/Rest.php?&type=freetext&q=petrus&dbs=127|129"
+    r = requests.post(trame_url)
+    return HttpResponse(r.content, mimetype='application/json')
 
 def find_date(request,project_slug,topic_node_id):
     response_dates= []
