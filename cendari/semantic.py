@@ -6,6 +6,7 @@ from models import PlaceTopicModel
 from django.conf import settings
 from django.utils import six
 from django.core import signals
+from django.db.models import Count
 import utils as utils
 
 from lxml import etree, html
@@ -350,7 +351,6 @@ def create_topics_for(entity, topics, user):
                     topic.save()
 
 
-
 def semantic_process_note(note,user=None):
     """Extract the semantic information from a note,
     creating topics on behalf of the specific user."""
@@ -386,6 +386,7 @@ def semantic_process_note(note,user=None):
     logger.debug("Time for iterating :  %s seconds " % (time.time() - start_time))  
 
     start_time = time.time()
+
     semantic.commit()
     logger.debug("Time for semantic commit :  %s seconds " % (time.time() - start_time))
 
@@ -418,6 +419,7 @@ def semantic_process_document(document,user=None):
 
     document.related_topics.all().delete()
     create_topics_for(document, topics, user)
+
     semantic.commit()
 
 def semantic_process_transcript(transcript,user=None):
@@ -459,6 +461,48 @@ def semantic_find_dates(topic,uri=None):
             if not d in eventDates:
                 eventDates.append(d)
     return eventDates
+
+def semantic_unmerge_topics(topic,alias,project):
+    alias = topic.alternate_names.filter(name=alias)[0]
+
+    uri = semantic_uri(topic1)
+    g = Semantic.graph(uri)
+    g.remove( (g.identifier, OWL['sameAs'], Literal(alias)) )
+
+    topic_alias=get_or_create_topic(alias.creator, alias.name, topic.topic_node.type, topic.project)
+    semantic_process_topic(topic_alias)
+
+    alias.delete()
+    pass
+
+def semantic_merge_topics(topic1,topic2):
+    topic1.alternate_names.create(name=topic2.preferred_name,creator_id=topic2.creator.id)
+
+    uri = semantic_uri(topic1)
+    g = Semantic.graph(uri)
+    g.add( (g.identifier, OWL['sameAs'], Literal(topic2.preferred_name)) )
+    topic2.deleted = True
+    return topic1
+
+def semantic_merge_project_topics(project):
+    rdfs = project.topics.exclude(deleted=True).values('rdf').annotate(dcount=Count('rdf')).order_by('dcount')
+    for rdf in rdfs :
+        if rdf['rdf'] == None:
+            continue
+        if rdf['dcount'] == 1 :
+            continue
+        topics = project.topics.filter(rdf=rdf['rdf'])
+        len_topics = len(topics)
+
+        if not len_topics>1:
+            continue
+
+        main_topic = topics[0]
+        print topics
+        break
+        for i in range(1,len_topics):
+            semantic_merge_topics(main_topic,topics[i])
+
 
 def semantic_process_topic(topic,user=None,doCommit=True):
     """Extract the semantic information from a topic."""

@@ -353,6 +353,22 @@ rect.zoompane {
     return params;
   }
 
+  function makeList(jsonData){
+    ul = document.createElement('ul');
+    for(i=0;i<jsonData.length;i++){
+      var li = document.createElement('li');
+      var a = document.createElement('a');
+
+      a.target="_blank";
+      a.href = jsonData[i].url;
+      a.innerHTML = jsonData[i].titolo;
+
+      li.appendChild(a);
+      ul.appendChild(li)
+    }
+    return ul
+  }
+
   bind_faceted_widgets();
   $('.next_page').click(next_page);
   $('.prev_page').click(prev_page);
@@ -377,27 +393,66 @@ rect.zoompane {
     })
 
     if(query.hasOwnProperty('TRAME')){
-      var iframe_src = "{% url 'trame_search_view' %}?q="+query['q']
+      var trame_query = "{% url 'trame_search_view' %}?q="+query['q']
       // var iframe_src = "http://trame.fefonlus.it/trame/index.php?op=search&Field0="+query['q']+"&Field6_loc=&Field6_lib=&Field6_hold=&Field6_shelf=&Field4=&Field41=&Field42=&Field5=&Field7=&Field2=&Field1=&Field3=&Field6=&dbs=90|82|83|87|2|19|89|91|92|58|88|17|84|85|57|86|48|1&maxnum=10"
 
-      h2 = document.createElement('h2')
-      h2.innerHTML = 'TRAME results'
-      $('#trameresults').append(h2)
-      
-      var div = document.createElement('div');
-      div.id = "loadingMessage";
-      div.innerHTML = "Loading TRAME results";
-      $('#trameresults').append(h2)
+      $.ajax({
+        url:trame_query,
+        dataType: "json",
+        beforeSend: function() {
+          // setting a timeout
+          h2 = document.createElement('h2')
+          h2.innerHTML = 'Loading TRAME results';
+          $('#trameresults').append(h2);
+        },
+        success: function(data){
+          h2 = document.createElement('h2')
+          h2.innerHTML = 'TRAME Results:'
+         
+          
+          var ul = document.createElement('ul');
 
-      var iframe = document.createElement('iframe');
-      iframe.id = "trameIframe";
-      iframe.src = iframe_src; 
-      iframe.width = 800;
-      $('#trameresults').append(iframe)
-      $("#trameIframe").ready(function() {
-        $("#trameIframe").show();
-        $("#loadingMessage").hide();
-      });
+          var li_127 = document.createElement('li');
+          var ul_127 = makeList(data.site_127);
+          var a_127  = document.createElement('a');
+          var h3_127 = document.createElement('h3');
+          a_127.target = "_blank"
+          a_127.href ="http://brbl-dl.library.yale.edu/";
+          a_127.innerHTML="Beinecke Digital Collections";
+          h3_127.appendChild(a_127)
+          li_127.appendChild(h3_127);
+          li_127.appendChild(ul_127);
+
+
+          var li_129 = document.createElement('li');
+          var ul_129 = makeList(data.site_129);
+          var a_129  = document.createElement('a');
+          var h3_129 = document.createElement('h3');
+          a_129.target = "_blank"
+          a_129.href ="http://dc.lib.unc.edu/cdm/search/collection/mackinney/";
+          a_129.innerHTML="MacKinney Collection of Medieval Medical Illustrations";
+          h3_129.appendChild(a_129);
+          li_129.appendChild(h3_129);
+          li_129.appendChild(ul_129);
+
+          ul.appendChild(li_127)
+          ul.appendChild(li_129)
+
+          $('#trameresults').empty().append(h2).append(ul)
+        },
+        error: function(xhr){
+          h2 = document.createElement('h2')
+          h2.innerHTML = 'Apologies, something went wrong with Trame'
+          $('#trameresults').empty().append(h2)
+          console.log("xhr status text",xhr.statusText)
+          console.log("xhr response text",xhr.responseText)
+        }
+      })
+      // .done()
+      // .fail(function(){
+        
+      // })
+
 
       $('#trameCheckbox').prop("checked","true");
       console.log("TRAMMMEEEEE");

@@ -263,7 +263,7 @@
 		{% endif %}
 			<div class="form-main edit-section" >
 				<input  style="visibility: hidden;"  id="documentDescEditBut" type="button" value= {% if document.id > 0 %} " [ Read Only ]                --- click here for Edit mode" {% else %} " [ Editable ]                    --- click here for Read-Only mode" {% endif %} />
-				<p>Document's description ({{version.field_dict.last_updated | date}}). <a href="{% url "document_version" project_slug=project.slug  document_id=document.id version_id=version.id %}" id="revertToVersion">Revert to this version</a> </p>
+				<p>Document's description ({{version.field_dict.last_updated | date:'d/m/Y H:i'}}). <a href="{% url "document_version" project_slug=project.slug  document_id=document.id version_id=version.id %}" id="revertToVersion">Revert to this version</a> </p>
 				<div data-error-target="description"></div>
 				<textarea id="document-description" class="mceEditor" type="text" name="description" > 
 					{% if document %} {{document.description|as_html}} {% endif %}
