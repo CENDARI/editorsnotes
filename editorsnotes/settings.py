@@ -67,6 +67,8 @@ UPLOAD_FILE_TYPES = [
     'image/gif',
     'text/plain',
     'text/html',
+    'text/csv',
+    'text/x-bibtex',
     'application/pdf',
     'application/vnd.oasis.opendocument.text', # odt
     'application/vnd.oasis.opendocument.spreadsheet', # ods
@@ -74,6 +76,9 @@ UPLOAD_FILE_TYPES = [
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', # xlsx
     'application/msword', # doc
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document', # docx
+    'application/vnd.ms-powerpoint', # ppt
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation', #pptx
+    'application/xml',
     'audio/mpeg', # mp3
     'audio/mpeg3',
     'audio/mp3',
