@@ -12,7 +12,7 @@ pyelasticsearch==1.2
 BeautifulSoup<4.0
 lxml==3.4.2
 cssselect==0.8
-Pillow==2.7.0
+Pillow==3.0.0
 psycopg2==2.4.6
 
 isodate==0.4.9
@@ -31,7 +31,7 @@ pycurl==7.19.3.1
 guess-language==0.2
 rq==0.3.13
 django-rq==0.6.1
-rdflib==4.2.0
+rdflib==4.2.1
 django-widget-tweaks==1.3
 parse==1.6.4
 django-admin2==0.6.1

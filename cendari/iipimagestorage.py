@@ -22,8 +22,8 @@ q = django_rq.get_queue("default")
 class IIPImageStorage(FileSystemStorage):
     def get_tiff_path(self, name):
         root,ext = os.path.splitext(name)
-#        if ext == ".tif":
-#            root = root + "_"
+        if ext == ".tif":
+            root = root + "_"
         return root + ".tif"
 
     def _save(self, name, content):
