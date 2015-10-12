@@ -1288,7 +1288,7 @@ def editEntityCendari(request, project_slug, topic_node_id):
     o['object_id'] = topic_node_id
     o['topic_type'] = topic.topic_node.type
     o['topic'].date = utils.change_to_well_known_format(o['topic'].date)
-
+    o['aliases'] = topic.alternate_names.all()
     #print 20*'.'+ 'topic.summary = " + str(topic.summary)
     o['breadcrumb'] = (
         (topic.project.name, topic.project.get_absolute_url()),

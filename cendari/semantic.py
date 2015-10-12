@@ -462,27 +462,34 @@ def semantic_find_dates(topic,uri=None):
                 eventDates.append(d)
     return eventDates
 
-def semantic_unmerge_topics(topic,alias,project):
-    alias = topic.alternate_names.filter(name=alias)[0]
+# Cendari code E.G. aviz
+# change for alising
+def semantic_unmerge_topics(master,alias,project):
+    alias.unmerge()
 
-    uri = semantic_uri(topic1)
-    g = Semantic.graph(uri)
-    g.remove( (g.identifier, OWL['sameAs'], Literal(alias)) )
+    master_uri = semantic_uri(master)
+    master_g = Semantic.graph(master_uri)
 
-    topic_alias=get_or_create_topic(alias.creator, alias.name, topic.topic_node.type, topic.project)
-    semantic_process_topic(topic_alias)
+    alias_uri = semantic_uri(alias)
+    alias_g = Semantic.graph(alias_uri)
+    
+    master_g.remove( (master_g.identifier, OWL['sameAs'], Literal(alias.preferred_name)) )
+    master_g.remove( (master_g.identifier, OWL['sameAs'], alias_g) )
 
-    alias.delete()
-    pass
+    return master
 
-def semantic_merge_topics(topic1,topic2):
-    topic1.alternate_names.create(name=topic2.preferred_name,creator_id=topic2.creator.id)
+def semantic_merge_topics(master,alias):
+    alias.merge_into(master)
 
-    uri = semantic_uri(topic1)
-    g = Semantic.graph(uri)
-    g.add( (g.identifier, OWL['sameAs'], Literal(topic2.preferred_name)) )
-    topic2.deleted = True
-    return topic1
+    master_uri = semantic_uri(master)
+    master_g = Semantic.graph(master_uri)
+
+    alias_uri = semantic_uri(alias)
+    alias_g = Semantic.graph(alias_uri)
+
+    master_g.add( (master_g.identifier, OWL['sameAs'], alias_g) )
+    master_g.add( (master_g.identifier, OWL['sameAs'], Literal(alias.preferred_name)) )
+    return master
 
 def semantic_merge_project_topics(project):
     rdfs = project.topics.exclude(deleted=True).values('rdf').annotate(dcount=Count('rdf')).order_by('dcount')

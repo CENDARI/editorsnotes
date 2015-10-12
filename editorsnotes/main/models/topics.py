@@ -219,6 +219,61 @@ class Topic(LastUpdateMetadata, URLAccessible, ProjectPermissionsMixin,
             })
             
     @transaction.commit_on_success
+    #  original function 
+    # def merge_into(self, target):
+    #     """
+    #     Merge all connections from this container into another.
+    #     """
+    #     if self.project_id != target.project_id:
+    #         raise TopicMergeError(
+    #             'Can only merge topics within the same project.')
+    #     if not isinstance(target, Topic):
+    #         raise ValueError('Target must be another Topic')
+
+    #     # Move summary to new container if it exists
+    #     if self.has_summary():
+    #         if target.has_summary():
+    #             raise TopicMergeError(
+    #                 'Can\'t merge two summaries. Delete a summary before continuing.')
+    #         target.summary = self.summary
+    #     for cite in self.summary_cites.all():
+    #         cite.object_id = target.id
+    #         cite.save()
+
+    #     # Move topic assignments to the new container, but only if those
+    #     # assignments don't already exist in the target.
+    #     assignments = (
+    #         ta for ta in self.assignments.all()
+    #         if (ta.content_type_id, ta.object_id) not in
+    #         target.related_topics.values_list('content_type_id', 'object_id')
+    #     )
+    #     for assignment in assignments:
+    #         assignment.topic_id = target.id
+    #         assignment.save()
+    #     for stale_assignment in self.related_topics.all():
+    #         stale_assignment.delete()
+
+    #     # If no projects point to origin's topic node anymore, merge it into the
+    #     # target's topic node.
+    #     other_containers_exist = self.topic_node.project_topics\
+    #             .filter(deleted=False)\
+    #             .exclude(id=self.id)\
+    #             .exists()
+    #     if not other_containers_exist:
+    #         self.topic_node.deleted = True
+    #         self.topic_node.merged_into = target.topic_node
+    #         self.topic_node.save()
+
+    #     # Point this topic toward the new one.
+    #     self.deleted = True
+    #     self.merged_into = target
+    #     self.save()
+
+    #     return target
+
+
+    # Cendari code E.G. aviz
+    # change for alising
     def merge_into(self, target):
         """
         Merge all connections from this container into another.
@@ -259,16 +314,44 @@ class Topic(LastUpdateMetadata, URLAccessible, ProjectPermissionsMixin,
                 .exclude(id=self.id)\
                 .exists()
         if not other_containers_exist:
-            self.topic_node.deleted = True
+            # self.topic_node.deleted = True
             self.topic_node.merged_into = target.topic_node
             self.topic_node.save()
 
         # Point this topic toward the new one.
-        self.deleted = True
+        # self.deleted = True
         self.merged_into = target
         self.save()
-
+        target.alternate_names.create(name=self.preferred_name,creator_id=self.creator.id)
+        target.save()
         return target
+
+    def unmerge(self):
+        if self.merged_into == None:
+            return self
+        target = self.merged_into
+
+        if not isinstance(target, Topic):
+            raise ValueError('Target must be another Topic')
+
+        for cite in self.summary_cites.all():
+            cite.object_id = self.id
+            cite.save()
+
+        for assignment in assignments:
+            assignment.topic_id = self.id
+            assignment.save()
+
+        self.topic_node.merged_into = None
+        self.topic_node.save()
+
+        self.merged_into = None
+        self.save()
+
+        target.alternate_names.filter(name=self.preferred_name,creator_id=self.creator_id).delete()
+
+        return self
+
 
     # Cendari code E.G. aviz
     def related_objects(self, model=None):
