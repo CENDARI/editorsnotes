@@ -338,6 +338,98 @@ rect.zoompane {
 </div>
 
 <script type="text/javascript">
+  trame_sites = {};
+  trame_sites['1'] = {'name':'TLIon - Tradizione della letteratura italiana on line','site':'http://tlion.sns.it'}
+  trame_sites['2'] = {'name':'CODEX Inventario dei manoscritti medievali della Toscana','site':'http://codex.signum.sns.it/'}
+  trame_sites['3'] = {'name':'UCLA – Catalogue of Digitized Medieval Manuscripts','site':'http://manuscripts.cmrs.ucla.edu/'}
+  trame_sites['4'] = {'name':'Bodleian Library – Manuscripts Catalog','site':'http://www.bodley.ox.ac.uk/dept/scwmss/wmss/online/search.html'}
+  trame_sites['6'] = {'name':'Biblioteca Apostolica Vaticana – Catalogo dei manoscritti','site':'http://www.mss.vatlib.it'}
+  trame_sites['7'] = {'name':'"Bibliothèque nationale de France – Mandragore','site':' base des manuscrits enluminés"'}
+  trame_sites['8'] = {'name':'"Bibliothèque nationale de France – Gallica','site':' manuscrits"'}
+  trame_sites['9'] = {'name':'"Biblioteca Medicea Laurenziana','site':' Firenze – Teca digitale"'}
+  trame_sites['10'] = {'name':'e-codices – Virtual Manuscript Library of Switzerland','site':'http://www.e-codices.unifr.ch/en/search'}
+  trame_sites['11'] = {'name':'British Library – Manuscripts Catalogue','site':'http://www.bl.uk/catalogues/manuscripts/INDX0000.asp'}
+  trame_sites['13'] = {'name':'Manuscripta Mediaevalia','site':'http://www.manuscripta-mediaevalia.de'}
+  trame_sites['14'] = {'name':'UCB – Digital Scriptorium','site':'http://www.scriptorium.columbia.edu/'}
+  trame_sites['15'] = {'name':'ICCU – Manus on line. Censimento dei manoscritti delle biblioteche italiane','site':'http://manus.iccu.sbn.it/'}
+  trame_sites['17'] = {'name':'MDI - Manoscritti Datati d\'Italia','site':'http://www.manoscrittidatati.it/mdi/ricerca2.htm'}
+  trame_sites['18'] = {'name':'IRHT – Medium : gestion des reproductions de manuscrits','site':'http://medium.irht.cnrs.fr'}
+  trame_sites['19'] = {'name':'IRHT – Jonas : Répertoire des textes et des manuscrits médiévaux d’oc et d’oïl ','site':'http://jonas.irht.cnrs.fr/accueil/accueil.php'}
+  trame_sites['20'] = {'name':'Ramon Llull Database','site':'http://orbita.bib.ub.es/ramon/ms0.asp'}
+  trame_sites['21'] = {'name':'DEAF – Dictionnaire Étymologique de l\'Ancien Français. Complément bibliographique','site':'http://www.deaf-page.de/fr/bibl_neu.htm'}
+  trame_sites['22'] = {'name':'Archives de littérature du Moyen Âge','site':'http://www.arlima.net/mss/'}
+  trame_sites['24'] = {'name':'I testimoni della Vita Nova','site':'http://vitanova.unipv.it/testimoni.php'}
+  trame_sites['30'] = {'name':'Biblioteca della Società internazionale di studi francescani','site':'http://www.sisf-assisi.it/mediatheca.HTM'}
+  trame_sites['32'] = {'name':'Budapest - Országos Széchenyi Könivtár','site':'http://www.arcanum.hu/'}
+  trame_sites['33'] = {'name':'Cambridge (St. John\'s College)','site':'http://www.joh.cam.ac.uk/library/special_collections/manuscripts/medieval_manuscripts/'}
+  trame_sites['125'] = {'name':'LUND University library','site':'http://laurentius.ub.lu.se'}
+  trame_sites['135'] = {'name':'Bibliothèque Municipale de Lyon','site':'http://florus.bm-lyon.fr'}
+  trame_sites['35'] = {'name':'Houghton Library collection ','site':'http://hcl.harvard.edu/libraries/houghton/collections/early_manuscripts/about.cfm#collection'}
+  trame_sites['37'] = {'name':'Durham Medieval Manuscripts in the University Library','site':'http://www.dur.ac.uk/library/asc/theme/medmss/'}
+  trame_sites['84'] = {'name':'MEL (Mirabile) Bollettino bibliografico della cultura europea da Boezio a Erasmo (secoli VI-XV)','site':'http://www.mirabileweb.it/'}
+  trame_sites['137'] = {'name':'British Library Illuminated Manuscripts','site':'http://www.bl.uk/catalogues/illuminatedmanuscripts/'}
+  trame_sites['83'] = {'name':'CALMA (Mirabile) Compendium Auctorum Latinorum Medii Aevi','site':'http://www.mirabileweb.it/'}
+  trame_sites['92'] = {'name':'MAGIS (Mirabile) Manoscritti Agiografici dell\'Italia del Sud','site':'http://www.mirabileweb.it/'}
+  trame_sites['43'] = {'name':'København The Royal Library','site':'http://www.kb.dk/en/kb/nb/ha/e-mss/mdr.html'}
+  trame_sites['44'] = {'name':'Köln (Codices Electronici Ecclesiae Coloniensis)','site':'http://www.ceec.uni-koeln.de/'}
+  trame_sites['91'] = {'name':'IUSS - MAFRA (Mirabile) Repertorio dei manoscritti gallo-romanzi esemplati in Italia','site':'http://www.mirabileweb.it/'}
+  trame_sites['48'] = {'name':'TLIon - MSSb: Bibliografia dei manoscritti citati in rivista','site':'http://tlion.sns.it/mssb/'}
+  trame_sites['119'] = {'name':'ABC (Mirabile) Antica Biblioteca Camaldolese','site':'http://www.mirabileweb.it/'}
+  trame_sites['120'] = {'name':'TRAMP (Mirabile) La Tradizione Medievale dei Padri','site':'http://www.mirabileweb.it/'}
+  trame_sites['49'] = {'name':'"SALVit - Studio','site':' Archivio e Lessico dei volgarizzamenti italiani"'}
+  trame_sites['50'] = {'name':'ENSU - Edizione nazionale dei testi della storiografia umanistica','site':'http://www.ilritornodeiclassici.it/ensu'}
+  trame_sites['117'] = {'name':'ROME (Mirabile) Repertorio degli Omiliari del Medio Evo','site':'http://www.mirabileweb.it/'}
+  trame_sites['118'] = {'name':'TETRA (Mirabile) Mediaeval Latin Texts and their Transmission','site':'http://www.mirabileweb.it/'}
+  trame_sites['51'] = {'name':'ENAV - Edizione Nazionale degli antichi volgarizzamenti dei testi latini nei volgari italiani','site':'http://www.ilritornodeiclassici.it/enav'}
+  trame_sites['116'] = {'name':'Manuscriptorium','site':'www.manuscriptorium.com'}
+  trame_sites['34'] = {'name':'Cambridge (Trinity College)','site':'http://www.trin.cam.ac.uk/index.php'}
+  trame_sites['52'] = {'name':'Hill Museum & Manuscript Library','site':'http://www.hmml.org/'}
+  trame_sites['53'] = {'name':'Eine Bestandsaufnahme der handschriftlichen Überlieferung deutschsprachiger Texte des Mittelalters','site':'http://www.handschriftencensus.de'}
+  trame_sites['90'] = {'name':'BAI (Mirabile) Biblioteca Agiografica Italiana','site':'http://www.mirabileweb.it/'}
+  trame_sites['56'] = {'name':'Guide en ligne des manuscrits médiévaux Wallonie-Bruxelles','site':'http://www.cicweb.be/en/'}
+  trame_sites['57'] = {'name':'MIRAbile - Archivio digitale della cultura medievale','site':'http://www.mirabileweb.it/'}
+  trame_sites['58'] = {'name':'ICCU – Manus on line. Censimento dei manoscritti delle biblioteche italiane','site':'http://manus.iccu.sbn.it/'}
+  trame_sites['63'] = {'name':'Datierte Handschriften in lateinischer Schrift in Österreich','site':'http://www.ksbm.oeaw.ac.at'}
+  trame_sites['64'] = {'name':'Enluminures','site':'http://www.enluminures.culture.fr'}
+  trame_sites['89'] = {'name':'LIO (Mirabile) Lirica italiana delle Origini','site':'http://www.mirabileweb.it/'}
+  trame_sites['66'] = {'name':'Nuova biblioteca manoscritta','site':'http://www.nuovabibliotecamanoscritta.it'}
+  trame_sites['67'] = {'name':'Repertorium Biblicum Medii Aevii','site':'http://repbib.uni-trier.de/cgi-bin/rebihome.tcl'}
+  trame_sites['68'] = {'name':'BHL Biblioteca Hagiographica Latina manuscripta','site':'http://bhlms.fltr.ucl.ac.be'}
+  trame_sites['69'] = {'name':'International Catalogue of Mediaeval Scientific Manuscripts','site':'http://jordanus.org/'}
+  trame_sites['71'] = {'name':'Scriptorium / Bulletin codicologique','site':'http://www.scriptorium.be/index.php?lang=en'}
+  trame_sites['73'] = {'name':'"Lyon','site':' Bibliothèque Municipale"'}
+  trame_sites['39'] = {'name':'University of Glasgow','site':'http://special.lib.gla.ac.uk/manuscripts/search/'}
+  trame_sites['74'] = {'name':'Munchen (BSB)','site':'http://daten.digitale-sammlungen.de'}
+  trame_sites['75'] = {'name':'http://www.eab-paderborn.de/fh.htm','site':'http://www.eab-paderborn.de/fh.htm'}
+  trame_sites['76'] = {'name':'Philadelphia (Free Library)','site':'http://libwww.library.phila.gov/medievalman/MSSSrchFrm.cfm'}
+  trame_sites['77'] = {'name':'"New Haven','site':' CT (Yale)"'}
+  trame_sites['86'] = {'name':'RICABIM (Mirabile) Repertorio di Inventari e Cataloghi di Biblioteche Medievali','site':'http://www.mirabileweb.it/'}
+  trame_sites['80'] = {'name':'Salzburg (UB)','site':'http://www.ubs.sbg.ac.at/sosa/webseite/hsskat.htm'}
+  trame_sites['81'] = {'name':'Wolfenbüttel','site':'http://www.hab.de/bibliothek/wdb/mssdigital.htm'}
+  trame_sites['87'] = {'name':'CANTICUM (Mirabile) Commenti medievali al Cantico dei Cantici','site':'http://www.mirabileweb.it/'}
+  trame_sites['88'] = {'name':'MATER (Mirabile) Manoscritti Agiografici di Trento e Rovereto','site':'http://www.mirabileweb.it/'}
+  trame_sites['82'] = {'name':'BISLAM (Mirabile) Bibliotheca Scriptorum Latinorum Medii Recentiorisque Aevi','site':'http://www.mirabileweb.it/content.aspx?info=Repertorio_Bislam'}
+  trame_sites['85'] = {'name':'MEM (Mirabile) Medioevo musicale','site':'http://www.mirabileweb.it/'}
+  trame_sites['102'] = {'name':'Manuscripts on line','site':'http://www.manuscriptsonline.org/'}
+  trame_sites['101'] = {'name':'ICCU – BibMan: Bibliografia dei manoscritti in alfabeto latino conservati in Italia','site':'http://bibman.iccu.sbn.it'}
+  trame_sites['5'] = {'name':'Biblioteca Apostolica Vaticana Manoscritti Digitalizzati','site':'http://www.vatlib.it/'}
+  trame_sites['12'] = {'name':'Nuova Biblioteca Manoscritta','site':'http://www.nuovabibliotecamanoscritta.it/'}
+  trame_sites['121'] = {'name':'TRALIRO (Mirabile) Repertorio ipertestuale della tradizione lirica romanza delle Origini','site':'http://www.mirabileweb.it/'}
+  trame_sites['122'] = {'name':'TECOLM (Mirabile) Testi e Codici della Lombardia medieval','site':'http://www.mirabileweb.it/'}
+  trame_sites['123'] = {'name':'The European Library','site':'http://www.theeuropeanlibrary.org/tel4/'}
+  trame_sites['127'] = {'name':'Beinecke Digital Collections','site':'http://brbl-dl.library.yale.edu/'}
+  trame_sites['128'] = {'name':'Early Manuscripts at Oxford University','site':'http://image.ox.ac.uk/'}
+  trame_sites['129'] = {'name':'MacKinney Collection of Medieval Medical Illustrations','site':'http://dc.lib.unc.edu/cdm/search/collection/mackinney/'}
+  trame_sites['131'] = {'name':'"Manuscripts in the Library of St John\'s College','site':' Cambridge"'}
+  trame_sites['132'] = {'name':'Schoenberg Database of Manuscripts at UPENN Libraries','site':'http://dla.library.upenn.edu/dla/schoenberg'}
+  trame_sites['134'] = {'name':'University Libraries at South Carolina Universities','site':'http://digital.tcl.sc.edu/'}
+  trame_sites['130'] = {'name':'KUL List of microfilmed manuscripts','site':'http://hiw.kuleuven.be/apps/microfilm/microfilm.php'}
+  trame_sites['138'] = {'name':'French Illuminated Manuscripts','site':'http://www.enluminures.culture.fr/documentation/enlumine/fr/'}
+  trame_sites['139'] = {'name':'Digital Archive of Medieval Music','site':'http://www.diamm.ac.uk'}
+  trame_sites['141'] = {'name':'Mazarinum - Les collections numeriques de la Bibliotheque Mazarine','site':'http://mazarinum.bibliotheque-mazarine.fr/?esa=resetall'}
+
+
+
 
   function getQueryParams(qs) {
     qs = qs.split('+').join(' ');
@@ -393,8 +485,18 @@ rect.zoompane {
     })
 
     if(query.hasOwnProperty('TRAME')){
-      var trame_query = "{% url 'trame_search_view' %}?q="+query['q']
+      var trame_query = "{% url 'trame_search_view' %}?q="+query['q']//+"&dbs="
       // var iframe_src = "http://trame.fefonlus.it/trame/index.php?op=search&Field0="+query['q']+"&Field6_loc=&Field6_lib=&Field6_hold=&Field6_shelf=&Field4=&Field41=&Field42=&Field5=&Field7=&Field2=&Field1=&Field3=&Field6=&dbs=90|82|83|87|2|19|89|91|92|58|88|17|84|85|57|86|48|1&maxnum=10"
+
+      // keys = Object.keys(trame_query)
+      // for(var i=0; i<keys.length;i++){
+        
+      //   trame_query +=keys[i];
+
+      //   if(i<keys.length -1){
+      //     trame_query +='|'
+      //   }
+      // }
 
       $.ajax({
         url:trame_query,

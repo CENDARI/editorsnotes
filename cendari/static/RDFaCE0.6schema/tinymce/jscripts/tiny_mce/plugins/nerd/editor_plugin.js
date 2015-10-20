@@ -1,3 +1,8 @@
+
+
+
+
+
 /**
  * editor_plugin_src.js
  *
@@ -7,180 +12,170 @@
  * License: http://tinymce.moxiecode.com/license
  * Contributing: http://tinymce.moxiecode.com/contributing
  */
-
-
-function SubmitSuccesful(responseText, statusText) {    
-	console.log('responseText',responseText);
-	console.log('json',JSON.parse(responseText));      					             
-	// //console.log(responseText);
-	// responseJson = responseText;
-
-	// if ( (responseJson == null) || (responseJson.length == 0) ){
-	// 	$('#requestResult').html("<font color='red'>Error encountered while receiving the server's answer: response is empty.</font>");   
-	// 	return;
-	// }
-
-	// if ($('#selectedService').attr('value') == 'processNERDQuery') {
-	// 	responseJson = jQuery.parseJSON(responseJson);
-	// }
-
-	// var display = '<div class=\"note-tabs\"> \
-	// <ul id=\"resultTab\" class=\"nav nav-tabs\"> \
-	// <li class="active"><a href=\"#navbar-fixed-annotation\" data-toggle=\"tab\">Annotations</a></li> \
-	// <li><a href=\"#navbar-fixed-json\" data-toggle=\"tab\">Response</a></li> \
-	// </ul> \
-	// <div class="tab-content"> \
-	// <div class="tab-pane active" id="navbar-fixed-annotation">\n';   	
-
-	// var nbest = false; 
-	// if (responseJson.nbest == true)
-	// 	nbest = true;
-
-	// if (responseJson.sentences) {
-	// 	display += '<div style="max-height:150px; overflow:auto;"><table id="sentenceIndex" class="table table-bordered table-condensed">';  
-	// 	var m = 0;
-	// 	var text = responseJson.text;
-	// 	for(var sentence in responseJson.sentences) {    
-	// 		if (m == 0) { 	
-	// 			display += '<tr class="highlight" id="sent_'+m+'" rank="'+m+'" >'; 
-	// 		}   
-	// 		else {
-	// 			display += '<tr id="sent_'+m+'" rank="'+m+'" >';     
-	// 		}
-	// 		display += '<td style="width:25px;height:13px;font-size:small;">'+m+'</td>'  
-	// 		var start = responseJson.sentences[sentence].offsetStart;
-	// 		var end = responseJson.sentences[sentence].offsetEnd;
-	// 		display += '<td style="font-size:small;height:13px;color:#333;">'+text.substring(start,end)+'</td>';
-	// 		display += '</tr>';               
-	// 		m++;
-	// 	}
-	// 	display += '</table></div>\n'; 
-	// }
-
-	// display += '<pre style="background-color:#FFF;width:95%;" id="displayAnnotatedText">'; 
-
-	// // this variable is used to keep track of the last annotation and avoid "overlapping"
-	// // annotations in case of nbest results.
-	// // in case of nbest results, we haveonly one annotation in the text, but this can
-	// // lead to the visualisation of several info boxes on the right panel (one per entity candidate)
-	// var lastMaxIndex = responseJson.text.length;
-	// {    
-	// 	display += '<table id="sentenceNER" style="width:100%;table-layout:fixed;" class="table">'; 
-	// 	var string = responseJson.text;
-	// 	if (!responseJson.sentences || (responseJson.sentences.length == 0)) {
-	// 		display += '<tr style="background-color:#FFF;">';     
-	// 		if (responseJson.entities) {
-	// 			var currentAnnotationIndex = responseJson.entities.length-1;
-	// 			for(var m=responseJson.entities.length-1; m>=0; m--) {
-	// 				var entity = responseJson.entities[m];
-	// 				var label = entity.type;	
-	// 				if (!label)
-	// 					label = entity.rawName;
-	// 				var start = parseInt(entity.offsetStart,10);
-	// 				var end = parseInt(entity.offsetEnd,10);       
-
-	// 				if (start > lastMaxIndex) {
-	// 					// we have a problem in the initial sort of the entities
-	// 					// the server response is not compatible with the client 
-	// 					console.log("Sorting of entities as present in the server's response not valid for this client.");
-	// 				}
-	// 				else if (start == lastMaxIndex) {
-	// 					// the entity is associated to the previous map
-	// 					entityMap[currentAnnotationIndex].push(responseJson.entities[m]);
-	// 				}
-	// 				else if (end > lastMaxIndex) {
-	// 					end = lastMaxIndex;
-	// 					lastMaxIndex = start;
-	// 					// the entity is associated to the previous map
-	// 					entityMap[currentAnnotationIndex].push(responseJson.entities[m]);
-	// 				}
-	// 				else {
-	// 					string = string.substring(0,start) 
-	// 					+ '<span id="annot-'+m+'" rel="popover" data-color="'+label+'">'
-	// 					+ '<span class="label ' + label + '" style="cursor:hand;cursor:pointer;" >'
-	// 					+ string.substring(start,end) + '</span></span>' + string.substring(end,string.length+1); 
-	// 					lastMaxIndex = start;
-	// 					currentAnnotationIndex = m;
-	// 					entityMap[currentAnnotationIndex] = [];
-	// 					entityMap[currentAnnotationIndex].push(responseJson.entities[m]);
-	// 				}						
-	// 			} 
-	// 			//console.log(entityMap);
-	// 			string = "<p>" + string.replace(/(\r\n|\n|\r)/gm, "</p><p>") + "</p>";
-	// 			//string = string.replace("<p></p>", "");
-
-	// 			display += '<td style="font-size:small;width:60%;border:1px solid #CCC;"><p>'+string+'</p></td>';
-	// 			display += '<td style="font-size:small;width:40%;padding:0 5px; border:0"><span id="detailed_annot-0" /></td>';	
-	// 		}
-	// 		display += '</tr>';
-	// 	}
-	// 	else {
-	// 		//for(var sentence in responseJson.sentences) 
-	// 		{    
-	// 			display += '<tr style="background-color:#FFF;">';  
-
-	// 			display += '<td style="font-size:small;width:60%;border:1px solid #CCC;"><p><span id="sentence_ner">'+
-	// 			" "+'</span></p></td>';
-	// 			display += '<td style="font-size:small;width:40%;padding:0 5px; border:0"><span id="detailed_annot-0" /></td>';	
-	// 			display += '</tr>';
-	// 		}
-	// 	}
-
-	// 	display += '</table>\n';
-	// }
-
-	// display += '</pre>\n';
-
-	// //$('#requestResult').html(display);  
-
-	// display += '</div> \
-	// 	<div class="tab-pane " id="navbar-fixed-json">\n';
-	// // JSON visualisation component 	
-	// // with pretty print
-	// display += "<pre class='prettyprint' id='jsonCode'>";  
-
-	// display += "<pre class='prettyprint lang-json' id='xmlCode'>";  
-	// var testStr = vkbeautify.json(responseText);
-
-	// display += htmll(testStr);
-
-	// display += "</pre>"; 		
-	// display += '</div></div></div>';					   												  
-
-	// $('#requestResult').html(display);     
-	// window.prettyPrint && prettyPrint();
-
-	// if (responseJson.sentences) {
-	// 	// bind the sentence table line with the appropriate sentence result display
-	// 	var nbSentences = responseJson.sentences.length;
-	// 	for(var p=0;p<nbSentences;p++) {
-	// 		//$('#sent'+p).bind('click',viewSentenceResults());      
-	// 		$('#sentenceIndex').on('click', 'tbody tr', function(event) {
-	// 			$(this).addClass('highlight').siblings().removeClass('highlight');       
-	// 			viewSentenceResults($(this).attr('rank'));
-	// 		});
-	// 	} 
-	// 	viewSentenceResults('0');
-	// }		
-
-	// for (var key in entityMap) {
-	// 	if (entityMap.hasOwnProperty(key)) {
-	// 		$('#annot-'+key).bind('hover', viewEntity);  
-	// 		$('#annot-'+key).bind('click', viewEntity);  	
-	// 	}
-	// }
-	// $('#detailed_annot-0').hide();	
-
-	// /*if (responseJson.entities) {
-	// for(var m=responseJson.entities.length-1; m>=0; m--) {
-	// $('#annot-'+m).bind('hover', viewEntity);  
-	// $('#annot-'+m).bind('click', viewEntity); 
-	// }
-	// } 
-	// $('#detailed_annot-0').hide();	 */
-}
-
 (function() {
+	
+
+	// Script: jQuery replaceText: String replace for your jQueries!
+	//
+	// *Version: 1.1, Last updated: 11/21/2009*
+	// 
+	// Project Home - http://benalman.com/projects/jquery-replacetext-plugin/
+	// GitHub       - http://github.com/cowboy/jquery-replacetext/
+	// Source       - http://github.com/cowboy/jquery-replacetext/raw/master/jquery.ba-replacetext.js
+	// (Minified)   - http://github.com/cowboy/jquery-replacetext/raw/master/jquery.ba-replacetext.min.js (0.5kb)
+	// 
+	// About: License
+	// 
+	// Copyright (c) 2009 "Cowboy" Ben Alman,
+	// Dual licensed under the MIT and GPL licenses.
+	// http://benalman.com/about/license/
+	// 
+	// About: Examples
+	// 
+	// This working example, complete with fully commented code, illustrates one way
+	// in which this plugin can be used.
+	// 
+	// replaceText - http://benalman.com/code/projects/jquery-replacetext/examples/replacetext/
+	// 
+	// About: Support and Testing
+	// 
+	// Information about what version or versions of jQuery this plugin has been
+	// tested with, and what browsers it has been tested in.
+	// 
+	// jQuery Versions - 1.3.2, 1.4.1
+	// Browsers Tested - Internet Explorer 6-8, Firefox 2-3.6, Safari 3-4, Chrome, Opera 9.6-10.1.
+	// 
+	// About: Release History
+	// 
+	// 1.1 - (11/21/2009) Simplified the code and API substantially.
+	// 1.0 - (11/21/2009) Initial release
+	$.fn.replaceText = function( search, replace, text_only ) {
+		return this.each(function(){
+			var node = this.firstChild,
+			val,
+			new_val,
+
+			// Elements to be removed at the end.
+			remove = [];
+
+			// Only continue if firstChild exists.
+			if ( node ) {
+
+				// Loop over all childNodes.
+				do {
+
+					// Only process text nodes.
+					if ( node.nodeType === 3 ) {
+
+						// The original node value.
+						val = node.nodeValue;
+
+						// The new value.
+						new_val = val.replace( search, replace );
+
+						// Only replace text if the new value is actually different!
+						if ( new_val !== val ) {
+
+							if ( !text_only && /</.test( new_val ) ) {
+								// The new value contains HTML, set it in a slower but far more
+								// robust way.
+								$(node).before( new_val );
+
+								// Don't remove the node yet, or the loop will lose its place.
+								remove.push( node );
+							} else {
+								// The new value contains no HTML, so it can be set in this
+								// very fast, simple way.
+								node.nodeValue = new_val;
+							}
+						}
+					}
+
+				} while ( node = node.nextSibling );
+			}
+
+			// Time to remove those elements!
+			remove.length && $(remove).remove();
+		});
+	};  
+
+	jQuery.fn.outerHTML = function(s) {
+	    return s
+	        ? this.before(s).remove()
+	        : jQuery("<p>").append(this.eq(0).clone()).html();
+	};
+
+	$.fn.getAttributes = function() {
+		var attributes = {}; 
+
+		if( this.length ) {
+			$.each( this[0].attributes, function( index, attr ) {
+				attributes[ attr.name ] = attr.value;
+			} ); 
+		}
+
+		return attributes;
+	};
+
+	var entity_types_converter = {
+		"PERSON"		: "PER",
+		"LOCATION"		: "PLA",	
+		"ORGANISATION"	: "ORG",	
+		"EVENT"			: "EVT", 	
+		"INSTITUTION"	: "ORG",
+		"PERIOD"		: "EVT",
+		"NATIONAL"		: "PLA",
+		"WEBSITE"		: "PUB",
+		"MEDIA"			: "PUB",
+		"SPORT_TEAM"	: "ORG"
+	}	
+
+	var rdface_schema_name ={
+		"PER" : "Person" ,
+		"PLA" : "Place" ,
+		"ORG" : "Organization" ,
+		"EVT" : "Event" ,
+		"PUB" : "CreativeWork" ,
+	}
+
+
+	var rdface_class = {
+		"ORG" : "r_organization",
+		"EVT" : "r_event",
+		"PLA" : "r_place",
+		"PER" : "r_person"
+	}
+
+
+	//<span class="r_entity r_event" typeof="schema:Event">
+	createBasicAttributes = function (type) {
+		var attributes= {}
+		var rdface_type = entity_types_converter[type]
+
+		attributes['class'] = 'r_entity '+rdface_class[rdface_type]
+		attributes['typeof'] = 'schema:'+rdface_schema_name[rdface_type]
+
+		return attributes
+	}
+
+	createEntityTag= function(name,attributes){
+		var span = $('<span>').append('<span class="r_prop r_name" property="schema:name">'+name+'</span>')
+
+		for (var attrname in attributes){
+			span.attr(attrname,attributes[attrname])
+		}
+
+		return span.outerHTML()
+	}
+
+	function escapeRegExp(string) {
+	    return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+	}
+	function replaceAll(string, find, replace) {
+	  return string.replace(new RegExp(escapeRegExp(find), 'g'), replace);
+	}
+	
+
 	// Load plugin specific language pack
 	tinymce.PluginManager.requireLangPack('nerd');
 
@@ -194,37 +189,88 @@ function SubmitSuccesful(responseText, statusText) {
 		 * @param {string} url Absolute URL to where the plugin is located.
 		 */
 		init : function(ed, url) {
-			// Register the command so that it can be invoked by using tinyMCE.activeEditor.execCommand('mceExample');
-			consoel.log('url',url);
-			var proxy_url = url+'/php/proxy.php'
-			var nerd_url = 'http://traces1.saclay.inria.fr:8090/service/processNERDText';
-			console.log(proxy_url);
-			window.ed = ed;
+			// Register the command so that it can be invoked by using tinyMCE.activeEditor.execCommand('mceNerd');
 			ed.addCommand('mceNerd', function() {
-				// console.log()
+				nerd_url = cendari_root_url+'cendari/nerd?text='+$(ed.getContent()).text()
 				$.ajax({
-					type: 'GET',
-					url: proxy_url,
-					data: { 
-						text : encodeURIComponent(ed.getContent()),
-						onlyNER:"false",
-						shortText:"false",
-						nbest:"false",
-						sentence:"false",
-						format:"JSON",
-						customisation:"generic"
-					},
-					//			  processData: false,
-					success: SubmitSuccesful,
-					error: AjaxError,
-					contentType:false  
-					//contentType: "multipart/form-data"
-				});
+			        url:nerd_url,
+			        dataType: "json",
+			        success: function(data){
+			        	var content = ed.getContent()
+			          	var entities = data['entities']
+			          	
+
+			          	for(i=0;i<entities.length;i++){
+			          		
+			          		entities.skip=false;
+
+			          		if(entity_types_converter.hasOwnProperty(entities[i].type)===-1){ //not one of the types we support
+			          			entities.skip = true;
+			          			continue;
+			          		}
+			          		var rdface_type = entity_types_converter[entities[i].type]
+			          		var elements = $(content).find('.r_entity:contains('+entities[i].rawName+')')
+			          		if(elements.length ===0 ){ // there is not already an  entity with this name so we can create the entity in the next step
+			          			continue;
+			          		}
+
+			          		if($(elements[0]).attr('class').hasOwnProperty(rdface_class[rdface_type])===-1){ //there is an entity with this name but with different type, so we are not going to change it
+			          			entities[i].skip=true;
+			          			continue;
+			          		}
+
+			          		for(var j=0; j<elements.length;j++){
+			          			var attributes = {}
+			          			el_attributes = $(elements[j]).getAttributes()
+			          			for (var attrname in el_attributes) { 
+			          				if(!attributes.hasOwnProperty(attrname)){
+			          					attributes[attrname] = el_attributes[attrname]; 
+			          				}
+			          			}
+
+			          			// content.replace($(elements[j]).outerHTML(),$(elements[j]).text())
+			          			content = replaceAll(content,$(elements[j]).outerHTML(),$(elements[j]).text())
+
+			          		}
+			          		entities[i].attributes_list = attributes
+			          	}
+
+			          	var entities_served = []
+			          	for(i=0;i<entities.length;i++){
+			          		if(entities[i].skip){
+			          			continue;
+			          		}
+			          		if (entities_served.indexOf(entities[i].rawName)!==-1){
+			          			continue;
+			          		}
+
+			          		if(!entities[i].hasOwnProperty('attributes_list')){
+			          			entities[i].attributes_list = createBasicAttributes(entities[i].type);
+			          		}
+
+			          		entiy_span = createEntityTag(entities[i].rawName,entities[i].attributes_list)
+
+			          		content = replaceAll(content,entities[i].rawName,entiy_span);
+			          		entities_served.push(entities[i].rawName);
+			          	}
+
+			          	ed.setContent(content);
+
+			        },
+			        error: function(xhr){
+			          
+			        	console.log("xhr status text",xhr.statusText)
+			          	console.log("xhr response text",xhr.responseText)
+			        }
+			      })
+
+
+
 
 
 			});
 
-			// Register example button
+			// Register nerd button
 			ed.addButton('nerd', {
 				title : 'nerd.desc',
 				cmd : 'mceNerd',
@@ -262,7 +308,7 @@ function SubmitSuccesful(responseText, statusText) {
 				longname : 'Nerd plugin',
 				author : 'Some author',
 				authorurl : 'http://tinymce.moxiecode.com',
-				infourl : 'http://wiki.moxiecode.com/index.php/TinyMCE:Plugins/example',
+				infourl : 'http://wiki.moxiecode.com/index.php/TinyMCE:Plugins/nerd',
 				version : "1.0"
 			};
 		}
