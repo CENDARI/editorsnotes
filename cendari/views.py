@@ -899,10 +899,24 @@ def faceted_search(request,project_slug=None):
         'cendarisearch.html', o, context_instance=RequestContext(request))
 
 def trame_search(request):
-    trame_url = "http://git-trame.fefonlus.it/Rest.php?&type=freetext&q="+request.GET.get('q', '')+"&dbs=127|129"
+    trame_url = "http://git-trame.fefonlus.it/Rest.php?&type=freetext&q="+request.GET.get('q', '')+"&dbs="+request.GET.get('dbs', '127|129')
     # trame_url = "http://git-trame.fefonlus.it/Rest.php?&type=freetext&q=petrus&dbs=127|129"
     r = requests.post(trame_url)
     return HttpResponse(r.content, mimetype='application/json')
+
+def nerd_service(request):
+    url = 'http://traces1.saclay.inria.fr/nerd/service/processNERDText'
+    params={
+        "text": request.GET['text'],
+        "onlyNER":"false",
+        "sentence":"false",
+        "format":"JSON",
+        "customisation":"generic"
+    }
+    r = requests.get(url,params=params)
+
+    return HttpResponse(r.content, mimetype='application/json')
+
 
 def find_date(request,project_slug,topic_node_id):
     response_dates= []

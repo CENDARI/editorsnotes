@@ -22,7 +22,7 @@
 		 * @param {string} url Absolute URL to where the plugin is located.
 		 */
 		init : function(ed, url) {
-			// Register the command so that it can be invoked by using tinyMCE.activeEditor.execCommand('mceExample');
+			// Register the command so that it can be invoked by using tinyMCE.activeEditor.execCommand('mceNerd');
 			ed.addCommand('mceNerd', function() {
 				ed.windowManager.open({
 					file : url + '/dialog.htm',
@@ -35,11 +35,11 @@
 				});
 			});
 
-			// Register example button
+			// Register nerd button
 			ed.addButton('nerd', {
 				title : 'nerd.desc',
 				cmd : 'mceNerd',
-				image : url + '/img/nerd.JPG'
+				image : url + '/img/nerd.png'
 			});
 
 			// Add a node change handler, selects the button in the UI when a image is selected
@@ -73,7 +73,7 @@
 				longname : 'Nerd plugin',
 				author : 'Some author',
 				authorurl : 'http://tinymce.moxiecode.com',
-				infourl : 'http://wiki.moxiecode.com/index.php/TinyMCE:Plugins/example',
+				infourl : 'http://wiki.moxiecode.com/index.php/TinyMCE:Plugins/nerd',
 				version : "1.0"
 			};
 		}
