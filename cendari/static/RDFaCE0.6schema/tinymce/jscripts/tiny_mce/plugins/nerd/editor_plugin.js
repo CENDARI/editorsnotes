@@ -118,16 +118,17 @@
 	};
 
 	var entity_types_converter = {
-		"PERSON"		: "PER",
-		"LOCATION"		: "PLA",	
-		"ORGANISATION"	: "ORG",	
-		"EVENT"			: "EVT", 	
-		"INSTITUTION"	: "ORG",
+		"PERSON"		: "PER",	
+		"EVENT"			: "EVT",
 		"PERIOD"		: "EVT",
+		"LOCATION"		: "PLA",
 		"NATIONAL"		: "PLA",
 		"WEBSITE"		: "PUB",
 		"MEDIA"			: "PUB",
-		"SPORT_TEAM"	: "ORG"
+		"INSTITUTION"	: "ORG",
+		"ORGANISATION"	: "ORG",
+		"SPORT_TEAM"	: "ORG",
+		"BUSINESS"		: "ORG"
 	}	
 
 	var rdface_schema_name ={
@@ -175,6 +176,22 @@
 	  return string.replace(new RegExp(escapeRegExp(find), 'g'), replace);
 	}
 	
+	function strSplitOnLength(data, your_desired_width) {
+		if(data.length <= 0)
+			return [];  // return an empty array
+
+		var splitData = data.split(/([\s\n\r]+)/);
+		var arr = [];
+		var cnt = 0;
+		for (var i = 0; i < splitData.length; ++i) {
+			if (!arr[cnt]) arr[cnt] = '';  //Instantiate array entry to empty string if null or undefined
+			if (your_desired_width < (splitData[i].length + arr[cnt].length))
+				cnt++;
+			arr[cnt] += splitData[i];
+		}
+
+		return arr;
+	}
 
 	// Load plugin specific language pack
 	tinymce.PluginManager.requireLangPack('nerd');
@@ -190,26 +207,67 @@
 		 */
 		init : function(ed, url) {
 			// Register the command so that it can be invoked by using tinyMCE.activeEditor.execCommand('mceNerd');
+			console.log("NERD: doing nerd stuff :D");
 			ed.addCommand('mceNerd', function() {
-				nerd_url = cendari_root_url+'cendari/nerd?text='+$(ed.getContent()).text()
-				$.ajax({
-			        url:nerd_url,
-			        dataType: "json",
-			        success: function(data){
-			        	var content = ed.getContent()
-			          	var entities = data['entities']
-			          	
+				var content_text = $(ed.getContent()).text();
+				var deferreds  = [];
+				var split_text = strSplitOnLength(content_text,3000)
 
-			          	for(i=0;i<entities.length;i++){
-			          		
+				nerd_url = cendari_root_url+'cendari/nerd'//?text='+encodeURIComponent($(ed.getContent()).text())
+				for(var k=0;k<split_text.length;k++){
+					deferreds.push(
+						$.ajax({
+					        url:nerd_url,
+							data: { 
+								text :split_text[k], 
+								onlyNER : false,
+								//				  	  shortText : $('#shortText').is(':checked'),
+								nbest : false,
+								sentence :false,
+								format : "JSON",
+								customisation : "generic" 
+							},
+					        contentType:false,
+							beforeSend: function( xhr ) {
+								// xhr.overrideMimeType( "text/plain; charset=x-user-defined" );
+								ed.setProgressState(true);
+							},
+					        success: function(data){
+					        },
+					        error: function(xhr){
+					        }
+				     	})
+						
+					)
+				}
+
+				$.when.apply(this,deferreds)
+					.done(function(){
+						var entities = [];
+						var content = ed.getContent();
+						for(var i = 0; i < arguments.length; i++) {
+							console.log(arguments[i]);
+							entities= entities.concat(arguments[i][0]['entities'])
+						}
+						console.log("NERD",entities);
+						console.log("NERD",entities.length);
+
+			       		for(i=0;i<entities.length;i++){
+					          		
 			          		entities.skip=false;
 
 			          		if(entity_types_converter.hasOwnProperty(entities[i].type)===-1){ //not one of the types we support
 			          			entities.skip = true;
 			          			continue;
 			          		}
-			          		var rdface_type = entity_types_converter[entities[i].type]
-			          		var elements = $(content).find('.r_entity:contains('+entities[i].rawName+')')
+		          			var rdface_type = entity_types_converter[entities[i].type]
+			          		var elements = [] 
+			          		$(content).find('.r_entity').each(function(){
+			          			if($(this).text().indexOf(entities[i].rawName)){
+			          				elements.push(this)
+			          			}
+			          		})
+			          		// $(content).find('.r_entity:contains('+entities[i].rawName+')')
 			          		if(elements.length ===0 ){ // there is not already an  entity with this name so we can create the entity in the next step
 			          			continue;
 			          		}
@@ -233,7 +291,7 @@
 
 			          		}
 			          		entities[i].attributes_list = attributes
-			          	}
+				        }
 
 			          	var entities_served = []
 			          	for(i=0;i<entities.length;i++){
@@ -253,18 +311,26 @@
 			          		content = replaceAll(content,entities[i].rawName,entiy_span);
 			          		entities_served.push(entities[i].rawName);
 			          	}
+						
+						$content = $(content);
+						$content.find('.r_entity').has('.r_entity').each(function(){ 
+							$(this).find('.r_entity').each(function(index) {
+								var text = $(this).text();//get span content
+								$(this).replaceWith(text);//replace all span with just content
+							}); 
+						})
 
-			          	ed.setContent(content);
-
-			        },
-			        error: function(xhr){
-			          
-			        	console.log("xhr status text",xhr.statusText)
-			          	console.log("xhr response text",xhr.responseText)
-			        }
-			      })
-
-
+			          	ed.setContent($content.html());
+			          	while( $('.mceBlocker').length || $('.mceProgress').length )
+			          		ed.setProgressState(false);
+					})
+					.fail(function (jqXHR, status, error){
+						console.log("status text",status);
+						console.log("error text",error);
+						console.log("jqXHR object",jqXHR);
+						while( $('.mceBlocker').length || $('.mceProgress').length )
+							ed.setProgressState(false);
+					})
 
 
 
