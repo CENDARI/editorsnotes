@@ -581,8 +581,8 @@ def semantic_process_cluster(cluster,user=None,doCommit=True):
 
         for topic in cluster.topics.all():
             t_uri = semantic_uri(topic)
-            t_g = Semantic.graph(t_uri)
-            g.add( (g.identifier, SCHEMA['itemListElement'], t_g))
+            #t_g = Semantic.graph(t_uri)
+            g.add( (g.identifier, SCHEMA['itemListElement'], Literal(t_uri)))
 
     if doCommit:
         semantic.commit()
