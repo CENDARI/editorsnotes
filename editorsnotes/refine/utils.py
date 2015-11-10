@@ -1,13 +1,15 @@
 from django.contrib.contenttypes.generic import GenericForeignKey
 from django.db import transaction
 from django.db.models import get_models, Model
-from editorsnotes.main.models import Topic, Alias
+from editorsnotes.main.models import Topic, AlternateName
+from models import TopicCluster, BadClusterPair
 from lxml import etree
+
 import reversion
 import re
 
 # importing the following so that reversion sees registered models
-from editorsnotes.main import admin
+from editorsnotes import admin
 
 def get_preferred_topic_name(topics):
     """
@@ -102,7 +104,7 @@ def merge_topics(topics, user):
     for topic_to_remove in topics:
         topic_to_remove.delete()
     for new_alias in alternate_names:
-        Alias.objects.create(topic=merged_topic, name=new_alias, creator=user)
+        AlternateName.objects.create(topic=merged_topic, name=new_alias, creator=user)
 
     # Update topic affiliation
     merged_topic.affiliated_projects.clear()
@@ -115,3 +117,87 @@ def merge_topics(topics, user):
     merged_topic.save()
 
     return merged_topic
+
+
+
+
+
+def topic_is_member_of_cluster(topic,cluster):
+    return cluster.topics.filter(id = topic.id).count() >=1
+
+def add_topic_to_cluster(topic,cluster):
+    if not topic_is_member_of_cluster(topic,cluster):
+        topic_cluster = get_cluster_for_topic(topic)
+        if topic_cluster == None:
+            cluster.topics.add(topic)
+        else:        
+            cluster = merge_clusters(cluster,topic_cluster)
+
+def merge_clusters(cluster1,cluster2):
+    for topic in cluster2.topics.all():
+        if not topic_is_member_of_cluster(topic,cluster1):
+            cluster1.topics.add(topic)
+    delete_cluster(cluster2)
+    return cluster1
+
+def get_cluster_for_topic(topic):
+    query_result  = TopicCluster.objects.filter(topics__in=[topic])
+    len_query_result = query_result.count() 
+    if len_query_result== 0 :
+        return None
+    elif len_query_result == 1:
+        return query_result[0]
+    else :
+        cluster_list = list(query_result)
+        c1 = cluster_list.pop()
+        for c in cluster_list:
+            c1 = merge(c1,c)
+        return c1
+
+
+def add_topics_to_cluster(topics):
+    len_topics = len(topics)
+
+    if len_topics == 0:
+        return None
+    elif len_topics == 1:
+        topic = topics[0]
+        cluster = get_cluster_for_topic(topic)
+        if cluster == None:
+            cluster  = TopicCluster.objects.create(creator=topic.creator,message=topic.preferred_name)
+            add_topic_to_cluster(topic,cluster)
+        return cluster
+    else:
+        main_topic = None
+        main_cluster = None
+        index = -1
+        topics = list(topics)
+        for i in range(0, len_topics):
+            main_topic = topics[i]
+            main_cluster = get_cluster_for_topic(main_topic)
+            index = i
+            if main_cluster != None:
+                break;
+
+        if main_cluster == None:
+            main_topic = topics.pop()
+            main_cluster = TopicCluster.objects.create(creator=main_topic.creator,message=main_topic.preferred_name)
+            add_topic_to_cluster(main_topic,main_cluster)
+        else:
+            topics.pop(index)
+
+        for topic in topics:
+            add_topic_to_cluster(topic,main_cluster)
+
+        return main_cluster
+
+    return None
+
+def delete_topics_from_cluster(topics,cluster):
+    for topic in topics:
+        if topic_is_member_of_cluster(topic,cluster):
+            cluster.topics.remove(topic)
+
+def delete_cluster(cluster):
+    cluster.delete()
+

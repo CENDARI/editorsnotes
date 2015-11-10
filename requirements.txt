@@ -46,7 +46,6 @@ uricore==0.1.2
 ## symlink: bsddb3
 
 #for mac  run in
-
+# for mac export BERKELEYDB_DIR=$(brew --cellar)/berkeley-db/5.3.28;
 #bsddb3==6.1.0
-# for mac run also export BERKELEYDB_DIR=$(brew --cellar)/berkeley-db/5.3.28;
 

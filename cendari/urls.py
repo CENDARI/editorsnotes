@@ -90,10 +90,10 @@ urlpatterns += patterns('editorsnotes.djotero.views',
     url(r'^api/metadata/documents/item_type_creators/$', 'item_type_creators', name='item_type_creators_view'),
     url(r'^api/document/archives/$', 'api_archives', name='api_archives_view'),
 )
-#urlpatterns += patterns('editorsnotes.refine.views',
-#    url(r'^topics/clusters/$', 'show_topic_clusters', name='show_topic_clusters_view'),
-#    url(r'^topics/merge/(?P<cluster_id>\d+)/$', 'merge_topic_cluster', name='merge_topic_cluster_view'),
-#)
+urlpatterns += patterns('editorsnotes.refine.views',
+   url(r'^cendari/(?P<project_slug>[-\w]+)/topics/clusters/$', 'show_topic_clusters', name='show_topic_clusters_view'),
+   url(r'^cendari/topics/merge/(?P<cluster_id>\d+)/$', 'merge_topic_cluster', name='merge_topic_cluster_view'),
+)
 
 import editorsnotes.admin.views.projects
 
@@ -181,6 +181,10 @@ cendaripatterns = patterns('cendari.views',
    #Cendari image browser
    url(r'^cendari/(?P<project_slug>[-\w]+)/documents/(?P<document_id>\d+)/image_browse/$', 'image_browse',name='image_browse'),
 
+
+   #Cendari clusters
+    url(r'^cendari/(?P<project_slug>[-\w]+)/topics/clusters/(?P<cluster_id>\d+)/$', 'show_cluster', name='show_cluster_view'),
+    url(r'^cendar/(?P<project_slug>[-\w]+)/topics/cluster/create/$','create_cluster',name='create_cluster_view')
 )
 
 urlpatterns += cendaripatterns

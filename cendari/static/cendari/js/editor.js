@@ -505,13 +505,15 @@ $(document).ready(function(){
     toastr.options = toastr_options
 
     $('.formCendari').submit(function(e){
-        e.preventDefault();
-       
-        for (var edId in tinyMCE.editors){
-            if(tinyMCE.editors[edId]!=null){
-                tinyMCE.editors[edId].save();
+        if(cendari_js_object_type === 'note' || cendari_js_object_type === 'document' || cendari_js_object_type === 'entity' || cendari_js_object_type==='topic' )
+            e.preventDefault();
+        
+        if(tinyMCE)
+            for (var edId in tinyMCE.editors){
+                if(tinyMCE.editors[edId]!=null){
+                    tinyMCE.editors[edId].save();
+                }
             }
-        }
 
         var fc = $(this);
         console.log('fc',fc);
@@ -519,7 +521,7 @@ $(document).ready(function(){
             showInfoMessage(messages.note.beforeSend);
             submitNote(fc);
         }
-        if(cendari_js_object_type == 'document'){
+        else if(cendari_js_object_type == 'document'){
             showInfoMessage(messages.document.beforeSend);
             console.log("cendari_js_object_id ===>",cendari_js_object_id)
             if(cendari_js_object_id.length === 0){
@@ -529,9 +531,12 @@ $(document).ready(function(){
                 submitTranscript(cendari_js_object_id,fc);
             }
         }
-        if(cendari_js_object_type == 'topic'){
+        else if(cendari_js_object_type == 'topic'){
             showInfoMessage(messages.entity.beforeSend)
             submitEntity(fc)
+        }
+        else if(cendari_js_object_type === 'cluster'){
+
         }
 
     }); 

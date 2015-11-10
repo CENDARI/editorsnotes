@@ -10,6 +10,16 @@
 {% block css %}
 	<link rel="stylesheet" href="{{ STATIC_URL }}style/topic.css" type="text/css"/>
 	<link rel="stylesheet" href="{{ STATIC_URL }}style/facets.css" type="text/css" />
+	<style type="text/css">
+		.topic-cluster {
+			padding: 8px;
+			border: 1px solid #aaa;
+			margin: 4px;
+		}
+		.topic-cluster > * {
+			display: block-inline;
+		}
+	</style>
 {% endblock %}
 
 {% block init %}
@@ -155,30 +165,38 @@
 					<input type="hidden" id = "model_id" name="id" value="{{topic.id}}" >
 				{%endif%}
 
-				<!-- <fieldset name="rdf_field" >
-					{% include "includes/bootstrap_errors.html" with errors=form.rdf.errors %}
-					<div class="fieldset-content rdf">
-						<label>Note's title</label>
-				<input  type="text" id="note-title" name="title" value="{{ note.title }}"/>
-					</div>
-				</fieldset>	
-				<hr /> -->
 				{% if topic.id %}
 					<button id="saveButton" style="visibility: hidden;" class="save-item" name="_method" value="PUT" >Save</button>
 				{% else %}
 					<button id="saveButton" style="visibility: hidden;" class="save-item"  method="POST" name="_method" value="POST">Save</button>
 				{% endif %}
+			
+				{% if cluster %}
+					<label class="editorlabel bold">  <a href={% url "show_cluster_view" project_slug=project.slug  cluster_id=cluster.id %} target="_blank">{{cluster.message}}</a>: </label>
+					<div class="topic-cluster span4" >
+						<ol>
+						{% for topic in cluster.topics.all %}
+							<li>{{ topic|as_link|typogrify }}</li>
+						{% endfor %}
+						</ol>
+					</div>
+				{% else %}
+					<a href="" id="createCluster"> Cleate a new cluster containing this topic</a>
+				{% endif %}
+				
 
 
 			</div>
+
+
 
 			<div id="statusMessages">
 				
 			</div>
 			
 		</form>
-
 	</div>
+	
 {% endblock model_fields %}
 
 {% block functions %}
@@ -223,6 +241,19 @@
 		// $('#findDatesButton').submit(function(){return false;});
 		$("#findDatesButton").on("click",function(){
 			find_dates($('meta[name=topic_node_id]').attr("content"));
+		})
+
+		$('#createCluster').on('click',function(e){
+			e.preventDefault()
+			
+
+
+
+			$.post("{% url "create_cluster_view" project_slug=project.slug %}",{ csrfmiddlewaretoken: document.getElementsByName("csrfmiddlewaretoken")[2].value,action: "create", topic: "{{topic.id}}" },function(data){
+				cluster_url = cendari_root_url+'cendari/'+cendari_js_project_slug+'/topics/clusters/'+data.id+'/'
+				var win = window.open(cluster_url, '_blank');
+  				win.focus();
+			})
 		})
 	})
 

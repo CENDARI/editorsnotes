@@ -33,6 +33,8 @@ from editorsnotes.admin.views.documents import DocumentAdminView, TranscriptAdmi
 from editorsnotes.admin.views.projects import add_project, change_project
 from editorsnotes.admin import forms
 
+from editorsnotes.refine import utils as rutils
+from editorsnotes.refine.models import TopicCluster
 from editorsnotes.main.templatetags.display import as_html
 from django.core.urlresolvers import reverse
 from forms import ImportFromJigsawForm
@@ -673,7 +675,30 @@ def getTopicResources(request, project_slug, sfield):
 	set_count = len(o_query_set)
         topic_count += 1
         # active_topics = utils.get_all_active_topics_for_project(project)
-
+        clusters = TopicCluster.objects.filter(topics__topic_node__type=topic_type,topics__project=project).distinct()
+        clustered_topics = []
+        for cluster in  clusters:
+            topic_children = []
+            for topic in cluster.topics.all():
+                clustered_topics.append(topic)
+                if (topic.topic_node.type != "EVT" and topic.rdf!=None and topic.rdf.strip() != '') or (topic.topic_node.type == "EVT" and topic.date!=None) :#TO BE CHANGED: check if the dbpedia entry is stored in the tuple store rather than rdf field
+                    toresolve_flag = ''
+                else:
+                    toresolve_flag = ' *'
+                topic_children.append({
+                    'title': unicode(topic)+toresolve_flag,
+                    'key': str(project_slug)+'.topic.'+str(topic.id),
+                    'url':topic.get_absolute_url(),
+                    'class':'topic_item'
+                })
+            my_list.append({
+                'title' : unicode(cluster.message),
+                'key' : str(project_slug)+'.topic_cluster.'+str(cluster.id),
+                'isFolder':'true',
+                'addClass':'',
+                'url':'',
+                'children':topic_children
+            })
         for e in o_query_set:
             #to make sure both url and node key have the same topic_id (when a topic exists in multiple probjects)
             #my_list.append({'title':str(e), 'key':str(project_slug)+'.topic.'+str(e.id), 'url':e.get_absolute_url()})
@@ -681,7 +706,8 @@ def getTopicResources(request, project_slug, sfield):
             # if not e in active_topics:
             #     set_count -=1
             #     continue
-
+            if e in clustered_topics:
+                continue
             url_parts = e.get_absolute_url().split('/')
             topic_id_index = len(url_parts) - 2
             topic_id = url_parts[topic_id_index];
@@ -693,7 +719,7 @@ def getTopicResources(request, project_slug, sfield):
                 'title': unicode(e)+toresolve_flag,
                 'key': str(project_slug)+'.topic.'+str(topic_id),
                 'url':e.get_absolute_url(),
-		'class':'topic_item'
+	            'class':'topic_item'
             })
             node_title = topic_name + ' (' + str(set_count)  + ')'
     	css_class = '<span class="dynatree-topicfolder u' + topic_name + '">'
@@ -1296,6 +1322,7 @@ def editEntityCendari(request, project_slug, topic_node_id):
     topic_qs = main_models.Topic.objects.select_related('topic_node', 'creator', 'last_updater', 'project').prefetch_related('related_topics__topic')
     #print "getting topic object"
     o['topic'] = topic = get_object_or_404(topic_qs,topic_node_id=topic_node_id,project__slug=project_slug)
+    o['cluster'] = rutils.get_cluster_for_topic(topic)
     o['project'] = topic.project
     o['project_slug'] = project_slug
     o['object_type'] = 'topic'
@@ -1467,3 +1494,64 @@ def autocomplete_search(request):
     results = cendari_index.search(q, doc_type='entity')
     res = json.dumps(results, encoding="utf-8")
     return HttpResponse(res, mimetype='application/json') 
+
+def create_cluster(request,project_slug):
+    if ('action' in request.POST) and (request.POST['action'] == 'create'):
+        if 'topic' in request.POST:
+            result_query = main_models.Topic.objects.filter(id=request.POST['topic'])
+            if result_query.count()>0:
+                topic  = result_query.all()[0]
+                cluster = rutils.add_topics_to_cluster([topic])
+                semantic_process_cluster(cluster)
+                return HttpResponse(json.dumps({'id': cluster.id}), content_type="application/json");
+
+def show_cluster(request,project_slug,cluster_id):
+    query_result = TopicCluster.objects.filter(id=cluster_id)
+    cluster = query_result[0] if query_result.count()!= 0 else None
+    
+    if request.method == "POST":
+        
+        
+        topics_to_be_removed = []
+        topics_to_be_added   = []
+        for key in request.POST:
+            value = request.POST[key]
+            if key == 'message':
+                cluster.message = value
+            elif 'cluster_topic' in key:
+                query_result =main_models.Topic.objects.filter(id=key.split('_')[-1])
+                if query_result.count()!= 0:
+                    topics_to_be_removed.append(query_result[0])                
+            elif 'project_topic' in key:
+                query_result =main_models.Topic.objects.filter(id=key.split('_')[-1])
+                if query_result.count()!= 0:
+                    topics_to_be_added.append(query_result[0])
+        
+        if len(topics_to_be_removed) >0 :
+            rutils.delete_topics_from_cluster(topics_to_be_removed,cluster)
+        if len(topics_to_be_added) >0 :
+            for topic in topics_to_be_added:
+                rutils.add_topic_to_cluster(topic,cluster)
+    
+        cluster.save()
+        semantic_process_cluster(cluster)
+        if cluster.topics.count() == 0:
+            cluster.delete()
+
+    o ={}
+    project = _check_project_privs_or_deny(request.user,project_slug)
+    
+    o['object_type'] = 'cluster'
+    o['cluster'] = cluster
+    topics = list()
+    if cluster.topics.count()>0:
+        for topic in project.topics.filter(topic_node__type = cluster.topics.all()[0].topic_node.type):
+            if not topic in o['cluster'].topics.all():
+                topics.append(topic)
+        o['project_topics'] = topics
+    else:
+        o['project_topics'] = project.topics.all()
+    return render_to_response(
+        'clusterShowCendari.html', o, context_instance=RequestContext(request))
+
+

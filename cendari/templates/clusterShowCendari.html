@@ -1,0 +1,230 @@
+{% extends "centerCendari.html" %}
+{% load set_var %}
+{% load typogrify display note_sections staticfiles compress %}
+
+{% block css %}
+<style type="text/css">
+	ul{
+		list-style-type: none;
+		overflow: auto;
+		border: 1px solid #000;
+	}
+
+	ul, li{
+		margin:0;
+		padding:0 0 0 15px;    
+	}
+
+	.column{
+		float: left;
+		margin: 0 20px 0 0;
+	}
+
+  .topic-cluster {
+    padding: 8px;
+    border: 1px solid #aaa;
+    margin: 4px;
+  }
+  .topic-cluster > * {
+    display: block-inline;
+  }
+</style>
+{% endblock %}
+
+{% block init %}
+	<meta name="cluster_id" id="cluster_id" content="{{ cluster.id }}" />
+	<meta name="cluster_name" id="cluster_name_id" content="{{ cluster.message }}" />
+{% endblock init %}
+
+{% block model_fields %}
+	<div class="form-menu-document" >
+		<!-- <section id="note-details>" -->
+		<ul class="tabs note">
+			<li><!-- ENTITIES TAB -->
+				<input type="radio" checked name="tabs" id="tab1">
+
+				<label id='entitiesTab' for="tab1">
+					<script > document.write("Entities (" + "{{ note.get_all_related_topics|length }}" + ")"); </script> 
+				</label>
+
+				<div id="tab-content1" class="tab-content  note animated fadeIn">
+					<div class="form-entities" id="note-related-topics">
+						{% if note %}
+							{% for topic in note.get_all_related_topics %}
+								<a href= {{ topic.get_absolute_url }}
+								{% if 		topic.topic_node.type == "PER" %} class ="form-entities r_person"
+								{% elif 	topic.topic_node.type == "ORG" %} class ="form-entities r_organization"
+								{% elif 	topic.topic_node.type == "EVT" %} class ="form-entities r_event"
+								{% elif 	topic.topic_node.type == "PLA" %} class ="form-entities r_place"
+								{% elif 	topic.topic_node.type == "TAG" %} class ="form-entities r_thing"
+								{% else 						%} class = "form-entities"
+								{% endif %} 
+								> 
+									{% if topic.topic_node.type == "EVT" %}
+										{% if  topic.date%} 
+											{{topic}} 
+										{%else%}
+											<u> {{topic}} </u>
+										{%endif%}
+									{% else %}
+										{% if  topic.rdf%} 
+											{{topic}} 
+										{%else%}
+											<u> {{topic}} </u>
+										{%endif%}
+									{% endif %}
+								</a>
+							{% endfor %}
+							{% if not note.get_all_related_topics|length > 0 %}
+								<div>
+									No Entities.
+								</div>
+								<div>
+									select the Entity & right-click to add it
+								</div>
+							{% endif %}
+
+						{% endif %}
+						{% if not note.id > 0 %}
+							<div>
+								No Entities.
+							</div>
+							<div>
+								Save this note to add your Entities
+							</div>
+						{% endif %}
+
+					</div>
+				</div>
+			</li>
+
+			<li><!-- STATUS TAB -->
+				<input type="radio" name="tabs" id="tab2">
+				<label for="tab2">Status {% if note.status == "0" %} (Closed) {% elif note.status == "2" %} (Hibernating)  {% else %} (Open) {% endif %}</label>
+				<div id="tab-content2" class="tab-content note animated fadeIn">
+					<div class="form-status" id="note-status">
+						<select name="status">
+							<option value="open" {% if note.status == 'open' %} selected="selected" {% endif %}><span class="note-status-closed">Closed</span></option>
+							<option value="closed" {% if note.status == 'closed' %} selected="selected" {% endif %}><span class="note-status-closed">Closed</option>
+							<option value="hibernate" {% if note.status == 'hibernating' %} selected="selected" {% endif %}><span class="note-status-hibernating" >Hibernating</span></option>
+						</select>
+					</div>
+				</div>
+			</li>
+
+			<li><!-- AUTHORSHIP TAB (Project, Private, Licence, Author, Last updated ) -->
+				<input type="radio" name="tabs" id="tab3">
+				<label for="tab3">Authorship</label>
+				<div id="tab-content3" class="tab-content note animated fadeIn">
+					<div style="height:50px; overflow: auto;" >
+						<dl id="note-authorship" >
+						<!-- class="dl-horizontal">-->
+						{% if note %}
+							<dt>
+								Project
+							</dt>
+							<dd>
+								{{ note.project|as_link }}
+							</dd>
+							<dt>
+								Private
+							</dt>
+							<dd>
+								{% if note.is_private %}Yes{% else %}No{% endif %}
+							</dd>
+							<dt>
+								License
+							</dt>
+							<dd>
+								<a class="license-link" href="{{ license.url }}" title="{{ license }}"> {% for symbol in license.symbols %}<i class="license-symbol">{{ symbol }}</i>{% endfor %} </a>
+							</dd>
+							{% with authors=note.get_all_updaters %}
+								<dt>
+									Author{% if authors|length > 1 %}s{% endif %}
+								</dt>
+								<dd>
+									{% for author in authors %}
+										<li>
+											{{ author|as_link }}
+										</li>
+									{% endfor %}
+								</dd>
+							{% endwith %}
+							<br>
+							<dt>
+								Last updated
+							</dt>
+							<dd>
+								{{ note.last_updated }} (<a href="#">view history</a>)
+							</dd>
+						{% endif %}
+						</dl>
+					</div>
+				</div>
+			</li>
+		</ul>
+		<!-- </section> -->
+
+		<form class="formCendari" id='clusterForm' method="POST" >
+			{% csrf_token %}
+			<div class="form-main edit-section" >
+				<p>Cluster's name:</p>
+				<input type="text" id="cluster_message" name="message" style="height:30px;" value="{%if cluster%}{{cluster.message}}{%endif%}">
+				<br>
+				<p>
+				<div class="column">
+					<h2>Topics in Cluster. Select the ones to be removed from cluster.</h2>
+					<ul>
+						{% for topic in cluster.topics.all %}
+							<li>
+								<label for="cluster_topic_{{topic.id}}">
+									<input name="cluster_topic_{{topic.id}}" id="cluster_topic_{{topic.id}}" type="checkbox">
+									<a href="{{topic.get_absolute_url}}" target="_blank">{{topic.preferred_name}}</a>
+								</label>
+							</li>
+						{% endfor %}
+					</ul>
+				</div>
+
+				<div class="column">
+					<h2>Topics in Project. Select the ones to be added to cluster</h2>
+					<ul>
+						{% for topic in project_topics %}
+							<li>
+								<label for="cluster_topic_{{topic.id}}">
+									<input name="project_topic_{{topic.id}}" id="project_topic_{{topic.id}}" type="checkbox">
+									<a href="{{topic.get_absolute_url}}" target="_blank">{{topic.preferred_name}}</a>
+								</label>
+							</li>
+						{% endfor %}
+					</ul>
+				</div>
+				</p>
+				<br>
+			</div>
+		</form>
+	</div>
+{% endblock model_fields %}
+
+{% block functions %}
+
+		<script>
+	switchtabs(4,"note");
+
+
+	var title = document.getElementById("cluster_name_id").getAttribute("content");
+	//if(!title )	title="New Entity";
+
+	//var descriptionLabel = "Resource URL ";
+	//var temp = document.getElementById("topicResolveBut").getAttribute("value");
+	//document.getElementById("topicResolveButtn).value = descriptionLabel + temp;	
+
+	cendari.addInit(function() { 
+		//cendari.createEditor($('#noteform').height(), "id_rdf", true, "topicResolveBut", descriptionLabel);
+		cendari.addTab(title);
+		cendari.addWidgetToActiveTab("form","noteform" ,"border");
+	});
+
+	</script>
+{% endblock functions %}
+

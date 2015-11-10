@@ -1,6 +1,7 @@
 from editorsnotes.main.utils import xhtml_to_text
 from editorsnotes.main.templatetags.display import as_html
 from editorsnotes.main.models.topics import get_or_create_topic,get_topic_with_rdf, Topic
+from editorsnotes.refine import utils as rutils
 from models import PlaceTopicModel
 
 from django.conf import settings
@@ -49,8 +50,10 @@ __all__ = [
     'semantic_query_latlong',
     'semantic_resolve_topic',
     'semantic_rdfa',
-    'semantic_find_dates'
+    'semantic_find_dates',
+    'semantic_process_cluster'
 ]
+
 
 import logging
 logger = logging.getLogger(__name__)
@@ -390,6 +393,9 @@ def semantic_process_note(note,user=None):
     semantic.commit()
     logger.debug("Time for semantic commit :  %s seconds " % (time.time() - start_time))
 
+    semantic_merge_project_topics(note.project)
+
+
 
 def semantic_process_document(document,user=None):
     """Extract the semantic information from a note,
@@ -421,6 +427,7 @@ def semantic_process_document(document,user=None):
     create_topics_for(document, topics, user)
 
     semantic.commit()
+    semantic_merge_project_topics(document.project)
 
 def semantic_process_transcript(transcript,user=None):
     """Extract the semantic information from a document's transcript,
@@ -479,7 +486,7 @@ def semantic_unmerge_topics(master,alias,project):
     return master
 
 def semantic_merge_topics(master,alias):
-    alias.merge_into(master)
+    # alias.merge_into(master)
 
     master_uri = semantic_uri(master)
     master_g = Semantic.graph(master_uri)
@@ -504,11 +511,14 @@ def semantic_merge_project_topics(project):
         if not len_topics>1:
             continue
 
-        main_topic = topics[0]
-        print topics
-        break
-        for i in range(1,len_topics):
-            semantic_merge_topics(main_topic,topics[i])
+        cluster = rutils.add_topics_to_cluster(topics)
+        semantic_process_cluster(cluster)
+
+        # main_topic = topics[0]
+        # # print topics
+        # # break
+        # for i in range(1,len_topics):
+        #     semantic_merge_topics(main_topic,topics[i])
 
 
 def semantic_process_topic(topic,user=None,doCommit=True):
@@ -549,6 +559,33 @@ def semantic_process_topic(topic,user=None,doCommit=True):
     if doCommit:
         semantic.commit()
 
+    semantic_merge_project_topics(topic.project)
+
+def semantic_process_cluster(cluster,user=None,doCommit=True):
+    if cluster == None:
+        return
+
+    if user is None:
+        user = cluster.creator
+    # Cleanup entities related to note
+    uri = semantic_uri(cluster)
+    g = Semantic.graph(uri)
+    Semantic.remove_graph(g)
+    if cluster.topics.count()>0:
+        # This is not a creative work
+        g.add( (g.identifier, RDF.type, SCHEMA['ItemList']) )
+        g.add( (g.identifier, SCHEMA['creator'], semantic_uri(cluster.creator)) )
+        g.add( (g.identifier, SCHEMA['dateCreated'], Literal(cluster.created)) )
+        g.add( (g.identifier, SCHEMA['itemListOrder'], Literal('Unordered')) )
+        g.add( (g.identifier, SCHEMA['numberOfItems'], Literal(str(cluster.topics.count()))) )
+
+        for topic in cluster.topics.all():
+            t_uri = semantic_uri(topic)
+            t_g = Semantic.graph(t_uri)
+            g.add( (g.identifier, SCHEMA['itemListElement'], t_g))
+
+    if doCommit:
+        semantic.commit()
 
 imported_relations = set([
     # Place

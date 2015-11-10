@@ -11,9 +11,9 @@ POSTGRES_DB = {
     'PORT': ''
 }
 
-SEMANTIC_STORE = 'Sleepycat'
+# SEMANTIC_STORE = 'Sleepycat'
 #SEMANTIC_PATH = os.path.abspath(os.path.join(STORAGE_PATH, 'rdfstore'))
-#SEMANTIC_STORE = 'Virtuoso'
+SEMANTIC_STORE = 'Virtuoso'
 
 #SEMANTIC_NAMESPACE = 'http://localhost:8000/'
 SEMANTIC_NAMESPACE = 'http://resources.cendari.dariah.eu/'
