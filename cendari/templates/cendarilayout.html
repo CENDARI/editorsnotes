@@ -79,6 +79,9 @@
           <li><a class="brand" href="{% url 'index_view' %}"><img src="{% static "img/cendari_logo.png" %}" height="50" width="200" border="5"/></a> </li>
           <li class="divider-vertical"></li>
           <li><a href="{% url 'index_view' %}">Home</a></li>
+          {% if  not user %}
+          <li><a href="{% url 'user_login_view' %}">Login</a></li>
+          {% endif%}
           <li><a href="{% url 'cendari_browse_view' %}">Browse</a></li>
           <li><a href="{% url 'cendari_about_view' %}">About</a></li>
           <li><a target="_blank" href="https://archives.cendari.dariah.eu/">AtoM</a></li>

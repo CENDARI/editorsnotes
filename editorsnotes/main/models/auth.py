@@ -223,6 +223,15 @@ class Project(models.Model, URLAccessible, ProjectPermissionsMixin):
         qs = self.roles.filter(group__user=user,role='Owner')
         return qs.exists()
 
+# class ProjectSlugAlias(CreationMetadata, ProjectPermissionsMixin):
+#     project = models.ForeignKey(Project, related_name='slug_aliases')
+#     name = models.CharField(max_length=200)
+#     class Meta:
+#         app_label = 'main'
+#         unique_together = ('id','name')
+#     def __unicode__(self):
+#             return self.name
+
 @receiver(models.signals.post_save, sender=Project)
 def create_editor_role(sender, instance, created, **kwargs):
     "Creates an editor role after a project has been created."
