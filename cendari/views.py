@@ -116,31 +116,24 @@ def _sort_citations(instance):
 
 def _check_project_privs_or_deny(user, project_slug):
         if not user.is_authenticated():
-            if project_slug is None:
-                raise PermissionDenied("insufficient priviledges for %s" % user.username)
-            project = get_object_or_404(Project, slug=project_slug)
-            if utils.project_is_public(project):
-                return project
-            else:
-                raise PermissionDenied("insufficient priviledges for %s" % user.username)
-
+            raise PermissionDenied("anonymous access not allowed")
         project = None
         if project_slug is None:
             projects = user.get_authorized_projects()
             if not projects:
                 raise PermissionDenied("insufficient priviledges for %s" % user.username)
-	    #(NB) handle superusers
-	    if user.is_superuser:
-		for p in projects:
-			project_role = user._get_project_role(p)
-			if project_role is not None:				
-				project = p
-				break
-		if project is None:
+        #(NB) handle superusers
+        if user.is_superuser:
+        for p in projects:
+            project_role = user._get_project_role(p)
+            if project_role is not None:                
+                project = p
+                break
+        if project is None:
                     logger.warn("superuser does not have own projects.")
                     project = projects[0]
-	    else:
-	   	project = projects[0]
+        else:
+        project = projects[0]
         else:
             project = get_object_or_404(Project, slug=project_slug)
         if not user.superuser_or_belongs_to(project) and not project.is_owned_by(user):
@@ -177,9 +170,6 @@ def index(request,project_slug=None):
     if user.is_authenticated():
         project =  get_projects_owned_by_user(request.user)[0]
     else:
-        print "--------------------------------------"
-        print 'user is anonymous'
-        print "----------------------------------------"
         project = Project.objects.all()[0]
     o['project'] =  project 
     return render_to_response(
@@ -421,7 +411,8 @@ def small_vis(request, project_slug):
 #        Currently replaced by small_vis_data_lazy
 def small_vis_data(request, project_slug):
     #indexed_topics = SearchQuerySet().models(main_models.Topic)
-    _check_project_privs_or_deny(request.user, project_slug) # only 4 check
+    if not utils.project_is_public(get_object_or_404(Project, slug=project_slug)):
+        _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     indexed_topics = main_models.Topic.objects.filter(project__slug=project_slug)
     topics_list = []
     for t in indexed_topics:
@@ -447,7 +438,8 @@ def small_vis_data(request, project_slug):
 
 def small_vis_data_lazy(request, project_slug):
     topics_dict = {}
-    _check_project_privs_or_deny(request.user, project_slug) # only 4 check
+    if not utils.project_is_public(get_object_or_404(Project, slug=project_slug)):
+        _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     documents = main_models.Document.objects.filter(project__slug=project_slug)#[:100] #For debugging 
     #print 'docs: %d' % (len(documents))
     for document in documents:
@@ -534,7 +526,11 @@ def getResourcesData(request, project_slug, sfield):
 
     if request.user.is_authenticated():
         projects = request.user.get_authorized_projects().order_by('name').distinct('name')
-    main_project =  _check_project_privs_or_deny(request.user, project_slug)
+    project = get_object_or_404(Project, slug=project_slug)
+    if not utils.project_is_public(project):
+        main_project =  _check_project_privs_or_deny(request.user, project_slug)
+    else:
+        main_project = project
     # utils.get_image_placeholder_document(request.user,main_project)
     if request.user.is_authenticated():
         if request.user.is_superuser:
@@ -601,7 +597,8 @@ def getResourcesData(request, project_slug, sfield):
     return HttpResponse(response_dict, mimetype='application/json')
 
 def getLazyProjectData(request, project_slug, sfield):
-    _check_project_privs_or_deny(request.user, project_slug) # only 4 check
+    if not utils.project_is_public(get_object_or_404(Project, slug=project_slug)):
+        _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     if request.user.is_authenticated():
         projects = request.user.get_authorized_projects() 
     else:
@@ -650,18 +647,13 @@ def getLazyProjectData(request, project_slug, sfield):
                         'url':'',
                         'children':document_list
                     })
-
-
-    print  ' !!!!!!!!!!!!!!!!!!!!!!!!!!!'
-    print result_list
-    print  ' !!!!!!!!!!!!!!!!!!!!!!!!!!!'
-
     res = json.dumps(result_list, encoding="utf-8")
     response_dict = request.GET['callback'] + "(" + res + ")"
     return HttpResponse(response_dict, mimetype='application/json')
 
 def getTopicResources(request, project_slug, sfield):
-    _check_project_privs_or_deny(request.user, project_slug) # only 4 check
+    if not utils.project_is_public(get_object_or_404(Project, slug=project_slug)):
+        _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     project = Project.objects.filter(slug=project_slug)[0]
     max_count = 10000
     topic_count = 0
@@ -754,7 +746,8 @@ def getTopicResources(request, project_slug, sfield):
     return topic_list
 
 def getNoteResources(request, project_slug, sfield):
-    _check_project_privs_or_deny(request.user, project_slug) # only 4 check
+    if not utils.project_is_public(get_object_or_404(Project, slug=project_slug)):
+        _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     max_count = 10000
     node_count = 0
     note_list = []
@@ -771,7 +764,10 @@ def getNoteResources(request, project_slug, sfield):
     return note_list
 
 def getDocumentResources(request, project_slug, sfield):
-    current_project = _check_project_privs_or_deny(request.user, project_slug) # only 4 check
+    if not utils.project_is_public(get_object_or_404(Project, slug=project_slug)):
+        current_project = _check_project_privs_or_deny(request.user, project_slug) # only 4 check
+    else:
+        current_project = get_object_or_404(Project, slug=project_slug)
 
     if(current_project):
         image_place_holder = utils.get_image_placeholder_document(request.user,current_project)
@@ -803,7 +799,11 @@ def getDocumentResources(request, project_slug, sfield):
 ID_RE = re.compile(r'/documents/(\d+)/$')
 
 def getDocumentResources_Faster(request, project_slug, sfield):
-    current_project = _check_project_privs_or_deny(request.user, project_slug) # only 4 check
+    if not utils.project_is_public(get_object_or_404(Project, slug=project_slug)):
+        current_project = _check_project_privs_or_deny(request.user, project_slug) # only 4 check
+    else:
+        current_project = get_object_or_404(Project, slug=project_slug)
+        
     image_place_holder = -1
 
     if current_project:
@@ -1109,8 +1109,8 @@ def editNoteCendari(request, note_id, project_slug):
 def readNoteCendari(request, note_id, project_slug):
     o = {}
 
-   
-    _check_project_privs_or_deny(request.user, project_slug)
+    if not utils.project_is_public(get_object_or_404(Project, slug=project_slug)):
+        _check_project_privs_or_deny(request.user, project_slug)
 
     qs = main_models.Note.objects.select_related('license', 'project__default_license').prefetch_related('related_topics')
     note = get_object_or_404(qs, id=note_id, project__slug=project_slug)
@@ -1245,7 +1245,8 @@ def editDocumentCendari(request, project_slug, document_id):
 
 def readDocumentCendari(request, project_slug, document_id):
     o = {}
-    _check_project_privs_or_deny(request.user, project_slug)
+    if not utils.project_is_public(get_object_or_404(Project, slug=project_slug)):
+        _check_project_privs_or_deny(request.user, project_slug)
     qs = main_models.Document.objects.select_related('project')
     o['document'] = get_object_or_404(main_models.Document, id=document_id, project__slug=project_slug)
     o['project_slug'] = project_slug
@@ -1410,7 +1411,8 @@ def editEntityCendari(request, project_slug, topic_node_id):
 
 def readEntityCendari(request, project_slug, topic_node_id):
     o = {}
-    _check_project_privs_or_deny(request.user, project_slug)
+    if not utils.project_is_public(get_object_or_404(Project, slug=project_slug)):
+        _check_project_privs_or_deny(request.user, project_slug)
     #print "getting topic_qs"
     topic_qs = main_models.Topic.objects.select_related('topic_node', 'creator', 'last_updater', 'project').prefetch_related('related_topics__topic')
     #print "getting topic object"
