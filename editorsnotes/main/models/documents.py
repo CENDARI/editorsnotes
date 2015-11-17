@@ -261,9 +261,10 @@ def get_or_create_document(user,project,description):
     for document in documents:
         if document.as_text() == description:
             return document
-
-    document=Document(creator=user, last_updater=user, description=description, project=project)
-    document.save()
+    if user.is_authenticated():
+        document=Document(creator=user, last_updater=user, description=description, project=project)
+        document.save()
+        return None
 
     return document
 

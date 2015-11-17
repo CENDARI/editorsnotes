@@ -116,7 +116,14 @@ def _sort_citations(instance):
 
 def _check_project_privs_or_deny(user, project_slug):
         if not user.is_authenticated():
-            raise PermissionDenied("anonymous access not allowed")
+            if project_slug is None:
+                raise PermissionDenied("insufficient priviledges for %s" % user.username)
+            project = get_object_or_404(Project, slug=project_slug)
+            if utils.project_is_public(project):
+                return project
+            else:
+                raise PermissionDenied("insufficient priviledges for %s" % user.username)
+
         project = None
         if project_slug is None:
             projects = user.get_authorized_projects()
@@ -157,17 +164,24 @@ def _check_privs(user, obj):
         raise PermissionDenied("not authorized on %s project" % obj.slug)
     return obj
 
-@login_required
+# @login_required
 #@check_project_privs
 def index(request,project_slug=None):
-    #user = request.user
+    user = request.user
     #if project_slug is None:
     #    project = user.get_authorized_projects()[0]
     #else:
     #    project = Project.objects.get(slug=project_slug)
     # project =  _check_project_privs_or_deny(request.user, project_slug)
-    project =  get_projects_owned_by_user(request.user)[0]
-    o = { 'project': project }
+    o ={}
+    if user.is_authenticated():
+        project =  get_projects_owned_by_user(request.user)[0]
+    else:
+        print "--------------------------------------"
+        print 'user is anonymous'
+        print "----------------------------------------"
+        project = Project.objects.all()[0]
+    o['project'] =  project 
     return render_to_response(
         'emptytab.html', o, context_instance=RequestContext(request))
 
@@ -398,14 +412,13 @@ def import_from_jigsaw(request, project_slug):
             { 'form': form, 'project': project },
             context_instance=RequestContext(request))
 
-@login_required
 def small_vis(request, project_slug):
     return render_to_response('smallvis.html',{'project_slug':project_slug})
+
 
 # Serve aggregated data used to drive the small visualizations panel
 # FIXME: No longer returns counts. Need to perform aggregation using Elastic Search instead of Haystack
 #        Currently replaced by small_vis_data_lazy
-@login_required
 def small_vis_data(request, project_slug):
     #indexed_topics = SearchQuerySet().models(main_models.Topic)
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
@@ -431,7 +444,7 @@ def small_vis_data(request, project_slug):
 
 # Serve aggregated data used to drive the small visualizations panel
 # - Performs all the aggregation at request time rather than using an index.
-@login_required
+
 def small_vis_data_lazy(request, project_slug):
     topics_dict = {}
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
@@ -482,7 +495,9 @@ def small_vis_data_lazy(request, project_slug):
 
 #project =  _check_project_privs_or_deny(request.user, project_slug)
 
-@login_required
+
+
+
 def getResourcesData(request, project_slug, sfield):  
     my_tree = {
         'title':'My resources:',
@@ -508,62 +523,89 @@ def getResourcesData(request, project_slug, sfield):
         'url':'',
         'children' : []
     }
-    projects = request.user.get_authorized_projects().order_by('name').distinct('name')
+    public_projects = {
+        'title':'Public projects',
+        'key':'public_projects',
+        'isFolder':'true',
+        'addClass':'',
+        'url':'',
+        'children' : []
+    }
+
+    if request.user.is_authenticated():
+        projects = request.user.get_authorized_projects().order_by('name').distinct('name')
     main_project =  _check_project_privs_or_deny(request.user, project_slug)
     # utils.get_image_placeholder_document(request.user,main_project)
-    if request.user.is_superuser:
-        for p in projects:
-            p_role = p.get_role_for(request.user)
-            if p_role!=None:
+    if request.user.is_authenticated():
+        if request.user.is_superuser:
+            for p in projects:
+                p_role = p.get_role_for(request.user)
+                if p_role!=None:
+                    my_project = {
+                        'title': p.name,
+                        'key': p.slug,
+                        'isFolder':'true',
+                        'addClass': '',
+                        'url':'',
+                        'isLazy':'true',
+                        'project_id': p.id,
+                        'children' : []
+                    }
+                    my_projects['children'].append(my_project)
+                else:
+                    other_project = {
+                        'title': p.name,
+                        'key': p.slug,
+                        'isFolder': 'true',
+                        'addClass': '',
+                        'url':'',
+                        'isLazy':'true',
+                        'project_id':p.id,
+                        'children' : []
+                    }
+                    other_projects['children'].append(other_project)
+        else:
+            #copied from cendari.admin2
+            owned_projects = projects
+            for p in owned_projects:
                 my_project = {
                     'title': p.name,
                     'key': p.slug,
                     'isFolder':'true',
-                    'addClass': '',
-                    'url':'',
-                    'isLazy':'true',
-                    'project_id': p.id,
-                    'children' : []
-                }
-                my_projects['children'].append(my_project)
-            else:
-                other_project = {
-                    'title': p.name,
-                    'key': p.slug,
-                    'isFolder': 'true',
-                    'addClass': '',
+                    'addClass':'',
                     'url':'',
                     'isLazy':'true',
                     'project_id':p.id,
                     'children' : []
                 }
-                other_projects['children'].append(other_project)
-	my_tree['children'].append(my_projects)
-	my_tree['children'].append(other_projects)
-    else:
-        #copied from cendari.admin2
-        owned_projects = projects
-        for p in owned_projects:
-            my_project = {
-                'title': p.name,
-                'key': p.slug,
-                'isFolder':'true',
-                'addClass':'',
-                'url':'',
-                'isLazy':'true',
-                'project_id':p.id,
-                'children' : []
-            }
-            my_projects['children'].append(my_project)
-        my_tree['children'].append(my_projects)
+                my_projects['children'].append(my_project)
+            my_tree['children'].append(my_projects)
+    published_projects = utils.get_public_projects()
+
+    for p in published_projects:
+        published_project = {
+            'title': p.name,
+            'key': p.slug,
+            'isFolder':'true',
+            'addClass':'',
+            'url':'',
+            'isLazy':'true',
+            'project_id':p.id,
+            'children' : []
+        }
+        public_projects['children'].append(published_project)
+    my_tree['children'].append(public_projects)
+
     res = json.dumps(my_tree, encoding="utf-8")
     response_dict = request.GET['callback'] + "(" + res + ")"
     return HttpResponse(response_dict, mimetype='application/json')
 
-@login_required
 def getLazyProjectData(request, project_slug, sfield):
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
-    projects = request.user.get_authorized_projects()    
+    if request.user.is_authenticated():
+        projects = request.user.get_authorized_projects() 
+    else:
+        projects =utils.get_public_projects()   
     for p in projects:
         image_place_holder   = utils.get_image_placeholder_document(request.user,p)
         if p.slug == project_slug:
@@ -608,11 +650,16 @@ def getLazyProjectData(request, project_slug, sfield):
                         'url':'',
                         'children':document_list
                     })
+
+
+    print  ' !!!!!!!!!!!!!!!!!!!!!!!!!!!'
+    print result_list
+    print  ' !!!!!!!!!!!!!!!!!!!!!!!!!!!'
+
     res = json.dumps(result_list, encoding="utf-8")
     response_dict = request.GET['callback'] + "(" + res + ")"
     return HttpResponse(response_dict, mimetype='application/json')
 
-@login_required
 def getTopicResources(request, project_slug, sfield):
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     project = Project.objects.filter(slug=project_slug)[0]
@@ -627,35 +674,6 @@ def getTopicResources(request, project_slug, sfield):
             query_set = main_models.Topic.objects\
               .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)[:max_count] 
             o_query_set = sorted(query_set, key=operator.attrgetter(sfield))  
-
-	    # '''
-	    # # No access to 'deleted' or sort fields in the cendari index
-            # query = {
-	    #       "query": {
-	    #         "bool": {
-	    #           "must": [
-	    #     	{
-	    #     	  "query_string": {
-	    #     	    "default_field": "topic.serialized.type",
-	    #     	    "query": "PER"
-	    #     	  }
-	    #     	},
-	    #     	{
-	    #     	  "query_string": {
-	    #     	    "default_field": "topic.serialized.project.name",
-	    #     	    "query": "test"
-	    #     	  }
-	    #     	}
-	    #           ]
-	    #         }
-	    #       },
-	    #       "from": 0,
-	    #       "size": 1,
-	    #       "sort": []
-	    # }
-	    # es = ElasticSearch('http://localhost:9200/')
-	    # results = es.search(query)'''
-
     	elif sfield == "-created" or sfield == "-last_updated":
             query_set = main_models.Topic.objects\
               .filter(project__slug=project_slug,topic_node__type=topic_type,deleted=False)[:max_count] 
@@ -735,7 +753,6 @@ def getTopicResources(request, project_slug, sfield):
         })
     return topic_list
 
-@login_required
 def getNoteResources(request, project_slug, sfield):
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     max_count = 10000
@@ -753,7 +770,6 @@ def getNoteResources(request, project_slug, sfield):
         note_list.append({'title':str(e), 'key':str(project_slug)+'.note.'+str(e.id), 'addClass':'', 'url':e.get_absolute_url()})
     return note_list
 
-@login_required
 def getDocumentResources(request, project_slug, sfield):
     current_project = _check_project_privs_or_deny(request.user, project_slug) # only 4 check
 
@@ -786,7 +802,6 @@ def getDocumentResources(request, project_slug, sfield):
 
 ID_RE = re.compile(r'/documents/(\d+)/$')
 
-@login_required
 def getDocumentResources_Faster(request, project_slug, sfield):
     current_project = _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     image_place_holder = -1
@@ -900,6 +915,8 @@ def resources(request, project_slug):
     print "=====> project slug is :"+str(project_slug)
 
     return render_to_response('resources.html',dict(project_slug=project_slug))
+
+
 
 def project_index(request, project_slug):
     return render_to_response('project_index.html',dict(project_slug=project_slug))
@@ -1049,10 +1066,12 @@ class DocumentCendari(DocumentAdminView):
 class EntityCendari(TopicAdminView):
     template_name = 'entityCendari.html'
 
-    
+@login_required
 def editNoteCendari(request, note_id, project_slug):
     o = {}
     user = request.user
+    project = _check_project_privs_or_deny(user, project_slug)
+
     qs = main_models.Note.objects.select_related('license', 'project__default_license').prefetch_related('related_topics')
     note = get_object_or_404(qs, id=note_id, project__slug=project_slug)
     if note.is_private:
@@ -1089,6 +1108,10 @@ def editNoteCendari(request, note_id, project_slug):
 
 def readNoteCendari(request, note_id, project_slug):
     o = {}
+
+   
+    _check_project_privs_or_deny(request.user, project_slug)
+
     qs = main_models.Note.objects.select_related('license', 'project__default_license').prefetch_related('related_topics')
     note = get_object_or_404(qs, id=note_id, project__slug=project_slug)
     if note.is_private:
@@ -1121,6 +1144,7 @@ def readNoteCendari(request, note_id, project_slug):
 
     return render_to_response( 'noteCendariRead.html', o, context_instance=RequestContext(request))
 
+@login_required
 def versionHistoryNoteCendari(request, note_id, project_slug):
     o = {}
     qs = main_models.Note.objects.select_related('license', 'project__default_license').prefetch_related('related_topics')
@@ -1134,6 +1158,7 @@ def versionHistoryNoteCendari(request, note_id, project_slug):
     o['version_list'] = reversion.get_for_object(note)
     return render_to_response( 'noteCendariVersionHistory.html', o, context_instance=RequestContext(request))
 
+@login_required
 def versionNoteCendari(request, note_id, project_slug,version_id):
     o = {}
     qs = main_models.Note.objects.select_related('license', 'project__default_license').prefetch_related('related_topics')
@@ -1176,8 +1201,10 @@ def versionNoteCendari(request, note_id, project_slug,version_id):
 
     return render_to_response( 'noteCendariVersion.html', o, context_instance=RequestContext(request))
 
+@login_required
 def editDocumentCendari(request, project_slug, document_id):
     o = {}
+    _check_project_privs_or_deny(request.user, project_slug)
     qs = main_models.Document.objects.select_related('project')
     o['document'] = get_object_or_404(main_models.Document, id=document_id, project__slug=project_slug)
     o['project_slug'] = project_slug
@@ -1215,8 +1242,10 @@ def editDocumentCendari(request, project_slug, document_id):
             o['zotero_date_information'] = o['document'].zotero_link.date_information
     return render_to_response('documentCendariEdit.html', o, context_instance=RequestContext(request))
 
+
 def readDocumentCendari(request, project_slug, document_id):
     o = {}
+    _check_project_privs_or_deny(request.user, project_slug)
     qs = main_models.Document.objects.select_related('project')
     o['document'] = get_object_or_404(main_models.Document, id=document_id, project__slug=project_slug)
     o['project_slug'] = project_slug
@@ -1251,7 +1280,8 @@ def readDocumentCendari(request, project_slug, document_id):
             o['zotero_url'] = o['document'].zotero_link.zotero_url
             o['zotero_date_information'] = o['document'].zotero_link.date_information
     return render_to_response('documentCendariRead.html', o, context_instance=RequestContext(request))
-    
+
+@login_required   
 def versionHistoryDocumentCendari(request, document_id, project_slug):
     o = {}
     qs = main_models.Document.objects.select_related('project')
@@ -1263,10 +1293,8 @@ def versionHistoryDocumentCendari(request, document_id, project_slug):
     o['version_list'] = reversion.get_for_object(document)
     return render_to_response( 'documentCendariVersionHistory.html', o, context_instance=RequestContext(request))
 
+@login_required
 def versionDocumentCendari(request, document_id, project_slug,version_id):
-    
-
-
     o = {}
     qs = main_models.Document.objects.select_related('project')
     document = get_object_or_404(main_models.Document, id=document_id, project__slug=project_slug)
@@ -1315,9 +1343,10 @@ def versionDocumentCendari(request, document_id, project_slug,version_id):
 
     return render_to_response( 'documentCendariVersion.html', o, context_instance=RequestContext(request))
 
-
+@login_required
 def editEntityCendari(request, project_slug, topic_node_id):
     o = {}
+    _check_project_privs_or_deny(request.user, project_slug)
     #print "getting topic_qs"
     topic_qs = main_models.Topic.objects.select_related('topic_node', 'creator', 'last_updater', 'project').prefetch_related('related_topics__topic')
     #print "getting topic object"
@@ -1377,6 +1406,70 @@ def editEntityCendari(request, project_slug, topic_node_id):
 
     return render_to_response(
         'entityCendariEdit.html', o, context_instance=RequestContext(request))
+
+
+def readEntityCendari(request, project_slug, topic_node_id):
+    o = {}
+    _check_project_privs_or_deny(request.user, project_slug)
+    #print "getting topic_qs"
+    topic_qs = main_models.Topic.objects.select_related('topic_node', 'creator', 'last_updater', 'project').prefetch_related('related_topics__topic')
+    #print "getting topic object"
+    o['topic'] = topic = get_object_or_404(topic_qs,topic_node_id=topic_node_id,project__slug=project_slug)
+    o['cluster'] = rutils.get_cluster_for_topic(topic)
+    o['project'] = topic.project
+    o['project_slug'] = project_slug
+    o['object_type'] = 'topic'
+    o['object_id'] = topic_node_id
+    o['topic_type'] = topic.topic_node.type
+    o['topic'].date = utils.change_to_well_known_format(o['topic'].date)
+    o['aliases'] = topic.alternate_names.all()
+    #print 20*'.'+ 'topic.summary = " + str(topic.summary)
+    o['breadcrumb'] = (
+        (topic.project.name, topic.project.get_absolute_url()),
+        ('Topics', reverse('all_topics_view', kwargs={'project_slug': topic.project.slug})),(topic.preferred_name, None)
+    )
+    topic_query = {'query': {'term': {'serialized.related_topics.id': topic.id }}}
+    topic_query['size'] = 1000
+    #print "searching for models"
+    model_searches = ( en_index.search_model(model, topic_query) for model in
+                       (main_models.Document, main_models.Note, main_models.Topic) )
+    documents, notes, topics = (
+        [ result['_source']['serialized'] for result in search['hits']['hits'] ]
+        for search in model_searches)
+    #print "filtering documents"
+    # o['documents'] = main_models.Document.objects.filter(id__in=[d['id'] for d in documents])
+    o['related_topics'] = main_models.Topic.objects.filter(id__in=[t['id'] for t in topics])
+    note_objects = main_models.Note.objects.in_bulk([n['id'] for n in notes])
+    #print len(note_objects)
+    #print note_objects
+    for note in notes:
+        if ('id' in note.keys()) and (note['id'] in note_objects.keys()):
+            related_topics = list((topic for topic in note['related_topics']
+                                   if topic['url'] != request.path))
+            note_objects[note['id']] = (note_objects[note['id']], related_topics,)
+    # o['notes'] = note_objects.values()
+    
+
+
+    o['documents']  = []
+    o['notes']      = []
+
+
+
+    for d in topic.get_related_documents():
+        if d.project in request.user.get_affiliated_projects():
+            o['documents'].append(d)
+
+    for n in topic.get_related_notes():
+        if n.project in request.user.get_affiliated_projects():
+            o['notes'].append(n)
+
+    # o['documents']  = topic.get_related_documents()
+    # o['notes']      = topic.get_related_notes()
+
+
+    return render_to_response(
+        'entityCendariRead.html', o, context_instance=RequestContext(request))
 
 
 def transcript(request, project_slug, document_id):
@@ -1505,6 +1598,7 @@ def create_cluster(request,project_slug):
                 semantic_process_cluster(cluster)
                 return HttpResponse(json.dumps({'id': cluster.id}), content_type="application/json");
 
+@login_required
 def show_cluster(request,project_slug,cluster_id):
     query_result = TopicCluster.objects.filter(id=cluster_id)
     cluster = query_result[0] if query_result.count()!= 0 else None

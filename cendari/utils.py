@@ -16,6 +16,7 @@ import pdb
 from rest_framework.views import exception_handler
 
 from editorsnotes.main.models.documents import get_or_create_document
+from editorsnotes.main.models import Project
 
 import datetime_safe
 import dateinfer
@@ -301,3 +302,11 @@ def date_range_to_interval(date1, date2, max_buckets=20):
     i = 2
     scale = math.floor(dist / (TIME_LENGTH[i] * (max_buckets-1)))
     return "%d%s" % (scale, TIME_UNIT[i])
+
+
+
+def get_public_projects():
+    return Project.objects.all()
+
+def project_is_public(project):
+    return True
