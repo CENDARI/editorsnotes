@@ -141,6 +141,11 @@ def _check_project_privs_or_deny(user, project_slug):
         return project
 
 def user_login(request):
+    logger.debug('in login request meta is :')
+    logger.debug(request.META)
+
+   
+
     if 'eppn' in request.META:
         return HttpResponseRedirect(reverse('index_view'))
     return HttpResponseRedirect(reverse('index_view'))
@@ -165,6 +170,8 @@ def _check_privs(user, obj):
 # @login_required
 #@check_project_privs
 def index(request,project_slug=None):
+    logger.debug('in index request meta is :')
+    logger.debug(request.META)
     user = request.user
     #if project_slug is None:
     #    project = user.get_authorized_projects()[0]

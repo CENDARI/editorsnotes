@@ -26,8 +26,6 @@ class CendariUserMiddleware(RemoteUserMiddleware):
         changed = False
         if user.is_authenticated():
             logger.debug('Cendari Middelware user %s is_authenticated', user)
-        else:
-            auth.login(request, user)
         try:
             memberof = request.META['isMemberOf']
             logger.debug('Received isMemberOf information: %s', memberof)
