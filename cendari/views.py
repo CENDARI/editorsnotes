@@ -12,7 +12,7 @@ from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from django.http import (
     HttpResponse, HttpResponseForbidden, HttpResponseBadRequest, HttpResponseRedirect)
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404, redirect
 
 from django.template import RequestContext
 from django.utils.functional import lazy 
@@ -140,6 +140,11 @@ def _check_project_privs_or_deny(user, project_slug):
             raise PermissionDenied("not authorized on %s project" % project_slug)
         return project
 
+def user_login(request):
+    if 'eppn' in request.META:
+        return HttpResponseRedirect(reverse('index_view'))
+    return HttpResponseRedirect(reverse('index_view'))
+
 def get_projects_owned_by_user(user):
     owned_projects = []
     authorized_projects = user.get_authorized_projects()
@@ -170,7 +175,8 @@ def index(request,project_slug=None):
     if user.is_authenticated():
         project =  get_projects_owned_by_user(request.user)[0]
     else:
-        project = Project.objects.all()[0]
+        public_projects = utils.get_public_projects()
+        project = public_projects[0] if len(public_projects)>0 else None
     o['project'] =  project 
     return render_to_response(
         'emptytab.html', o, context_instance=RequestContext(request))
@@ -529,12 +535,14 @@ def getResourcesData(request, project_slug, sfield):
         projects = request.user.get_authorized_projects().order_by('name').distinct('name')
         main_project =  _check_project_privs_or_deny(request.user, project_slug)
         print "I am hereeeeeeeee"
-    else:
+    elif project_slug != 'no_project':
         project = get_object_or_404(Project, slug=project_slug)
         if not utils.project_is_public(project):
             main_project =  _check_project_privs_or_deny(request.user, project_slug)
         else:
             main_project = project
+    else:
+        main_project = None
     # utils.get_image_placeholder_document(request.user,main_project)
     if request.user.is_authenticated():
         if request.user.is_superuser:
