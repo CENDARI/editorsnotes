@@ -96,7 +96,6 @@
             <li><a href="https://docs.google.com/forms/d/1LgNR3GLfMmql2acSryzVQRGPjEBmr6ZfvsVJZ8xX9QI/viewform" target="_blank" >Survey</a></li>
             <li class="divider-vertical"></li>
               <form class="navbar-search" action="{% url "cendari_faceted_search_view" %}" target="_blank" method="get">
-            <!-- <form class="navbar-search" action="{% url "cendari_faceted_search_view" project_slug=project.slug %}" method="get"> -->
               <input type="text" class="search-query search-autocomplete" name="q" x-search-target="topics" placeholder="Search" />
               <input type="hidden" name="project_slug" value="{{project.slug}}">
               <input type="checkbox" name="TRAME" value= "TRAME" checked="true" style="visibility: hidden;">
@@ -107,7 +106,7 @@
         <!--<button id="submitButtonCendari" onclick="submitCendariForm()"  value=""></button>
         <script type="text/javascript" src="{% static "cendari/js/editor.js" %}"></script> -->
 
-        {% with user=request.user %}
+        <!-- {% with user=request.user %}
           {% if user.is_authenticated %}
             {% if user.email %}
               <input type="hidden" id="logged-in-user-email" value="{{ user.email }}" />
@@ -129,7 +128,7 @@
               <li><a href="{% url 'django.contrib.auth.views.login' %}{% if request.path|length > 1 %}?return_to={{ request.path }}{% endif %}">Log in</a></li>
               </ul>
           {% endif %}
-        {% endwith %}
+        {% endwith %} -->
       </div>
     </div>
   </div>
@@ -148,20 +147,20 @@
     {% block cendari_content %}
 
       <div id="west" style="height:100%;" class="x-hide-display">
-        <iframe src="{% url 'resources_view' project_slug=project.slug %}?object_type={{object_type}}&object_id={{object_id}}&topic_type={{topic_type}}" id ='resourcesIframe' seamless="true" width="100%" height="100%">
-          <p>Sorry, your browser does not support iframes. </p>
-        </iframe>
+          <iframe src="{% url 'resources_view' project_slug=project.slug %}?object_type={{object_type}}&object_id={{object_id}}&topic_type={{topic_type}}" id ='resourcesIframe' seamless="true" width="100%" height="100%">
+            <p>Sorry, your browser does not support iframes. </p>
+          </iframe>
       </div>
 
      <!--  -->
 
 
       <div id="east" style="height:100%;" class="x-hide-display">
-        <iframe src="{%  url 'smallvis_view' project_slug=project.slug %}" id ='smallvisIframe' seamless="true" width="100%" height="100%">
-          <p>Sorry, your browser does not support iframes. </p>
-        </iframe>
+          <iframe src="{%  url 'smallvis_view' project_slug=project.slug %}" id ='smallvisIframe' seamless="true" width="100%" height="100%">
+            <p>Sorry, your browser does not support iframes. </p>
+          </iframe>
       </div>
-
+      
       <div  id="center" style="height:100%;" class="x-hide-display editor" >
         <!-- <button id="submitButtonCendari" onclick="submitCendariForm()" >&nbsp;</button>  -->
 

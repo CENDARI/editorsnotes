@@ -16,10 +16,12 @@ USER_GROUP_MAP = settings.LDAP_GROUP_MAPS['user_groups'].split(';')
 
 class CendariUserMiddleware(RemoteUserMiddleware):
     def process_request(self, request):
-        request.META['REMOTE_USER'] = cendari_clean_name(request.META['REMOTE_USER'])
+        if 'REMOTE_USER' in request.META:
+            request.META['REMOTE_USER'] = cendari_clean_name(request.META['REMOTE_USER'])
         super(CendariUserMiddleware, self).process_request(request)
         user = request.user
         logger.debug('Cendari Middelware called with user %s', user)
+        
         changed = False
 
         try:

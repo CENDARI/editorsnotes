@@ -110,7 +110,7 @@ class Document(LastUpdateMetadata, Administered, URLAccessible,
             })
     @models.permalink
     def get_absolute_url(self):
-        return ('document_view', [str(self.project.slug), str(self.id)])
+        return ('document_read', [str(self.project.slug), str(self.id)])
     def get_affiliation(self):
         return self.project
     def clean_fields(self, exclude=None):
@@ -261,9 +261,10 @@ def get_or_create_document(user,project,description):
     for document in documents:
         if document.as_text() == description:
             return document
-
-    document=Document(creator=user, last_updater=user, description=description, project=project)
-    document.save()
+    if user.is_authenticated():
+        document=Document(creator=user, last_updater=user, description=description, project=project)
+        document.save()
+        return None
 
     return document
 

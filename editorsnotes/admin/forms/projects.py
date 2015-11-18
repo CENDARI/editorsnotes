@@ -183,10 +183,10 @@ BANNED_PROJECT_SLUGS = (
 # Cendari code E.G. aviz
 class ProjectForm(ModelForm):
     editors = forms.MultipleChoiceField( widget=forms.CheckboxSelectMultiple,
-                                          choices=[])
+                                          choices=[],required=False)
     class Meta:
         model = Project
-        fields = ('name',  'image', 'description', 'default_license','editors')
+        fields = ('name',  'image', 'description', 'default_license','editors','is_public')
     def __init__(self, *args, **kwargs):
         super(ProjectForm, self).__init__(*args, **kwargs)
         project = self.instance
@@ -213,6 +213,7 @@ class ProjectForm(ModelForm):
         for user in User.objects.filter(username__in=to_remove):
             if not user in owners:
                 role.users.remove(user)
+        project.save()
         return project
 # Cendari code E.G. aviz
 # class ProjectCreationForm(ModelForm):
