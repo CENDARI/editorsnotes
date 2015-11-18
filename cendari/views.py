@@ -147,8 +147,8 @@ def user_login(request):
    
 
     if 'eppn' in request.META:
-        return HttpResponseRedirect(reverse('index_view'))
-    return HttpResponseRedirect(reverse('index_view'))
+        return redirect('index_view')
+    return redirect('index_view')
 
 def get_projects_owned_by_user(user):
     owned_projects = []
