@@ -2,6 +2,7 @@ from django.contrib.auth.middleware import RemoteUserMiddleware
 from django.contrib.auth.signals import user_logged_in
 from django.conf import settings
 from editorsnotes.main.models import Project
+from django.contrib import auth
 from cendari_api import *
 
 import logging
@@ -23,7 +24,10 @@ class CendariUserMiddleware(RemoteUserMiddleware):
         logger.debug('Cendari Middelware called with user %s', user)
         
         changed = False
-
+        if user.is_authenticated():
+            logger.debug('Cendari Middelware user %s is_authenticated', user)
+        else:
+            auth.login(request, user)
         try:
             memberof = request.META['isMemberOf']
             logger.debug('Received isMemberOf information: %s', memberof)
