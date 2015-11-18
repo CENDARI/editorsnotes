@@ -79,8 +79,8 @@
           <li><a class="brand" href="{% url 'index_view' %}"><img src="{% static "img/cendari_logo.png" %}" height="50" width="200" border="5"/></a> </li>
           <li class="divider-vertical"></li>
           <li><a href="{% url 'index_view' %}">Home</a></li>
-          {% if  not user %}
-          <li><a href="{% url 'user_login_view' %}">Login</a></li>
+          {% if  not user.is_authenticated %}
+            <li><a href="{% url 'user_login_view' %}">Login</a></li>
           {% endif%}
           <li><a href="{% url 'cendari_browse_view' %}">Browse</a></li>
           <li><a href="{% url 'cendari_about_view' %}">About</a></li>
@@ -147,18 +147,30 @@
     {% block cendari_content %}
 
       <div id="west" style="height:100%;" class="x-hide-display">
+        {% if project %}
           <iframe src="{% url 'resources_view' project_slug=project.slug %}?object_type={{object_type}}&object_id={{object_id}}&topic_type={{topic_type}}" id ='resourcesIframe' seamless="true" width="100%" height="100%">
             <p>Sorry, your browser does not support iframes. </p>
           </iframe>
+        {% else %}
+          <iframe src="{% url 'resources_view' project_slug='no_project' %}?object_type={{object_type}}&object_id={{object_id}}&topic_type={{topic_type}}" id ='resourcesIframe' seamless="true" width="100%" height="100%">
+            <p>Sorry, your browser does not support iframes. </p>
+          </iframe>
+        {% endif %}
       </div>
 
      <!--  -->
 
 
       <div id="east" style="height:100%;" class="x-hide-display">
+        {% if project %}
           <iframe src="{%  url 'smallvis_view' project_slug=project.slug %}" id ='smallvisIframe' seamless="true" width="100%" height="100%">
             <p>Sorry, your browser does not support iframes. </p>
           </iframe>
+        {% else %}
+          <iframe src="{%  url 'smallvis_view' project_slug='no_project' %}" id ='smallvisIframe' seamless="true" width="100%" height="100%">
+            <p>Sorry, your browser does not support iframes. </p>
+          </iframe>
+        {% endif %}
       </div>
       
       <div  id="center" style="height:100%;" class="x-hide-display editor" >

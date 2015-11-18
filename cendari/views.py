@@ -170,7 +170,8 @@ def index(request,project_slug=None):
     if user.is_authenticated():
         project =  get_projects_owned_by_user(request.user)[0]
     else:
-        project = Project.objects.all()[0]
+        public_projects = utils.get_public_projects()
+        project = public_projects[0] if len(public_projects)>0 else None
     o['project'] =  project 
     return render_to_response(
         'emptytab.html', o, context_instance=RequestContext(request))
@@ -529,12 +530,14 @@ def getResourcesData(request, project_slug, sfield):
         projects = request.user.get_authorized_projects().order_by('name').distinct('name')
         main_project =  _check_project_privs_or_deny(request.user, project_slug)
         print "I am hereeeeeeeee"
-    else:
+    elif project_slug != 'no_project':
         project = get_object_or_404(Project, slug=project_slug)
         if not utils.project_is_public(project):
             main_project =  _check_project_privs_or_deny(request.user, project_slug)
         else:
             main_project = project
+    else:
+        main_project = None
     # utils.get_image_placeholder_document(request.user,main_project)
     if request.user.is_authenticated():
         if request.user.is_superuser:
