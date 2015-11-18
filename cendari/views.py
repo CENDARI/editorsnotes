@@ -12,7 +12,7 @@ from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from django.http import (
     HttpResponse, HttpResponseForbidden, HttpResponseBadRequest, HttpResponseRedirect)
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404, redirect
 
 from django.template import RequestContext
 from django.utils.functional import lazy 
@@ -139,6 +139,11 @@ def _check_project_privs_or_deny(user, project_slug):
         if not user.superuser_or_belongs_to(project) and not project.is_owned_by(user):
             raise PermissionDenied("not authorized on %s project" % project_slug)
         return project
+
+def user_login(request):
+    if 'eppn' in request.META:
+        return HttpResponseRedirect(reverse('index_view'))
+    return HttpResponseRedirect(reverse('index_view'))
 
 def get_projects_owned_by_user(user):
     owned_projects = []

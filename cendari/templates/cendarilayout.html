@@ -103,32 +103,7 @@
             </form> 
         </ul>
 
-        <!--<button id="submitButtonCendari" onclick="submitCendariForm()"  value=""></button>
-        <script type="text/javascript" src="{% static "cendari/js/editor.js" %}"></script> -->
-
-        <!-- {% with user=request.user %}
-          {% if user.is_authenticated %}
-            {% if user.email %}
-              <input type="hidden" id="logged-in-user-email" value="{{ user.email }}" />
-            {% endif %}
-            <ul class="nav pull-right">
-              <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                {{ user.display_name }}
-                 <b class="caret"></b>
-                </a>
-                <ul class="dropdown-menu">
-                  <li><a href="{{ user.get_absolute_url }}">My profile</a></li>
-                  <li><a {% if browserid_authenticated %}class="browserid-logout" {% endif %}href="{% url "user_logout_view" %}">Log out</a></li>
-                </ul>
-              </li>
-          </ul>
-          {% else %}
-            <ul class="nav pull-right">
-              <li><a href="{% url 'django.contrib.auth.views.login' %}{% if request.path|length > 1 %}?return_to={{ request.path }}{% endif %}">Log in</a></li>
-              </ul>
-          {% endif %}
-        {% endwith %} -->
+       
       </div>
     </div>
   </div>
