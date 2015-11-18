@@ -295,7 +295,7 @@
 			$('#versionHistoryButtonId').hide();
 			$('#extraButtonId').text('Edit Mode');
 			$('#extraButtonId').on('click',function(e){
-				var readModeUrl = '{% url "note_view" project_slug=project.slug  note_id=note.id %}';
+				var readModeUrl = '{% url "note_edit" project_slug=project.slug  note_id=note.id %}';
 				window.location.replace(readModeUrl);
 			});
 

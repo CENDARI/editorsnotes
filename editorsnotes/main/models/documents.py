@@ -110,7 +110,7 @@ class Document(LastUpdateMetadata, Administered, URLAccessible,
             })
     @models.permalink
     def get_absolute_url(self):
-        return ('document_view', [str(self.project.slug), str(self.id)])
+        return ('document_read', [str(self.project.slug), str(self.id)])
     def get_affiliation(self):
         return self.project
     def clean_fields(self, exclude=None):

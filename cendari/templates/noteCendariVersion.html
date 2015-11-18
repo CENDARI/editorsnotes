@@ -248,7 +248,7 @@
 			$('#revertToVersion').on('click',function(e){
 				e.preventDefault()
 				$.post($(this).attr('href'),{"csrfmiddlewaretoken":$('input[name="csrfmiddlewaretoken"]').val()},function(data){
-					window.location.replace('{% url "note_view" project_slug=project.slug  note_id=note.id %}')
+					window.location.replace('{% url "note_edit" project_slug=project.slug  note_id=note.id %}')
 				})
 			})
 		})

@@ -306,7 +306,7 @@ def date_range_to_interval(date1, date2, max_buckets=20):
 
 
 def get_public_projects():
-    return Project.objects.all()
+    return Project.objects.filter(is_public=True)
 
 def project_is_public(project):
-    return True
+    return project.is_public

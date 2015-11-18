@@ -48,7 +48,7 @@ class Note(LastUpdateMetadata, Administered, URLAccessible,
         return self.title
     @models.permalink
     def get_absolute_url(self):
-        return ('note_view', [self.project.slug, self.id])
+        return ('note_read', [self.project.slug, self.id])
     def get_affiliation(self):
         return self.project
     def has_topic(self, project_topic):

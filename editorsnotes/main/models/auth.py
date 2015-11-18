@@ -182,6 +182,7 @@ class Project(models.Model, URLAccessible, ProjectPermissionsMixin):
     image = models.ImageField(upload_to='project_images', blank=True, null=True)
     description = fields.XHTMLField(blank=True, null=True)
     default_license = models.ForeignKey(License, default=1)
+    is_public = models.BooleanField(default=False)
     objects = ProjectManager()
     class Meta:
         app_label = 'main'

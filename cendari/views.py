@@ -122,18 +122,18 @@ def _check_project_privs_or_deny(user, project_slug):
             projects = user.get_authorized_projects()
             if not projects:
                 raise PermissionDenied("insufficient priviledges for %s" % user.username)
-        #(NB) handle superusers
-        if user.is_superuser:
-        for p in projects:
-            project_role = user._get_project_role(p)
-            if project_role is not None:                
-                project = p
-                break
-        if project is None:
+            #(NB) handle superusers
+            if user.is_superuser:
+                for p in projects:
+                    project_role = user._get_project_role(p)
+                    if project_role is not None:                
+                        project = p
+                        break
+                if project is None:
                     logger.warn("superuser does not have own projects.")
                     project = projects[0]
-        else:
-        project = projects[0]
+            else:
+                project = projects[0]
         else:
             project = get_object_or_404(Project, slug=project_slug)
         if not user.superuser_or_belongs_to(project) and not project.is_owned_by(user):
@@ -523,14 +523,18 @@ def getResourcesData(request, project_slug, sfield):
         'url':'',
         'children' : []
     }
+    
 
     if request.user.is_authenticated():
         projects = request.user.get_authorized_projects().order_by('name').distinct('name')
-    project = get_object_or_404(Project, slug=project_slug)
-    if not utils.project_is_public(project):
         main_project =  _check_project_privs_or_deny(request.user, project_slug)
+        print "I am hereeeeeeeee"
     else:
-        main_project = project
+        project = get_object_or_404(Project, slug=project_slug)
+        if not utils.project_is_public(project):
+            main_project =  _check_project_privs_or_deny(request.user, project_slug)
+        else:
+            main_project = project
     # utils.get_image_placeholder_document(request.user,main_project)
     if request.user.is_authenticated():
         if request.user.is_superuser:
@@ -560,6 +564,8 @@ def getResourcesData(request, project_slug, sfield):
                         'children' : []
                     }
                     other_projects['children'].append(other_project)
+            my_tree['children'].append(my_projects)
+            my_tree['children'].append(other_projects)
         else:
             #copied from cendari.admin2
             owned_projects = projects
@@ -594,6 +600,7 @@ def getResourcesData(request, project_slug, sfield):
 
     res = json.dumps(my_tree, encoding="utf-8")
     response_dict = request.GET['callback'] + "(" + res + ")"
+
     return HttpResponse(response_dict, mimetype='application/json')
 
 def getLazyProjectData(request, project_slug, sfield):
@@ -814,17 +821,17 @@ def getDocumentResources_Faster(request, project_slug, sfield):
     sort_order = ""
 
     if sfield == "last_updated":
-	sort_field = "updated"
-	sort_order = "asc"
+    	sort_field = "updated"
+    	sort_order = "asc"
     elif sfield == "-last_updated":
-	sort_field = "updated"
-	sort_order = "desc"
+    	sort_field = "updated"
+    	sort_order = "desc"
     elif sfield == "-alpha":
-	sort_field = "title"
-	sort_order = "desc"
+    	sort_field = "title"
+    	sort_order = "desc"
     else:
-	sort_field = "title"
-	sort_order = "asc"
+    	sort_field = "title"
+    	sort_order = "asc"
 
     es_query = {
         "query": {"constant_score":  {"filter": {"term": {"project": project_slug }}}},
@@ -912,8 +919,6 @@ def proxyRDFaCE(request):
     return HttpResponse(response, mimetype='application/json') 
 
 def resources(request, project_slug):
-    print "=====> project slug is :"+str(project_slug)
-
     return render_to_response('resources.html',dict(project_slug=project_slug))
 
 
