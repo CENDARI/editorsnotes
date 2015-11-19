@@ -25,7 +25,7 @@ CENDARI_FACETS = [
 ]
 
 def cendari_filter(user=None,project_slugs=None):
-    if user is None:
+    if user is None or not user.is_authenticated():
         logger.debug('Creating filter for unknown user')
         filter = [
             { "missing": { "field" : "groups_allowed" } },
