@@ -317,12 +317,15 @@
 		Ext.onReady(function(){
 			$('#extraButtonId').css('left',$('#versionHistoryButtonId').css('left'))
 			$('#versionHistoryButtonId').hide();
-			$('#extraButtonId').text('Edit Mode');
-			$('#extraButtonId').on('click',function(e){
-				var readModeUrl = '{% url "document_view" project_slug=project.slug  document_id=document.id %}';
-				window.location.replace(readModeUrl);
-			});
-
+			{% if user.is_authenticated%}
+				$('#extraButtonId').text('Edit Mode');
+				$('#extraButtonId').on('click',function(e){
+					var readModeUrl = '{% url "document_edit" project_slug=project.slug  document_id=document.id %}';
+					window.location.replace(readModeUrl);
+				});
+			{% else %}
+				$('#extraButtonId').hide()
+			{% endif %}
 		})
 
 	</script>

@@ -228,7 +228,12 @@
 	});
 
 	Ext.onReady(function(){
-		$('#extraButtonId').hide();		
+		$('#extraButtonId').text('Read Mode');
+		$('#extraButtonId').show();
+		$('#extraButtonId').on('click',function(e){
+			var readModeUrl = '{% url "topic_read" project_slug=project.slug  topic_node_id=topic.topic_node.id %}';
+			window.location.replace(readModeUrl);
+		});	
 		$('#deleteButtonId').hide();		
 
 	})

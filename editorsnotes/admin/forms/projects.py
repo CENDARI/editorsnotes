@@ -186,7 +186,7 @@ class ProjectForm(ModelForm):
                                           choices=[],required=False)
     class Meta:
         model = Project
-        fields = ('name',  'image', 'description', 'default_license','editors','is_public')
+        fields = ('name',  'image', 'description', 'default_license','editors','is_public',)
     def __init__(self, *args, **kwargs):
         super(ProjectForm, self).__init__(*args, **kwargs)
         project = self.instance

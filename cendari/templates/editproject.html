@@ -33,19 +33,90 @@
 
     {{ form.as_p }}
     <!-- <input class="btn" type="submit" value="Save"> -->
+    
+    <br>
+    <br>
+   
+
   {% else %}
 
     <h1>Your are in project <u>{{project.name}}</u></h1>
 
   {%endif%}
 
+   {% if mode == 'edit' %}
+      <form class="formCendari" id="aliasSlugCendari" action="{% url "add_project_slug_view" project_id=project.id  %}" method="POST">
+        <label for="slug_alias">New Alias:</label>
+        <input id="slugAliasSubmit" name="slug_alias" />
+        <a id ="aliasSlugCendariSumbit" class="btn"   href="{% url "add_project_slug_view" project_id=project.id  %}"> Add</a>
+     
+        <ul id='slug_alias_list'>
+          {% for slug_alias in slug_aliases %}
+            <li> {{slug_alias}}</li>
+          {% endfor%}
+        </ul>
+       </form>
+    {% endif%}
 {% endblock form_content %}
 
 
 {% block form_functions %}
 <script>
 
+
+
 (function ($) {
+
+  var toastr_options = {
+    "closeButton": true,
+    "debug": false,
+    "newestOnTop": true,
+    "progressBar": false,
+    "positionClass": "toast-top-center",
+    "preventDuplicates": true,
+    "onclick": null,
+    "showDuration": "300",
+    "hideDuration": "1000",
+    "timeOut": "5000000000000000",
+    "extendedTimeOut": "5000000000000000",
+    "showEasing": "swing",
+    "hideEasing": "linear",
+    "showMethod": "fadeIn",
+    "hideMethod": "fadeOut"
+  }
+
+  function showToastrMessage(type,message){
+    toastr.clear();
+    toastr[type](message);
+  }
+
+  function showErrorMessage(message){
+    toastr.options.timeOut="1000";
+    toastr.options.extendedTimeOut="1000";
+    showToastrMessage('error',message);
+  }
+
+  function showSuccessMessage(message){
+    toastr.options.timeOut="500";
+    toastr.options.extendedTimeOut="1000";
+    showToastrMessage('success',message);
+  }
+
+
+  function showWarningMessage(message){
+    toastr.options.timeOut="5000";
+    toastr.options.extendedTimeOut="10000";
+    showToastrMessage('warning',message);
+  }
+
+  function showInfoMessage(message){
+    toastr.options.timeOut="5000000000000000";
+    toastr.options.extendedTimeOut="5000000000000000";
+    showToastrMessage('info',message)
+  }
+
+
+
   // custom css expression for a case-insensitive contains()
   jQuery.expr[':'].Contains = function(a,i,m){
       return (a.textContent || a.innerText || "").toUpperCase().indexOf(m[3].toUpperCase())>=0;
@@ -91,6 +162,34 @@
   	console.log('Loading filter');
   	if($('#id_editors_0'))
     	listFilter($('#id_editors_0').closest('ul'));
+
+
+    $('#aliasSlugCendariSumbit').on('click',function(e){
+      e.preventDefault()
+      $.ajax({
+        // beforeSend: function (xhr) {xhr.setRequestHeader('X-CSRFToken', $('input[name="csrfmiddlewaretoken"]').val());},
+        url:$('#aliasSlugCendariSumbit').attr('href'),
+        type: 'POST',
+        data: {project_id:{{project.id}},name:$('#slugAliasSubmit').val(), csrfmiddlewaretoken: document.getElementsByName("csrfmiddlewaretoken")[0].value},
+        success: function(data){
+          console.log('data!!!')
+          if (data['status'] == 'success'){
+           $('#slug_alias_list').append('<li>'+ $('#slugAliasSubmit').val()+'</li>')
+           $('#slugAliasSubmit').val('')
+           showSuccessMessage('alias was added')
+          }
+          else{
+            showErrorMessage(data['message'])
+          }
+
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) { 
+            console.log("Error with status "+textStatus+":",errorThrown);
+            // showErrorMessage(messages.transcript.error);
+            showErrorMessage(errorThrown);
+        } 
+    });
+    })
   })
   // $(function () {
   // 	console.log('Loading filter');

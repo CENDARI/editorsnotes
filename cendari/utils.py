@@ -16,7 +16,7 @@ import pdb
 from rest_framework.views import exception_handler
 
 from editorsnotes.main.models.documents import get_or_create_document
-from editorsnotes.main.models import Project
+from editorsnotes.main.models import Project, ProjectSlugAlias
 
 import datetime_safe
 import dateinfer
@@ -310,3 +310,11 @@ def get_public_projects():
 
 def project_is_public(project):
     return project.is_public
+
+
+def get_project_slug(pslug):
+    if Project.objects.filter(slug=pslug).count()>0:
+        return pslug
+    if ProjectSlugAlias.objects.filter(name=pslug).count()>0:
+        return ProjectSlugAlias.objects.filter(name=pslug)[0].project.slug
+    return None

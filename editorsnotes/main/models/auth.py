@@ -19,7 +19,7 @@ from base import URLAccessible, CreationMetadata
 # Cendari code E.G. aviz
 from django.core.urlresolvers import reverse
 
-__all__ = ['User', 'UserFeedback', 'Project', 'ProjectRole', 'ProjectInvitation', 'FeaturedItem']
+__all__ = ['User', 'UserFeedback', 'Project', 'ProjectRole', 'ProjectInvitation', 'FeaturedItem','ProjectSlugAlias']
 
 
 # CENDARI : UserFeedback  and PURPOSE_CHOICES are  added
@@ -171,6 +171,7 @@ class ProjectPermissionsMixin(object):
         raise NotImplementedError(
             'Must define get_affiliation method which returns the project for this model.')
 
+
 class ProjectManager(models.Manager):
     def for_user(self, user):
         return self.select_related('roles__group__user')\
@@ -224,14 +225,15 @@ class Project(models.Model, URLAccessible, ProjectPermissionsMixin):
         qs = self.roles.filter(group__user=user,role='Owner')
         return qs.exists()
 
-# class ProjectSlugAlias(CreationMetadata, ProjectPermissionsMixin):
-#     project = models.ForeignKey(Project, related_name='slug_aliases')
-#     name = models.CharField(max_length=200)
-#     class Meta:
-#         app_label = 'main'
-#         unique_together = ('id','name')
-#     def __unicode__(self):
-#             return self.name
+
+class ProjectSlugAlias(CreationMetadata, ProjectPermissionsMixin):
+    project = models.ForeignKey(Project, related_name='slug_aliases')
+    name = models.CharField(max_length=200)
+    class Meta:
+        app_label = 'main'
+        unique_together = ('id','name')
+    def __unicode__(self):
+            return self.name
 
 @receiver(models.signals.post_save, sender=Project)
 def create_editor_role(sender, instance, created, **kwargs):

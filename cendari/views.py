@@ -115,6 +115,7 @@ def _sort_citations(instance):
     return cites
 
 def _check_project_privs_or_deny(user, project_slug):
+        project_slug = utils.get_project_slug(project_slug)
         if not user.is_authenticated():
             raise PermissionDenied("anonymous access not allowed")
         project = None
@@ -186,6 +187,7 @@ def _check_privs(user, obj):
 # @login_required
 #@check_project_privs
 def index(request,project_slug=None):
+    project_slug = utils.get_project_slug(project_slug)
     logger.debug('in index request meta is :')
     logger.debug(request.META)
     if 'REMOTE_USER' in request.session:
@@ -228,6 +230,7 @@ class EditDocumentAdminView(DocumentAdminView):
 
 @login_required
 def scan(request, scan_id, project_slug):
+    project_slug = utils.get_project_slug(project_slug)
     #print "scan view"
     o = {}
     scan = get_object_or_404(main_models.Scan, id=scan_id)
@@ -251,6 +254,7 @@ def scan(request, scan_id, project_slug):
 
 @login_required
 def scan_image(request, scan_id, project_slug):
+    project_slug = utils.get_project_slug(project_slug)
     scan = get_object_or_404(main_models.Scan, id=scan_id)
     if scan.document.project.slug != project_slug:
         raise PermissionDenied("not authorized on %s project" % project_slug)
@@ -258,6 +262,7 @@ def scan_image(request, scan_id, project_slug):
 
 @login_required
 def scan_tiffimage(request, scan_id, project_slug):
+    project_slug = utils.get_project_slug(project_slug)
     scan = get_object_or_404(main_models.Scan, id=scan_id)
     if scan.document.project.slug != project_slug:
         raise PermissionDenied("not authorized on %s project" % project_slug)
@@ -309,6 +314,7 @@ def cendari_project_add(request):
     project = user.get_authorized_projects()[0]
     # o['user_has_perm'] = user.is_superuser
     o['user_has_perm'] = True
+    o['mode'] = 'add'
      #or utils.is_project_creator(user)
     # if not (user.is_superuser or utils.is_project_creator(user)):
     #     return HttpResponseForbidden(
@@ -351,8 +357,8 @@ def cendari_project_change(request, project_id):
     user = request.user
     o['user']= request.user
     o['user_has_perm'] =  user.has_project_perm(project, 'main.change_project') or  project.is_owned_by(user)
-    
-    
+    o['slug_aliases'] = project.slug_aliases.all()
+    o['mode'] = 'edit'
     # if not user.has_project_perm(project, 'main.change_project') and not project.is_owned_by(user):
     #     return HttpResponseForbidden(
     #         content='You do not have permission to edit the details of %s' % project.name)
@@ -420,6 +426,7 @@ def editnote(request, note_id):
 @login_required
 @transaction.commit_on_success
 def import_from_jigsaw(request, project_slug):
+    project_slug = utils.get_project_slug(project_slug)
     project =  _check_project_privs_or_deny(request.user, project_slug)
     if request.method == 'POST':
         form = ImportFromJigsawForm(request.POST, request.FILES)
@@ -443,6 +450,7 @@ def small_vis(request, project_slug):
 # FIXME: No longer returns counts. Need to perform aggregation using Elastic Search instead of Haystack
 #        Currently replaced by small_vis_data_lazy
 def small_vis_data(request, project_slug):
+    project_slug = utils.get_project_slug(project_slug)
     #indexed_topics = SearchQuerySet().models(main_models.Topic)
     if not utils.project_is_public(get_object_or_404(Project, slug=project_slug)):
         _check_project_privs_or_deny(request.user, project_slug) # only 4 check
@@ -470,6 +478,7 @@ def small_vis_data(request, project_slug):
 # - Performs all the aggregation at request time rather than using an index.
 
 def small_vis_data_lazy(request, project_slug):
+    project_slug = utils.get_project_slug(project_slug)
     topics_dict = {}
     if not utils.project_is_public(get_object_or_404(Project, slug=project_slug)):
         _check_project_privs_or_deny(request.user, project_slug) # only 4 check
@@ -524,6 +533,7 @@ def small_vis_data_lazy(request, project_slug):
 
 
 def getResourcesData(request, project_slug, sfield):  
+    project_slug = utils.get_project_slug(project_slug)
     my_tree = {
         'title':'My resources:',
         'key':'root',
@@ -639,6 +649,7 @@ def getResourcesData(request, project_slug, sfield):
     return HttpResponse(response_dict, mimetype='application/json')
 
 def getLazyProjectData(request, project_slug, sfield):
+    project_slug = utils.get_project_slug(project_slug)
     if not utils.project_is_public(get_object_or_404(Project, slug=project_slug)):
         _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     if request.user.is_authenticated():
@@ -694,6 +705,7 @@ def getLazyProjectData(request, project_slug, sfield):
     return HttpResponse(response_dict, mimetype='application/json')
 
 def getTopicResources(request, project_slug, sfield):
+    project_slug = utils.get_project_slug(project_slug)
     if not utils.project_is_public(get_object_or_404(Project, slug=project_slug)):
         _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     project = Project.objects.filter(slug=project_slug)[0]
@@ -788,6 +800,7 @@ def getTopicResources(request, project_slug, sfield):
     return topic_list
 
 def getNoteResources(request, project_slug, sfield):
+    project_slug = utils.get_project_slug(project_slug)
     if not utils.project_is_public(get_object_or_404(Project, slug=project_slug)):
         _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     max_count = 10000
@@ -806,6 +819,7 @@ def getNoteResources(request, project_slug, sfield):
     return note_list
 
 def getDocumentResources(request, project_slug, sfield):
+    project_slug = utils.get_project_slug(project_slug)
     if not utils.project_is_public(get_object_or_404(Project, slug=project_slug)):
         current_project = _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     else:
@@ -841,6 +855,7 @@ def getDocumentResources(request, project_slug, sfield):
 ID_RE = re.compile(r'/documents/(\d+)/$')
 
 def getDocumentResources_Faster(request, project_slug, sfield):
+    project_slug = utils.get_project_slug(project_slug)
     if not utils.project_is_public(get_object_or_404(Project, slug=project_slug)):
         current_project = _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     else:
@@ -906,6 +921,7 @@ def getDocumentResources_Faster(request, project_slug, sfield):
 
 @login_required
 def getProjectID(request, project_slug, new_slug):
+    project_slug = utils.get_project_slug(project_slug)
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     _check_project_privs_or_deny(request.user, new_slug) # only 4 check
     editorsnotes.admin.views.projects.change_project(request, new_slug)
@@ -918,6 +934,7 @@ def getProjectID(request, project_slug, new_slug):
 
 @login_required
 def getTopicType(request, project_slug, topic_id):
+    project_slug = utils.get_project_slug(project_slug)
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     #editorsnotes.admin.views.projects.change_project(request, project_slug)
     topic_node_query_set = main_models.TopicNode.objects.filter(id=topic_id)
@@ -954,11 +971,13 @@ def proxyRDFaCE(request):
     return HttpResponse(response, mimetype='application/json') 
 
 def resources(request, project_slug):
+    project_slug = utils.get_project_slug(project_slug)
     return render_to_response('resources.html',dict(project_slug=project_slug))
 
 
 
 def project_index(request, project_slug):
+    project_slug = utils.get_project_slug(project_slug)
     return render_to_response('project_index.html',dict(project_slug=project_slug))
 
 # dummy: to be reimplemented!
@@ -1002,6 +1021,7 @@ def nerd_service(request):
 
 
 def find_date(request,project_slug,topic_node_id):
+    project_slug = utils.get_project_slug(project_slug)
     response_dates= []
     topic_qs = main_models.Topic.objects.select_related('topic_node', 'creator', 'last_updater', 'project').prefetch_related('related_topics__topic')
     topic = get_object_or_404(topic_qs,topic_node_id=topic_node_id,project__slug=project_slug)
@@ -1019,6 +1039,7 @@ def find_date(request,project_slug,topic_node_id):
 
 
 def get_project_topics(request,project_slug=None):
+    project_slug = utils.get_project_slug(project_slug)
     p = Project.objects.filter(slug=project_slug)[0]
     data = simplejson.dumps(cendari_get_project_topics(request.GET['topic_type'],p.name,request.GET['topic_name_prefix']))
 
@@ -1026,6 +1047,7 @@ def get_project_topics(request,project_slug=None):
 
 @login_required
 def search(request,project_slug=None):
+    project_slug = utils.get_project_slug(project_slug)
     #user = request.user
     #if project_slug is None:
     #    projects = user.get_authorized_projects()
@@ -1108,7 +1130,9 @@ class EntityCendari(TopicAdminView):
 
 @login_required
 def editNoteCendari(request, note_id, project_slug):
+    project_slug = utils.get_project_slug(project_slug)
     o = {}
+    o['user'] = request.user
     user = request.user
     project = _check_project_privs_or_deny(user, project_slug)
 
@@ -1147,7 +1171,9 @@ def editNoteCendari(request, note_id, project_slug):
     return render_to_response( 'noteCendariEdit.html', o, context_instance=RequestContext(request))
 
 def readNoteCendari(request, note_id, project_slug):
+    project_slug = utils.get_project_slug(project_slug)
     o = {}
+    o['user'] = request.user
 
     if not utils.project_is_public(get_object_or_404(Project, slug=project_slug)):
         _check_project_privs_or_deny(request.user, project_slug)
@@ -1186,6 +1212,7 @@ def readNoteCendari(request, note_id, project_slug):
 
 @login_required
 def versionHistoryNoteCendari(request, note_id, project_slug):
+    project_slug = utils.get_project_slug(project_slug)
     o = {}
     qs = main_models.Note.objects.select_related('license', 'project__default_license').prefetch_related('related_topics')
     note = get_object_or_404(qs, id=note_id, project__slug=project_slug)
@@ -1200,6 +1227,7 @@ def versionHistoryNoteCendari(request, note_id, project_slug):
 
 @login_required
 def versionNoteCendari(request, note_id, project_slug,version_id):
+    project_slug = utils.get_project_slug(project_slug)
     o = {}
     qs = main_models.Note.objects.select_related('license', 'project__default_license').prefetch_related('related_topics')
     note = get_object_or_404(qs, id=note_id, project__slug=project_slug)
@@ -1243,7 +1271,9 @@ def versionNoteCendari(request, note_id, project_slug,version_id):
 
 @login_required
 def editDocumentCendari(request, project_slug, document_id):
+    project_slug = utils.get_project_slug(project_slug)
     o = {}
+    o['user'] = request.user
     _check_project_privs_or_deny(request.user, project_slug)
     qs = main_models.Document.objects.select_related('project')
     o['document'] = get_object_or_404(main_models.Document, id=document_id, project__slug=project_slug)
@@ -1284,7 +1314,9 @@ def editDocumentCendari(request, project_slug, document_id):
 
 
 def readDocumentCendari(request, project_slug, document_id):
+    project_slug = utils.get_project_slug(project_slug)
     o = {}
+    o['user'] = request.user
     if not utils.project_is_public(get_object_or_404(Project, slug=project_slug)):
         _check_project_privs_or_deny(request.user, project_slug)
     qs = main_models.Document.objects.select_related('project')
@@ -1324,7 +1356,9 @@ def readDocumentCendari(request, project_slug, document_id):
 
 @login_required   
 def versionHistoryDocumentCendari(request, document_id, project_slug):
+    project_slug = utils.get_project_slug(project_slug)
     o = {}
+    o['user'] = request.user
     qs = main_models.Document.objects.select_related('project')
     document = get_object_or_404(main_models.Document, id=document_id, project__slug=project_slug)
     o['project_slug'] = project_slug
@@ -1336,7 +1370,9 @@ def versionHistoryDocumentCendari(request, document_id, project_slug):
 
 @login_required
 def versionDocumentCendari(request, document_id, project_slug,version_id):
+    project_slug = utils.get_project_slug(project_slug)
     o = {}
+    o['user'] = request.user
     qs = main_models.Document.objects.select_related('project')
     document = get_object_or_404(main_models.Document, id=document_id, project__slug=project_slug)
 
@@ -1386,7 +1422,9 @@ def versionDocumentCendari(request, document_id, project_slug,version_id):
 
 @login_required
 def editEntityCendari(request, project_slug, topic_node_id):
+    project_slug = utils.get_project_slug(project_slug)
     o = {}
+    o['user'] = request.user
     _check_project_privs_or_deny(request.user, project_slug)
     #print "getting topic_qs"
     topic_qs = main_models.Topic.objects.select_related('topic_node', 'creator', 'last_updater', 'project').prefetch_related('related_topics__topic')
@@ -1450,7 +1488,9 @@ def editEntityCendari(request, project_slug, topic_node_id):
 
 
 def readEntityCendari(request, project_slug, topic_node_id):
+    project_slug = utils.get_project_slug(project_slug)
     o = {}
+    o['user'] = request.user
     if not utils.project_is_public(get_object_or_404(Project, slug=project_slug)):
         _check_project_privs_or_deny(request.user, project_slug)
     #print "getting topic_qs"
@@ -1515,10 +1555,12 @@ def readEntityCendari(request, project_slug, topic_node_id):
 
 
 def transcript(request, project_slug, document_id):
+    project_slug = utils.get_project_slug(project_slug)
     transcript = get_object_or_404(Transcript, document_id=document_id)
     return HttpResponse(transcript)
 
 def footnote(request, project_slug, document_id, footnote_id):
+    project_slug = utils.get_project_slug(project_slug)
     o = {}
     o['footnote'] = get_object_or_404(Footnote, id=footnote_id)
     o['project_slug'] = project_slug
@@ -1528,6 +1570,7 @@ def footnote(request, project_slug, document_id, footnote_id):
         'footnote.html', o, context_instance=RequestContext(request))
 
 def rdfa_view_note(request, project_slug, note_id):
+    project_slug = utils.get_project_slug(project_slug)
     user = request.user
     if not user.is_authenticated():
         raise PermissionDenied("anonymous access not allowed")
@@ -1540,6 +1583,7 @@ def rdfa_view_note(request, project_slug, note_id):
     return HttpResponse(semantic_rdfa(note, note.content))
     
 def rdfa_view_document(request, project_slug, document_id):
+    project_slug = utils.get_project_slug(project_slug)
     user = request.user
     if not user.is_authenticated():
         raise PermissionDenied("anonymous access not allowed")
@@ -1553,6 +1597,7 @@ def rdfa_view_document(request, project_slug, document_id):
     
 
 def image_browse(request,project_slug,document_id):
+    project_slug = utils.get_project_slug(project_slug)
     o = {}
     user = request.user
 
@@ -1631,6 +1676,7 @@ def autocomplete_search(request):
     return HttpResponse(res, mimetype='application/json') 
 
 def create_cluster(request,project_slug):
+    project_slug = utils.get_project_slug(project_slug)
     if ('action' in request.POST) and (request.POST['action'] == 'create'):
         if 'topic' in request.POST:
             result_query = main_models.Topic.objects.filter(id=request.POST['topic'])
@@ -1642,6 +1688,7 @@ def create_cluster(request,project_slug):
 
 @login_required
 def show_cluster(request,project_slug,cluster_id):
+    project_slug = utils.get_project_slug(project_slug)
     query_result = TopicCluster.objects.filter(id=cluster_id)
     cluster = query_result[0] if query_result.count()!= 0 else None
     
@@ -1690,4 +1737,37 @@ def show_cluster(request,project_slug,cluster_id):
     return render_to_response(
         'clusterShowCendari.html', o, context_instance=RequestContext(request))
 
+
+
+
+def add_project_slug(request,project_id):
+    response = {}
+    if request.method == 'POST':
+        print ':::::::::::::::::::::::::::::::'
+        if 'name' in request.POST and 'project_id' in request.POST and request.POST['name'] :
+            new_alias = request.POST['name']
+            project_id = request.POST['project_id']
+            print new_alias
+            print project_id
+            query_set = Project.objects.filter(id=project_id)
+            project = query_set[0] if len(query_set)>0 else  None
+            if project != None:
+                user = request.user if request.user else project.creator
+                if (main_models.Project.objects.filter(slug=new_alias).count() == 0) or (main_models.ProjectSlugAlias.objects.filter(name=new_alias).count() == 0):
+                    project.slug_aliases.create(creator=user,name=new_alias)
+                    project.save()
+                    response['status'] = 'success'
+                    response['message'] = 'project alias saved'
+                else:
+                    response['status'] = 'error'
+                    response['message'] = 'alias already exists'
+            else:
+                response['status'] = 'error'
+                response['message'] = 'project wasn\'t found'
+        else:
+            response['status'] = 'error'
+            response['message'] = 'missing information'
+    
+    print response
+    return HttpResponse(json.dumps(response), content_type="application/json");
 

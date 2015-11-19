@@ -293,11 +293,15 @@
 		Ext.onReady(function(){
 			$('#extraButtonId').css('left',$('#versionHistoryButtonId').css('left'))
 			$('#versionHistoryButtonId').hide();
-			$('#extraButtonId').text('Edit Mode');
-			$('#extraButtonId').on('click',function(e){
-				var readModeUrl = '{% url "note_edit" project_slug=project.slug  note_id=note.id %}';
-				window.location.replace(readModeUrl);
-			});
+			{% if user.is_authenticated%}
+				$('#extraButtonId').text('Edit Mode');
+				$('#extraButtonId').on('click',function(e){
+					var readModeUrl = '{% url "note_edit" project_slug=project.slug  note_id=note.id %}';
+					window.location.replace(readModeUrl);
+				});
+				{% else %}
+				$('#extraButtonId').hide()
+			{% endif %}
 
 		})
 

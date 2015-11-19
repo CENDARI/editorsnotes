@@ -111,6 +111,7 @@ cendaripatterns = patterns('cendari.views',
     # Cendari Projects
     url(r'^cendari/projects/add/',                                                          'cendari_project_add',                name='add_project_view'),
     url(r'^cendari/projects/(?P<project_id>\d+)/$',                                          'cendari_project_change',            name='project_view'),
+    url(r'^cendari/projects/(?P<project_id>\d+)/add_alias/$',                                          'add_project_slug',            name='add_project_slug_view'),
     url(r'^projects/(?P<project_slug>[-\w]+)/',                                                 include('editorsnotes.admin.urls',   namespace='admin', app_name='admin')),
     #url(r'^cendari/projects/add/$',                                                         cendari.views.change_project,        name='addproject_view'),
     #url(r'^cendari/projects/(?P<slug>[-_a-z0-9]+)/$',                                       EditProjectAdminView.as_view(),      name='project_view'),
@@ -140,7 +141,8 @@ cendaripatterns = patterns('cendari.views',
     # Cendari Topics
     #url(r'^cendari/(?P<project_slug>[-\w]+)/topics/add/$',                                      EditTopicAdminView.as_view(),        name='addtopic_view'),
     #url(r'^cendari/(?P<project_slug>[-\w]+)/topics/(?P<topic_node_id>\d+)/$',                   EditTopicAdminView.as_view(),        name='topic_view'),
-    url(r'^cendari/(?P<project_slug>[-\w]+)/topics/(?P<topic_node_id>\d+)/$',                   'editEntityCendari',                  name='topic_view'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/topics/(?P<topic_node_id>\d+)/$',                   'readEntityCendari',                  name='topic_read'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/topics/(?P<topic_node_id>\d+)/edit$',                   'editEntityCendari',                  name='topic_edit'),
 	url(r'^cendari/topic/(?P<topic_node_id>[\w\-,]+)/$',                                        'edit_topic_node',                 name='topic_node_view'),
 
     
