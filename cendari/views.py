@@ -150,9 +150,19 @@ def user_login(request):
    
 
     if 'eppn' in request.META:
-        if 'REMOTE_USER' in request:
+        if 'REMOTE_USER' in request.META:
             request.session['REMOTE_USER'] = request.META['REMOTE_USER']
+            logger.debug('session REMOTE_USER:')
+            logger.debug(request.session['REMOTE_USER'])
+            if 'REMOTE_USER' in request.session:
+                logger.debug('REMOTE_USER is in session')
+            else:
+                logger.debug('REMOTE_USER is not in the session')
+        else:
+            logger.debug('no REMOTE_USER in meta')
         return redirect('index_view')
+    else:
+        logger.debug('no eppn in meta')
     return redirect('index_view')
 
 def get_projects_owned_by_user(user):
@@ -179,7 +189,7 @@ def index(request,project_slug=None):
     logger.debug(request.META)
 
     logger.debug('in login request session is :')
-    logger.debug(request.session)
+    logger.debug(request.session['REMOTE_USER'])
     
     user = request.user
     #if project_slug is None:
