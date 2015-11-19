@@ -152,10 +152,11 @@ def user_login(request):
     if 'eppn' in request.META:
         if 'REMOTE_USER' in request.META:
             request.session['REMOTE_USER'] = request.META['REMOTE_USER']
-            logger.debug('session REMOTE_USER:')
-            logger.debug(request.session['REMOTE_USER'])
+           
             if 'REMOTE_USER' in request.session:
                 logger.debug('REMOTE_USER is in session')
+                logger.debug('session REMOTE_USER:')
+                logger.debug(request.session['REMOTE_USER'])
             else:
                 logger.debug('REMOTE_USER is not in the session')
         else:
