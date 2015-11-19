@@ -126,11 +126,12 @@ cendaripatterns = patterns('cendari.views',
     url(r'^cendari/(?P<project_slug>[-\w]+)/notes/(?P<note_id>\d+)/version_history$',                          'versionHistoryNoteCendari',                name='note_version_history'),
     url(r'^cendari/(?P<project_slug>[-\w]+)/notes/(?P<note_id>\d+)/version_history/(?P<version_id>\d+)$',  'versionNoteCendari',                name='note_version'),
     url(r'^cendari/(?P<project_slug>[-\w]+)/notes/(?P<note_id>\d+)/rdfa/$', 'rdfa_view_note', name='rdfa_view_note'),
-
+    url(r'^cendari/(?P<project_slug>[-\w]+)/notes/(?P<note_id>\d+)/download/$', 'rdfa_download_note', name='rdfa_download_note'),
 
     # Cendari Documents
     url(r'^cendari/(?P<project_slug>[-\w]+)/documents/(?P<document_id>\d+)/transcript/$',       EditTranscriptAdminView.as_view(),   name='transcript_edit_view'),
     url(r'^cendari/(?P<project_slug>[-\w]+)/documents/(?P<document_id>\d+)/rdfa/$', 'rdfa_view_document', name='rdfa_view_document'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/documents/(?P<document_id>\d+)/download/$', 'rdfa_download_document', name='rdfa_download_document'),
    # url(r'^cendari/(?P<project_slug>[-\w]+)/documents/(?P<document_id>\d+)/$',                  EditDocumentAdminView.as_view(),     name='document_view'),
     url(r'^cendari/(?P<project_slug>[-\w]+)/documents/(?P<document_id>\d+)/edit/$',                 'editDocumentCendari',                name='document_edit'),
     url(r'^cendari/(?P<project_slug>[-\w]+)/documents/(?P<document_id>\d+)/$',                 'readDocumentCendari',                name='document_read'),

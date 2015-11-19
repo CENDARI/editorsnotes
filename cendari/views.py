@@ -1580,7 +1580,8 @@ def rdfa_view_note(request, project_slug, note_id):
         raise PermissionDenied("Note %d does not belong to project %s"%(note_id,project_slug))
     if not user.superuser_or_belongs_to(project):
         raise PermissionDenied("not authorized on %s project" % project.slug)
-    return HttpResponse(semantic_rdfa(note, note.content))
+    return HttpResponse(semantic_rdfa(note, note.content),
+                        content_type="application/xhtml+xml")
     
 def rdfa_view_document(request, project_slug, document_id):
     project_slug = utils.get_project_slug(project_slug)
@@ -1593,8 +1594,18 @@ def rdfa_view_document(request, project_slug, document_id):
         raise PermissionDenied("Document %d does not belong to project %s"%(document_id,project_slug))
     if not user.superuser_or_belongs_to(project):
         raise PermissionDenied("not authorized on %s project" % project.slug)
-    return HttpResponse(semantic_rdfa(document, document.description))
-    
+    return HttpResponse(semantic_rdfa(document, document.description),
+                        content_type="application/xhtml+xml")
+
+def rdfa_download_note(request, project_slug, note_id):
+    response = rdfa_view_note(request, project_slug, note_id)
+    response['Content-Disposition'] = 'attachment; filename="note_%s_%s.xml"'%(project_slug, note_id)
+    return response
+
+def rdfa_download_document(request, project_slug, document_id):
+    response = rdfa_view_document(request, project_slug, document_id)
+    response['Content-Disposition'] = 'attachment; filename="document_%s_%s.xml"'%(project_slug, document_id)
+    return response
 
 def image_browse(request,project_slug,document_id):
     project_slug = utils.get_project_slug(project_slug)
