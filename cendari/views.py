@@ -188,9 +188,9 @@ def _check_privs(user, obj):
 def index(request,project_slug=None):
     logger.debug('in index request meta is :')
     logger.debug(request.META)
-
-    logger.debug('in login request session is :')
-    logger.debug(request.session['REMOTE_USER'])
+    if 'REMOTE_USER' in request.session:
+        logger.debug('in login request session is :')
+        logger.debug(request.session['REMOTE_USER'])
     
     user = request.user
     #if project_slug is None:
