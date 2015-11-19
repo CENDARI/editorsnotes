@@ -144,9 +144,14 @@ def user_login(request):
     logger.debug('in login request meta is :')
     logger.debug(request.META)
 
+    logger.debug('in login request session is :')
+    logger.debug(request.session)
+
    
 
     if 'eppn' in request.META:
+        if 'REMOTE_USER' in request:
+            request.session['REMOTE_USER'] = request.META['REMOTE_USER']
         return redirect('index_view')
     return redirect('index_view')
 
@@ -172,6 +177,10 @@ def _check_privs(user, obj):
 def index(request,project_slug=None):
     logger.debug('in index request meta is :')
     logger.debug(request.META)
+
+    logger.debug('in login request session is :')
+    logger.debug(request.session)
+    
     user = request.user
     #if project_slug is None:
     #    project = user.get_authorized_projects()[0]

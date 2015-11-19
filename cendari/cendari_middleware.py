@@ -19,6 +19,8 @@ class CendariUserMiddleware(RemoteUserMiddleware):
     def process_request(self, request):
         if 'REMOTE_USER' in request.META:
             request.META['REMOTE_USER'] = cendari_clean_name(request.META['REMOTE_USER'])
+        elif 'REMOTE_USER' in request.session:
+            request.META['REMOTE_USER'] = cendari_clean_name(request.session['REMOTE_USER'])
         super(CendariUserMiddleware, self).process_request(request)
         user = request.user
         logger.debug('Cendari Middelware called with user %s', user)
