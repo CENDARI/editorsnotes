@@ -299,9 +299,12 @@
 					var readModeUrl = '{% url "note_edit" project_slug=project.slug  note_id=note.id %}';
 					window.location.replace(readModeUrl);
 				});
-				{% else %}
+			{% else %}
 				$('#extraButtonId').hide()
 			{% endif %}
+			$('#exportRdfaButtonId').on('click',function(){
+				var win = window.open('{% url "rdfa_download_note" project_slug=project.slug  note_id=note.id  %}','_blank');	
+			})
 
 		})
 

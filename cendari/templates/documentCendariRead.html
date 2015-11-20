@@ -326,6 +326,9 @@
 			{% else %}
 				$('#extraButtonId').hide()
 			{% endif %}
+			$('#exportRdfaButtonId').on('click',function(){
+				var win = window.open('{% url "rdfa_download_document" project_slug=project.slug  document_id=document.id %}','_blank');	
+			})
 		})
 
 	</script>

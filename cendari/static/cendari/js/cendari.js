@@ -140,6 +140,7 @@ Ext.application({
 							id: 'extraButtonId'
 						},
 						
+						
 						{
 							itemId : 'toggleCw',
 							text : 'Pop-up Window',
@@ -164,6 +165,10 @@ Ext.application({
 						// 				text : 'From ...'
 						// 			}]
 						// 	},
+							{
+								text : 'Export rdfa',
+								id: 'exportRdfaButtonId'
+							},
 							{
 								text:'Delete',
 								id: 'deleteButtonId'
