@@ -111,6 +111,7 @@ cendaripatterns = patterns('cendari.views',
     # Cendari Projects
     url(r'^cendari/projects/add/',                                                          'cendari_project_add',                name='add_project_view'),
     url(r'^cendari/projects/(?P<project_id>\d+)/$',                                          'cendari_project_change',            name='project_view'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/$',                                          'cendari_project_view',            name='project_read_view'),
     url(r'^cendari/projects/(?P<project_id>\d+)/add_alias/$',                                          'add_project_slug',            name='add_project_slug_view'),
     url(r'^projects/(?P<project_slug>[-\w]+)/',                                                 include('editorsnotes.admin.urls',   namespace='admin', app_name='admin')),
     #url(r'^cendari/projects/add/$',                                                         cendari.views.change_project,        name='addproject_view'),

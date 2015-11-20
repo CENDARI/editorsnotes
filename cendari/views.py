@@ -348,15 +348,17 @@ def cendari_project_add(request):
 
 # TODO add reversion / revision
 
-@login_required
+# @login_required
 @reversion.create_revision()
 def cendari_project_change(request, project_id):
     o = {}
-    project = _check_privs(request.user, get_object_or_404(Project, id=project_id))
-    
-    user = request.user
+    if request.user.is_authenticated():
+        project = _check_privs(request.user, get_object_or_404(Project, id=project_id))
+    else:
+       project = get_object_or_404(Project, id=project_id)
+       return redirect('project_read_view',project_slug=project.slug)
     o['user']= request.user
-    o['user_has_perm'] =  user.has_project_perm(project, 'main.change_project') or  project.is_owned_by(user)
+    o['user_has_perm'] =  request.user.has_project_perm(project, 'main.change_project') or  project.is_owned_by(user)
     o['slug_aliases'] = project.slug_aliases.all()
     o['mode'] = 'edit'
     # if not user.has_project_perm(project, 'main.change_project') and not project.is_owned_by(user):
@@ -370,8 +372,8 @@ def cendari_project_change(request, project_id):
             messages.add_message(
                 request, messages.SUCCESS,
                 'Details of %s saved.' % (project.name))
-            redirect = request.GET.get('return_to', request.path)
-            return HttpResponseRedirect(redirect)
+            redirect_url = request.GET.get('return_to', request.path)
+            return HttpResponseRedirect(redirect_url)
         else:
             o['form'] = form
 
@@ -385,7 +387,17 @@ def cendari_project_change(request, project_id):
 
     return render_to_response(
         'editproject.html', o, context_instance=RequestContext(request))
-    
+
+def cendari_project_view(request,project_slug):
+    project_slug = utils.get_project_slug(project_slug)
+    project = get_object_or_404(Project, slug=project_slug)
+    if not utils.project_is_public(project):
+        _check_project_privs_or_deny(request.user, project_slug)
+    o ={}
+    o['project']=project
+    return render_to_response(
+        'editproject.html', o, context_instance=RequestContext(request))
+
 def editnote(request, note_id):
     if request.method == 'POST':
         form = NoteForm(request.POST)
@@ -1018,6 +1030,7 @@ def nerd_service(request):
     r = requests.get(url,params=params)
 
     return HttpResponse(r.content, mimetype='application/json')
+
 
 
 def find_date(request,project_slug,topic_node_id):
