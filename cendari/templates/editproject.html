@@ -49,12 +49,27 @@
         <label for="slug_alias">New Alias:</label>
         <input id="slugAliasSubmit" name="slug_alias" />
         <a id ="aliasSlugCendariSumbit" class="btn"   href="{% url "add_project_slug_view" project_id=project.id  %}"> Add</a>
-     
-        <ul id='slug_alias_list'>
+
+        <h2> Available Slugs:</h2>
+        <table style="width:100%" id='slug_alias_table'>
+          <tr>
+            <th><span style="font-weight:bold">Slug Alias</span></th>
+            <th><span style="font-weight:bold">Project url</span></th>
+          </tr>
+          <tr>
+            <td>{{project.slug}}</td>
+            <td> <a href="{% url "project_read_view" project_slug=project.slug%}" target="_blank"> {% url "project_read_view" project_slug=project.slug%} </a> </td>
+          </tr>
           {% for slug_alias in slug_aliases %}
-            <li> {{slug_alias}}</li>
-          {% endfor%}
-        </ul>
+            <tr>
+              <td>{{slug_alias}}</td>
+              <td> <a href="{% url "project_read_view" project_slug=slug_alias%}" target="_blank"> {% url "project_read_view" project_slug=slug_alias%} </a> </td>
+            </tr>
+          {% endfor %}
+
+        </table>
+
+
        </form>
     {% endif%}
 {% endblock form_content %}
@@ -174,7 +189,7 @@
         success: function(data){
           console.log('data!!!')
           if (data['status'] == 'success'){
-           $('#slug_alias_list').append('<li>'+ $('#slugAliasSubmit').val()+'</li>')
+           $('#slug_alias_table').append('<tr>'+ '<td>'+$('#slugAliasSubmit').val()+'</td>'+ '<td><a href="'+cendari_root_url+'cendari/'+$('#slugAliasSubmit').val()+'" target="_blank"> '+cendari_root_url+'cendari/'+$('#slugAliasSubmit').val()+' </a></td>'  +'</tr>')
            $('#slugAliasSubmit').val('')
            showSuccessMessage('alias was added')
           }

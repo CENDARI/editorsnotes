@@ -359,6 +359,8 @@ def cendari_project_change(request, project_id):
        return redirect('project_read_view',project_slug=project.slug)
     o['user']= request.user
     o['user_has_perm'] =  request.user.has_project_perm(project, 'main.change_project') or  project.is_owned_by(user)
+    if not ['user_has_perm']:
+        return redirect('project_read_view',project_slug=project.slug)
     o['slug_aliases'] = project.slug_aliases.all()
     o['mode'] = 'edit'
     # if not user.has_project_perm(project, 'main.change_project') and not project.is_owned_by(user):
@@ -1777,7 +1779,7 @@ def add_project_slug(request,project_id):
             project = query_set[0] if len(query_set)>0 else  None
             if project != None:
                 user = request.user if request.user else project.creator
-                if (main_models.Project.objects.filter(slug=new_alias).count() == 0) or (main_models.ProjectSlugAlias.objects.filter(name=new_alias).count() == 0):
+                if (main_models.Project.objects.filter(slug=new_alias).count() == 0) and (main_models.ProjectSlugAlias.objects.filter(name=new_alias).count() == 0):
                     project.slug_aliases.create(creator=user,name=new_alias)
                     project.save()
                     response['status'] = 'success'

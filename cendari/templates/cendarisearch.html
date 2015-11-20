@@ -200,7 +200,7 @@ rect.zoompane {
           </ul>
           {% else %}
             <ul class="nav pull-right">
-              <li><a href="{% url 'django.contrib.auth.views.login' %}{% if request.path|length > 1 %}?return_to={{ request.path }}{% endif %}">Log in</a></li>
+              <li><a href="{% url 'user_login_view' %}{% if request.path|length > 1 %}?return_to={{ request.path }}{% endif %}">Log in</a></li>
               </ul>
           {% endif %}
         {% endwith %}
