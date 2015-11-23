@@ -353,11 +353,20 @@ def cendari_project_add(request):
 def cendari_project_change(request, project_id):
     o = {}
     user = request.user
+    project = get_object_or_404(Project, id=project_id)
     if request.user.is_authenticated():
-        project = _check_privs(request.user, get_object_or_404(Project, id=project_id))
+        try:
+            project = _check_privs(request.user, project)
+        except PermissionDenied, e:
+            if utils.project_is_public(project):
+                return redirect('project_read_view',project_slug=project.slug)
+        
+    elif utils.project_is_public(project):
+        return redirect('project_read_view',project_slug=project.slug)
     else:
-       project = get_object_or_404(Project, id=project_id)
-       return redirect('project_read_view',project_slug=project.slug)
+        raise PermissionDenied("not authorized on %s project" % project_slug)
+
+
     o['user']= request.user
     o['user_has_perm'] = user.is_authenticated() and (request.user.has_project_perm(project, 'main.change_project') or  project.is_owned_by(user))
     if not ['user_has_perm']:
@@ -585,8 +594,13 @@ def getResourcesData(request, project_slug, sfield):
 
     if request.user.is_authenticated():
         projects = request.user.get_authorized_projects().order_by('name').distinct('name')
-        main_project =  _check_project_privs_or_deny(request.user, project_slug)
-        print "I am hereeeeeeeee"
+        try:
+            main_project =  _check_project_privs_or_deny(request.user, project_slug)
+        except PermissionDenied, e:
+            main_project = get_object_or_404(Project, slug=project_slug)
+            if not utils.project_is_public(main_project):
+                raise PermissionDenied("not authorized on %s project" % project_slug)
+        
     elif project_slug != 'no_project':
         project = get_object_or_404(Project, slug=project_slug)
         if not utils.project_is_public(project):
@@ -665,16 +679,21 @@ def getResourcesData(request, project_slug, sfield):
 
 def getLazyProjectData(request, project_slug, sfield):
     project_slug = utils.get_project_slug(project_slug)
+    result_list = []
+    projects = []
     if not utils.project_is_public(get_object_or_404(Project, slug=project_slug)):
         _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     if request.user.is_authenticated():
-        projects = request.user.get_authorized_projects() 
-    else:
-        projects =utils.get_public_projects()   
+        projects = projects + list(request.user.get_authorized_projects()) 
+    projects =projects + list(utils.get_public_projects())  
+    print "projects::::"
+    print projects 
     for p in projects:
         image_place_holder   = utils.get_image_placeholder_document(request.user,p)
+        print '------------------'
+        print p.slug
+        print project_slug
         if p.slug == project_slug:
-            result_list = []
             max_count = 10000
             for model in [main_models.Note, main_models.Document, main_models.Topic]:
                 model_name = model._meta.module_name  
