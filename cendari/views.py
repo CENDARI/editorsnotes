@@ -944,7 +944,7 @@ def getProjectID(request, project_slug, new_slug):
     # _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     # _check_project_privs_or_deny(request.user, new_slug) # only 4 check
     editorsnotes.admin.views.projects.change_project(request, new_slug)
-    if user.is_authenticated():
+    if request.user.is_authenticated():
         projects = list(request.user.get_authorized_projects())
     for public_project in utils.get_public_projects():
         if not public_project in projects:
