@@ -685,7 +685,9 @@ def getLazyProjectData(request, project_slug, sfield):
         _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     if request.user.is_authenticated():
         projects = projects + list(request.user.get_authorized_projects()) 
-    projects =projects + list(utils.get_public_projects())  
+    for p in utils.get_public_projects():
+        if not p in projects: 
+            projects.append(p)  
     print "projects::::"
     print projects 
     for p in projects:
