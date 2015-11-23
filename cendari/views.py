@@ -936,8 +936,12 @@ def getDocumentResources_Faster(request, project_slug, sfield):
 
 def getProjectID(request, project_slug, new_slug):
     project_slug = utils.get_project_slug(project_slug)
-    _check_project_privs_or_deny(request.user, project_slug) # only 4 check
-    _check_project_privs_or_deny(request.user, new_slug) # only 4 check
+    if not utils.project_is_public(get_object_or_404(Project, slug=project_slug)):
+        current_project = _check_project_privs_or_deny(request.user, project_slug) # only 4 check
+    else:
+        current_project = get_object_or_404(Project, slug=project_slug)
+    # _check_project_privs_or_deny(request.user, project_slug) # only 4 check
+    # _check_project_privs_or_deny(request.user, new_slug) # only 4 check
     editorsnotes.admin.views.projects.change_project(request, new_slug)
     projects = request.user.get_authorized_projects()
     selected_project = list((x for x in request.user.get_authorized_projects() if x.slug == new_slug))
@@ -949,7 +953,11 @@ def getProjectID(request, project_slug, new_slug):
 
 def getTopicType(request, project_slug, topic_id):
     project_slug = utils.get_project_slug(project_slug)
-    _check_project_privs_or_deny(request.user, project_slug) # only 4 check
+    if not utils.project_is_public(get_object_or_404(Project, slug=project_slug)):
+        current_project = _check_project_privs_or_deny(request.user, project_slug) # only 4 check
+    else:
+        current_project = get_object_or_404(Project, slug=project_slug)
+    # _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     #editorsnotes.admin.views.projects.change_project(request, project_slug)
     topic_node_query_set = main_models.TopicNode.objects.filter(id=topic_id)
     topic_type = topic_node_query_set[0].type
