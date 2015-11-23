@@ -353,6 +353,7 @@ def cendari_project_add(request):
 def cendari_project_change(request, project_id):
     o = {}
     user = request.user
+    logger.debug('==================================')
     logger.debug('getting project')
     project = get_object_or_404(Project, id=project_id)
     logger.debug('checking if user is authhenticated')
