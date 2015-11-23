@@ -352,7 +352,7 @@ def cendari_project_add(request):
 @reversion.create_revision()
 def cendari_project_change(request, project_id):
     o = {}
-    uer = request.user
+    user = request.user
     if request.user.is_authenticated():
         project = _check_privs(request.user, get_object_or_404(Project, id=project_id))
     else:
