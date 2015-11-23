@@ -933,7 +933,7 @@ def getDocumentResources_Faster(request, project_slug, sfield):
     return doc_list
 
 
-@login_required
+
 def getProjectID(request, project_slug, new_slug):
     project_slug = utils.get_project_slug(project_slug)
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check
@@ -946,7 +946,7 @@ def getProjectID(request, project_slug, new_slug):
     ret = json.dumps(res, encoding="utf-8")
     return HttpResponse(ret, mimetype='application/json') 
 
-@login_required
+
 def getTopicType(request, project_slug, topic_id):
     project_slug = utils.get_project_slug(project_slug)
     _check_project_privs_or_deny(request.user, project_slug) # only 4 check

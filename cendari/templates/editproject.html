@@ -47,7 +47,7 @@
    {% if mode == 'edit' %}
       <form class="formCendari" id="aliasSlugCendari" action="{% url "add_project_slug_view" project_id=project.id  %}" method="POST">
         <label for="slug_alias">New Alias:</label>
-        <input id="slugAliasSubmit" name="slug_alias" />
+        <input id="id_slugalias" name="slug_alias" />
         <a id ="aliasSlugCendariSumbit" class="btn"   href="{% url "add_project_slug_view" project_id=project.id  %}"> Add</a>
 
         <h2> Available Slugs:</h2>
@@ -185,12 +185,12 @@
         // beforeSend: function (xhr) {xhr.setRequestHeader('X-CSRFToken', $('input[name="csrfmiddlewaretoken"]').val());},
         url:$('#aliasSlugCendariSumbit').attr('href'),
         type: 'POST',
-        data: {project_id:{{project.id}},name:$('#slugAliasSubmit').val(), csrfmiddlewaretoken: document.getElementsByName("csrfmiddlewaretoken")[0].value},
+        data: {project_id:{{project.id}},name:$('#id_slugalias').val(), csrfmiddlewaretoken: document.getElementsByName("csrfmiddlewaretoken")[0].value},
         success: function(data){
           console.log('data!!!')
           if (data['status'] == 'success'){
-           $('#slug_alias_table').append('<tr>'+ '<td>'+$('#slugAliasSubmit').val()+'</td>'+ '<td><a href="'+cendari_root_url+'cendari/'+$('#slugAliasSubmit').val()+'" target="_blank"> '+cendari_root_url+'cendari/'+$('#slugAliasSubmit').val()+' </a></td>'  +'</tr>')
-           $('#slugAliasSubmit').val('')
+           $('#slug_alias_table').append('<tr>'+ '<td>'+$('#id_slugalias').val()+'</td>'+ '<td><a href="'+cendari_root_url+'cendari/'+$('#id_slugalias').val()+'" target="_blank"> '+cendari_root_url+'cendari/'+$('#id_slugalias').val()+' </a></td>'  +'</tr>')
+           $('#id_slugalias').val('')
            showSuccessMessage('alias was added')
           }
           else{
@@ -252,6 +252,12 @@
 			});
 
 		}
+    if($('#id_slugalias').length){
+      $('#id_slugalias').keyup(function() {
+        var dInput = $(this).val();
+        $('#id_slugalias').val(dInput.replace(/[^a-zA-Z0-9-_]/g, '_'));
+      });
+    }
 
 	});
 </script>
