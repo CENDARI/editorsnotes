@@ -353,26 +353,44 @@ def cendari_project_add(request):
 def cendari_project_change(request, project_id):
     o = {}
     user = request.user
+    logger.debug('getting project')
     project = get_object_or_404(Project, id=project_id)
+    logger.debug('checking if user is authhenticated')
+    logger.debug(project)
+    logger.debug(user)
+    logger.debug(request.user)
     if request.user.is_authenticated():
         try:
+            logger.debug('checking for is_privs')
             project = _check_privs(request.user, project)
+            logger.debug('success')
+            logger.debug(project)
         except PermissionDenied, e:
+            logger.debug('no privs')
             if utils.project_is_public(project):
+                logger.debug('project is public')
                 return redirect('project_read_view',project_slug=project.slug)
         
     elif utils.project_is_public(project):
+        logger.debug('user is not authhenticated')
         return redirect('project_read_view',project_slug=project.slug)
     else:
         raise PermissionDenied("not authorized on %s project" % project_slug)
 
 
     o['user']= request.user
-    o['user_has_perm'] = user.is_authenticated() and (request.user.has_project_perm(project, 'main.change_project') or  project.is_owned_by(user))
+    logger.debug('checking permissions')
+    if user.is_authenticated():
+        o['user_has_perm'] = request.user.has_project_perm(project, 'main.change_project') or  project.is_owned_by(user)
+    else:
+        o['user_has_perm'] = False
+    logger.debug(o['user_has_perm'])
     if not ['user_has_perm']:
+        logger.debug('user doesn\'t  have permissions')
         return redirect('project_read_view',project_slug=project.slug)
     o['slug_aliases'] = project.slug_aliases.all()
     o['mode'] = 'edit'
+    logger.debug('set variables')
     # if not user.has_project_perm(project, 'main.change_project') and not project.is_owned_by(user):
     #     return HttpResponseForbidden(
     #         content='You do not have permission to edit the details of %s' % project.name)
