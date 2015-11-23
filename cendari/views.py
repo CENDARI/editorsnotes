@@ -352,13 +352,14 @@ def cendari_project_add(request):
 @reversion.create_revision()
 def cendari_project_change(request, project_id):
     o = {}
+    uer = request.user
     if request.user.is_authenticated():
         project = _check_privs(request.user, get_object_or_404(Project, id=project_id))
     else:
        project = get_object_or_404(Project, id=project_id)
        return redirect('project_read_view',project_slug=project.slug)
     o['user']= request.user
-    o['user_has_perm'] =  request.user.has_project_perm(project, 'main.change_project') or  project.is_owned_by(user)
+    o['user_has_perm'] = user.is_authenticated() and (request.user.has_project_perm(project, 'main.change_project') or  project.is_owned_by(user))
     if not ['user_has_perm']:
         return redirect('project_read_view',project_slug=project.slug)
     o['slug_aliases'] = project.slug_aliases.all()
