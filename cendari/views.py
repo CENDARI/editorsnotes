@@ -936,6 +936,7 @@ def getDocumentResources_Faster(request, project_slug, sfield):
 
 def getProjectID(request, project_slug, new_slug):
     project_slug = utils.get_project_slug(project_slug)
+    projects = []
     if not utils.project_is_public(get_object_or_404(Project, slug=project_slug)):
         current_project = _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     else:
@@ -943,8 +944,12 @@ def getProjectID(request, project_slug, new_slug):
     # _check_project_privs_or_deny(request.user, project_slug) # only 4 check
     # _check_project_privs_or_deny(request.user, new_slug) # only 4 check
     editorsnotes.admin.views.projects.change_project(request, new_slug)
-    projects = request.user.get_authorized_projects()
-    selected_project = list((x for x in request.user.get_authorized_projects() if x.slug == new_slug))
+    if user.is_authenticated():
+        projects = list(request.user.get_authorized_projects())
+    for public_project in utils.get_public_projects():
+        if not public_project in projects:
+            projects.append(public_project)
+    selected_project = list((x for x in projects if x.slug == new_slug))
     selected_project_id = selected_project[0].id #there should only be one project with slug == new_slug
     res = {'project_id':selected_project_id}
     ret = json.dumps(res, encoding="utf-8")
