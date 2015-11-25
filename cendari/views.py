@@ -228,7 +228,6 @@ class EditDocumentAdminView(DocumentAdminView):
         semantic_process_document(obj, user)
         return obj, action
 
-@login_required
 def scan(request, scan_id, project_slug):
     project_slug = utils.get_project_slug(project_slug)
     #print "scan view"
@@ -252,7 +251,6 @@ def scan(request, scan_id, project_slug):
         { 'scan':o,'project_slug': project_slug}, 
         context_instance=RequestContext(request))
 
-@login_required
 def scan_image(request, scan_id, project_slug):
     project_slug = utils.get_project_slug(project_slug)
     scan = get_object_or_404(main_models.Scan, id=scan_id)
@@ -260,7 +258,6 @@ def scan_image(request, scan_id, project_slug):
         raise PermissionDenied("not authorized on %s project" % project_slug)
     return sendfile(request, os.path.abspath(scan.image.path))
 
-@login_required
 def scan_tiffimage(request, scan_id, project_slug):
     project_slug = utils.get_project_slug(project_slug)
     scan = get_object_or_404(main_models.Scan, id=scan_id)
