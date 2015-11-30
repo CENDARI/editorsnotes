@@ -35,6 +35,7 @@ from pyelasticsearch import ElasticSearch
 
 
 __all__ = [
+    'EDM',
     'CENDARI',
     'SCHEMA',
     'DBPPROP',
@@ -73,7 +74,8 @@ DBPPROP  = Namespace("http://dbpedia.org/property/")
 GRS     = Namespace("http://www.georss.org/georss/")
 GEO     = Namespace("http://www.w3.org/2003/01/geo/wgs84_pos#")
 DBOWL   = Namespace("http://dbpedia.org/ontology/")
-FREEBASE = Namespace("http://rdf.freebase.com/ns/")
+EDM     = Namespace("http://www.europeana.eu/schemas/edm/")
+SKOS    = Namespace("http://www.w3.org/2004/02/skos/core#")
 
 INIT_NS = {
     'owl': OWL, 
@@ -83,7 +85,8 @@ INIT_NS = {
     'grs': GRS,
     'geo': GEO,
     'dbpedia-owl': DBOWL,
-    'ns': FREEBASE
+    'edm': EDM,
+    'skos': SKOS,
 }
 
 WRONG_PREFIX = "http://dbpedia.org/page/"
@@ -616,8 +619,6 @@ imported_relations = set([
     # Event/battle
     DBOWL['date'], 
     DBOWL['place'],
-    FREEBASE['topic_server.geolocation_latitude'],
-    FREEBASE['topic_server.geolocation_longitude'],
 ])
 
 no_duplicates = set([
@@ -759,14 +760,6 @@ def load_dbpedia(uri, topicid):
             loc = "%f %f" % (lat, lon)
             g.add( (uri, GRS['point'], Literal(loc)) )
             logger.info("Found in dbprop:latDeg/dbprop:lonDeg: %s", g.value(uri, GRS['point']))
-            break
-
-        lat = g.value(uri, FREEBASE['topic_server.geolocation_latitude'])
-        lon = g.value(uri, FREEBASE['topic_server.geolocation_longitude'])
-        if lat and lon:
-            loc = str(lat)+" "+str(lon)
-            g.add( (uri, GRS['point'], Literal(loc)) )
-            logger.info("Found in ns:latitude/ns:longitude: %s", g.value(uri, GRS['point']))
             break
 
         logger.warning('No lat/long information in RDF for %s', unicode(uri))
