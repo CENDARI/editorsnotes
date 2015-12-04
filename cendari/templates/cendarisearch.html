@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="{% static "bootstrap/css/bootstrap.min.css" %}">
 <link rel="stylesheet" href="{% static "jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.css" %}">
 <link rel="stylesheet" href="{% static "cendari/css/facetview.css" %}">
+<link rel="stylesheet" href="{% static "cendari/css/toastr.min.css" %}">
 <link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css' />
 <style type="text/css">
   .container {
@@ -128,10 +129,13 @@ rect.zoompane {
 
 {% block js_nocompress %}
 <script src='//cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js'></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.3/clipboard.min.js"></script>
 <script type="text/javascript" src="{% static "function/jquery/jquery-1.8.2.min.js" %}"></script>
 <script src='{% static 'function/d3/d3.v3.min.js' %}'></script>
 <script type="text/javascript" src="{% static "bootstrap/js/bootstrap.js" %}"></script>
 <script type="text/javascript" src="{% static "jquery-ui-1.8.18.custom/jquery-ui-1.8.18.custom.min.js" %}"></script>
+<script type="text/javascript" src="{% static "cendari/js/toastr.min.js" %}"></script>
+<script type="text/javascript" src="{% static "cendari/js/cendarimsg.js" %}"></script>
 <script type="text/javascript" src="{% static "cendari/js/latlon-geohash.js" %}"></script>
 <script type="text/javascript" src="{% static "cendari/js/cendarisearch.js" %}"></script>
 
@@ -194,9 +198,6 @@ rect.zoompane {
             </form> 
         </ul>
 
-        <!--<button id="submitButtonCendari" onclick="submitCendariForm()"  value=""></button>
-        <script type="text/javascript" src="{% static "cendari/js/editor.js" %}"></script> -->
-
         {% with user=request.user %}
           {% if user.is_authenticated %}
             {% if user.email %}
@@ -234,10 +235,9 @@ rect.zoompane {
       <input id='trameCheckbox' type="checkbox" name="TRAME" value= "TRAME"></span>
     <span class='chk-with-label'>Limit search to current project:
       <input id='currentProjectCheckbox' type="checkbox" name="currentProject" value= "currentProject"> </span>
-    <span class='chk-with-label'>Select All:
-      <input id='selectAll' type="checkbox" name="selectAll" value="selectAll"> </span>
-    <span class='chk-with-label'>Select None:
-      <input id='selectNone' type="checkbox" name="selectNone" value="selectNone"> </span>
+    <button type='button' id='selectAll'>Select All</button>
+    <button type='button' id='selectNone'>Select None</button>
+    <button type='button' id='selectCopy'>Copy Selection to Clipboard</button>
   </p>
 
 <!-- Begin faceting. -->
@@ -333,7 +333,7 @@ rect.zoompane {
 </h2>
   <dl>
     {% for document in results %}
-    <dt><input class='select' type="checkbox" name="check_{{forloop.counter0}}" value= "select">
+    <dt><input class='selectHit' type="checkbox" name="check_{{forloop.counter0}}" value= "{{document.uri}}">
 <a href="{{ document.uri }}">
 {% for title in document.title %}
  {% if forloop.first %}

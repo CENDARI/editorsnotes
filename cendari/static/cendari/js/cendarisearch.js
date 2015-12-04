@@ -536,22 +536,25 @@ var datepicker_options = {
     $.datepicker._formatDate = datepicker__formatDate;
 }( jQuery, jQuery.ui.datepicker ));
 
-function select_toggle(event) {
-    $('#selectAll').prop("checked", false);
-    $('#selectNone').prop("checked", false);
-}
 
 function select_all(event) {
-    if ($(this).is( ":checked" )) {
-        $('.select').prop('checked', true);
-        $('#selectNone').prop('checked', false);
-    }
+    $('.selectHit').prop('checked', true);
 }
 
 function select_none(event) {
-    if ($(this).is( ":checked" )) {
-        $('.select').prop('checked', false);
-        $('#selectAll').prop('checked', false);
+    $('.selectHit').prop('checked', false);
+}
+
+function select_to_clipboard() {
+    var selected = $('.selectHit:checked').toArray();
+
+    if (selected.length==0) {
+        showErrorMessage("No document selected");
+        return '';
+    }
+    else {
+        showInfoMessage((selected.length).toString()+" document(s) in the Clipboard");
+        return selected.map(function(s) { return s.getAttribute("value"); }).join('\n');
     }
 }
 
@@ -567,5 +570,9 @@ function bind_faceted_widgets() {
     $('#searchText').keyup(facet_keyup);
     $('#selectAll').click(select_all);
     $('#selectNone').click(select_none);
-    $('.select').click(select_toggle);
+    new Clipboard('#selectCopy', {
+        text: function(trigger) {
+            return select_to_clipboard();
+        }
+    });
 }
