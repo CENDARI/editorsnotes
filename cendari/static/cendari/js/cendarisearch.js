@@ -536,6 +536,26 @@ var datepicker_options = {
     $.datepicker._formatDate = datepicker__formatDate;
 }( jQuery, jQuery.ui.datepicker ));
 
+function select_toggle(event) {
+    $('#selectAll').prop("checked", false);
+    $('#selectNone').prop("checked", false);
+}
+
+function select_all(event) {
+    if ($(this).is( ":checked" )) {
+        $('.select').prop('checked', true);
+        $('#selectNone').prop('checked', false);
+    }
+}
+
+function select_none(event) {
+    if ($(this).is( ":checked" )) {
+        $('.select').prop('checked', false);
+        $('#selectAll').prop('checked', false);
+    }
+}
+
+
 function bind_faceted_widgets() {
     $('.facetview_morefacetvals').click(morefacetvals);
     $('.facetview_toggle').click(facet_toggle);
@@ -545,4 +565,7 @@ function bind_faceted_widgets() {
     $('.facetview_filterdate').click(filter_date);
     $('.searchSubmit').click(facet_submit);
     $('#searchText').keyup(facet_keyup);
+    $('#selectAll').click(select_all);
+    $('#selectNone').click(select_none);
+    $('.select').click(select_toggle);
 }

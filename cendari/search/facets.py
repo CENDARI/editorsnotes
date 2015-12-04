@@ -191,8 +191,8 @@ def build_es_query(request,project_slug, version):
     # and ignore the filter alone
     q = {'query': { 'filtered': q } }
     if version > '1.6':
-        q['functions'] = [ {'filter': { 'term': { 'application': 'nte'}},
-                            'weight': 10
+        q['functions'] = [ {'filter': { 'terms': { 'application': ['nte' 'archives' 'repository']}},
+                            'weight': 50
                             },
                             {'field_value_factor': {
                                 "field": "pageviews",
@@ -292,16 +292,21 @@ def cendari_faceted_search(request,project_slug=None):
         if 'highlight' in h:
             for field, values in h['highlight'].items():
                 highlight += values
-            info = { 'uri': h['fields']['uri'][0], 
+            info = { 'uri': h['fields']['uri'][0],
                      'highlight': highlight }
+            if 'title' in h['fields']:
+                info['title'] = h['fields']['title']
             res.append(info)
         elif 'fields' in h and 'title' in h['fields']:
-            info = { 'uri': h['fields']['uri'][0], 
+            info = { 'uri': h['fields']['uri'][0],
+                     'title': h['fields']['title'],
                      'highlight': h['fields']['title'] }
             res.append(info)
         elif 'fields' in h:
             info = { 'uri': h['fields']['uri'][0], 
                      'highlight': '' }
+            if 'title' in h['fields']:
+                info['title'] = h['fields']['title']
 
     facets = results['aggregations']
     cardinalities = []

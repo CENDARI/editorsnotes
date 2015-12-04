@@ -34,6 +34,22 @@
     background: #faa732;
     padding: 2px;
   }
+
+  .chk-with-label {
+      padding: 3px 5px 3px 5px;
+      border: 1px solid black;
+  }
+
+  #searchText {
+      height: 25px;
+      font-size: 15pt;
+      width: 200px;
+      box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.075) inset;
+  }
+  #searchSubmit {
+      height: 25px;
+      font-size: 15pt;
+  }
   .searchresult > a * {
     display: inline;
   }
@@ -214,8 +230,14 @@ rect.zoompane {
     <input id="searchText" type="text" name="q" value="{{ query }}">
     <input id="searchSubmit" type="submit" value="Search">
     <input type="hidden" id="project_slug" name="project_slug" value="">
-    <br>Include TRAME <input id='trameCheckbox' type="checkbox" name="TRAME" value= "TRAME"> 
-    <br>Limit search to current project  <input id='currentProjectCheckbox' type="checkbox" name="currentProject" value= "currentProject"> 
+    <span class='chk-with-label'>Include TRAME:
+      <input id='trameCheckbox' type="checkbox" name="TRAME" value= "TRAME"></span>
+    <span class='chk-with-label'>Limit search to current project:
+      <input id='currentProjectCheckbox' type="checkbox" name="currentProject" value= "currentProject"> </span>
+    <span class='chk-with-label'>Select All:
+      <input id='selectAll' type="checkbox" name="selectAll" value="selectAll"> </span>
+    <span class='chk-with-label'>Select None:
+      <input id='selectNone' type="checkbox" name="selectNone" value="selectNone"> </span>
   </p>
 
 <!-- Begin faceting. -->
@@ -311,7 +333,18 @@ rect.zoompane {
 </h2>
   <dl>
     {% for document in results %}
-    <dt><a href="{{ document.uri }}">{{ document.uri }}</a></dt>
+    <dt><input class='select' type="checkbox" name="check_{{forloop.counter0}}" value= "select">
+<a href="{{ document.uri }}">
+{% for title in document.title %}
+ {% if forloop.first %}
+{{ title }}
+ {% else %}
+, {{ title }}
+ {% endif %}
+{% empty %}
+ {{ document.uri }}
+{% endfor %}
+</a></dt>
     <dd>
 {% autoescape off %}  
       {% for h in document.highlight %}
