@@ -188,7 +188,7 @@ Ext.application({
 					layout:'fit',
 					defaults:{
 						autoScroll : true,
-						minWidth : 5,
+						minWidth : 5
 					},
 
 					//title: 'My Working Space',
@@ -198,7 +198,7 @@ Ext.application({
 							closable : true,
 							minimizable : true,
 							title : 'Pop-up Window',
-							height : 200,
+							height : 300,
 							width : 400,
 							layout : 'fit',
 							constrain : true,
@@ -208,7 +208,7 @@ Ext.application({
 								this.floatParent.down('button#toggleCw').toggle();
 							}
 						})
-					],				
+					]
 				}, {
 					region : 'south',
 					height : 350,
