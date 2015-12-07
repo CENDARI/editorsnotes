@@ -229,7 +229,8 @@ rect.zoompane {
 <form id ='facetedSearchForm' method="get" action=".">
   <p>
     <input id="searchText" type="text" name="q" value="{{ query }}">
-    <input id="searchSubmit" type="submit" value="Search">
+    <input id="searchSubmit" type="submit" value="Search"
+           title="+ signifies AND, | signifies OR, - negates a single token, &quot; around a phrase, * at the end of a term for prefix, ( and ) signify precedence">
     <input type="hidden" id="project_slug" name="project_slug" value="">
     <span class='chk-with-label'>Include TRAME:
       <input id='trameCheckbox' type="checkbox" name="TRAME" value= "TRAME"></span>

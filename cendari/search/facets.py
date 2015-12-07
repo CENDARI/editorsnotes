@@ -126,7 +126,7 @@ def build_es_query(request,project_slug, version):
     if query is not None and len(query)!=0:
         logger.debug("Buidling textual query '%s'", query)
         #query_terms.append({'match': {'_all': query} })
-        query_terms.append({'query_string': {'query': query} })
+        query_terms.append({'simple_query_string': {'query': query} })
     else:
         logger.debug("Buidling no textual query")
         query = ''
