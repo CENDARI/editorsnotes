@@ -161,6 +161,9 @@ rect.zoompane {
       {%endif%}
       document.location.assign(url);
   }
+
+    var date_range = null;
+
 {% endautoescape %}
 </script>
 
@@ -290,8 +293,8 @@ rect.zoompane {
 	{% autoescape off %}
 	<script>
     	  var date_data = {{values.buckets|json}}, 
-	      date_range = {{values.bounds|json}},
 	      timeline = d3.select('.timeline');
+	  date_range = {{values.bounds|json}};
 	  buildTimeline(date_data, date_range, timeline);
 	  $(function() {
 	      $( "#min_date" ).datepicker(datepicker_options);
