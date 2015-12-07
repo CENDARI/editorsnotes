@@ -394,7 +394,7 @@ function find_dates(topic_node_id){
         else{
             alert('no dates found');
         }
-    })
+    });
 }
 
 function submitEntity(fc){
@@ -475,7 +475,7 @@ $(document).ready(function(){
         }
         else if(cendari_js_object_type == 'document'){
             showInfoMessage(messages.document.beforeSend);
-            console.log("cendari_js_object_id ===>",cendari_js_object_id)
+            console.log("cendari_js_object_id ===>",cendari_js_object_id);
             if(cendari_js_object_id.length === 0){
                 submitDocument(fc);
             }
