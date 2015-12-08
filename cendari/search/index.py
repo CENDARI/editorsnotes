@@ -173,6 +173,8 @@ class CendariIndex(object):
             topic = ta.topic
             if topic is None or topic.topic_node is None:
                 pass
+            elif topic.topic_node.type not in topics:
+                logger.error('Topic %s has no type', topic.id)
             elif topic.topic_node.type=='EVT':
                 date = topic.date
 #                if date is None:
@@ -335,7 +337,7 @@ class CendariIndex(object):
             elif isinstance(obj, Document):
                 doc = self.document_to_cendari(obj)
                 doc_type = 'document'
-            elif isinstance(obj, Topic):
+            elif isinstance(obj, Topic) and not obj.deleted:
                 doc = self.topic_to_cendari(obj)
                 doc_type = 'entity'
             else:
