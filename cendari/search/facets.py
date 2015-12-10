@@ -202,10 +202,10 @@ def build_es_query(request,project_slug, version):
                                 "missing": 1
                             }}
         ]
-        q['score_mode'] = 'sum'
+        q['score_mode'] = 'first'
         q = {'query': { 'function_score': q } }
 
-#    pprint.pprint(q)
+    pprint.pprint(q)
     return (q, query, geo_bounds, date_range)
 
 def del_out_of_bounds(buckets, bounds):
@@ -276,8 +276,8 @@ def cendari_faceted_search(request,project_slug=None):
     q['aggregations'] = cendari_aggregations(size=buckets, geo_bounds=geo_bounds, date_range=date_range)
     #pprint.pprint(q)
     results = cendari_index.search(q, highlight=True, size=size)
-    # with open('res.log', 'w') as out:
-    #     pprint.pprint(results, stream=out)
+    with open('res.log', 'w') as out:
+        pprint.pprint(results, stream=out)
     res = []
     total = int(results['hits']['total'])
     sizes = {
