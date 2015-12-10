@@ -1,6 +1,5 @@
 from django.core.management.base import BaseCommand
 import json, sys
-import pprint
 
 
 from ... import cendari_index
@@ -18,7 +17,6 @@ class Command(BaseCommand):
                     uri = doc['uri']
                     if isinstance(uri, list):
                         doc['uri'] = uri[0]
-                    pprint.pprint(doc)
                     yield es.index_op(doc, doc_type='document')
 
         if len(args) > 0:
@@ -26,5 +24,5 @@ class Command(BaseCommand):
         else:
             js = json.load(sys.stdin)
         res=es.bulk(litef_documents(js), index=cendari_index.name)
-        with open('litef_documents.out', 'w') as f:
-            json.dumps(res, f)
+        with open('add_litef.out.json', 'w') as f:
+            json.dump(res, f)
