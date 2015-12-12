@@ -256,9 +256,11 @@ function parse_doc_params() {
 }
 
 var doc_facets = {},
-    doc_sizes = {};
+    doc_sizes = {},
+    doc_sort = {};
 var facets_prefix = 'selected_facets',
-    size_prefix = 'show_facets';
+    size_prefix = 'show_facets',
+    sort_prefix = 'sort_facets';
 var bounds = 0;
 
 function parse_facets() {
@@ -282,6 +284,12 @@ function parse_facets() {
                 doc_sizes[size_vals[j]] = size_vals[j+1];
             }
         }
+        else if (p[0] == sort_prefix) {
+            var sort_vals = p[1].split(':');
+            for (var j = 0; j < sort_vals.length; j++) {
+                doc_sort[sort_vals[0]] = true;
+            }
+        }
         else if (p[0] == 'bounds') {
             bounds = p[1];
         }
@@ -296,7 +304,8 @@ parse_facets();
 
 function url_facets() {
     var ret = location.origin+location.pathname+"?",
-        first = true;
+        first = true,
+        facets;
     if ('q' in doc_args) {
         ret += 'q='+doc_args['q'];
         first = false;
@@ -317,14 +326,35 @@ function url_facets() {
             ret += facet[f];
         }
     }
-    for (d in doc_sizes) {
+    if (Object.keys(doc_sizes).length) {
         if (first) {
             ret += '?';
             first = false;
         }
         else 
             ret += '&';
-        ret += 'show_facets='+d+':'+doc_sizes[d];
+        ret += 'show_facets=';
+        facets = '';
+        for (d in doc_sizes) {
+            if (facets) facets += ':';
+            facets += d+':'+doc_sizes[d];
+        }
+        ret += facets;
+    }
+    if (Object.keys(doc_sort).length) {
+        if (first) {
+            ret += '?';
+            first = false;
+        }
+        else 
+            ret += '&';
+        ret += 'sort_facets=';
+        facets = '';
+        for (f in doc_sort) {
+            if (facets) facets += ':';
+            facets += f;
+        }
+        ret += facets;
     }
     if (bounds) {
         if (! first) {
@@ -374,6 +404,17 @@ function facet_set_size(val) {
         delete doc_sizes[facet];
     else
         doc_sizes[facet] = size;
+    return url_facets();
+}
+
+function facet_sort(val) {
+    var varval = val.split('='),
+        facet = varval[1];
+
+    if (doc_sort[facet])
+        delete doc_sort[facet];
+    else
+        doc_sort[facet] = true;
     return url_facets();
 }
 
@@ -447,6 +488,14 @@ function morefacetvals(event) {
     
     var href = $(this).attr("href"),
         url = facet_set_size(href);
+    document.location.assign(url);
+}
+
+function sortfacetvals(event) {
+    event.preventDefault();
+    
+    var href = $(this).attr("href"),
+        url = facet_sort(href);
     document.location.assign(url);
 }
 
@@ -594,6 +643,7 @@ function select_to_clipboard() {
 
 function bind_faceted_widgets() {
     $('.facetview_learnmore').popover();
+    $('.facetview_sort').click(sortfacetvals);
     $('.facetview_morefacetvals').click(morefacetvals);
     $('.facetview_toggle').click(facet_toggle);
     $('.facetview_filtershow').click(showfiltervals);

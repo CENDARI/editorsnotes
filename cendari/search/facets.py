@@ -79,7 +79,7 @@ def date_range_interval(date_range):
     else:
         return None
 
-def cendari_aggregations(size={},default_size=10,geo_bounds=None,date_range=None):
+def cendari_aggregations(size={},order=set(),default_size=10,geo_bounds=None,date_range=None):
     interval = date_range_interval(date_range)
     precision = geo_bounds_precision(geo_bounds)
     aggs = {
@@ -100,14 +100,17 @@ def cendari_aggregations(size={},default_size=10,geo_bounds=None,date_range=None
             }
         
     for facet in CENDARI_FACETS:
-        s =  size[facet] if facet in size else default_size
-        aggs[facet] = {
-            "terms": {
-                "field": facet,
-                "size": s,
-                "min_doc_count": 0
-            }
+        terms = { "field": facet,
+                 "min_doc_count": 0
         }
+        if facet in order:
+            terms['order'] = { "_term" : "asc" }
+        if facet in size:
+            terms['size'] = size[facet]
+        else:
+            terms['size'] = default_size
+        aggs[facet] = { "terms": terms }
+            
         aggs[facet+'_cardinality'] = { 
             "cardinality": {
                 "field": facet
@@ -228,12 +231,17 @@ def cendari_faceted_search(request,project_slug=None):
 
     # 1 - term facets
     buckets = {}
-    if 'show_facets' in request.REQUEST \
-      and request.REQUEST['show_facets']:
+    order = set()
+    if 'show_facets' in request.REQUEST and request.REQUEST['show_facets']:
       facets_shown = request.REQUEST.getlist('show_facets')
       for facet in facets_shown:
           (facet,value) = facet.split(':')
           buckets[facet] = int(value)
+    if 'sort_facets' in request.REQUEST and request.REQUEST['sort_facets']:
+        facets_sort = request.REQUEST.getlist('sort_facets')
+        for facet in facets_sort:
+            facets = facet.split(':')
+            order = set(facets)
 
     # 2 - geo and date facets
     range_requests = {}
@@ -273,7 +281,7 @@ def cendari_faceted_search(request,project_slug=None):
     q['size'] = size
     frm = int(request.REQUEST.get('from', 0))
     q['from'] = frm
-    q['aggregations'] = cendari_aggregations(size=buckets, geo_bounds=geo_bounds, date_range=date_range)
+    q['aggregations'] = cendari_aggregations(size=buckets, order=order, geo_bounds=geo_bounds, date_range=date_range)
     #pprint.pprint(q)
     results = cendari_index.search(q, highlight=True, size=size)
     #with open('res.log', 'w') as out:
@@ -338,6 +346,7 @@ def cendari_faceted_search(request,project_slug=None):
         'sizes': sizes,
         'results': res,
         'buckets': buckets,
+        'orders': order,
         'selected_facets': terms,
         'query': query if isinstance(query, basestring) else ''
     }

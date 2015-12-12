@@ -312,14 +312,18 @@ rect.zoompane {
         <div class="btn-group facetview_filteroptions" style="display:none; margin-top:5px;">
           <a class="btn btn-small facetview_learnmore" data-toggle="popover"
              title="Click on '100' or '10' to show more or less facets.
-Click on 'Sort' to sort alphabetically instead of by frequency.
+Click on 'Alpha' to sort alphabetically, or 'Count' to sort by count.
 Click on the facet value to filter data according to it." href="#"><b>?</b></a> 
           {% if facet in buckets %}
           <a class="btn btn-small facetview_morefacetvals" title="filter list size" rel="{{facet}}" href="show_facets={{facet}}:10">10</a>
           {% else %}
           <a class="btn btn-small facetview_morefacetvals" title="filter list size" rel="{{facet}}" href="show_facets={{facet}}:100">100</a>
           <{% endif %}
-          <a class="btn btn-small facetview_sort {{facet}}" title="filter value order" href="{{facet}}">Sort</a>
+          {% if facet in orders %}
+          <a class="btn btn-small facetview_sort {{facet}}" title="filter value order" href="sort_facet={{facet}}">Count</a>
+          {% else %}
+          <a class="btn btn-small facetview_sort {{facet}}" title="filter value order" href="sort_facet={{facet}}">Alpha</a>
+          <{% endif %}
 	</div>
     </td></tr>
     {% for value in values.buckets %}
