@@ -255,8 +255,10 @@ function parse_doc_params() {
     }
 }
 
-var doc_facets = {};
-var facets_prefix = 'selected_facets';
+var doc_facets = {},
+    doc_sizes = {};
+var facets_prefix = 'selected_facets',
+    size_prefix = 'show_facets';
 var bounds = 0;
 
 function parse_facets() {
@@ -272,6 +274,12 @@ function parse_facets() {
             }
             else {
                 doc_facets[facets_vals[0]] = d3.set(facets_vals.slice(1));
+            }
+        }
+        else if (p[0] == size_prefix) {
+            var size_vals = p[1].split(':');
+            for (var j = 0; j < size_vals.length; j += 2) {
+                doc_sizes[size_vals[j]] = size_vals[j+1];
             }
         }
         else if (p[0] == 'bounds') {
@@ -297,15 +305,26 @@ function url_facets() {
         var facet =doc_facets[d].values();
         if (facet.length == 0)
             continue;
-        if (! first) {
-            ret += '&';
+        if (first) {
+            ret += '?';
             first = false;
         }
+        else 
+            ret += '&';
         ret += 'selected_facets='+d;
         for (var f in facet) {
             ret += ':';
             ret += facet[f];
         }
+    }
+    for (d in doc_sizes) {
+        if (first) {
+            ret += '?';
+            first = false;
+        }
+        else 
+            ret += '&';
+        ret += 'show_facets='+d+':'+doc_sizes[d];
     }
     if (bounds) {
         if (! first) {
@@ -343,6 +362,19 @@ function facet_del_facet(facet) {
     delete doc_facets[facet];
 
     var url = url_facets();
+}
+
+function facet_set_size(val) {
+    var varval = val.split('='),
+        facets = varval[1].split(':'),
+        facet = facets[0],
+        size = facets[1];
+
+    if (doc_sizes[facet])
+        delete doc_sizes[facet];
+    else
+        doc_sizes[facet] = size;
+    return url_facets();
 }
 
 function filter_date(event) {
@@ -413,7 +445,8 @@ function reset_location(event) {
 function morefacetvals(event) {
     event.preventDefault();
     
-    var url = facet_toggle_value($(this).attr("href"));
+    var href = $(this).attr("href"),
+        url = facet_set_size(href);
     document.location.assign(url);
 }
 
@@ -560,6 +593,7 @@ function select_to_clipboard() {
 
 
 function bind_faceted_widgets() {
+    $('.facetview_learnmore').popover();
     $('.facetview_morefacetvals').click(morefacetvals);
     $('.facetview_toggle').click(facet_toggle);
     $('.facetview_filtershow').click(showfiltervals);

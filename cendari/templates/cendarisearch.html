@@ -1,6 +1,6 @@
 {% extends 'emptylayout.html' %}
 
-{% load staticfiles display sort jsondumps notzero todate %}
+{% load staticfiles display sort jsondumps notzero todate hash %}
 
 {% block css_nocompress %}
 <link rel="stylesheet" href="{% static "bootstrap/css/bootstrap.min.css" %}">
@@ -23,9 +23,10 @@
 
   .leftpanel {
       float: left;
-      padding: 5px;
+      padding: 1px;
       width: 200px;
       border: 1px solid black;
+      overflow: hidden;
   }
   .mainpanel {
       padding: 5px;
@@ -251,7 +252,8 @@ rect.zoompane {
   <h2>Facets (<a href="?q=">reset</a>)</h2>
   <hr>
   {% for facet, values in facets|sortiter %}
-  <table id="facetview_{{facet}}" class="facetview_filters table table-bordered table-condensed table-striped" >
+  <div class='facetview_filters'>
+  <table id="facetview_{{facet}}" class="table table-bordered table-condensed table-striped" >
     <tr><td>
     {% if values %}
       {% if facet in selected_facets %}
@@ -280,6 +282,7 @@ rect.zoompane {
 	{% endautoescape %}
     </td></tr>
     {% elif facet == "date" %}
+    <br>
         <div class="btn-group facetview_datefilteroptions" style="margin-top:5px;">
           <a class="btn btn-small facetview_learnmore" title="click to view search help information" href="#"><b>?</b></a> 
           <a class="btn btn-small facetview_filterdate" title="filter date" rel="{{facet}}" href="filter_date">Filter</a>
@@ -307,18 +310,29 @@ rect.zoompane {
     </td></tr>
     {% else %}
         <div class="btn-group facetview_filteroptions" style="display:none; margin-top:5px;">
-          <a class="btn btn-small facetview_learnmore" title="click to view search help information" href="#"><b>?</b></a> 
+          <a class="btn btn-small facetview_learnmore" data-toggle="popover"
+             title="Click on '100' or '10' to show more or less facets.
+Click on 'Sort' to sort alphabetically instead of by frequency.
+Click on the facet value to filter data according to it." href="#"><b>?</b></a> 
+          {% if facet in buckets %}
+          <a class="btn btn-small facetview_morefacetvals" title="filter list size" rel="{{facet}}" href="show_facets={{facet}}:10">10</a>
+          {% else %}
           <a class="btn btn-small facetview_morefacetvals" title="filter list size" rel="{{facet}}" href="show_facets={{facet}}:100">100</a>
+          <{% endif %}
           <a class="btn btn-small facetview_sort {{facet}}" title="filter value order" href="{{facet}}">Sort</a>
 	</div>
     </td></tr>
     {% for value in values.buckets %}
     <tr class="facetview_filtervalue" style="display:none;">
-      <td><a class="facetview_filterchoice facetview_toggle" rel="{{ facet }}" href="selected_facets={{ facet }}:{{ value.key }}">{{ value.key }} {{value.doc_count|notzero}}</a></td>
+      <td><a class="facetview_filterchoice facetview_toggle" rel="{{ facet }}" href="selected_facets={{ facet }}:{{ value.key }}">{{ value.key }} {{value.doc_count|notzero}}
+          {% if facet in selected_facets and value.key in selected_facets|hash:facet %}[remove]{% endif %}
+        </a>
+      </td>
     </tr>
     {% endfor %}
     {% endif %}
   </table>
+  </div>
   {% endfor %}
 </div>
 <!-- End faceting -->
