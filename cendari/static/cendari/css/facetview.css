@@ -54,7 +54,9 @@
 .facetview_del{
     color:grey;
 }
-.facetview_filterselected{
+.facetview_filters {
+    overflow-y: auto;
+    max-height: 300px;
 }
 .facetview_facetlogic{
 }

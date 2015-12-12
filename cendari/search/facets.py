@@ -205,8 +205,8 @@ def build_es_query(request,project_slug, version):
         q['score_mode'] = 'first'
         q = {'query': { 'function_score': q } }
 
-    pprint.pprint(q)
-    return (q, query, geo_bounds, date_range)
+    #pprint.pprint(q)
+    return (q, query, geo_bounds, date_range, terms)
 
 def del_out_of_bounds(buckets, bounds):
     return buckets
@@ -222,7 +222,7 @@ def del_out_of_range(buckets, date_range):
 
 def cendari_faceted_search(request,project_slug=None):
     version = cendari_index.version()
-    (q, query, geo_bounds, date_range) = build_es_query(request, project_slug, version)
+    (q, query, geo_bounds, date_range, terms) = build_es_query(request, project_slug, version)
 
     # Prepare the aggregations
 
@@ -276,8 +276,8 @@ def cendari_faceted_search(request,project_slug=None):
     q['aggregations'] = cendari_aggregations(size=buckets, geo_bounds=geo_bounds, date_range=date_range)
     #pprint.pprint(q)
     results = cendari_index.search(q, highlight=True, size=size)
-    with open('res.log', 'w') as out:
-        pprint.pprint(results, stream=out)
+    #with open('res.log', 'w') as out:
+    #    pprint.pprint(results, stream=out)
     res = []
     total = int(results['hits']['total'])
     sizes = {
@@ -337,6 +337,8 @@ def cendari_faceted_search(request,project_slug=None):
         'facets': facets,
         'sizes': sizes,
         'results': res,
+        'buckets': buckets,
+        'selected_facets': terms,
         'query': query if isinstance(query, basestring) else ''
     }
     return o
