@@ -268,7 +268,10 @@ rect.zoompane {
         <div class="btn-group facetview_locationfilteroptions" style="margin-top:5px;">
           <a class="btn btn-small facetview_learnmore" title="click to view search help information" href="#"><b>?</b></a> 
           <a class="btn btn-small facetview_filterlocation" title="filter location" rel="{{facet}}" href="filter_location">Filter</a>
-          <a class="btn btn-small facetview_adaptresolution" title="adapt viewport" rel="{{facet}}" href="adapt_to_viewport">Adapt</a>
+
+<!--
+          <a class="btn btn-small facetview_adaptresolution" title="adapt viewport" rel="{{facet}}" href="adapt_to_viewport">Filter</a>
+-->
           <a class="btn btn-small facetview_resetlocation" title="reset location filter" href="no_location_filter">Reset</a>
 	</div>
 	<div class="panelVis map" style="min-height: 30px; min-width: 170px; width: 170px; position: relative;">
@@ -286,7 +289,7 @@ rect.zoompane {
         <div class="btn-group facetview_datefilteroptions" style="margin-top:5px;">
           <a class="btn btn-small facetview_learnmore" title="click to view search help information" href="#"><b>?</b></a> 
           <a class="btn btn-small facetview_filterdate" title="filter date" rel="{{facet}}" href="filter_date">Filter</a>
-          <a class="btn btn-small facetview_resetdate" title="reset date filter" href="no_location_filter">Reset</a>
+          <a class="btn btn-small facetview_resetdate" title="reset date filter" href="no_date_filter">Reset</a>
 	</div>
 	{% if values.bounds.0 %}
 	<input type="text" id="min_date" name="min_date" value="{{values.bounds.0|todate}}">

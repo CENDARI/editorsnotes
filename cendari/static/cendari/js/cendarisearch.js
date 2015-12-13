@@ -433,6 +433,14 @@ function filter_date(event) {
     }
 }
 
+function reset_date(event) {
+    event.preventDefault();
+    date_range = '';
+    var url = url_facets();
+    document.location.assign(url);
+}
+
+
 function filter_location(event) {
     event.preventDefault();
     var b = leafletMap.getBounds(),
@@ -647,9 +655,10 @@ function bind_faceted_widgets() {
     $('.facetview_morefacetvals').click(morefacetvals);
     $('.facetview_toggle').click(facet_toggle);
     $('.facetview_filtershow').click(showfiltervals);
-    $('.facetview_adaptresolution').click(adapt_resolution);
+    $('.facetview_filterlocation').click(filter_location);
     $('.facetview_resetlocation').click(reset_location);
     $('.facetview_filterdate').click(filter_date);
+    $('.facetview_resetdate').click(reset_date);
     $('.searchSubmit').click(facet_submit);
     $('#searchText').keyup(facet_keyup);
     $('#selectAll').click(select_all);

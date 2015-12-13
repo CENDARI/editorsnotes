@@ -68,7 +68,11 @@ def cendari_filter(user=None,project_slugs=None):
 def geo_bounds_precision(geo_bounds):
     if not geo_bounds:
         return 2
-    (lat1, long1, lat2, long2) = geo_bounds
+    if len(geo_bounds)==4:
+        lat1, long1, lat2, long2 = geo_bounds
+    if len(geo_bounds)==5:
+        lat1, long1, lat2, long2, prec = geo_bounds
+    
     return bounding_box_to_precision(lat1, long1, lat2, long2, 70)
 
 def date_range_interval(date_range):
