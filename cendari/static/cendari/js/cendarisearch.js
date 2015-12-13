@@ -314,10 +314,8 @@ function url_facets() {
         var facet =doc_facets[d].values();
         if (facet.length == 0)
             continue;
-        if (first) {
-            ret += '?';
+        if (first)
             first = false;
-        }
         else 
             ret += '&';
         ret += 'selected_facets='+d;
@@ -327,10 +325,8 @@ function url_facets() {
         }
     }
     if (Object.keys(doc_sizes).length) {
-        if (first) {
-            ret += '?';
+        if (first)
             first = false;
-        }
         else 
             ret += '&';
         ret += 'show_facets=';
@@ -342,10 +338,8 @@ function url_facets() {
         ret += facets;
     }
     if (Object.keys(doc_sort).length) {
-        if (first) {
-            ret += '?';
+        if (first)
             first = false;
-        }
         else 
             ret += '&';
         ret += 'sort_facets=';
@@ -357,17 +351,17 @@ function url_facets() {
         ret += facets;
     }
     if (bounds) {
-        if (! first) {
-            ret += '&';
+        if (first)
             first = false;
-        }
+        else 
+            ret += '&';
         ret += 'bounds='+bounds;
     }
     if (date_range) {
-        if (! first) {
-            ret += '&';
+        if (first)
             first = false;
-        }
+        else 
+            ret += '&';
         ret += 'daterange='+date_range;
     }
     return ret;
