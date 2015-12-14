@@ -247,7 +247,7 @@ function parse_doc_params() {
     var params = document.location.search.substring(1);
     var varvals = params.split('&');
     for (var i = 0; i < varvals.length; i++) {
-        var p = varvals[i].split('=');
+        var p = decodeURIComponent(varvals[i]).split('=');
         if (p.length == 2) {
             doc_params.push(p);
             doc_args[p[0]] = p[1];
@@ -307,7 +307,7 @@ function url_facets() {
         first = true,
         facets;
     if ('q' in doc_args) {
-        ret += 'q='+doc_args['q'];
+        ret += 'q='+encodeURIComponent(doc_args['q']);
         first = false;
     }
     for (var d in doc_facets) {
@@ -318,11 +318,12 @@ function url_facets() {
             first = false;
         else 
             ret += '&';
-        ret += 'selected_facets='+d;
+        facets = d;
         for (var f in facet) {
-            ret += ':';
-            ret += facet[f];
+            facets += ':';
+            facets += facet[f];
         }
+        ret += 'selected_facets='+encodeURIComponent(facets);
     }
     if (Object.keys(doc_sizes).length) {
         if (first)
@@ -335,7 +336,7 @@ function url_facets() {
             if (facets) facets += ':';
             facets += d+':'+doc_sizes[d];
         }
-        ret += facets;
+        ret += encodeURIComponent(facets);
     }
     if (Object.keys(doc_sort).length) {
         if (first)
@@ -348,7 +349,7 @@ function url_facets() {
             if (facets) facets += ':';
             facets += f;
         }
-        ret += facets;
+        ret += encodeURIComponent(facets);
     }
     if (bounds) {
         if (first)
