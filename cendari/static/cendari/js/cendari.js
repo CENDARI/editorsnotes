@@ -354,7 +354,7 @@ Ext.application({
 
 			var editor = new Editor(height, domID+new_extension, isReadOnly, editButtonID, labeltitle);
 			
-
+                        if (editButtonID === null) return;
 			for (var i = 0; i < editors.length; i++) {
 				if (editors[i].editButtonID == editButtonID) {
 					return;

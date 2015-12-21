@@ -139,8 +139,8 @@
 					</div>
 				</div>
 			</li>
-
-			<li><!-- STATUS TAB -->
+<!-- STATUS TAB 
+			<li>
 				<input type="radio" name="tabs" id="tab2">
 				<label for="tab2">Status {% if note.status == "0" %} (Closed) {% elif note.status == "2" %} (Hibernating)  {% else %} (Open) {% endif %}</label>
 				<div id="tab-content2" class="tab-content note animated fadeIn">
@@ -153,7 +153,7 @@
 					</div>
 				</div>
 			</li>
-
+-->
 			<li><!-- AUTHORSHIP TAB (Project, Private, Licence, Author, Last updated ) -->
 				<input type="radio" name="tabs" id="tab3">
 				<label for="tab3">Authorship</label>
@@ -224,9 +224,14 @@
 				<ol id="note_toc" class='toc'></ol>
 			</div>
 			
+			<textarea id="note-description" type="text"  class="mceEditor" name="content">
+{% if note %} {{ note.content|as_html }} {% endif %}	
+			</textarea>
+<!--
 			<div id="note_content"> 
 				{{note.content|as_html}}
 			</div>
+-->
 
 		{% endif %}
 		<section id="note-sections">
@@ -252,7 +257,7 @@
 		// var temp = document.getElementById("noteDescEditBut").getAttribute("value");
 		// document.getElementById("noteDescEditBut").value = descriptionLabel + temp;
 		cendari.addInit(function() {
-			// cendari.createEditor(500, "note-description", isReadOnly, "noteDescEditBut", descriptionLabel);
+			cendari.createEditor(500, "note-description", true, null, null);
 			cendari.addTab(title);
 			cendari.addWidgetToActiveTab("form", "noteform", "border");
 		});

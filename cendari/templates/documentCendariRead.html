@@ -196,7 +196,7 @@
 								{% if scans %}
 									{% for scan in scans %}
 										<li class='scan-list-item'>
-											<a class="scan btn" id="{{scan.id}}" href="http://{{ domain }}{{ scan.image.url }}">
+											<a class="scan btn" id="{{scan.id}}" href="{% url 'scan_view' project.slug scan.id %}" target='_blank'>
 												<img src="{{scan.image_thumbnail.url}}" width=100 alt="Thumbnail of scan {{scan.id}}">
 												<!-- {{ forloop.counter }} -->
 											</a>
@@ -206,6 +206,7 @@
 									No scans.
 								{% endif %}
 							</ul>
+    						    <iframe width="100%" allowfullscreen="true" id="scan-viewer" name='scan-viewer'></iframe>
 						</div>
 
 						<br/>
