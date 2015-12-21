@@ -224,9 +224,14 @@
 				<ol id="note_toc" class='toc'></ol>
 			</div>
 			
+			<textarea id="note-description" type="text"  class="mceEditor" name="content">
+{% if note %} {{ note.content|as_html }} {% endif %}	
+			</textarea>
+<!--
 			<div id="note_content"> 
 				{{note.content|as_html}}
 			</div>
+-->
 
 		{% endif %}
 		<section id="note-sections">
@@ -252,7 +257,7 @@
 		// var temp = document.getElementById("noteDescEditBut").getAttribute("value");
 		// document.getElementById("noteDescEditBut").value = descriptionLabel + temp;
 		cendari.addInit(function() {
-			// cendari.createEditor(500, "note-description", isReadOnly, "noteDescEditBut", descriptionLabel);
+			cendari.createEditor(500, "note-description", true, null, null);
 			cendari.addTab(title);
 			cendari.addWidgetToActiveTab("form", "noteform", "border");
 		});
