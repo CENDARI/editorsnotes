@@ -230,6 +230,7 @@ class EditDocumentAdminView(DocumentAdminView):
 
 def scan(request, scan_id, project_slug):
     project_slug = utils.get_project_slug(project_slug)
+    project =  _check_project_privs_or_deny(request.user, project_slug)
     #print "scan view"
     o = {}
     scan = get_object_or_404(main_models.Scan, id=scan_id)
@@ -253,6 +254,7 @@ def scan(request, scan_id, project_slug):
 
 def scan_image(request, scan_id, project_slug):
     project_slug = utils.get_project_slug(project_slug)
+    project =  _check_project_privs_or_deny(request.user, project_slug)
     scan = get_object_or_404(main_models.Scan, id=scan_id)
     if scan.document.project.slug != project_slug:
         raise PermissionDenied("not authorized on %s project" % project_slug)
@@ -260,6 +262,7 @@ def scan_image(request, scan_id, project_slug):
 
 def scan_tiffimage(request, scan_id, project_slug):
     project_slug = utils.get_project_slug(project_slug)
+    project =  _check_project_privs_or_deny(request.user, project_slug)
     scan = get_object_or_404(main_models.Scan, id=scan_id)
     if scan.document.project.slug != project_slug:
         raise PermissionDenied("not authorized on %s project" % project_slug)
