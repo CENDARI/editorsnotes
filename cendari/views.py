@@ -143,18 +143,10 @@ def _check_project_privs_or_deny(user, project_slug):
 
 def user_logout(request):
     auth.logout(request)
-    return redirect('index_view')
+    return redirect('/Shibboleth.sso/Logout')
 
 
 def user_login(request):
-    logger.debug('in login request meta is :')
-    logger.debug(request.META)
-
-    logger.debug('in login request session is :')
-    logger.debug(request.session)
-
-   
-
     if 'eppn' in request.META:
         if 'REMOTE_USER' in request.META:
             request.session['REMOTE_USER'] = request.META['REMOTE_USER']
