@@ -29,7 +29,7 @@ urlpatterns = patterns('',
 # Auth patterns
 urlpatterns += patterns('',
     url(r'^accounts/login/$', 'cendari.views.user_login', name='user_login_view'),
-    url(r'^accounts/logout/$', 'editorsnotes.main.views.auth.user_logout', name='user_logout_view'),
+    url(r'^accounts/logout/$', 'cendari.views.user_logout', name='user_logout_view'),
     url(r'^accounts/profile/$', 'editorsnotes.main.views.auth.user'),
     url(r'^accounts/profile/feedback/$', 'editorsnotes.main.views.auth.user_feedback', name='user_feedback_view'),
     url(r'^accounts/browserid/$', CustomBrowserIDVerify.as_view(), name='browserid_verify'),

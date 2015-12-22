@@ -141,6 +141,11 @@ def _check_project_privs_or_deny(user, project_slug):
             raise PermissionDenied("not authorized on %s project" % project_slug)
         return project
 
+def user_logout(request):
+    auth.logout(request)
+    return redirect('index_view')
+
+
 def user_login(request):
     logger.debug('in login request meta is :')
     logger.debug(request.META)

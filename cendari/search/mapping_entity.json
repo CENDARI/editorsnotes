@@ -65,7 +65,15 @@
             },
 	    "pageviews" : {
 		"type" : "integer"
-	    }
+	    },
+            "groups_allowed" : {
+                "type" : "string",
+                "index" : "not_analyzed"
+            },
+            "users_allowed" : {
+                "type" : "string",
+                "index" : "not_analyzed"
+            }
         }
     }
 }
