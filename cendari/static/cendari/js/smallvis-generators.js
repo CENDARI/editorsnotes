@@ -382,10 +382,7 @@ function onVisClick(){
   logHover(itemData, visDef);
 
   if(parent.location.href.indexOf(itemData.url)==-1){
-	var r = confirm("Are you sure you want to leave this page? If you press 'OK', you might loose unsaved work.");
-  	if (r == true) {
-		window.open(itemData.url, "_parent");
-	}
+      window.open(itemData.url, "_parent");
   } 
 }
 

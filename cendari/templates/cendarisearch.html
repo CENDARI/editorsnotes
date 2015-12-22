@@ -183,6 +183,8 @@ rect.zoompane {
           <li><a href="{% url 'index_view' %}">Home</a></li>
           {% if  not user.is_authenticated %}
             <li><a href="{% url 'user_login_view' %}">Login</a></li>
+            {% else %}
+            <li><a href="{% url 'user_logout_view' %}">Logout</a></li>
           {% endif%}
           <li><a href="{% url 'cendari_browse_view' %}">Browse</a></li>
           <li><a href="{% url 'cendari_about_view' %}">About</a></li>
