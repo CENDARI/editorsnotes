@@ -75,7 +75,7 @@ function createEntityLink(absolute_url,type,name,rdf){
 function  updatedEnitiesTab(prefix,related_topics){
     var entities_html = "";
     var related_topics_jq = $('#'+prefix+'-related-topics');
-    console.log('related_topics: ',related_topics)
+    console.log('related_topics: ',related_topics);
     for(var i=0;i<related_topics.length;i++){
         entities_html += createEntityLink(related_topics[i].absolute_url,related_topics[i].type,related_topics[i].preferred_name,related_topics[i].rdf);
     }
@@ -97,8 +97,6 @@ function createScanElement(image_url,image_name,thumbnail_url,id){
 	    '<br><span>'+image_name+'</span>'+
             '</li>';
     return html;
-                    
-
 }
 
 function updateScanTab(scans){
@@ -130,7 +128,6 @@ function updateMessage(msg_id,new_msg){
 
 
 function replaceWindowUrl(data_id){
-
     var currentUrl = window.location.toString();
     if(id.length===0){
         var newUrl = currentUrl.replace("add", data_id);
@@ -232,13 +229,13 @@ function submitScan(document_id,fc_document){
             e.preventDefault();
             var options = { 
                 success: function(){
-                    submitDocument(fc_document)
+                    submitDocument(fc_document);
                 },
                  error: function(XMLHttpRequest, textStatus, errorThrown) { 
                     console.log("Error with status "+textStatus+":",errorThrown);
                     // showErrorMessage(messages.scan.error);
                     showErrorMessage(errorThrown);
-                    submitDocument(fc_document)
+                    submitDocument(fc_document);
                 }
                 
             }; 
@@ -373,8 +370,8 @@ function find_dates(topic_node_id){
         return;
     }
     $.get(url,function(data){
-        console.log('data are :', data)
-        console.log('data length is  :', data.length)
+        //console.log('data are :', data);
+        //console.log('data length is  :', data.length);
         if(data.length){
             for (var i = data.length - 1; i >= 0; i--) {
                 if(data[i] === $('#date_id').text()){
@@ -382,12 +379,12 @@ function find_dates(topic_node_id){
                     break;
                 }
             };
-            console.log(i+"=="+data.length)
+            //console.log(i+"=="+data.length);
             if(i<0){
                 var r = confirm("We found in dbpedia the date "+data[0]+" would you like to  use this date for your entity?");
                 if (r == true) {
                     $('#date_id').text(data[0]);
-                    $('.formCendari').submit()
+                    $('.formCendari').submit();
                 }
             }
         }
@@ -484,8 +481,8 @@ $(document).ready(function(){
             }
         }
         else if(cendari_js_object_type == 'topic'){
-            showInfoMessage(messages.entity.beforeSend)
-            submitEntity(fc)
+            showInfoMessage(messages.entity.beforeSend);
+            submitEntity(fc);
         }
         else if(cendari_js_object_type === 'cluster'){
 
