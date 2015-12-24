@@ -413,12 +413,12 @@ class Scan(CreationMetadata, ProjectPermissionsMixin):
         return False
 
     def needs_image_viewer(self):
-        if not self.is_image():
-            logger.debug("Not an image")
-            return False
-        dimensions = self._get_image_dimensions()
-        logger.info("Image dimension (%d,%d)", dimensions[0], dimensions[1])
-        return dimensions[0] > 1024 and dimensions[1] > 1024
+        return self.is_image():
+        #     logger.debug("Not an image")
+        #     return False
+        # dimensions = self._get_image_dimensions()
+        # logger.info("Image dimension (%d,%d)", dimensions[0], dimensions[1])
+        # return dimensions[0] > 1024 or dimensions[1] > 1024
 
     def _get_image_dimensions(self):
         if not hasattr(self, '_dimensions_cache'):
