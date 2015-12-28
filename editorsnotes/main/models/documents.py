@@ -413,7 +413,7 @@ class Scan(CreationMetadata, ProjectPermissionsMixin):
         return False
 
     def needs_image_viewer(self):
-        return self.is_image():
+        return self.is_image()
         #     logger.debug("Not an image")
         #     return False
         # dimensions = self._get_image_dimensions()
