@@ -308,6 +308,7 @@ Ext.application({
 				//theme_advanced_resizing : true,
 				//resize : true,
 				readonly : isReadOnly,
+				relative_urls : false,
 				valid_elements : "*[*]",
 
 			    file_browser_callback : 'myFileBrowser',
