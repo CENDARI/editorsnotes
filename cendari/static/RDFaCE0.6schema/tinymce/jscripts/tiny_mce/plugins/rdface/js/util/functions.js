@@ -146,10 +146,11 @@ function remove_annotation(pointer,format){
 		pointer.find('.tooltip').remove();
 		pointer.find('.tooltip-t').remove();
 	if(format=="RDFa"){
-		pointer.css("background-color","");
+		//pointer.css("background-color","");
+                pointer.removeAttr("style");
 		pointer.removeAttr("typeof").removeAttr("class").removeAttr("resource").removeAttr("property");
 		pointer.find('>[property]').each(function(i,v){
-			remove_annotation($(v),'RDFa')
+			remove_annotation($(v),'RDFa');
 		});
 
 		console.log('pointer_updated',pointer);
@@ -157,7 +158,7 @@ function remove_annotation(pointer,format){
 		pointer.css("background-color","");
 		pointer.removeAttr("itemtype").removeAttr("class").removeAttr("itemid").removeAttr("itemscope").removeAttr("itemprop");
 		pointer.find('>[itemprop]').each(function(i,v){
-			remove_annotation($(v),'Microdata')
+			remove_annotation($(v),'Microdata');
 		});	
 	}
 	//remove spans wich have no attribute
