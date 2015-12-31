@@ -405,7 +405,7 @@ def get_or_create_topic(user, name, type, project, date=None):
             if t.topic_node.type==type:
                 logger.debug("Topic '%s' for project '%s' already created", name, project)
                 return t
-        logger.debug("Topic '%s' or type %s for project '%s' already created with other type(s): %s", name, type, project)
+        logger.debug("Topic '%s' of type %s for project '%s' already created with other type(s): %s", name, type, project, t.topic_node.type)
         return None
     return t
 
