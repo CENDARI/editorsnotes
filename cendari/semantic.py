@@ -8,6 +8,7 @@ from django.conf import settings
 from django.utils import six
 from django.core import signals
 from django.db.models import Count
+from django.utils.http import urlquote
 import utils as utils
 
 from lxml import etree, html
@@ -99,7 +100,8 @@ def fix_uri(uri):
         uri = "http://dbpedia.org/resource/"+uri[len(WRONG_PREFIX):]
     loc=list(urlparse.urlsplit(uri))
     if not is_ascii(loc[2]):
-        loc[2] = urllib.quote(loc[2].encode('utf8'))
+        loc[2] = urlquote(loc[2].encode('utf8'))
+    loc[2] = loc[2].replace(u'%2C',',')
     loc = urlparse.urlunsplit(loc)
     return loc
 
