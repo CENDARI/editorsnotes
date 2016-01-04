@@ -399,8 +399,7 @@ class Scan(CreationMetadata, ProjectPermissionsMixin):
         thumbnail_image.save(thumbfile, format=thumbnail_image.format)
         thumbfile.seek(0)
 
-        thumbnail_name = os.path.join(path + '_thumb', ext)
-        self.image_thumbnail.save(path + '_thumb' + ext,
+        self.image_thumbnail.save(path + '_thumb.png',
                                   ContentFile(thumbfile.read()),
                                   save=save)
         thumbfile.close()

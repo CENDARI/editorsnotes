@@ -5,6 +5,8 @@ from editorsnotes.main.models import Project
 from django.contrib import auth
 from cendari_api import *
 
+import pprint
+
 import logging
 logger = logging.getLogger(__name__)
 from sys import exc_info
@@ -130,7 +132,7 @@ def login_user_synchronize(sender, user, request, **kwargs):
         return # Only do the dataspace creation when we create the key
     else:
         try:
-            logger.debug('Getting key from DATA API')        
+            logger.debug('Getting key from DATA API')
             if not api.session(eppn=eppn, mail=mail, cn=cn):
                 logger.warning("Cendari Data API refuses the connection")
                 return
@@ -156,6 +158,7 @@ def login_user_synchronize(sender, user, request, **kwargs):
                         role.users.add(user)
                 except:
                     logger.error("Unexpected error creating group '%s': %s", name, sys.exc_info()[0])
+        logger.info('dataspace with nte projects: %s', dprojects)
         for p in user.get_authorized_projects():
             pname = cendari_clean_name(p.name)
             if pname not in dprojects:
