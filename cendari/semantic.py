@@ -324,35 +324,36 @@ def semantic_update_topics(existing_topics,new_topics):
 def create_topics_for(entity, topics, user):
     done=set()
     for t in topics:
-        topic=get_or_create_topic(user, t['value'], t['type'], entity.project)
+        value = t['value']
+        if value in done:
+            continue
+        done.add(value)
+        topic=get_or_create_topic(user, value, t['type'], entity.project)
         if topic is None:
             continue
-        if topic not in done:
-            done.add(topic)
-            entity.related_topics.create(creator=user, topic=topic)
-            rdftopic = semantic_uri(topic)
-            subject = t['rdfsubject']
-            value = t['value']
-            if (not topic.rdf is None) and (not check_domain(topic.rdf,'dbpedia')):
-                topic.rdf = None
-                topic.save()
-            elif topic.rdf is None and subject.startswith('http'):
-                topic.rdf = unicode(subject)
-                topic.save()
-            elif topic.rdf is None and t['type']=='PUB' and value.startswith('http'):
-                topic.rdf = value
-                topic.save()
-            elif t['type']=='EVT':
-                logger.debug('working with EVT entity...')
-                if utils.parse_well_known_date(value, True):
-                    topic.date = utils.parse_well_known_date(value, True)
-                    logger.debug('Found a valid date: %s', topic.date)
+        entity.related_topics.create(creator=user, topic=topic)
+        rdftopic = semantic_uri(topic)
+        subject = t['rdfsubject']
+        if (topic.rdf is not None) and (not check_domain(topic.rdf,'dbpedia')):
+            topic.rdf = None
+            topic.save()
+        elif topic.rdf is None and subject.startswith('http'):
+            topic.rdf = unicode(subject)
+            topic.save()
+        elif topic.rdf is None and t['type']=='PUB' and value.startswith('http'):
+            topic.rdf = value
+            topic.save()
+        elif t['type']=='EVT':
+            logger.debug('working with EVT entity...')
+            if utils.parse_well_known_date(value, True):
+                topic.date = utils.parse_well_known_date(value, True)
+                logger.debug('Found a valid date: %s', topic.date)
                 topic.save()    
         else:
             results_reg = re.search('\[(.*?)\]', value)
             if results_reg!=None:
                 results_reg = str(results_reg.group(0))
-                explicit_date = results_reg[1:len(results_reg)-1]
+                explicit_date = results_reg[1:-1]
                 if utils.parse_well_known_date(explicit_date, True):
                     topic.date = utils.parse_well_known_date(explicit_date, True)
                     logger.debug('Found a valid date between []: %s', topic.date)

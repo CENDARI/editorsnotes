@@ -375,38 +375,40 @@ class Topic(LastUpdateMetadata, URLAccessible, ProjectPermissionsMixin,
 reversion.register(Topic)
 
 def get_or_create_topic(user, name, type, project, date=None):
+    if type is None:
+        logger.error("Topic '%s' for project '%s' cannot have no type", name, project.slug)
+        return None
     name = name.strip()
     res = Topic.objects.filter(preferred_name=name,project=project)
     created = False
     t = None
-    if not bool(res):
-        logger.debug("Creating topic '%s' of type '%s'", name, type)
-        topic_node, c = TopicNode.objects.get_or_create(_preferred_name=name,
-                                                        type=type,
-                                                        defaults={'creator': user,
-                                                                 'last_updater': user})
-        t, created=Topic.objects.get_or_create(creator=user,
-                                               last_updater=user,
-                                               preferred_name=name,
-                                               topic_node=topic_node,
-                                               project=project)
-
-        if type=='EVT':
-            t.date = date
-            if (t.date):
-                logger.debug("Parsed %s into a proper date %s", name,t.date.isoformat())
-        
-        if created :
-            t.save()
-        if c:
-            t.topic_node.save()
-    else:
+    if bool(res):
         for t in res:
             if t.topic_node.type==type:
                 logger.debug("Topic '%s' for project '%s' already created", name, project)
                 return t
         logger.debug("Topic '%s' of type %s for project '%s' already created with other type(s): %s", name, type, project, t.topic_node.type)
         return None
+    # continue, creating the topic with the other type
+    logger.debug("Creating topic '%s' of type '%s'", name, type)
+    topic_node, c = TopicNode.objects.get_or_create(_preferred_name=name,
+                                                    type=type,
+                                                    defaults={'creator': user,
+                                                              'last_updater': user})
+    t, created=Topic.objects.get_or_create(creator=user,
+                                           last_updater=user,
+                                           preferred_name=name,
+                                           topic_node=topic_node,
+                                           project=project)
+    if type=='EVT' and date is not None:
+        t.date = date
+        t.save()
+#                if (t.date):
+#                    logger.debug("Parsed %s into a proper date %s", name,t.date.isoformat())
+    elif created:
+        t.save()
+    if c:
+        t.topic_node.save()
     return t
 
 def get_topic_with_rdf(topic_rdf):
