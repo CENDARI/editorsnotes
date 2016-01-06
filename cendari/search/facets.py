@@ -27,6 +27,7 @@ CENDARI_FACETS = [
 
 def cendari_filter(user=None,project_slugs=None):
     cendari_public_groups = cendari_data_api.get_public_dataspaces()
+    logger.info('Cendari public groups: %s', cendari_public_groups)
     if user is None or not user.is_authenticated():
         logger.debug('Creating filter for unknown user')
         if cendari_public_groups:
