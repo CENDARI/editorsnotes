@@ -238,7 +238,7 @@
 					        }
 				     	})
 						
-					)
+					);
 				}
 
 				$.when.apply(this,deferreds)
@@ -247,70 +247,73 @@
 						var content = ed.getContent();
 						for(var i = 0; i < arguments.length; i++) {
 							console.log(arguments[i]);
-							entities= entities.concat(arguments[i][0]['entities'])
+							entities= entities.concat(arguments[i]['entities']);
 						}
 						console.log("NERD",entities);
 						console.log("NERD",entities.length);
 
-			       		for(i=0;i<entities.length;i++){
-					          		
+			       		    for(i=0;i<entities.length;i++){
 			          		entities.skip=false;
+                                                if (!entities[i])
+                                                    continue;
 
 			          		if(entity_types_converter.hasOwnProperty(entities[i].type)===-1){ //not one of the types we support
-			          			entities.skip = true;
-			          			continue;
+			          		    entities.skip = true;
+			          		    continue;
 			          		}
-		          			var rdface_type = entity_types_converter[entities[i].type]
-			          		var elements = [] 
+		          			var rdface_type = entity_types_converter[entities[i].type],
+			          		    elements = [];
 			          		$(content).find('.r_entity').each(function(){
-			          			if($(this).text().indexOf(entities[i].rawName)){
-			          				elements.push(this)
-			          			}
-			          		})
+			          		    if($(this).text().indexOf(entities[i].rawName)){
+			          			elements.push(this)
+			          		    }
+			          		});
 			          		// $(content).find('.r_entity:contains('+entities[i].rawName+')')
 			          		if(elements.length ===0 ){ // there is not already an  entity with this name so we can create the entity in the next step
-			          			continue;
+			          		    continue;
 			          		}
 
 			          		if($(elements[0]).attr('class').hasOwnProperty(rdface_class[rdface_type])===-1){ //there is an entity with this name but with different type, so we are not going to change it
-			          			entities[i].skip=true;
-			          			continue;
+			          		    entities[i].skip=true;
+			          		    continue;
 			          		}
 
 			          		for(var j=0; j<elements.length;j++){
-			          			var attributes = {}
-			          			el_attributes = $(elements[j]).getAttributes()
-			          			for (var attrname in el_attributes) { 
-			          				if(!attributes.hasOwnProperty(attrname)){
-			          					attributes[attrname] = el_attributes[attrname]; 
-			          				}
+			          		    var attributes = {},
+			          			el_attributes = $(elements[j]).getAttributes();
+			          		    for (var attrname in el_attributes) { 
+			          			if(!attributes.hasOwnProperty(attrname)){
+			          			    attributes[attrname] = el_attributes[attrname]; 
 			          			}
+			          		    }
 
-			          			// content.replace($(elements[j]).outerHTML(),$(elements[j]).text())
-			          			content = replaceAll(content,$(elements[j]).outerHTML(),$(elements[j]).text())
+			          		    // content.replace($(elements[j]).outerHTML(),$(elements[j]).text())
+			          		    content = replaceAll(content,$(elements[j]).outerHTML(),$(elements[j]).text());
 
 			          		}
-			          		entities[i].attributes_list = attributes
-				        }
+			          		entities[i].attributes_list = attributes;
+				            }
 
-			          	var entities_served = []
-			          	for(i=0;i<entities.length;i++){
+			          	var entities_served = [];
+			          	    for(i=0;i<entities.length;i++){
+                                                if (! entities[i])
+                                                    continue;
 			          		if(entities[i].skip){
-			          			continue;
+			          		    continue;
 			          		}
 			          		if (entities_served.indexOf(entities[i].rawName)!==-1){
-			          			continue;
+			          		    continue;
 			          		}
 
 			          		if(!entities[i].hasOwnProperty('attributes_list')){
-			          			entities[i].attributes_list = createBasicAttributes(entities[i].type);
+			          		    entities[i].attributes_list = createBasicAttributes(entities[i].type);
 			          		}
 
-			          		entiy_span = createEntityTag(entities[i].rawName,entities[i].attributes_list)
+			          		entiy_span = createEntityTag(entities[i].rawName,entities[i].attributes_list);
 
 			          		content = replaceAll(content,entities[i].rawName,entiy_span);
 			          		entities_served.push(entities[i].rawName);
-			          	}
+			          	    }
 						
 						$content = $(content);
 						$content.find('.r_entity').has('.r_entity').each(function(){ 
@@ -318,7 +321,7 @@
 								var text = $(this).text();//get span content
 								$(this).replaceWith(text);//replace all span with just content
 							}); 
-						})
+						});
 
 			          	ed.setContent($content.html());
 			          	while( $('.mceBlocker').length || $('.mceProgress').length )
@@ -330,7 +333,7 @@
 						console.log("jqXHR object",jqXHR);
 						while( $('.mceBlocker').length || $('.mceProgress').length )
 							ed.setProgressState(false);
-					})
+					});
 
 
 

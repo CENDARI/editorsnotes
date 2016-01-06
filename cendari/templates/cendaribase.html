@@ -94,6 +94,7 @@
 	<!-- <script type="text/javascript" src="{% static "extjs/ext-all-debug.js" %}"> </script>   -->
 				
 <!-- tinymce face -->
+	<script type="text/javascript" src="{% static "cendari/js/Autolinker.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "RDFaCE0.6schema/tinymce/jscripts/tiny_mce/plugins/rdface/js/util/config.js" %}"></script>
 	<script type="text/javascript" src="{% static "RDFaCE0.6schema/tinymce/jscripts/tiny_mce/plugins/rdface/js/util/jquery.cookie.js" %}"></script>
 	<script type="text/javascript" src="{% static "RDFaCE0.6schema/tinymce/jscripts/tiny_mce/plugins/rdface/js/util/drag.js" %}"></script>
@@ -106,10 +107,6 @@
 	<!-- script type="text/javascript" src="{% static "tracing/trace_test_130529.js" %}"></script-->			
 {% compress js %}{% block js %}{% endblock %}{% endcompress %}
 		
-{% block js_nocompress %}
-	<script type="text/javascript" src="https://www.gstatic.com/freebase/suggest/4_2/suggest.min.js"></script>
-{% endblock %}
-
 </head>
 
 {% load typogrify display %}
