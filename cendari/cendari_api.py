@@ -53,10 +53,16 @@ class CendariDataAPI(object):
     def __init__(self, url, key=None):
         self.url = url
         self.key = key
+        self.anonymous = False
+        self.public_dataspaces = None
 
-    def session(self,eppn=None, mail=None, cn=None, key=None):
+    def session(self,eppn=None, mail=None, cn=None, key=None, anonymous=False):
         if key:
             self.key = key
+            return
+        if anonymous:
+            self.anonymous = True
+            self.key = None
             return
         postfields = json.dumps({'eppn': eppn, 'mail': mail, 'cn': cn })
         buffer = BytesIO()
@@ -83,8 +89,18 @@ class CendariDataAPI(object):
     def has_key(self):
         return self.key != None
 
+    def check_login(self):
+        if not self.anonymous and not self.key:
+            raise CendariDataAPIException('Not Logged-in to Cendari Data API')
+
     def close(self):
         self.key = None
+        self.anonymous = False
+
+    def get_key(self):
+        if self.anonymous:
+            return "null"
+        return self.key
 
     def read_url(self,url):
         results = []
@@ -92,7 +108,7 @@ class CendariDataAPI(object):
             buffer = BytesIO()
             c = pycurl.Curl()
             c.setopt(c.URL, url)
-            c.setopt(pycurl.HTTPHEADER, ["Authorization:"+self.key, "Content-type:application/json"])
+            c.setopt(pycurl.HTTPHEADER, ["Authorization:"+self.get_key(), "Content-type:application/json"])
             c.setopt(pycurl.WRITEDATA, buffer)
             c.perform()
             status = c.getinfo(c.RESPONSE_CODE)
@@ -114,16 +130,32 @@ class CendariDataAPI(object):
                 url = None
         return results
 
+    def get_public_dataspaces(self):
+        if self.public_dataspaces is None:
+            saved = self.anonymous
+            try:
+                self.anonymous = True
+                dataspaces=self.get_dataspace()
+                public_ds = []
+                for d in dataspaces:
+                    name = d['name']
+                    if name.startswith('nte_'):
+                        name=name[4:]
+                    public_ds.append(name)
+                self.public_dataspaces = public_ds
+            except:
+                self.public_dataspaces = []
+            self.anonymous = saved
+        return self.public_dataspaces
+
     def get_dataspace(self,id=None):
-        if not self.key:
-            raise CendariDataAPIException('Not Logged-in to Cendari Data API')
+        self.check_login()
         if not id:
             id = ''
         return self.read_url(self.url+'dataspaces/'+id)
 
     def delete_dataspace(self,id):
-        if not self.key:
-            raise CendariDataAPIException('Not Logged-in to Cendari Data API')
+        self.check_login()
         buffer = BytesIO()
         c = pycurl.Curl()
         c.setopt(c.URL, self.url+'dataspaces/'+id)
@@ -142,8 +174,7 @@ class CendariDataAPI(object):
         return results
 
     def create_dataspace(self,name,title=None,desc=None):
-        if not self.key:
-            raise CendariDataAPIException('Not Logged-in to Cendari Data API')
+        self.check_login()
         # maybe test for name conformance
         fields = {'name': name}
         if title is not None:
@@ -173,8 +204,7 @@ class CendariDataAPI(object):
         
 
     def get_resources(self,url,filter=None):
-        if not self.key:
-            raise CendariDataAPIException('Not Logged-in to Cendari Data API')
+        self.check_login()
         if not filter:
             filter = ''
         else:
@@ -182,8 +212,7 @@ class CendariDataAPI(object):
         return self.read_url(url+filter)
 
     def create_resource(self,dataspaceId,fileName=None,fileContents=None,name=None,format=None,title=None,desc=None,setId=None):
-        if not self.key:
-            raise CendariDataAPIException('Not Logged-in to Cendari Data API')
+        self.check_login()
         # maybe test for name conformance
         url = self.url+'dataspaces/%s/resources' % dataspaceId
         print "Url is %s" % url
@@ -223,8 +252,7 @@ class CendariDataAPI(object):
         return results
 
     def update_resource(self,dataspaceId,resId,fileName=None,fileContents=None,name=None,format=None,title=None,desc=None):
-        if not self.key:
-            raise CendariDataAPIException('Not Logged-in to Cendari Data API')
+        self.check_login()
         # maybe test for name conformance
         url = self.url+'dataspaces/%s/resources/%s' % (dataspaceId, resId)
         print "Url is %s" % url
@@ -263,15 +291,13 @@ class CendariDataAPI(object):
         return results
 
     def get_users(self,id=None):
-        if not self.key:
-            raise CendariDataAPIException('Not Logged-in to Cendari Data API')
+        self.check_login()
         if not id:
             id = ''
         return self.read_url(self.url+'users'+id)
 
     def get_privileges(self,userId=None,dataspaceId=None,role=None):
-        if not self.key:
-            raise CendariDataAPIException('Not Logged-in to Cendari Data API')
+        self.check_login()
         if userId:
             return self.read_url(self.url+'privileges?userId'+userId)
         elif dataspaceId:

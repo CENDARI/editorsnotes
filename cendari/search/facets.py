@@ -1,6 +1,7 @@
 from editorsnotes.main.models import Project
 from . import cendari_index
 import pprint
+from ..cendari_api import cendari_data_api
 from ..utils import bounding_box_to_precision, date_range_to_interval, timestamp2isodate
 
 import logging
@@ -25,12 +26,22 @@ CENDARI_FACETS = [
 ]
 
 def cendari_filter(user=None,project_slugs=None):
+    cendari_public_groups = cendari_data_api.get_public_dataspaces()
     if user is None or not user.is_authenticated():
         logger.debug('Creating filter for unknown user')
-        filter = [
-            { "missing": { "field" : "groups_allowed" } },
-            { "missing": { "field" : "users_allowed" } }
-        ]
+        if cendari_public_groups:
+            filter = [
+                {"bool": { "should": [
+                    { "missing": { "field" : "groups_allowed" } },
+                    { "terms": { "groups_allowed" : cendari_public_groups } }
+                ] } },
+                { "missing": { "field" : "users_allowed" } }
+            ]
+        else:
+            filter = [
+                { "missing": { "field" : "groups_allowed" } },
+                { "missing": { "field" : "users_allowed" } }
+            ]
     else:
         if user.is_superuser:
             logger.debug('Creating filter for super user')
@@ -41,6 +52,8 @@ def cendari_filter(user=None,project_slugs=None):
         else:
             groups=project_slugs
 
+        if cendari_public_groups:
+            groups += cendari_public_groups
         logger.debug("Creating filter for user '%s' in projects %s", username, groups)
         filter = [
             {"bool": { "should": [

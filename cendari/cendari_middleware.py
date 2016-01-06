@@ -3,7 +3,7 @@ from django.contrib.auth.signals import user_logged_in
 from django.conf import settings
 from editorsnotes.main.models import Project
 from django.contrib import auth
-from cendari_api import *
+from cendari_api import DATA_API_SERVER, cendari_clean_name, CendariDataAPIException, cendari_data_api
 
 import pprint
 
@@ -77,7 +77,7 @@ class CendariUserMiddleware(RemoteUserMiddleware):
                     user.is_staff = False
         except KeyError:
             logger.debug('No isMemberOf information')
-            pass
+            cendari_data_api.session(anonymous=True)
         except ValueError:
             raise ImproperlyConfigured("LDAP_GROUP_MAPS must be configured in the settings file'")
         if changed:
