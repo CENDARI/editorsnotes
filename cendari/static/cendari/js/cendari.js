@@ -136,12 +136,6 @@ Ext.application({
 							id: 'versionHistoryButtonId'
 						},
 						{
-							text : 'Button',
-							id: 'extraButtonId'
-						},
-						
-						
-						{
 							itemId : 'toggleCw',
 							text : 'Pop-up Window',
 							layout : 'fit',
