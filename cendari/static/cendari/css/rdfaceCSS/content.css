@@ -110,36 +110,36 @@ img.right, table.right {
 
 }
 
-.toc li {
+#toc li {
     list-style-type:none;
 }
 
-.toc{
-    padding-left: 2em;
-}
-.toc ul, .toc ol{
-    padding-left: 2em;
-}
-
-
-.h1 {
+#toc {
     padding-left: 1em;
 }
 
-.h2 {
-    padding-left: 2em;
+.toc-h1 {
+    padding-left: 1em;
 }
 
-.h3 {
+.toc-h2 {
     padding-left: 3em;
 }
 
-.toc  {
+.toc-h3 {
+    padding-left: 5em;
+}
+
+.toc-h4 {
+    padding-left: 7em;
+}
+
+#toc  {
     list-style-position:inside;
     border: 1px solid black;
 }  
 
-u {
+#toc u {
     text-decoration: none;
 /*border-bottom: 2px solid black;*/
 }

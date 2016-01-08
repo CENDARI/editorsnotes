@@ -133,13 +133,15 @@
 		<div class="stop-float"></div>
 		<div style="height:5px"> &nbsp;</div>
 		{% if document %} 
-		<div id='document_toc_wrapper'>
-		  <p>Table of contents (<a class='visibilityToc' href="">hide</a>)</p>
-		  <ol id="document_toc" class='toc'></ol>
-		</div>
-		<div id="document_content"> 
-		  {{document.description|as_html}}
-		</div>
+<iframe  id="document_content" name="document_content" src="{%url 'rdfa_view_document' document.project.slug document.id %}" height="500" width="100%" onload="if (document_content.location.href != 'about:blank') iframe_loaded()"></iframe>
+
+		<!-- <div id='document_toc_wrapper'> -->
+		<!--   <p>Table of contents (<a class='visibilityToc' href="">hide</a>)</p> -->
+		<!--   <ol id="document_toc" class='toc'></ol> -->
+		<!-- </div> -->
+		<!-- <div id="document_content">  -->
+		<!--   {{document.description|as_html}} -->
+		<!-- </div> -->
 		{% endif %}	
 	</div>
 
@@ -172,57 +174,51 @@
 		
 		
 
-		$(document).ready(function(){
-                    //$('#document_content').find('img').each(function(){this.src= this.src.replace('http://'+document.location.host,'').replace('documents/','')})			
-			$('#scanCendari').submit(function(e) { 
-			    e.preventDefault();
-			    $(this).ajaxSubmit(); 
-			    // return false to prevent normal browser submit and page navigation 
-			    // return false;  
-			})
+  function iframe_loaded() {
+      var iframe = $('#note_content').contents();
+      iframe.find('img').each(function(){
+          this.src= this.src
+              .replace('http://'+document.location.host,'')
+              .replace('documents/','');
+      });
+      
+      iframe.find('#toc').toc({content: "#content",
+                               container: iframe,
+                               smoothScrolling: false,
+                               headings: "h1,h2,h3,h4,h5,h6"});
+  }
 
-			$('#scan-list').sortable({
-				helper: function(e, elt) {
-					return elt.clone(true);
-				}
-			});
+  $(document).ready(function() {
+      $('#scanCendari').submit(function(e) { 
+          e.preventDefault();
+          $(this).ajaxSubmit(); 
+          // return false to prevent normal browser submit and page navigation 
+          // return false;  
+      })
+      
+      $('#scan-list').sortable({
+          helper: function(e, elt) {
+              return elt.clone(true);
+          }
+      });
+  });
 
-			$('#document_toc').toc({content: "#document_content", headings: "h1,h2,h3,h4,h5,h6"});
-			if($('#document_toc li').length >0){
-				$('.visibilityToc').on('click',function(e){
-					e.preventDefault();
-					id = $(this).parent().parent().find('.toc').attr('id')
-					if($(this).text().indexOf('show')>-1){
-						$(this).text('hide');
-						$('#'+id).show();
-					}
-					else{
-						$(this).text('show');
-						$('#'+id).hide();
-					}
-				})
-			}
-			else{
-				$('#document_toc_wrapper').hide()
-			}
-		});
-
-		Ext.onReady(function(){
-			$('#extraButtonId').css('left',$('#versionHistoryButtonId').css('left'))
-			$('#versionHistoryButtonId').hide();
-			{% if user.is_authenticated%}
-				$('#extraButtonId').text('Edit Mode');
-				$('#extraButtonId').on('click',function(e){
-					var readModeUrl = '{% url "document_edit" project_slug=project.slug  document_id=document.id %}';
-					window.location.replace(readModeUrl);
-				});
-			{% else %}
-				$('#extraButtonId').hide()
-			{% endif %}
-			$('#exportRdfaButtonId').on('click',function(){
-				var win = window.open('{% url "rdfa_download_document" project_slug=project.slug  document_id=document.id %}','_blank');
-			})
-		})
+  Ext.onReady(function(){
+      $('#extraButtonId').css('left',$('#versionHistoryButtonId').css('left'))
+      $('#versionHistoryButtonId').hide();
+      {% if user.is_authenticated%}
+      $('#extraButtonId').text('Edit Mode');
+      $('#extraButtonId').on('click',function(e){
+          var readModeUrl = '{% url "document_edit" project_slug=project.slug  document_id=document.id %}';
+          window.location.replace(readModeUrl);
+      });
+      {% else %}
+      $('#extraButtonId').hide()
+      {% endif %}
+      $('#exportRdfaButtonId').on('click',function(){
+          var win = window.open('{% url "rdfa_download_document" project_slug=project.slug  document_id=document.id %}','_blank');
+      })
+  })
 
 	</script>
 {% endblock functions %}

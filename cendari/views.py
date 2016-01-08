@@ -1596,7 +1596,7 @@ def rdfa_view_document(request, project_slug, document_id):
     if document.project!=project:
         raise PermissionDenied("Document %d does not belong to project %s"%(document_id,project_slug))
     triples = list(semantic_triples(document))
-    return render_to_response('rdfa.html', {'triples': triples, 'body': note.description})
+    return render_to_response('rdfa.html', {'triples': triples, 'body': document.description})
 #    return HttpResponse(semantic_rdfa(document, document.description),
 #                        content_type="application/xhtml+xml")
 

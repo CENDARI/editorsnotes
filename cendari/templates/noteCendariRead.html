@@ -141,12 +141,10 @@
 		
 {% if note %}
 <div class="form-main">
-<p>Note's title</p>
+<p>Note&apos;s title</p>
 <input readonly="readonly" type="text" id="note_title" name="title" style="height:30px;" value="{%if note%}{{note.title}}{%endif%}">
-<p>Note content</p>
-
-<iframe  id="note_content" name="content" src="{%url 'rdfa_view_note' note.project.slug note.id %}" height="500" width="100%">
-</iframe>
+<p id='label1'>Note content</p>
+<iframe  id="note_content" name="note_content" src="{%url 'rdfa_view_note' note.project.slug note.id %}" height="500" width="100%" onload="if (note_content.location.href != 'about:blank') iframe_loaded()"></iframe>
 {% endif %}
 <section id="note-sections">
   {% for section in sections %}{% include section|ns_template_name %}{% endfor %}
@@ -155,77 +153,57 @@
 {% endblock model_fields %}
 
 {% block functions %}
+<script>
+  switchtabs(3, "note");
+  $("#note-title").attr("placeholder", "Insert Note Title  . . . ");
+  var isReadOnly = false, title = "New Note", id = document.getElementById("note_id").getAttribute("content");
 
-	<script>
-		switchtabs(3, "note");
-		$("#note-title").attr("placeholder", "Insert Note Title  . . . ");
-		var isReadOnly = false, title = "New Note", id = document.getElementById("note_id").getAttribute("content");
+  cendari.addInit(function() {
+      cendari.addTab(title);
+      cendari.addWidgetToActiveTab("form", "noteform", "border");
+  });
+  {% if note %}
+  // highlight associated entities in the paired vis panel
+  var currentNoteEntities = "{{ note.get_all_related_topics_ids }}";
+  window.postMessage({
+      'messageType' : 'cendari_highlight',
+      'targetWindowIds' : 'east',
+      'entityIds' : currentNoteEntities,
+      'highlightMode' : 1
+  }, document.location.origin);
+  {% endif %}
 
-		// if (id > 0) {
-		// 	var name = document.getElementById("note_name").getAttribute("content");
-		// 	title = "Note " + id + ": " + name;
-		// 	isReadOnly = false;
-		// }
+  function iframe_loaded(){
+      var iframe = $('#note_content').contents();
+      iframe.find('img').each(function(){
+          this.src= this.src
+              .replace('http://'+document.location.host,'')
+              .replace('documents/','');
+      });
 
-		// var descriptionLabel = "Note Description ";
-		// var temp = document.getElementById("noteDescEditBut").getAttribute("value");
-		// document.getElementById("noteDescEditBut").value = descriptionLabel + temp;
-		cendari.addInit(function() {
-			//cendari.createEditor(500, "note-description", true, null, null);
-			cendari.addTab(title);
-			cendari.addWidgetToActiveTab("form", "noteform", "border");
-		});
-		{% if note %}
-			// highlight associated entities in the paired vis panel
-			var currentNoteEntities = "{{ note.get_all_related_topics_ids }}";
-			window.postMessage({
-				'messageType' : 'cendari_highlight',
-				'targetWindowIds' : 'east',
-				'entityIds' : currentNoteEntities,
-				'highlightMode' : 1
-			}, document.location.origin);
-		{% endif %}
+      iframe.find('#toc').toc({content: "#content",
+                               container: iframe,
+                               smoothScrolling: false,
+                               headings: "h1,h2,h3,h4,h5,h6"});
+  }
 
+  Ext.onReady(function() {
+      $('#extraButtonId').css('left',$('#versionHistoryButtonId').css('left'))
+      $('#versionHistoryButtonId').hide();
+      {% if user.is_authenticated%}
+      $('#extraButtonId').text('Edit Mode');
+      $('#extraButtonId').on('click',function(e){
+          var readModeUrl = '{% url "note_edit" project_slug=project.slug  note_id=note.id %}';
+          window.location.replace(readModeUrl);
+      });
+      {% else %}
+      $('#extraButtonId').hide()
+      {% endif %}
+      $('#exportRdfaButtonId').on('click',function(){
+          var win = window.open('{% url "rdfa_download_note" project_slug=project.slug  note_id=note.id  %}','_blank');
+      })
+      
+  });
 
-		$(document).ready(function(){
-			$('#note_content').find('img').each(function(){this.src= this.src.replace('http://'+document.location.host,'').replace('documents/','')})
-			$('#note_toc').toc({content: "#note_content", headings: "h1,h2,h3,h4,h5,h6"});
-			if( $('#note_toc li').length >0)	{
-				$('.visibilityToc').on('click',function(e){
-					e.preventDefault();
-					if($(this).text().indexOf('show')>-1){
-						$(this).text('hide');
-						$('#note_toc').show();
-					}
-					else{
-						$(this).text('show');
-						$('#note_toc').hide();
-					}
-				})
-			}
-			else{
-				$('#note_toc_wrapper').hide()
-			}
-		});
-		
-
-		Ext.onReady(function(){
-			$('#extraButtonId').css('left',$('#versionHistoryButtonId').css('left'))
-			$('#versionHistoryButtonId').hide();
-			{% if user.is_authenticated%}
-				$('#extraButtonId').text('Edit Mode');
-				$('#extraButtonId').on('click',function(e){
-					var readModeUrl = '{% url "note_edit" project_slug=project.slug  note_id=note.id %}';
-					window.location.replace(readModeUrl);
-				});
-			{% else %}
-				$('#extraButtonId').hide()
-			{% endif %}
-			$('#exportRdfaButtonId').on('click',function(){
-				var win = window.open('{% url "rdfa_download_note" project_slug=project.slug  note_id=note.id  %}','_blank');
-			})
-
-		})
-
-	</script>
+</script>
 {% endblock functions %}
