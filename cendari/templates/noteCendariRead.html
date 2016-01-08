@@ -2,81 +2,13 @@
 {% load set_var %}
 {% load typogrify display note_sections staticfiles compress %}
 
-{% block css %}
-	<link rel="stylesheet" type="text/css" media="all" href="{% static "iipmooviewer/css/iip.css" %}" />
-	<style type="text/css">
-		.toc  a{
-			color: #000;
-			text-decoration: underline;
-
-		}
-		.toc  li {
-		    list-style:decimal;}
-		.toc  ol li {
-			list-style-type:lower-roman;
-		}
-		.toc  ol ol li {
-			list-style-type:lower-latin;
-		}
-		.toc  ul li {
-			list-style-type:lower-roman;
-		}
-		.toc  ul ul li {
-			list-style-type:lower-latin;
-		}
-		.toc{
-			padding-left: 2em;
-		}
-		.toc ul, .toc ol{
-		    padding-left: 2em;
-		}
-
-		.toc  {
-	    	list-style-position:inside;
-	    	border: 1px solid black;
-	 	}  
-
-	 	u {
-		    text-decoration: none;
-		    /*border-bottom: 2px solid black;*/
-		}
-		u::after{
-			content: "*";
-		}
-
-		#note_content ul li {
-			list-style-type:circle;
-		}
-
-		#note_content ol li {
-			list-style-type:decimal;
-		}
-
-
-		#note_content ol li {
-			list-style:decimal;
-		}
-		#note_content ul li {
-			list-style:disc;
-		}
-		#note_content ul ul li {
-			list-style:circle;
-		}
-		#note_content ul, #note_content ol {
-			padding-left: 2em;
-		}
-
-
-	</style>
-{% endblock %}
+{% block css %}{% endblock %}
 
 {% block init %}
 	<meta name="note_id" id="note_id" content="{{ note.id }}" />
 	<meta name="note_name" id="note_name" content="{{ note.title }}" />
-	<script type="text/javascript" src="{% static "cendari/js/jquery.toc.min.js" %}"></script>
-	<!--<script type="text/javascript" src="{% static "cendari/js/toc.min.js" %}"></script>-->
+	<script type="text/javascript" src="{% static "cendari/js/toc.min.js" %}"></script>
 {% endblock init %}
-
 
 {% block model_fields %}
 	<div class="form-menu-document" >
@@ -128,12 +60,8 @@
 
 						{% endif %}
 						{% if not note.id > 0 %}
-							<div>
-								No Entities.
-							</div>
-							<div>
-								Save this note to add your Entities
-							</div>
+							<div>No Entities.</div>
+							<div>Save this note to add your Entities</div>
 						{% endif %}
 
 					</div>
@@ -207,37 +135,23 @@
 		</ul>
 		<!-- </section> -->
 
-
-
-
 		<div class="stop-float"></div>
 		<div style="height:5px"> &nbsp;</div>
 
 		
-		{% if note %}
-			<h1> {{note.title}} </h1>
+{% if note %}
+<div class="form-main">
+<p>Note's title</p>
+<input readonly="readonly" type="text" id="note_title" name="title" style="height:30px;" value="{%if note%}{{note.title}}{%endif%}">
+<p>Note content</p>
 
-			<!-- <div id="note_toc" class='toc'></div> -->
-			<!-- <ul id="note_toc"></ul> -->
-			<div id='note_toc_wrapper'>
-				<p>Table of contents (<a class='visibilityToc' href="">hide</a>)</p>
-				<ol id="note_toc" class='toc'></ol>
-			</div>
-			
-			<textarea id="note-description" type="text"  class="mceEditor" name="content">
-{% if note %} {{ note.content|as_html }} {% endif %}	
-			</textarea>
-<!--
-			<div id="note_content"> 
-				{{note.content|as_html}}
-			</div>
--->
-
-		{% endif %}
-		<section id="note-sections">
-				{% for section in sections %}{% include section|ns_template_name %}{% endfor %}
-		</section>
-	</div>
+<iframe  id="note_content" name="content" src="{%url 'rdfa_view_note' note.project.slug note.id %}" height="500" width="100%">
+</iframe>
+{% endif %}
+<section id="note-sections">
+  {% for section in sections %}{% include section|ns_template_name %}{% endfor %}
+</section>
+</div>
 {% endblock model_fields %}
 
 {% block functions %}
@@ -257,7 +171,7 @@
 		// var temp = document.getElementById("noteDescEditBut").getAttribute("value");
 		// document.getElementById("noteDescEditBut").value = descriptionLabel + temp;
 		cendari.addInit(function() {
-			cendari.createEditor(500, "note-description", true, null, null);
+			//cendari.createEditor(500, "note-description", true, null, null);
 			cendari.addTab(title);
 			cendari.addWidgetToActiveTab("form", "noteform", "border");
 		});
@@ -308,7 +222,7 @@
 				$('#extraButtonId').hide()
 			{% endif %}
 			$('#exportRdfaButtonId').on('click',function(){
-				var win = window.open('{% url "rdfa_download_note" project_slug=project.slug  note_id=note.id  %}','_blank');	
+				var win = window.open('{% url "rdfa_download_note" project_slug=project.slug  note_id=note.id  %}','_blank');
 			})
 
 		})

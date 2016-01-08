@@ -1584,8 +1584,10 @@ def rdfa_view_note(request, project_slug, note_id):
     note = get_object_or_404(main_models.Note, id=note_id)
     if note.project!=project:
         raise PermissionDenied("Note %d does not belong to project %s"%(note_id,project_slug))
-    return HttpResponse(semantic_rdfa(note, note.content),
-                        content_type="application/xhtml+xml")
+    triples = list(semantic_triples(note))
+    return render_to_response('rdfa.html', {'triples': triples, 'body': note.content})
+#    return HttpResponse(semantic_rdfa(note, note.content),
+#                        content_type="application/xhtml+xml")
     
 def rdfa_view_document(request, project_slug, document_id):
     project = _check_project_privs_or_deny(request.user, project_slug)
@@ -1593,8 +1595,10 @@ def rdfa_view_document(request, project_slug, document_id):
     document = get_object_or_404(main_models.Document, id=document_id)
     if document.project!=project:
         raise PermissionDenied("Document %d does not belong to project %s"%(document_id,project_slug))
-    return HttpResponse(semantic_rdfa(document, document.description),
-                        content_type="application/xhtml+xml")
+    triples = list(semantic_triples(document))
+    return render_to_response('rdfa.html', {'triples': triples, 'body': note.description})
+#    return HttpResponse(semantic_rdfa(document, document.description),
+#                        content_type="application/xhtml+xml")
 
 def rdfa_download_note(request, project_slug, note_id):
     response = rdfa_view_note(request, project_slug, note_id)
@@ -1767,6 +1771,5 @@ def add_project_slug(request,project_id):
             response['status'] = 'error'
             response['message'] = 'missing information'
     
-    print response
     return HttpResponse(json.dumps(response), content_type="application/json");
 

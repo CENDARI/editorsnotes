@@ -3,71 +3,7 @@
 {% load staticfiles typogrify display  compress %}
 
 {% block css %}
-	<link rel="stylesheet" type="text/css" media="all" href="{% static "iipmooviewer/css/iip.css" %}" />
-	<style type="text/css">
-		.toc  a{
-			color: #000;
-			text-decoration: underline;
-
-		}
-		.toc  li {
-		    list-style:decimal;}
-		.toc  ol li {
-			list-style-type:lower-roman;
-		}
-		.toc  ol ol li {
-			list-style-type:lower-latin;
-		}
-
-		.toc  ul li {
-			list-style-type:lower-roman;
-		}
-		.toc  ul ul li {
-			list-style-type:lower-latin;
-		}
-
-		.toc{
-			padding-left: 2em;
-		}
-		.toc ul, .toc ol{
-		    padding-left: 2em;
-		}
-
-		.toc  {
-	    	list-style-position:inside;
-	    	border: 1px solid black;
-	 	} 
-	 	u {
-		    text-decoration: none;
-		    /*border-bottom: 2px solid black;*/
-		}
-		u::after{
-			content: "*";
-		}
-
-		#document_content ul li {
-			list-style-type:circle;
-		}
-
-		#document_content ol li {
-			list-style-type:decimal;
-		}
-
-
-		#document_content ol li {
-			list-style:decimal;
-		}
-		#document_content ul li {
-			list-style:disc;
-		}
-		#document_content ul ul li {
-			list-style:circle;
-		}
-		#document_content ul, #document_content ol {
-			padding-left: 2em;
-		}
-		
-	</style>
+<link rel="stylesheet" type="text/css" media="all" href="{% static "iipmooviewer/css/iip.css" %}" />
 {% endblock %}
 
 
@@ -86,8 +22,8 @@
 				<script > document.write("Entities (" + "{{ document.get_all_related_topics|length }}" + ")"); </script>
 				</label>
 				<div id="tab-content1" class="tab-content  document animated fadeIn">
-					<div class="form-entities" id="document-related-topics">					
-						{% if document %}						
+					<div class="form-entities" id="document-related-topics">
+						{% if document %}
 							{% for topic in document.get_all_related_topics %}
 								<a href= {{ topic.get_absolute_url }}
 									{% if 		topic.topic_node.type == "PER" %} class ="form-entities r_person"
@@ -133,38 +69,15 @@
 				<input type="radio" name="tabs" id="tab2">
 				<label for="tab2">Transcript {% if document.transcript %} (1) {% else %} (0) {% endif %}</label>
 				<div id="tab-content2" class="tab-content document animated fadeIn resizable">
-					<!-- {% if document.id %}
-						<iframe   scrolling="no" id="transciptIframe" class="transcript-form" width="100%" src="{% url 'transcript_view' project.slug document.id %}"></iframe>
-					{% else %}
-						Save document before adding a transcript.
-					{% endif %}	 -->
 					{% if document.transcript %}
-						<div id='transcript_toc_wrapper'>
-						<!-- 	<p>Table of contents (<a class='visibilityToc' href="">hide</a>)</p>
-							<ol id="transcript_toc" class='toc'></ol>
-						</div> -->
-						<div id="transcript_content" class="form-main edit-section">
-							{{document.transcript.content|as_html}}
-						</div>
-						
+					<div id="transcript_content" class="form-main edit-section">
+					  {{document.transcript.content|as_html}}
+					</div>
 					{% else %}
 						No transcript.
 					{% endif %}	
 				</div>
 			</li> <!-- end of TRANSCRIPT TAB -->
- <!-- ZOTERO TAB 
-			<li>
-				<input type="radio" name="tabs" id="tab3">
-				<label for="tab3">Zotero data ({% if not document.zotero_link %}0{% else %}1{% endif%})</label>
-				<div id="tab-content3" class="tab-content document animated fadeIn">
-					{% if zotero_data %}
-						{% include "zotero_item.html" %}
-					{% else %}
-						<p>This document has no connected Zotero data.</p>
-					{% endif %}
-				</div>
-			</li> 
-end of ZOTERO TAB -->
 
 			<li> <!-- LINKS TAB -->
 				<input type="radio" name="tabs" id="tab4">
@@ -217,17 +130,16 @@ end of ZOTERO TAB -->
 			</li>
 		</ul>
 
-
 		<div class="stop-float"></div>
 		<div style="height:5px"> &nbsp;</div>
 		{% if document %} 
-			<div id='document_toc_wrapper'>
-				<p>Table of contents (<a class='visibilityToc' href="">hide</a>)</p>
-				<ol id="document_toc" class='toc'></ol>
-			</div>
-			<div id="document_content"> 
-				{{document.description|as_html}}
-			</div>
+		<div id='document_toc_wrapper'>
+		  <p>Table of contents (<a class='visibilityToc' href="">hide</a>)</p>
+		  <ol id="document_toc" class='toc'></ol>
+		</div>
+		<div id="document_content"> 
+		  {{document.description|as_html}}
+		</div>
 		{% endif %}	
 	</div>
 
@@ -238,18 +150,17 @@ end of ZOTERO TAB -->
 
 	<script>
 		switchtabs(5, "document");
-		var isReadOnly = false, title = "New Document";
+		var isReadOnly = false, title = "New Document", id = document.getElementById("document_id").getAttribute("content");
 
-		if (( id = document.getElementById("document_id").getAttribute("content")) > 0) {
-			var name = document.getElementById("document_name").getAttribute("content");
-			title = "Document " + id + ": " + name;
-			isReadOnly = true;
-		}
+		// if (id > 0) {
+		// 	var name = document.getElementById("document_name").getAttribute("content");
+		// 	title = "Document " + id + ": " + name;
+		// 	isReadOnly = true;
+		// }
 
 
-		var descriptionLabel = "Document Description ";
+		//var descriptionLabel = "Document Description ";
 		// var temp = document.getElementById("documentDescEditBut").getAttribute("value");
-
 		// document.getElementById("documentDescEditBut").value = descriptionLabel + temp;
 
 		cendari.addInit(function() {
@@ -262,7 +173,7 @@ end of ZOTERO TAB -->
 		
 
 		$(document).ready(function(){
-			$('#document_content').find('img').each(function(){this.src= this.src.replace('http://'+document.location.host,'').replace('documents/','')})			
+                    //$('#document_content').find('img').each(function(){this.src= this.src.replace('http://'+document.location.host,'').replace('documents/','')})			
 			$('#scanCendari').submit(function(e) { 
 			    e.preventDefault();
 			    $(this).ajaxSubmit(); 
@@ -276,26 +187,6 @@ end of ZOTERO TAB -->
 				}
 			});
 
-			// $('#transcript_toc').toc({
-			// 	'container': '#transcript_content',
-			// 	'selectors': 'h1,h2,h3,h4,h5,h6',
-			// 	'smoothScrolling': true, //enable or disable smooth scrolling on click
-			//     'prefix': 'toc', //prefix for anchor tags and class names
-			//     'onHighlight': function(el) {}, //called when a new section is highlighted 
-			//     'highlightOnScroll': true, //add class to heading that is currently in focus
-			//     'highlightOffset': 100, //offset to trigger the next headline
-			//     'anchorName': function(i, heading, prefix) { //custom function for anchor name
-			//         return prefix+i;
-			//     },
-			//     'headerText': function(i, heading, $heading) { //custom function building the header-item text
-			//         return $heading.text();
-			//     },
-			// 	'itemClass': function(i, heading, $heading, prefix) { // custom function for item class
-			// 	  return $heading[0].tagName.toLowerCase();
-			// 	}
-			// });
-			// $('#transcript_toc').toc({content: "#transcript_content", headings: "h1,h2,h3,h4,h5,h6"});
-			
 			$('#document_toc').toc({content: "#document_content", headings: "h1,h2,h3,h4,h5,h6"});
 			if($('#document_toc li').length >0){
 				$('.visibilityToc').on('click',function(e){
@@ -329,7 +220,7 @@ end of ZOTERO TAB -->
 				$('#extraButtonId').hide()
 			{% endif %}
 			$('#exportRdfaButtonId').on('click',function(){
-				var win = window.open('{% url "rdfa_download_document" project_slug=project.slug  document_id=document.id %}','_blank');	
+				var win = window.open('{% url "rdfa_download_document" project_slug=project.slug  document_id=document.id %}','_blank');
 			})
 		})
 

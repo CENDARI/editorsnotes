@@ -53,7 +53,8 @@ __all__ = [
     'semantic_resolve_topic',
     'semantic_rdfa',
     'semantic_find_dates',
-    'semantic_process_cluster'
+    'semantic_process_cluster',
+    'semantic_triples'
 ]
 
 
@@ -796,3 +797,8 @@ def semantic_rdfa(obj, xml):
     document = E.HTML(head, E.BODY(xml, about=uri), version="XHTML+RDFa 1.0")
     return etree.tostring(document, encoding='utf8', pretty_print=True)
 
+def semantic_triples(obj):
+    uri = semantic_uri(obj)
+    g = Semantic.graph(uri)
+    for s,p,o in g.triples( (URIRef(uri), None, None) ):
+        yield dict(p=p,o=o)

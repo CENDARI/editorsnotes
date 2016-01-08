@@ -177,8 +177,6 @@
 				<input type="hidden" id = "model_id" name="id" value="{{note.id}}" />
 			{% endif %}
 			<div class="form-main edit-section" >
-		
-				<input  class="editorlabel" id="noteDescEditBut" type="button" value= {% if note.id > 0 %} "[ Read Only ]                --- click here for Edit mode" {% else %} "[ Editable ]                    --- click here for Read-Only mode" {% endif %} />
 				<div data-error-target="note-title"></div>
 				<!-- <label for="note-title">Note's title</label> -->
 				<p>Note's title</p>
@@ -222,10 +220,10 @@
 		}
 
 		var descriptionLabel = "Note Description ";
-		var temp = document.getElementById("noteDescEditBut").getAttribute("value");
-		document.getElementById("noteDescEditBut").value = descriptionLabel + temp;
+		//var temp = document.getElementById("noteDescEditBut").getAttribute("value");
+		//document.getElementById("noteDescEditBut").value = descriptionLabel + temp;
 		cendari.addInit(function() {
-			cendari.createEditor(500, "note-description", isReadOnly, "noteDescEditBut", descriptionLabel);
+			cendari.createEditor(500, "note-description", isReadOnly, null, descriptionLabel);
 			cendari.addTab(title);
 			cendari.addWidgetToActiveTab("form", "noteform", "border");
 		});

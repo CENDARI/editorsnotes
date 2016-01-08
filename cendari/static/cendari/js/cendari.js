@@ -421,7 +421,7 @@ Ext.application({
                 cendari.addWidgetToActiveTab = addWidgetToActiveTab;
                 cendari.currentId = 0;
                 // Ext.getCmp('saveNoteID').on('click', function() {submitCendariForm();});
-                Ext.getCmp('saveNoteID').on('click', function() {$('.formCendari').submit()});
+                Ext.getCmp('saveNoteID').on('click', function() {$('.formCendari').submit();});
                 // Ext.getCmp('readModeID').on('click', function() {});
         /*      Ext.getCmp('saveNoteID').on('click', function() {
                     if(tinyMCE.activeEditor!=null){

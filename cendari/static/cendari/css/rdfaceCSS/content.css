@@ -103,3 +103,46 @@ img.right, table.right {
 	float: right;
 	text-align: inherit;
 }
+
+.toc  a{
+    color: #000;
+    text-decoration: underline;
+
+}
+
+.toc li {
+    list-style-type:none;
+}
+
+.toc{
+    padding-left: 2em;
+}
+.toc ul, .toc ol{
+    padding-left: 2em;
+}
+
+
+.h1 {
+    padding-left: 1em;
+}
+
+.h2 {
+    padding-left: 2em;
+}
+
+.h3 {
+    padding-left: 3em;
+}
+
+.toc  {
+    list-style-position:inside;
+    border: 1px solid black;
+}  
+
+u {
+    text-decoration: none;
+/*border-bottom: 2px solid black;*/
+}
+
+
+
