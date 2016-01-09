@@ -48,7 +48,6 @@ class CendariDataAPIException(Exception):
     def __str__(self):
         return repr(self.msg)
 
-
 class CendariDataAPI(object):
     def __init__(self, url, key=None):
         self.url = url
