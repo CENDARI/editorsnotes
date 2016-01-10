@@ -176,6 +176,11 @@ class ProjectManager(models.Manager):
     def for_user(self, user):
         return self.select_related('roles__group__user')\
                 .filter(roles__group__user=user)
+    def public_projects(self):
+        return self.filter(is_public=True)
+    def public_project_slugs(self):
+        return [p.slug for p in self.public_projects()]
+
 
 class Project(models.Model, URLAccessible, ProjectPermissionsMixin):
     name = models.CharField(max_length='80')
