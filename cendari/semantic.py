@@ -600,11 +600,17 @@ imported_relations = set([
     DBPPROP['latitude'],
     DBPPROP['longitude'],
     DBPPROP['latd'],
+    DBPPROP['latm'],
+    DBPPROP['lats'],
     DBPPROP['longd'],
-    DBPPROP['latMin'],
+    DBPPROP['longm'],
+    DBPPROP['longs'],
     DBPPROP['latDeg'],
-    DBPPROP['lonMin'],
+    DBPPROP['latMin'],
+    DBPPROP['latSec'],
     DBPPROP['lonDeg'],
+    DBPPROP['lonMin'],
+    DBPPROP['lonSec'],
     GRS['point'],
     RDFS.label,
     OWL['sameAs'],
@@ -629,8 +635,18 @@ no_duplicates = set([
     DBPPROP['latitude'],
     DBPPROP['longitude'],
     DBPPROP['latd'],
+    DBPPROP['latm'],
+    DBPPROP['lats'],
     DBPPROP['longd'],
-    GRS['point'],
+    DBPPROP['longm'],
+    DBPPROP['longs'],
+    DBPPROP['latDeg'],
+    DBPPROP['latMin'],
+    DBPPROP['latSec'],
+    DBPPROP['lonDeg'],
+    DBPPROP['lonMin'],
+    DBPPROP['lonSec'],
+        GRS['point'],
     GEO['lat'],
     GEO['long'],
     GEO['geometry'],
@@ -661,7 +677,7 @@ def dbpedia_lookup(label,type):
 def semantic_resolve_topic(topic, force=False):
     topic.save()
     semantic_process_topic(topic,doCommit=False)
-    if topic.rdf is None:
+    if topic.rdf is None or topic.rdf=='':
         semantic.commit()
         return
 
@@ -741,12 +757,14 @@ def load_dbpedia(uri, topicid):
 
         lat = g.value(uri, DBPPROP['latd'])
         latmin = g.value(uri, DBPPROP['latm'])
+        lats = g.value(uri, DBPPROP['lats'],default=0)
         lon = g.value(uri, DBPPROP['longd'])
-        lonmin = g.value(uri, DBPPROP['lonm'])
+        lonmin = g.value(uri, DBPPROP['longm'])
+        lons = g.value(uri, DBPPROP['longs'],default=0)
         if lat and latmin and lon and lonmin:
-            # Degrees + minutes/60 
-            lat = float(lat) + float(latmin)/60.0
-            lon = float(lon) + float(lonmin)/60.0
+            # Degrees + minutes/60 + seconds/3600
+            lat = float(lat) + float(latmin)/60.0 + float(lats)/3600.0
+            lon = float(lon) + float(lonmin)/60.0 + float(lons)/3600.0
             loc = "%f %f" % (lat, lon)
             loc = str(lat)+" "+str(lon)
             g.add( (uri, GRS['point'], Literal(loc)) )
@@ -755,12 +773,14 @@ def load_dbpedia(uri, topicid):
 
         lat = g.value(uri, DBPPROP['latDeg'])
         latmin = g.value(uri, DBPPROP['latMin'])
+        lats = g.value(uri, DBPPROP['latSec'],default=0)        
         lon = g.value(uri, DBPPROP['lonDeg'])
         lonmin = g.value(uri, DBPPROP['lonMin'])
+        lons = g.value(uri, DBPPROP['lonSec'],default=0)
         if lat and latmin and lon and lonmin:
             # Degrees + minutes/60 
-            lat = float(lat) + float(latmin)/60.0
-            lon = float(lon) + float(lonmin)/60.0
+            lat = float(lat) + float(latmin)/60.0 + float(lats)/3600.0
+            lon = float(lon) + float(lonmin)/60.0 + float(lons)/3600.0
             loc = "%f %f" % (lat, lon)
             g.add( (uri, GRS['point'], Literal(loc)) )
             logger.info("Found in dbprop:latDeg/dbprop:lonDeg: %s", g.value(uri, GRS['point']))

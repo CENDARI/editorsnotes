@@ -178,10 +178,9 @@
 			{% endif %}
 			<div class="form-main edit-section" >
 				<div data-error-target="note-title"></div>
-				<!-- <label for="note-title">Note's title</label> -->
-				<p>Note's title</p>
+				<p>Title:</p>
 				<input type="text" id="note_title" name="title" style="height:30px;" value="{%if note%}{{note.title}}{%endif%}">
-				<p>Note content</p>
+				<p>Content:</p>
 				<div data-error-target="note-description"></div>
 				<textarea id="note-description" type="text"  class="mceEditor" name="content"  >
 				{% if note %} {{ note.content|as_html }} {% endif %}	

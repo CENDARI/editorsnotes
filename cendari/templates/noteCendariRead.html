@@ -141,9 +141,9 @@
 		
 {% if note %}
 <div class="form-main">
-<p>Note&apos;s title</p>
+<p>Title:</p>
 <input readonly="readonly" type="text" id="note_title" name="title" style="height:30px;" value="{%if note%}{{note.title}}{%endif%}">
-<p id='label1'>Note content</p>
+<p id='label1'>Content:</p>
 <iframe  id="note_content" name="note_content" src="{%url 'rdfa_view_note' note.project.slug note.id %}" height="500" width="100%" onload="if (note_content.location.href != 'about:blank') iframe_loaded()"></iframe>
 {% endif %}
 <section id="note-sections">
