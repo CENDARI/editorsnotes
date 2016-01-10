@@ -7,9 +7,15 @@ django-model-utils==2.0.3
 django-reversion==1.7
 django-licensing==0.2.4
 djangorestframework==2.3.13
+django-crispy-forms==1.5.2
+django-extra-views==0.7.1
+django-floppyforms==1.5.2
 
+html5lib==0.9999999
+elasticsearch==1.9.0
 pyelasticsearch==1.2
-BeautifulSoup<4.0
+BeautifulSoup==3.2.1
+beautifulsoup4==4.4.1
 lxml==3.4.2
 cssselect==0.8
 #Pillow==3.0.0
@@ -17,14 +23,23 @@ cssselect==0.8
 psycopg2==2.4.6
 
 isodate==0.4.9
+pyparsing==2.0.3
+redis==2.10.3
 pytz==2012h
+simplejson==3.8.0
+six==1.10.0
 refine-client==0.2.1
 smartypants==1.6.0.3
 
 ipython==0.13.1
 
+urllib2-file==0.2.1
+urllib3==1.12
 webtest==2.0.14
 django-webtest==1.7.6
+waitress==0.8.10
+WebOb==1.5.0
+wheel==0.24.0
 
 # CENDARI EXTRA REQUIREMENTS
 requests==2.2.1
@@ -33,6 +48,7 @@ guess-language==0.2
 rq==0.5.6
 django-rq==0.8.0
 rdflib==4.2.1
+SPARQLWrapper==1.6.4
 django-widget-tweaks==1.3
 parse==1.6.4
 django_filter==0.11.0
@@ -49,4 +65,3 @@ uricore==0.1.2
 #for mac  run in
 # for mac export BERKELEYDB_DIR=$(brew --cellar)/berkeley-db/5.3.28;
 #bsddb3==6.1.0
-
