@@ -134,14 +134,6 @@
 		<div style="height:5px"> &nbsp;</div>
 		{% if document %} 
 <iframe  id="document_content" name="document_content" src="{%url 'rdfa_view_document' document.project.slug document.id %}" height="500" width="100%" onload="if (document_content.location.href != 'about:blank') iframe_loaded()"></iframe>
-
-		<!-- <div id='document_toc_wrapper'> -->
-		<!--   <p>Table of contents (<a class='visibilityToc' href="">hide</a>)</p> -->
-		<!--   <ol id="document_toc" class='toc'></ol> -->
-		<!-- </div> -->
-		<!-- <div id="document_content">  -->
-		<!--   {{document.description|as_html}} -->
-		<!-- </div> -->
 		{% endif %}	
 	</div>
 
@@ -175,17 +167,24 @@
 		
 
   function iframe_loaded() {
-      var iframe = $('#note_content').contents();
+      var iframe = $('#document_content').contents();
       iframe.find('img').each(function(){
           this.src= this.src
               .replace('http://'+document.location.host,'')
               .replace('documents/','');
       });
       
+      iframe.find('body').prepend('<div id="toc"></div>');
       iframe.find('#toc').toc({content: "#content",
                                container: iframe,
                                smoothScrolling: false,
                                headings: "h1,h2,h3,h4,h5,h6"});
+      if (iframe.find('#toc li').length > 0) {
+          iframe.find('#toc').prepend('<p>Table of contents</p>');
+      }
+      else {
+          iframe.find('#toc').remove();
+      }
   }
 
   $(document).ready(function() {

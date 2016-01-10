@@ -180,11 +180,17 @@
               .replace('http://'+document.location.host,'')
               .replace('documents/','');
       });
-
+      iframe.find('body').prepend('<div id="toc"></div>');
       iframe.find('#toc').toc({content: "#content",
                                container: iframe,
                                smoothScrolling: false,
                                headings: "h1,h2,h3,h4,h5,h6"});
+      if (iframe.find('#toc li').length > 0) {
+          iframe.find('#toc').prepend('<p>Table of contents</p>');
+      }
+      else {
+          iframe.find('#toc').remove();
+      }
   }
 
   Ext.onReady(function() {
