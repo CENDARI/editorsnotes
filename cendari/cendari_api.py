@@ -129,8 +129,8 @@ class CendariDataAPI(object):
                 url = None
         return results
 
-    def get_public_dataspaces(self):
-        if self.public_dataspaces is None:
+    def get_public_dataspaces(self,force=False):
+        if self.public_dataspaces is None or force:
             saved = self.anonymous
             try:
                 self.anonymous = True

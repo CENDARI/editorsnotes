@@ -143,6 +143,7 @@ def login_user_synchronize(sender, user, request, **kwargs):
             api.close()
             return
     try:
+        api.get_public_dataspaces(force=True)
         dataspaces = api.get_dataspace()
         dprojects = {}
         for d in dataspaces:
