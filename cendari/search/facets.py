@@ -35,14 +35,16 @@ def cendari_filter(user=None,project_slugs=None):
             filter = [
                 {"bool": { "should": [
                     { "missing": { "field" : "groups_allowed" } },
-                    { "terms": { "groups_allowed" : cendari_public_groups } }
-                ] } },
-                { "missing": { "field" : "users_allowed" } }
+                    { "terms": { "groups_allowed" : cendari_public_groups } },
+                    { "missing": { "field" : "users_allowed" } }
+                ] } }
             ]
         else:
             filter = [
-                { "missing": { "field" : "groups_allowed" } },
-                { "missing": { "field" : "users_allowed" } }
+                {"bool": { "should": [
+                    { "missing": { "field" : "groups_allowed" } },
+                    { "missing": { "field" : "users_allowed" } }
+                ] } }
             ]
     else:
         if user.is_superuser:
@@ -60,9 +62,7 @@ def cendari_filter(user=None,project_slugs=None):
         filter = [
             {"bool": { "should": [
                 { "missing": { "field" : "groups_allowed" } },
-                { "terms": { "groups_allowed" : groups } }
-            ] } },
-            {"bool": { "should": [
+                { "terms": { "groups_allowed" : groups } },
                 { "missing": { "field" : "users_allowed" } },
                 { "term": { "users_allowed" : username } }
             ] } }

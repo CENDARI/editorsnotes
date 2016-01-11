@@ -56,6 +56,7 @@ class CendariDataAPI(object):
         self.public_dataspaces = None
 
     def session(self,eppn=None, mail=None, cn=None, key=None, anonymous=False):
+        self.public_dataspaces = None
         if key:
             self.key = key
             return
@@ -95,6 +96,7 @@ class CendariDataAPI(object):
     def close(self):
         self.key = None
         self.anonymous = False
+        self.public_dataspaces = None
 
     def get_key(self):
         if self.anonymous:
@@ -131,20 +133,17 @@ class CendariDataAPI(object):
 
     def get_public_dataspaces(self,force=False):
         if self.public_dataspaces is None or force:
-            saved = self.anonymous
             try:
-                self.anonymous = True
                 dataspaces=self.get_dataspace()
                 public_ds = []
                 for d in dataspaces:
                     name = d['name']
-                    if name.startswith('nte_'):
-                        name=name[4:]
                     public_ds.append(name)
+                    if name.startswith('nte_'):
+                        public_ds.append(name[4:])
                 self.public_dataspaces = public_ds
             except:
                 self.public_dataspaces = []
-            self.anonymous = saved
         return self.public_dataspaces
 
     def get_dataspace(self,id=None):

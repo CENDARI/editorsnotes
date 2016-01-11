@@ -31,6 +31,7 @@ class CendariUserMiddleware(RemoteUserMiddleware):
         if user.is_authenticated():
             logger.debug('Cendari Middelware user %s is_authenticated', user)
         try:
+            cendari_data_api.close()
             memberof = request.META['isMemberOf']
             logger.debug('Received isMemberOf information: %s', memberof)
             group_maps = settings.LDAP_GROUP_MAPS
