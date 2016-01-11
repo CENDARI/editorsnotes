@@ -73,9 +73,11 @@ def browse_cendari(request):
         model_name = model._meta.module_name
         listname = '%s_list' % model_name
 	if request.user.is_superuser:
-		query_set = model.objects.order_by('-last_updated')
+            query_set = model.objects.order_by('-last_updated')
+        elif not request.user.is_authenticated():
+            query_set = model.objects.filter(project__in=list(Project.objects.filter(is_public=True))).order_by('-last_updated')
 	else:
-		query_set = model.objects.filter(pk__in=[obj.id for obj in model.objects.all() if obj.get_affiliation().is_owned_by(request.user)]).order_by('-last_updated')
+            query_set = model.objects.filter(pk__in=[obj.id for obj in model.objects.all() if obj.get_affiliation().is_owned_by(request.user)]).order_by('-last_updated')
         items = list(query_set[:max_count])
         o[listname] = items
 
@@ -83,25 +85,28 @@ def browse_cendari(request):
     model_name = model._meta.module_name
     listname = '%s_list' % model_name
     if request.user.is_superuser:
-	    query_set = model.objects.order_by('-last_updated')
-	    items = list(query_set[:max_count])
+        query_set = model.objects.order_by('-last_updated')
+        items = list(query_set[:max_count])
     else:		
-            #query_set = model.objects.filter(pk__in=[tn.id for tn in model.objects.all() if tn.get_connected_projects()[0].is_owned_by(request.user)]).order_by('-last_updated')
-	    #query_set = model.objects.filter(pk__in=[tn.id for tn in model.objects.all() if (pr for pr in tn.get_connected_projects() if pr.is_owned_by(request.user))]).order_by('-last_updated')
-	    #TO-DO: query above does not work, below is a quick fix:
-	    tns = []
-	    for tn in model.objects.all():
-		    connected_projects = tn.get_connected_projects()
-		    for pr in connected_projects:
-			    if(pr.is_owned_by(request.user)):
-			       tns.append(tn)
-	    items = tns[:max_count]
+        #TO-DO: query above does not work, below is a quick fix:
+        tns = []
+        for tn in model.objects.all():
+            connected_projects = tn.get_connected_projects()
+            for pr in connected_projects:
+                if not request.user.is_authenticated():
+                    if pr.is_public:
+                        tns.append(tn)
+                    elif pr.is_owned_by(request.user):
+                        tns.append(tn)
+	items = tns[:max_count]
     o[listname] = items
 
     if request.user.is_superuser:
-	    o['projects'] = Project.objects.all().order_by('name')
+	o['projects'] = list(Project.objects.all().order_by('name'))
+    elif not request.user.is_authenticated():
+        o['projects'] = list(Project.objects.public_projects().order_by('name'))
     else:
-	    o['projects'] = request.user.get_authorized_projects().order_by('name')
+	o['projects'] = list(request.user.get_authorized_projects().order_by('name'))
     return render_to_response(
         'browsecendari.html', o, context_instance=RequestContext(request))
     
@@ -115,27 +120,28 @@ def _sort_citations(instance):
     return cites
 
 def _check_project_privs_or_deny(user, project_slug):
-        real_project_slug = utils.get_project_slug(project_slug)
-        project = None
-        if real_project_slug is None:
+    real_project_slug = utils.get_project_slug(project_slug)
+    project = None
+    if real_project_slug is None:
+        if not user.is_authenticated():
+            projects = Project.objects.public_projects()
+        elif user.is_superuser:
+            for p in projects:
+                project_role = user._get_project_role(p)
+                if project_role is not None:                
+                    project = p
+                    break
+            if project is None:
+                logger.warn("superuser does not have own projects.")
+                project = projects[0]
+        else:
             projects = user.get_authorized_projects()
             if not projects:
                 raise PermissionDenied("No accessible project for user %s" % user.username)
-            #(NB) handle superusers
-            if user.is_superuser:
-                for p in projects:
-                    project_role = user._get_project_role(p)
-                    if project_role is not None:                
-                        project = p
-                        break
-                if project is None:
-                    logger.warn("superuser does not have own projects.")
-                    project = projects[0]
-            else:
-                project = projects[0]
-        else:
-            project = get_object_or_404(Project, slug=real_project_slug)
-        if utils.project_is_public(project):
+            project = projects[0]
+    else:
+        project = get_object_or_404(Project, slug=real_project_slug)
+        if project.is_public:
             return project
         if not user.is_authenticated():
             raise PermissionDenied("Anonymous access not allowed")

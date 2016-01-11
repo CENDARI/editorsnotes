@@ -168,7 +168,7 @@ def login_user_synchronize(sender, user, request, **kwargs):
                 try:
                     api.create_dataspace('nte_'+pname,title=p.name)
                 except CendariDataAPIException as e:
-                    logger.error('Problem creating project with DATA Api: %s', pname, e)
+                    logger.error('Problem creating project "%s" with DATA Api: %s', pname, e)
     except CendariDataAPIException as e:
         logger.error('Problem synchonizing projects with DATA Api: %s', e)
     except:
