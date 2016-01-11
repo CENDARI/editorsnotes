@@ -96,8 +96,8 @@ def browse_cendari(request):
                 if not request.user.is_authenticated():
                     if pr.is_public:
                         tns.append(tn)
-                    elif pr.is_owned_by(request.user):
-                        tns.append(tn)
+                elif pr.is_owned_by(request.user):
+                    tns.append(tn)
 	items = tns[:max_count]
     o[listname] = items
 
@@ -126,6 +126,7 @@ def _check_project_privs_or_deny(user, project_slug):
         if not user.is_authenticated():
             projects = Project.objects.public_projects()
         elif user.is_superuser:
+            projects = user.get_authorized_projects()
             for p in projects:
                 project_role = user._get_project_role(p)
                 if project_role is not None:                
@@ -136,9 +137,9 @@ def _check_project_privs_or_deny(user, project_slug):
                 project = projects[0]
         else:
             projects = user.get_authorized_projects()
-            if not projects:
-                raise PermissionDenied("No accessible project for user %s" % user.username)
-            project = projects[0]
+        if not projects:
+            raise PermissionDenied("No accessible project for user %s" % user.username)
+        project = projects[0]
     else:
         project = get_object_or_404(Project, slug=real_project_slug)
         if project.is_public:
@@ -147,7 +148,7 @@ def _check_project_privs_or_deny(user, project_slug):
             raise PermissionDenied("Anonymous access not allowed")
         if not user.superuser_or_belongs_to(project) and not project.is_owned_by(user):
             raise PermissionDenied("Access to project '%s' not allowed" % project_slug)
-        return project
+    return project
 
 def user_logout(request):
     auth.logout(request)
