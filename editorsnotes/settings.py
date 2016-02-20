@@ -128,7 +128,6 @@ try:
 except ImportError:
     STORAGE_PATH = EN_PROJECT_PATH
 
-
 # CENDARI ADD
 HAYSTACK_XAPIAN_PATH = os.path.abspath(os.path.join(STORAGE_PATH, 'searchindex'))
 #MEDIA_ROOT = os.path.abspath(os.path.join(STORAGE_PATH, 'uploads'))

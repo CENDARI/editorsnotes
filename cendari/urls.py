@@ -57,7 +57,7 @@ urlpatterns += patterns('editorsnotes.main.views.navigation',
     #url(r'^$', 'index', name='index_view'),
     url(r'^about/$', 'about', name='about_view'),
     url(r'^about/test/$', 'about_test'),
-    url(r'^search/$', 'search', name='search_view'),
+#    url(r'^search/$', 'search', name='search_view'),
     url(r'^version/$', 'get_version', name='get_version'),
 )
 
@@ -99,13 +99,13 @@ urlpatterns += patterns('editorsnotes.refine.views',
 import editorsnotes.admin.views.projects
 
 cendaripatterns = patterns('cendari.views',
-    url(r'^$',                                                                              'index',                              name='index_view'),
-    url(r'^cendari/browse/$',                                                               'browse_cendari',                     name='cendari_browse_view'),
-    url(r'^cendari/about/$',                                                                'about_cendari',                      name='cendari_about_view'),
-    url(r'^cendari/external/(?P<type>\w+)/$',                                               'iframe_view',                        name='iframe_view'),
-    
-
-    url(r'^cendari/(?P<project_slug>[-\w]+)/index$',                                           'index',                              name='index_project'),
+    url(r'^$','index', name='index_view'),
+    url(r'^browse/$', 'browse_cendari', name='cendari_browse_view'),
+    url(r'^cendari/browse/$', 'browse_cendari', name='cendari_browse_view'),
+    url(r'^about/$', 'about_cendari', name='cendari_about_view'),
+    url(r'^cendari/about/$', 'about_cendari', name='cendari_about_view'),
+    url(r'^cendari/external/(?P<type>\w+)/$', 'iframe_view', name='iframe_view'),
+    url(r'^cendari/(?P<project_slug>[-\w]+)/index$', 'index', name='index_project'),
     
 
     # Cendari Projects
@@ -175,6 +175,7 @@ cendaripatterns = patterns('cendari.views',
 
     # Cendari search
     url(r'^cendari/(?P<project_slug>[-\w]+)/search/$',                                          'search',                            name='cendari_search_view'),
+    url(r'^search/$', 'faceted_search', name='cendari_faceted_search_view'),
     url(r'^cendari/faceted/$', 'faceted_search', name='cendari_faceted_search_view'),
 #    url(r'^cendari/(?P<project_slug>[-\w]+)/faceted/$', 'faceted_search', name='cendari_faceted_search_view'),
     url(r'^cendari/autocomplete_search/$', 'autocomplete_search', name = 'autocomplete_search_view'),

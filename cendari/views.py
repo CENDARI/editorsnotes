@@ -1050,8 +1050,13 @@ def trame_search(request):
     r = requests.post(trame_url)
     return HttpResponse(r.content, mimetype='application/json')
 
+try:
+    NERD_SERVER = settings.IIPSRV
+except:
+    NERD_SERVER = 'http://traces1.saclay.inria.fr/nerd/service/processNERDText'
+
 def nerd_service(request):
-    url = 'http://traces1.saclay.inria.fr/nerd/service/processNERDText'
+    url = NERD_SERVICE
     params={
         "text": request.GET['text'],
         "onlyNER":"false",

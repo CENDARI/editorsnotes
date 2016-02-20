@@ -10,9 +10,9 @@ urlpatterns = patterns('editorsnotes.main.views.auth',
     url(r'^projects/(?P<project_slug>[-\w]+)/$', 'project', name='project_view'),
 )
 
-urlpatterns += patterns('editorsnotes.main.views.navigation',
-    url(r'^browse/$', 'browse', name='browse_view'),
-)
+#urlpatterns += patterns('editorsnotes.main.views.navigation',
+#    url(r'^browse/$', 'browse', name='browse_view'),
+#)
 
 urlpatterns += patterns('editorsnotes.main.views.documents',
     url(r'^(?:projects/(?P<project_slug>[-\w]+)/)?documents/$', 'all_documents', name='all_documents_view'),

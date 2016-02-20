@@ -11,6 +11,8 @@ POSTGRES_DB = {
     'PORT': ''
 }
 
+NERD_SERVICE_SERVER = 'http://traces1.saclay.inria.fr/nerd/service/processNERDText'
+
 SEMANTIC_STORE = 'Sleepycat'
 #SEMANTIC_PATH = os.path.abspath(os.path.join(STORAGE_PATH, 'rdfstore'))
 #SEMANTIC_STORE = 'Virtuoso'
