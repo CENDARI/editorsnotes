@@ -293,7 +293,7 @@ Ext.application({
                                 // plugins : "style,table,noneditable,example,lists,advhr,advimage,advlink,iespell,inlinepopups,media,paste,directionality,noneditable,nonbreaking,wordcount,advlist,contextmenu,fullscreen,rdface",
                                 plugins : "nerd,markcreativework,style,table,noneditable,example,lists,advhr,advimage,advlink,iespell,inlinepopups,media,paste,directionality,nonbreaking,wordcount,advlist,contextmenu,fullscreen,rdface,autolink,spellchecker,pagebreak,layer,emotions,insertdatetime,preview,searchreplace,print,fullscreen,visualchars,xhtmlxtras,template",
                                 theme_advanced_buttons1 : "nerd,undo,redo,cut,copy,paste,fontsizeselect,bold,italic,underline,strikethrough,bullist,numlist,forecolor,backcolor, code,rdfaceHelp,rdfaceRun,rdfaceFacts,rdfaceSetting,markcreativework",//,
-                                theme_advanced_buttons2 : "image,|,tablecontrols,|,link,unlink,anchor,|,justifyleft,justifycenter,justifyright,justifyfull,|,styleselect,formatselect,fontselect,fontsizeselect",
+                                theme_advanced_buttons2 : "image,|,table,|,link,unlink,anchor,|,justifyleft,justifycenter,justifyright,justifyfull,|,styleselect,formatselect,fontselect,fontsizeselect",
                                 fullscreen_new_window : true,
                                 width : "100%",
                                 content_css : csspath + "content.css ," + csspath + "rdface.css, " + csspath + "schema_colors.css" ,
