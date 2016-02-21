@@ -1044,8 +1044,11 @@ def faceted_search(request,project_slug=None):
     return render_to_response(
         'cendarisearch.html', o, context_instance=RequestContext(request))
 
+TRAME_IDS = '2|7|6|8|9|10|15|18|19|57|58|74|83|84|116|89'
+#TRAME_IDS = '127|129'
+
 def trame_search(request):
-    trame_url = "http://git-trame.fefonlus.it/Rest.php?&type=freetext&q="+request.GET.get('q', '')+"&dbs="+request.GET.get('dbs', '127|129')
+    trame_url = "http://git-trame.fefonlus.it/Rest.php?&type=freetext&q="+request.GET.get('q', '')+"&dbs="+request.GET.get('dbs', TRAME_IDS)
     # trame_url = "http://git-trame.fefonlus.it/Rest.php?&type=freetext&q=petrus&dbs=127|129"
     r = requests.post(trame_url)
     return HttpResponse(r.content, mimetype='application/json')
