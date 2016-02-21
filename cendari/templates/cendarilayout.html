@@ -87,10 +87,13 @@
             {% else %}
             <li><a href="{% url 'user_logout_view' %}">Logout</a></li>
           {% endif%}
+<!--
           <li><a href="{% url 'cendari_browse_view' %}">Browse</a></li>
+-->
           <li><a href="{% url 'cendari_about_view' %}">About</a></li>
           <li><a target="_blank" href="https://archives.cendari.dariah.eu/">AtoM</a></li>
-
+          <li><a href="https://github.com/CENDARI/editorsnotes/issues/new" target="_blank">Issue Report</a></li>
+<!--
           {% if user.is_superuser %}
             <li><a href="https://dev.dariah.eu/jira/browse/CVRE" target="_blank">Issue Report</a></li>
           {% elif user.is_staff %}
@@ -99,6 +102,7 @@
             <li><a href="" id='issueCollector'>Issue Report</a></li>
           {% endif %}
             <li><a href="https://docs.google.com/forms/d/1LgNR3GLfMmql2acSryzVQRGPjEBmr6ZfvsVJZ8xX9QI/viewform" target="_blank" >Survey</a></li>
+-->
             <li class="divider-vertical"></li>
               <form class="navbar-search" action="{% url "cendari_faceted_search_view" %}" target="_blank" method="get">
               <input type="text" class="search-query search-autocomplete" name="q" x-search-target="topics" placeholder="Search" />
