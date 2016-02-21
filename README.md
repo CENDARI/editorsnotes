@@ -12,9 +12,9 @@ UBUNTU:
    sudo apt-get install pgadmin3
    sudo -u postgres psql postgres
    sudo apt-get install postgresql-client
-   sudo apt-get install postgresql-server-dev-9.1
-   \password postgres
+   sudo apt-get install postgresql-server-dev-9.3
    sudo -u postgres createdb mydb
+   \password postgres
    ```
      +open pgAdmin gui & create new role & connect the db
 
