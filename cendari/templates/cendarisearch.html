@@ -370,7 +370,11 @@ Click on the facet value to filter data according to it." href="#"><b>?</b></a>
   <dl>
     {% for document in results %}
     <dt><input class='selectHit' type="checkbox" name="check_{{forloop.counter0}}" value= "{{document.uri}}">
+{% if document.ref %}
+<a href="{{ document.ref }}">
+{% else %}
 <a href="{{ document.uri }}">
+{% endif %}
 {% for title in document.title %}
  {% if forloop.first %}
 {{ title }}

@@ -1,8 +1,8 @@
 from editorsnotes.main.models import Project
 from . import cendari_index
-import pprint
+#import pprint
 from ..cendari_api import cendari_data_api
-from ..utils import bounding_box_to_precision, date_range_to_interval, timestamp2isodate
+from ..utils import bounding_box_to_precision, date_range_to_interval #, timestamp2isodate
 
 import logging
 logger = logging.getLogger(__name__)
@@ -295,7 +295,7 @@ def cendari_faceted_search(request,project_slug=None):
             else:
                 geo_bounds = [] # no geo bounds
     
-    q['fields'] = ['uri', 'title']
+    q['fields'] = ['uri', 'title', 'ref']
     size = int(request.REQUEST.get('size', 50))
     q['size'] = size
     frm = int(request.REQUEST.get('from', 0))
@@ -318,23 +318,39 @@ def cendari_faceted_search(request,project_slug=None):
     for h in results['hits']['hits']:
         highlight = []
         if 'highlight' in h:
-            for field, values in h['highlight'].items():
+            for _, values in h['highlight'].iteritems():
                 highlight += values
             info = { 'uri': h['fields']['uri'][0],
                      'highlight': highlight }
             if 'title' in h['fields']:
                 info['title'] = h['fields']['title']
+            if 'ref' in h['fields']:
+                ref = h['fields']['ref']
+                if isinstance(ref, list):
+                    ref = ref[0]
+                info['ref'] = ref
             res.append(info)
         elif 'fields' in h and 'title' in h['fields']:
             info = { 'uri': h['fields']['uri'][0],
                      'title': h['fields']['title'],
                      'highlight': h['fields']['title'] }
+            if 'ref' in h['fields']:
+                ref = h['fields']['ref']
+                if isinstance(ref, list):
+                    ref = ref[0]
+                info['ref'] = ref
             res.append(info)
         elif 'fields' in h:
             info = { 'uri': h['fields']['uri'][0], 
                      'highlight': '' }
             if 'title' in h['fields']:
                 info['title'] = h['fields']['title']
+            if 'ref' in h['fields']:
+                ref = h['fields']['ref']
+                if isinstance(ref, list):
+                    ref = ref[0]
+                info['ref'] = ref
+            res.append(info)
 
     facets = results['aggregations']
     cardinalities = []
