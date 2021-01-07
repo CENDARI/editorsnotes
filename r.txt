@@ -29,7 +29,7 @@ guess-language==0.2
 html5lib==0.95
 ipython==0.13.1
 isodate==0.4.9
-lxml==3.0.2
+lxml==4.6.2
 parse==1.6.4
 psycopg2==2.4.6
 pycurl==7.19.3.1
