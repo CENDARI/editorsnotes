@@ -1,6 +1,6 @@
 BeautifulSoup==3.2.1
 Django==1.5.12
-Pillow==2.7.0
+Pillow==9.0.0
 SPARQLWrapper==1.6.4
 South==0.7.6
 WebOb==1.4
