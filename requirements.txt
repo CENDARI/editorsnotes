@@ -32,7 +32,7 @@ six==1.10.0
 refine-client==0.2.1
 smartypants==1.6.0.3
 
-ipython==0.13.1
+ipython==7.16.3
 
 urllib2-file==0.2.1
 urllib3==1.12
