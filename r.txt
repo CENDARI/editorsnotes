@@ -48,5 +48,5 @@ smartypants==1.6.0.3
 times==0.7
 urllib2-file==0.2.1
 -e git+https://github.com/maparent/virtuoso-python@b90eba9c6e5b41ebb1769d49a745c357d65cd4f2#egg=virtuoso-origin/master
-waitress==0.8.9
+waitress==2.1.1
 wsgiref==0.1.2
