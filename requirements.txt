@@ -7,7 +7,7 @@ django_compressor==1.5
 django-model-utils==2.0.3
 django-reversion==1.7
 django-licensing==0.2.4
-djangorestframework==2.3.13
+djangorestframework==3.11.2
 django-crispy-forms==1.5.2
 django-extra-views==0.7.1
 django-floppyforms==1.5.2

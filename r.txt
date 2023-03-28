@@ -24,7 +24,7 @@ django-reversion==1.7
 django-rq==0.6.1
 django-webtest==1.7.6
 django-widget-tweaks==1.3
-djangorestframework==2.3.13
+djangorestframework==3.11.2
 guess-language==0.2
 html5lib==0.95
 ipython==0.13.1
