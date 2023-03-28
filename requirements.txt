@@ -1,5 +1,5 @@
 # Django-specific packages
-Django==1.5.12
+Django==2.2.28
 South==0.7.6
 django-appconf==1.0.1
 django-browserid==0.7.1
