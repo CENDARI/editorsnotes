@@ -1,5 +1,5 @@
 BeautifulSoup==3.2.1
-Django==1.5.12
+Django==2.2.28
 Pillow==2.7.0
 SPARQLWrapper==1.6.4
 South==0.7.6
