@@ -35,7 +35,7 @@ smartypants==1.6.0.3
 ipython==8.10.0
 
 urllib2-file==0.2.1
-urllib3==1.26.5
+urllib3==1.26.18
 webtest==2.0.14
 django-webtest==1.7.6
 waitress==2.1.2
