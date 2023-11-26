@@ -19,7 +19,7 @@ BeautifulSoup==3.2.1
 beautifulsoup4==4.4.1
 lxml==4.9.1
 cssselect==0.8
-Pillow==9.3.0
+Pillow==10.0.1
 #-e git+https://github.com/python-pillow/Pillow.git@master#egg=Pillow
 psycopg2==2.4.6
 
