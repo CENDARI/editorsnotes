@@ -25,7 +25,7 @@ psycopg2==2.4.6
 
 isodate==0.4.9
 pyparsing==2.0.3
-redis==2.10.3
+redis==4.4.4
 pytz==2012h
 simplejson==3.8.0
 six==1.10.0
