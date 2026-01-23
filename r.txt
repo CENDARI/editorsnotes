@@ -38,7 +38,7 @@ pyparsing==2.0.3
 python-dateutil==2.4.0
 pytz==2012h
 rdflib==4.2.0
-redis==2.10.3
+redis==4.4.4
 refine-client==0.2.1
 requests==2.31.0
 rq==0.3.13
